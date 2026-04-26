@@ -10,6 +10,7 @@ import Appointments from './pages/Appointments'
 import Clinics from './pages/Clinics'
 import VetDashboard from './pages/VetDashboard'
 import MedicalHistory from './pages/MedicalHistory'
+import Profile from './pages/Profile'
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/clinics" element={<Clinics />} />
           <Route path="/vet/dashboard" element={<VetDashboard />} />
           <Route path="/history" element={<MedicalHistory />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -29,6 +29,7 @@ export default function Navbar() {
                         <Link to="/register" className="bg-[#ff6b6b] text-white text-sm px-4 py-1.5 rounded-lg hover:bg-[#ff5252] transition">
                             Registrarme
                         </Link>
+                        
                     </>
                 ) : user.role === 'vet' ? (
                     <>
@@ -57,6 +58,9 @@ export default function Navbar() {
                         </Link>
                         <Link to="/clinics" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">
                             Veterinarias
+                        </Link>
+                        <Link to="/profile" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">
+                            Mi perfil
                         </Link>
                         <span className="text-white/50 text-sm">|</span>
                         <span className="text-white/70 text-sm">{user.first_name || user.username}</span>
