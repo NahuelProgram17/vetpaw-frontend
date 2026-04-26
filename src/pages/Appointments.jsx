@@ -81,10 +81,13 @@ const handleChange = (e) =>
 
 const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.pet || !form.requested_date || !form.reason) {
-    setError("Mascota, fecha y motivo son obligatorios.");
+    if (!form.pet || !form.requested_date || !form.reason || !form.clinic) {
+    setError("Mascota, clínica, fecha y motivo son obligatorios.");
     return;
-    }
+}
+    
+    
+    
     setSaving(true);
     setError("");
     try {
@@ -270,7 +273,7 @@ return (
             <form onSubmit={handleSubmit} className="appt-form">
             <div className="form-group">
                 <label>Mascota *</label>
-                <select name="pet" value={form.pet} onChange={handleChange}>
+                <select name="pet" value={form.pet} onChange={(e) => setForm({ ...form, pet: parseInt(e.target.value) || "" })}>
                 <option value="">Seleccioná una mascota</option>
                 {pets.map((p) => (
                     <option key={p.id} value={p.id}>{p.name} ({p.species_display || p.species})</option>
@@ -280,7 +283,7 @@ return (
 
             <div className="form-group">
                 <label>Clínica</label>
-                <select name="clinic" value={form.clinic} onChange={handleChange}>
+                <select name="clinic" value={form.clinic} onChange={(e) => setForm({ ...form, clinic: parseInt(e.target.value) || "" })}>
                 <option value="">Sin clínica asignada</option>
                 {clinics.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
