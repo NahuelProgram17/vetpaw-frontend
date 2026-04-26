@@ -39,9 +39,30 @@ export const refreshToken = async (refresh) => {
 
 // ── Pets ──────────────────────────────────────────────
 export const getPets = () => api.get("/pets/").then((r) => r.data);
-export const createPet = (pet) => api.post("/pets/", pet).then((r) => r.data);
-export const updatePet = (id, pet) =>
-    api.put(`/pets/${id}/`, pet).then((r) => r.data);
+export const createPet = (petData) => {
+const formData = new FormData();
+Object.entries(petData).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && value !== "") {
+    formData.append(key, value);
+    }
+});
+return api.post("/pets/", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+}).then((r) => r.data);
+};
+
+export const updatePet = (id, petData) => {
+const formData = new FormData();
+Object.entries(petData).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && value !== "") {
+    formData.append(key, value);
+    }
+});
+return api.patch(`/pets/${id}/`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+}).then((r) => r.data);
+};
+
 export const deletePet = (id) => api.delete(`/pets/${id}/`);
 
 // ── Appointments ──────────────────────────────────────
