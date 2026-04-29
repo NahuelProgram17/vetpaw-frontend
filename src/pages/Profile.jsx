@@ -2,12 +2,110 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
+function AvatarSVG({ gender }) {
+    if (gender === 'female') return (
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
+            <defs>
+                <linearGradient id="bgF" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#ec4899"/>
+                    <stop offset="100%" stopColor="#8b5cf6"/>
+                </linearGradient>
+            </defs>
+            <rect width="100" height="100" fill="url(#bgF)"/>
+            {/* Cuerpo */}
+            <ellipse cx="50" cy="85" rx="22" ry="14" fill="#f9a8d4" opacity="0.6"/>
+            {/* Vestido */}
+            <path d="M34 70 Q50 60 66 70 L70 95 Q50 88 30 95 Z" fill="#ec4899"/>
+            {/* Cuello */}
+            <rect x="45" y="52" width="10" height="10" rx="2" fill="#fcd5b0"/>
+            {/* Cabeza */}
+            <circle cx="50" cy="42" r="18" fill="#fcd5b0">
+                <animate attributeName="cy" values="42;40;42" dur="3s" repeatCount="indefinite"/>
+            </circle>
+            {/* Cabello */}
+            <ellipse cx="50" cy="28" rx="18" ry="8" fill="#7c3aed"/>
+            <ellipse cx="33" cy="38" rx="5" ry="12" fill="#7c3aed"/>
+            <ellipse cx="67" cy="38" rx="5" ry="12" fill="#7c3aed"/>
+            {/* Ojos */}
+            <circle cx="43" cy="42" r="2.5" fill="#1e1b4b"/>
+            <circle cx="57" cy="42" r="2.5" fill="#1e1b4b"/>
+            <circle cx="44" cy="41" r="0.8" fill="#fff"/>
+            <circle cx="58" cy="41" r="0.8" fill="#fff"/>
+            {/* Sonrisa */}
+            <path d="M44 49 Q50 54 56 49" stroke="#e879a0" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+            {/* Mejillas */}
+            <circle cx="40" cy="47" r="4" fill="#f9a8d4" opacity="0.5"/>
+            <circle cx="60" cy="47" r="4" fill="#f9a8d4" opacity="0.5"/>
+        </svg>
+    );
+
+    if (gender === 'male') return (
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
+            <defs>
+                <linearGradient id="bgM" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#6366f1"/>
+                    <stop offset="100%" stopColor="#06b6d4"/>
+                </linearGradient>
+            </defs>
+            <rect width="100" height="100" fill="url(#bgM)"/>
+            {/* Cuerpo */}
+            <rect x="32" y="62" width="36" height="30" rx="6" fill="#4f46e5"/>
+            {/* Corbata */}
+            <polygon points="50,63 47,70 50,78 53,70" fill="#06b6d4"/>
+            {/* Cuello */}
+            <rect x="45" y="52" width="10" height="12" rx="2" fill="#fcd5b0"/>
+            {/* Cabeza */}
+            <circle cx="50" cy="40" r="18" fill="#fcd5b0">
+                <animate attributeName="cy" values="40;38;40" dur="3s" repeatCount="indefinite"/>
+            </circle>
+            {/* Cabello */}
+            <ellipse cx="50" cy="25" rx="17" ry="7" fill="#1e1b4b"/>
+            <ellipse cx="34" cy="32" rx="4" ry="8" fill="#1e1b4b"/>
+            {/* Ojos */}
+            <circle cx="43" cy="40" r="2.5" fill="#1e1b4b"/>
+            <circle cx="57" cy="40" r="2.5" fill="#1e1b4b"/>
+            <circle cx="44" cy="39" r="0.8" fill="#fff"/>
+            <circle cx="58" cy="39" r="0.8" fill="#fff"/>
+            {/* Sonrisa */}
+            <path d="M44 47 Q50 52 56 47" stroke="#f97316" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+            {/* Mejillas */}
+            <circle cx="40" cy="45" r="4" fill="#fca5a5" opacity="0.4"/>
+            <circle cx="60" cy="45" r="4" fill="#fca5a5" opacity="0.4"/>
+        </svg>
+    );
+
+    // Neutro
+    return (
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
+            <defs>
+                <linearGradient id="bgN" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#6366f1"/>
+                    <stop offset="100%" stopColor="#8b5cf6"/>
+                </linearGradient>
+            </defs>
+            <rect width="100" height="100" fill="url(#bgN)"/>
+            <circle cx="50" cy="40" r="18" fill="#fcd5b0">
+                <animate attributeName="cy" values="40;38;40" dur="3s" repeatCount="indefinite"/>
+            </circle>
+            <ellipse cx="50" cy="26" rx="16" ry="7" fill="#4f46e5"/>
+            <rect x="33" y="62" width="34" height="28" rx="6" fill="#6366f1"/>
+            <rect x="45" y="52" width="10" height="12" rx="2" fill="#fcd5b0"/>
+            <circle cx="43" cy="40" r="2.5" fill="#1e1b4b"/>
+            <circle cx="57" cy="40" r="2.5" fill="#1e1b4b"/>
+            <circle cx="44" cy="39" r="0.8" fill="#fff"/>
+            <circle cx="58" cy="39" r="0.8" fill="#fff"/>
+            <path d="M44 47 Q50 52 56 47" stroke="#a78bfa" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+            <text x="50" y="98" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.6)" fontFamily="sans-serif">VetPaw</text>
+        </svg>
+    );
+}
+
 export default function Profile() {
     const { user } = useAuth();
     const [profile, setProfile] = useState(null);
     const [form, setForm] = useState({
-        first_name: '', last_name: '', phone: '',
-        province: '', locality: '', bio: '',
+    first_name: '', last_name: '', phone: '',
+    province: '', locality: '', bio: '', gender: '',
     });
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [avatarFile, setAvatarFile] = useState(null);
@@ -30,6 +128,7 @@ export default function Profile() {
                 province: res.data.province || '',
                 locality: res.data.locality || '',
                 bio: res.data.bio || '',
+                gender: res.data.gender || 'other',
             });
             setAvatarPreview(res.data.avatar || null);
         } catch (e) { console.error(e); }
@@ -94,7 +193,7 @@ export default function Profile() {
             <div className="profile-inner">
                 <header className="profile-header">
                     <div>
-                        <h1 className="profile-title">👤 Mi perfil</h1>
+                        <h1 className="profile-title"> Mi perfil</h1>
                         <p className="profile-subtitle">Tu información personal</p>
                     </div>
                     {success && <div className="success-toast">✅ {success}</div>}
@@ -108,8 +207,8 @@ export default function Profile() {
                         <div className="avatar-card">
                             <div className="avatar-wrapper">
                                 {avatarPreview
-                                    ? <img src={avatarPreview} alt="avatar" className="avatar-img" />
-                                    : <div className="avatar-initials">{initials}</div>
+                                ? <img src={avatarPreview} alt="avatar" className="avatar-img" />
+                                : <AvatarSVG gender={profile?.gender} />
                                 }
                             </div>
                             <p className="avatar-name">{profile?.first_name || user?.username}</p>
@@ -167,6 +266,14 @@ export default function Profile() {
                                 <form onSubmit={handleSubmit} className="profile-form">
                                     <div className="form-row">
                                         <div className="form-group">
+    <label>Género</label>
+    <select name="gender" value={form.gender} onChange={handleChange}>
+        <option value="other">Prefiero no decir</option>
+        <option value="male">Masculino</option>
+        <option value="female">Femenino</option>
+    </select>
+</div>
+                                        <div className="form-group">
                                             <label>Nombre</label>
                                             <input name="first_name" placeholder="Luna" value={form.first_name} onChange={handleChange} />
                                         </div>
@@ -215,7 +322,7 @@ export default function Profile() {
         .b2 { width: 400px; height: 400px; background: #ffd93d; bottom: -100px; right: -100px; }
         .profile-inner { max-width: 900px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
         .profile-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
-        .profile-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
+        .profile-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; text-shadow: 0 2px 12px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.8); }
         .profile-subtitle { color: rgba(255,255,255,0.45); font-size: 0.9rem; margin-top: 4px; }
         .success-toast { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; padding: 10px 16px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; }
         .loading-state { text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
@@ -226,10 +333,10 @@ export default function Profile() {
         .avatar-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; backdrop-filter: blur(10px); }
         .avatar-wrapper { width: 90px; height: 90px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,107,107,0.4); margin-bottom: 4px; }
         .avatar-img { width: 100%; height: 100%; object-fit: cover; }
-        .avatar-initials { width: 100%; height: 100%; background: linear-gradient(135deg, #ff6b6b, #ff4a4a); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 900; color: #fff; }
+        .avatar-initials { width: 100%; height: 100%; background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 900; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
         .avatar-name { font-size: 1rem; font-weight: 900; color: #fff; text-align: center; }
         .avatar-role { font-size: 0.76rem; color: rgba(255,255,255,0.45); }
-        .avatar-email { font-size: 0.74rem; color: rgba(255,255,255,0.3); }
+        .avatar-email { font-size: 0.74rem; color: rgba(255,255,255,0.3); word-break: break-all; text-align: center; padding: 0 8px; }
         .avatar-upload-btn { background: rgba(255,255,255,0.06); border: 1.5px dashed rgba(255,255,255,0.2); border-radius: 10px; padding: 8px 14px; color: rgba(255,255,255,0.5); font-size: 0.82rem; font-weight: 700; cursor: pointer; margin-top: 8px; transition: border-color 0.2s, color 0.2s; }
         .avatar-upload-btn:hover { border-color: rgba(255,107,107,0.4); color: #ff6b6b; }
         .profile-form-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 28px; backdrop-filter: blur(10px); }
@@ -258,6 +365,9 @@ export default function Profile() {
         .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: border-color 0.2s; }
         .btn-ghost:hover { border-color: rgba(255,255,255,0.25); }
         @media (max-width: 700px) { .profile-layout { grid-template-columns: 1fr; } .form-row { flex-direction: column; } .view-row { flex-direction: column; } .profile-inner { padding: 20px 16px; } }
+        .form-group select { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 11px 14px; font-family: 'Nunito', sans-serif; font-size: 0.92rem; outline: none; transition: border-color 0.2s; cursor: pointer; }
+        .form-group select option { background: #1a1a2e; color: #fff; }
+        .form-group select:focus { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,0.12); }        
     `}</style>
         </div>
     );

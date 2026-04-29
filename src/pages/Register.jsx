@@ -17,6 +17,7 @@ export default function Register() {
         last_name: "",
         phone: "",
         role: "owner",
+        gender: "other",
         province: "",
         locality: "",
     });
@@ -171,6 +172,18 @@ export default function Register() {
                         </div>
 
                         <div className="field-group">
+                            <label>Género <span className="optional">(opcional)</span></label>
+                            <div className="input-wrapper select-wrapper">
+                                <span className="input-icon">🧬</span>
+                                <select name="gender" value={form.gender} onChange={handleChange}>
+                                    <option value="other">Prefiero no decir</option>
+                                    <option value="male">Masculino</option>
+                                    <option value="female">Femenino</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="field-group">
                             <label>Rol</label>
                             <div className="input-wrapper select-wrapper">
                                 <span className="input-icon">🏷️</span>
@@ -223,7 +236,7 @@ export default function Register() {
                         <div className="success-emoji">🐾</div>
                         <h2 className="success-title">¡Bienvenido/a a VetPaw!</h2>
                         <p className="success-msg">
-                            Tu cuenta fue creada con éxito. Ya podés ingresar y gestionar los turnos de tu mascota.
+                            Tu cuenta fue creada con éxito. Te enviamos un email de verificación — revisá tu casilla y hacé clic en el link para activar tu cuenta.
                         </p>
                         <button className="auth-btn" onClick={() => navigate("/login")}>
                             Ir al login →
