@@ -9,6 +9,9 @@ export default function Login() {
     const [form, setForm] = useState({ username: "", password: "" });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [showResend, setShowResend] = useState(false);    
+    const [resendMsg, setResendMsg] = useState("");
+    const [resendEmail, setResendEmail] = useState("");
 
     const handleChange = (e) =>
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -25,15 +28,29 @@ export default function Login() {
             navigate("/dashboard");
         }
     } catch (err) {
-        setError(
-            err.response?.data?.detail ||
-            "Credenciales incorrectas. Intentá de nuevo.",
-        );
+        const data = err.response?.data;
+        const msg = data?.email?.[0] || data?.detail || "Credenciales incorrectas. Intentá de nuevo.";
+        setError(msg);
+        if (data?.email?.[0]?.includes('verificar')) {
+            setShowResend(true);
+        }
     } finally {
         setLoading(false);
     }
 };
-
+const handleResend = async (e) => {
+    e.preventDefault();
+    try {
+        await fetch("http://localhost:8000/api/users/resend-verification/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: resendEmail }),
+        });
+        setResendMsg("Email reenviado. Revisá tu casilla 📬");
+    } catch {
+        setResendMsg("Hubo un error. Intentá de nuevo.");
+    }
+};
     return (
         <div className="auth-page">
             <div className="blob blob-1" />
@@ -51,10 +68,27 @@ export default function Login() {
                 <h2 className="auth-title">Iniciá sesión</h2>
 
                 {error && (
-                    <div className="auth-error">
-                        <span>⚠️</span> {error}
-                    </div>
-                )}
+    <div className="auth-error">
+        <span>⚠️</span> {error}
+    </div>
+)}
+
+{showResend && (
+    <div className="resend-box">
+        <p>¿No recibiste el email?</p>
+        <form onSubmit={handleResend} className="resend-form">
+            <input
+                type="email"
+                placeholder="Tu email"
+                value={resendEmail}
+                onChange={(e) => setResendEmail(e.target.value)}
+                required
+            />
+            <button type="submit">Reenviar 📬</button>
+        </form>
+        {resendMsg && <p className="resend-msg">{resendMsg}</p>}
+    </div>
+)}
 
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="field-group">
@@ -244,6 +278,45 @@ export default function Login() {
         @media (max-width: 480px) {
         .auth-card { padding: 36px 24px 32px; margin: 16px; border-radius: 20px; }
         }
+        .resend-box {
+    background: rgba(255,217,61,0.08);
+    border: 1px solid rgba(255,217,61,0.3);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 16px;
+    font-size: 0.86rem;
+    color: rgba(255,255,255,0.7);
+}
+.resend-form {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+.resend-form input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-size: 0.86rem;
+    outline: none;
+}
+.resend-form button {
+    padding: 8px 14px;
+    background: #ffd93d;
+    color: #1a1a2e;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.86rem;
+}
+.resend-msg {
+    margin-top: 8px;
+    color: #ffd93d;
+    font-size: 0.83rem;
+}
     `}</style>
         </div>
     );
