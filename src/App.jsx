@@ -5,6 +5,8 @@ import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import RegisterChoice from './pages/RegisterChoice'
+import RegisterClinic from './pages/RegisterClinic'
 import Dashboard from './pages/Dashboard'
 import Pets from './pages/Pets'
 import Appointments from './pages/Appointments'
@@ -22,7 +24,9 @@ function App() {
           {/* Públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<RegisterChoice />} />
+          <Route path="/register/owner" element={<Register />} />
+          <Route path="/register/clinic" element={<RegisterClinic />} />
           <Route path="/clinics" element={<Clinics />} />
 
           {/* Dueño */}
@@ -34,8 +38,8 @@ function App() {
           <Route path="/history" element={<ProtectedRoute role="owner"><MedicalHistory /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
-          {/* Veterinario */}
-          <Route path="/vet/dashboard" element={<ProtectedRoute role="vet"><VetDashboard /></ProtectedRoute>} />
+          {/* Clínica */}
+          <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

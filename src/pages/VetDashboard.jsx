@@ -99,8 +99,11 @@ export default function VetDashboard() {
                 reason: visitForm.reason,
                 diagnosis: visitForm.diagnosis,
                 treatment: visitForm.treatment,
-                observations: `[Vet: ${visitForm.vet_name} ${visitForm.vet_lastname} | Mat. ${visitForm.vet_license}] ${visitForm.observations}`,
+                observations: visitForm.observations,
                 next_visit: visitForm.next_visit || null,
+                vet_first_name: visitForm.vet_name,
+                vet_last_name: visitForm.vet_lastname,
+                vet_license: visitForm.vet_license,
             });
             setShowVisitModal(false);
             setSuccess("Visita registrada y agregada al historial de la mascota.");

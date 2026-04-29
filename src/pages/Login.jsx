@@ -22,11 +22,11 @@ export default function Login() {
     setLoading(true);
     try {
         const userData = await login(form.username, form.password);
-        if (userData?.role === "vet") {
-            navigate("/vet/dashboard");
+        if (userData?.role === "clinic") {
+            navigate("/clinic/dashboard");
         } else {
             navigate("/dashboard");
-        }
+        }       
     } catch (err) {
         const data = err.response?.data;
         const msg = data?.email?.[0] || data?.detail || "Credenciales incorrectas. Intentá de nuevo.";
