@@ -68,14 +68,14 @@ export default function Navbar() {
                         <Link to="/login" className="text-white text-sm border border-white/30 px-4 py-1.5 rounded-lg hover:bg-white/10 transition">Ingresar</Link>
                         <Link to="/register" className="bg-[#ff6b6b] text-white text-sm px-4 py-1.5 rounded-lg hover:bg-[#ff5252] transition">Registrarme</Link>
                     </>
-                ) : user.role === 'vet' ? (
-                    <>
-                        <Link to="/vet/dashboard" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Panel</Link>
-                        <Link to="/profile" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Mi perfil</Link>
-                        <span className="text-white/50 text-sm">|</span>
-                        <span className="text-white/70 text-sm">{user.first_name || user.username}</span>
-                        <button onClick={handleLogout} className="text-white/50 text-sm px-3 py-1.5 hover:text-white transition">Salir</button>
-                    </>
+                ) : user.role === 'clinic' ? (
+                        <>
+                            <Link to="/clinic/dashboard" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Mi panel</Link>
+                            <Link to="/profile" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Mi perfil</Link>
+                            <span className="text-white/50 text-sm">|</span>
+                            <span className="text-white/70 text-sm">{user.first_name || user.username}</span>
+                            <button onClick={handleLogout} className="text-white/50 text-sm px-3 py-1.5 hover:text-white transition">Salir</button>
+                        </>
                 ) : (
                     <>
                         <Link to="/dashboard" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Mi panel</Link>

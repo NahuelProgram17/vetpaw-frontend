@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getAppointments, confirmAppointment, cancelAppointment, createVisit, markNoShow } from "../services/api";
+import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const STATUS_LABEL = {
@@ -16,9 +17,17 @@ const EMPTY_VISIT = {
     next_visit: "", vet_name: "", vet_lastname: "", vet_license: "",
 };
 
-export default function VetDashboard() {
+const SPECIES_ICON = {
+    dog: "🐶", cat: "🐱", rabbit: "🐰", bird: "🦜",
+    hamster: "🐹", reptile: "🦎", fish: "🐠", other: "🐾",
+};
+
+export default function ClinicDashboard() {
     const { user } = useAuth();
+    const [tab, setTab] = useState("turnos");
     const [appointments, setAppointments] = useState([]);
+    const [pets, setPets] = useState([]);
+    const [visits, setVisits] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("pending");
     const [showVisitModal, setShowVisitModal] = useState(false);
@@ -27,13 +36,21 @@ export default function VetDashboard() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [selectedPet, setSelectedPet] = useState(null);
 
-    useEffect(() => { fetchAppointments(); }, []);
+    useEffect(() => { fetchAll(); }, []);
 
-    const fetchAppointments = async () => {
+    const fetchAll = async () => {
+        setLoading(true);
         try {
-            const data = await getAppointments();
-            setAppointments(data.results ?? data);
+            const [apptData, petData, visitData] = await Promise.all([
+                getAppointments(),
+                api.get('/pets/'),
+                api.get('/appointments/visits/'),
+            ]);
+            setAppointments(apptData.results ?? apptData);
+            setPets(petData.data.results ?? petData.data);
+            setVisits(visitData.data.results ?? visitData.data);
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
     };
@@ -41,23 +58,20 @@ export default function VetDashboard() {
     const handleConfirm = async (id) => {
         try {
             await confirmAppointment(id);
-            await fetchAppointments();
-            setSuccess("Turno confirmado exitosamente.");
+            await fetchAll();
+            setSuccess("Turno confirmado.");
             setTimeout(() => setSuccess(""), 3000);
         } catch (e) { console.error(e); }
     };
 
     const handleCancel = async (id) => {
-        try {
-            await cancelAppointment(id);
-            await fetchAppointments();
-        } catch (e) { console.error(e); }
+        try { await cancelAppointment(id); await fetchAll(); } catch (e) { console.error(e); }
     };
 
     const handleNoShow = async (id) => {
         try {
             await markNoShow(id);
-            await fetchAppointments();
+            await fetchAll();
             setSuccess("Turno marcado como ausente.");
             setTimeout(() => setSuccess(""), 3000);
         } catch (e) { console.error(e); }
@@ -85,12 +99,8 @@ export default function VetDashboard() {
             setError("Nombre, apellido y matrícula del veterinario son obligatorios.");
             return;
         }
-        if (!visitForm.diagnosis) {
-            setError("El diagnóstico es obligatorio.");
-            return;
-        }
-        setSaving(true);
-        setError("");
+        if (!visitForm.diagnosis) { setError("El diagnóstico es obligatorio."); return; }
+        setSaving(true); setError("");
         try {
             await createVisit({
                 pet: visitForm.pet,
@@ -106,19 +116,16 @@ export default function VetDashboard() {
                 vet_license: visitForm.vet_license,
             });
             setShowVisitModal(false);
-            setSuccess("Visita registrada y agregada al historial de la mascota.");
+            setSuccess("Visita registrada en el historial.");
             setTimeout(() => setSuccess(""), 4000);
-            await fetchAppointments();
+            await fetchAll();
         } catch (err) {
             const data = err.response?.data;
-            setError(data ? Object.values(data).flat().join(" ") : "Error al guardar la visita.");
+            setError(data ? Object.values(data).flat().join(" ") : "Error al guardar.");
         } finally { setSaving(false); }
     };
 
-    const filtered = filter === "all"
-        ? appointments
-        : appointments.filter((a) => a.status === filter);
-
+    const filtered = filter === "all" ? appointments : appointments.filter((a) => a.status === filter);
     const pending = appointments.filter((a) => a.status === "pending").length;
     const confirmed = appointments.filter((a) => a.status === "confirmed").length;
     const completed = appointments.filter((a) => a.status === "completed").length;
@@ -126,14 +133,14 @@ export default function VetDashboard() {
 
     const formatDate = (d) => {
         if (!d) return "—";
-        return new Date(d).toLocaleDateString("es-AR", {
-            weekday: "short", day: "2-digit", month: "short", year: "numeric",
-        });
+        return new Date(d).toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
     };
     const formatTime = (d) => {
         if (!d) return "";
         return new Date(d).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
     };
+
+    const petVisits = selectedPet ? visits.filter(v => v.pet === selectedPet.id) : [];
 
     return (
         <div className="vet-page">
@@ -141,85 +148,168 @@ export default function VetDashboard() {
             <div className="vet-inner">
                 <header className="vet-header">
                     <div>
-                        <p className="vet-greeting">Panel veterinario 🩺</p>
-                        <h1 className="vet-title">Gestión de turnos</h1>
+                        <p className="vet-greeting">🏥 Panel de clínica</p>
+                        <h1 className="vet-title">Bienvenido/a, {user?.username}</h1>
                     </div>
                     {success && <div className="success-toast">✅ {success}</div>}
                 </header>
 
-                <div className="vet-stats">
-                    <div className="vet-stat"><span className="stat-icon">⏳</span><div><p className="stat-num">{pending}</p><p className="stat-label">Pendientes</p></div></div>
-                    <div className="vet-stat"><span className="stat-icon">✅</span><div><p className="stat-num">{confirmed}</p><p className="stat-label">Confirmados</p></div></div>
-                    <div className="vet-stat"><span className="stat-icon">📋</span><div><p className="stat-num">{completed}</p><p className="stat-label">Realizados</p></div></div>
-                    <div className="vet-stat"><span className="stat-icon">❌</span><div><p className="stat-num">{noShow}</p><p className="stat-label">Ausentes</p></div></div>
-                </div>
-
-                <div className="filters">
-                    {["pending", "confirmed", "completed", "cancelled", "no_show", "all"].map((f) => (
-                        <button key={f} className={`filter-btn ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>
-                            {f === "all" ? "Todos" : STATUS_LABEL[f]?.label}
+                {/* Tabs */}
+                <div className="tabs">
+                    {[
+                        { id: "turnos", label: "📅 Turnos" },
+                        { id: "pacientes", label: "🐾 Mis pacientes" },
+                        { id: "historial", label: "📋 Historial clínico" },
+                    ].map((t) => (
+                        <button key={t.id} className={`tab-btn ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
+                            {t.label}
                         </button>
                     ))}
                 </div>
 
-                {loading && <div className="loading-state"><span className="paw-spin">🐾</span><p>Cargando turnos...</p></div>}
+                {loading && <div className="loading-state"><span className="paw-spin">🐾</span><p>Cargando...</p></div>}
 
-                {!loading && filtered.length === 0 && (
-                    <div className="empty-state">
-                        <span>📭</span>
-                        <p>No hay turnos {filter !== "all" ? `con estado "${STATUS_LABEL[filter]?.label}"` : ""}.</p>
+                {/* ── TAB TURNOS ── */}
+                {!loading && tab === "turnos" && (
+                    <>
+                        <div className="vet-stats">
+                            <div className="vet-stat"><span className="stat-icon">⏳</span><div><p className="stat-num">{pending}</p><p className="stat-label">Pendientes</p></div></div>
+                            <div className="vet-stat"><span className="stat-icon">✅</span><div><p className="stat-num">{confirmed}</p><p className="stat-label">Confirmados</p></div></div>
+                            <div className="vet-stat"><span className="stat-icon">📋</span><div><p className="stat-num">{completed}</p><p className="stat-label">Realizados</p></div></div>
+                            <div className="vet-stat"><span className="stat-icon">❌</span><div><p className="stat-num">{noShow}</p><p className="stat-label">Ausentes</p></div></div>
+                        </div>
+                        <div className="filters">
+                            {["pending", "confirmed", "completed", "cancelled", "no_show", "all"].map((f) => (
+                                <button key={f} className={`filter-btn ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>
+                                    {f === "all" ? "Todos" : STATUS_LABEL[f]?.label}
+                                </button>
+                            ))}
+                        </div>
+                        {filtered.length === 0 ? (
+                            <div className="empty-state"><span>📭</span><p>No hay turnos {filter !== "all" ? `con estado "${STATUS_LABEL[filter]?.label}"` : ""}.</p></div>
+                        ) : (
+                            <div className="appts-list">
+                                {filtered.map((appt) => {
+                                    const status = STATUS_LABEL[appt.status] || STATUS_LABEL.pending;
+                                    return (
+                                        <div key={appt.id} className="appt-card">
+                                            <div className="appt-date-box">
+                                                <span className="appt-day">{new Date(appt.requested_date).getDate()}</span>
+                                                <span className="appt-month">{new Date(appt.requested_date).toLocaleString("es-AR", { month: "short" })}</span>
+                                                <span className="appt-time">{formatTime(appt.requested_date)}</span>
+                                            </div>
+                                            <div className="appt-info">
+                                                <div className="appt-top">
+                                                    <h3 className="appt-reason">{appt.reason || "Consulta"}</h3>
+                                                    <span className="appt-status-badge" style={{ color: status.color, background: `${status.color}18`, borderColor: `${status.color}30` }}>{status.label}</span>
+                                                </div>
+                                                <div className="appt-meta">
+                                                    {appt.pet_name && <span>🐾 {appt.pet_name}</span>}
+                                                    {appt.owner_name && <span>👤 {appt.owner_name}</span>}
+                                                    <span>📆 {formatDate(appt.requested_date)}</span>
+                                                </div>
+                                            </div>
+                                            <div className="appt-actions">
+                                                {appt.status === "pending" && (<><button className="btn-confirm" onClick={() => handleConfirm(appt.id)}>✅ Confirmar</button><button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button></>)}
+                                                {appt.status === "confirmed" && (<><button className="btn-visit" onClick={() => openVisitModal(appt)}>📋 Cargar visita</button><button className="btn-noshow" onClick={() => handleNoShow(appt.id)}>❌ Ausente</button><button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button></>)}
+                                                {appt.status === "completed" && <span className="done-label">✅ Visita registrada</span>}
+                                                {appt.status === "cancelled" && <span className="cancelled-label">✕ Cancelado</span>}
+                                                {appt.status === "no_show" && <span className="noshow-label">❌ Ausente</span>}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {/* ── TAB PACIENTES ── */}
+                {!loading && tab === "pacientes" && (
+                    <div className="patients-section">
+                        {pets.length === 0 ? (
+                            <div className="empty-state"><span>🐾</span><p>No hay mascotas vinculadas a tu clínica todavía.</p></div>
+                        ) : (
+                            <div className="pets-grid">
+                                {pets.map((pet) => (
+                                    <div key={pet.id} className="pet-card" onClick={() => { setSelectedPet(pet); setTab("historial"); }}>
+                                        <div className="pet-avatar">{pet.photo ? <img src={pet.photo} alt={pet.name} /> : <span>{SPECIES_ICON[pet.species] || "🐾"}</span>}</div>
+                                        <div className="pet-info">
+                                            <h3 className="pet-name">{pet.name}</h3>
+                                            <p className="pet-species">{pet.species_display}</p>
+                                            {pet.breed && <p className="pet-breed">{pet.breed}</p>}
+                                            <p className="pet-owner">👤 {pet.owner_name || "—"}</p>
+                                        </div>
+                                        <div className="pet-details">
+                                            {pet.weight && <span>⚖️ {pet.weight} kg</span>}
+                                            {pet.is_neutered && <span>✂️ Castrado/a</span>}
+                                            {pet.allergies && <span>⚠️ Alergias</span>}
+                                        </div>
+                                        <button className="btn-view-history">Ver historial →</button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 
-                {!loading && filtered.length > 0 && (
-                    <div className="appts-list">
-                        {filtered.map((appt) => {
-                            const status = STATUS_LABEL[appt.status] || STATUS_LABEL.pending;
-                            return (
-                                <div key={appt.id} className="appt-card">
-                                    <div className="appt-date-box">
-                                        <span className="appt-day">{new Date(appt.requested_date).getDate()}</span>
-                                        <span className="appt-month">{new Date(appt.requested_date).toLocaleString("es-AR", { month: "short" })}</span>
-                                        <span className="appt-time">{formatTime(appt.requested_date)}</span>
-                                    </div>
-                                    <div className="appt-info">
-                                        <div className="appt-top">
-                                            <h3 className="appt-reason">{appt.reason || "Consulta"}</h3>
-                                            <span className="appt-status-badge" style={{ color: status.color, background: `${status.color}18`, borderColor: `${status.color}30` }}>
-                                                {status.label}
-                                            </span>
-                                        </div>
-                                        <div className="appt-meta">
-                                            {appt.pet_name && <span>🐾 {appt.pet_name}</span>}
-                                            {appt.owner_name && <span>👤 {appt.owner_name}</span>}
-                                            <span>📆 {formatDate(appt.requested_date)}</span>
-                                        </div>
-                                    </div>
-                                    <div className="appt-actions">
-                                        {appt.status === "pending" && (
-                                            <>
-                                                <button className="btn-confirm" onClick={() => handleConfirm(appt.id)}>✅ Confirmar</button>
-                                                <button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button>
-                                            </>
-                                        )}
-                                        {appt.status === "confirmed" && (
-                                            <>
-                                                <button className="btn-visit" onClick={() => openVisitModal(appt)}>📋 Cargar visita</button>
-                                                <button className="btn-noshow" onClick={() => handleNoShow(appt.id)}>❌ Ausente</button>
-                                                <button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button>
-                                            </>
-                                        )}
-                                        {appt.status === "completed" && <span className="done-label">✅ Visita registrada</span>}
-                                        {appt.status === "cancelled" && <span className="cancelled-label">✕ Cancelado</span>}
-                                        {appt.status === "no_show" && <span className="noshow-label">❌ Ausente</span>}
-                                    </div>
+                {/* ── TAB HISTORIAL ── */}
+                {!loading && tab === "historial" && (
+                    <div className="history-section">
+                        <div className="pet-selector">
+                            <p className="selector-label">Seleccioná una mascota:</p>
+                            <div className="pet-chips">
+                                <button className={`pet-chip ${!selectedPet ? "active" : ""}`} onClick={() => setSelectedPet(null)}>Todas</button>
+                                {pets.map((pet) => (
+                                    <button key={pet.id} className={`pet-chip ${selectedPet?.id === pet.id ? "active" : ""}`} onClick={() => setSelectedPet(pet)}>
+                                        {SPECIES_ICON[pet.species]} {pet.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {selectedPet && (
+                            <div className="pet-summary">
+                                <div className="summary-avatar">{SPECIES_ICON[selectedPet.species] || "🐾"}</div>
+                                <div>
+                                    <h3>{selectedPet.name}</h3>
+                                    <p>{selectedPet.species_display} · {selectedPet.breed || "Sin raza"} · {selectedPet.sex === "male" ? "Macho" : "Hembra"}</p>
+                                    <p>👤 Dueño: {selectedPet.owner_name || "—"}</p>
+                                    {selectedPet.allergies && <p>⚠️ Alergias: {selectedPet.allergies}</p>}
                                 </div>
-                            );
-                        })}
+                            </div>
+                        )}
+
+                        {(selectedPet ? petVisits : visits).length === 0 ? (
+                            <div className="empty-state"><span>📋</span><p>No hay visitas registradas{selectedPet ? ` para ${selectedPet.name}` : ""}.</p></div>
+                        ) : (
+                            <div className="visits-list">
+                                {(selectedPet ? petVisits : visits).map((visit) => (
+                                    <div key={visit.id} className="visit-card">
+                                        <div className="visit-date-box">
+                                            <span className="visit-day">{new Date(visit.date).getDate()}</span>
+                                            <span className="visit-month">{new Date(visit.date).toLocaleString("es-AR", { month: "short" })}</span>
+                                            <span className="visit-year">{new Date(visit.date).getFullYear()}</span>
+                                        </div>
+                                        <div className="visit-info">
+                                            <div className="visit-top">
+                                                <h3 className="visit-reason">{visit.reason}</h3>
+                                                <span className="visit-vet">🩺 Dr/a. {visit.vet_first_name} {visit.vet_last_name} · Mat. {visit.vet_license}</span>
+                                            </div>
+                                            {visit.diagnosis && <p className="visit-field"><span>Diagnóstico:</span> {visit.diagnosis}</p>}
+                                            {visit.treatment && <p className="visit-field"><span>Tratamiento:</span> {visit.treatment}</p>}
+                                            {visit.observations && <p className="visit-field"><span>Observaciones:</span> {visit.observations}</p>}
+                                            {visit.next_visit && <p className="visit-next">📅 Próxima visita: {formatDate(visit.next_visit)}</p>}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
 
+            {/* Modal visita */}
             {showVisitModal && (
                 <div className="modal-overlay" onClick={() => setShowVisitModal(false)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -241,9 +331,9 @@ export default function VetDashboard() {
                                 <h3 className="section-title">📝 Datos de la consulta</h3>
                                 <div className="form-group"><label>Fecha y hora</label><input name="date" type="datetime-local" value={visitForm.date} onChange={handleVisitChange} /></div>
                                 <div className="form-group"><label>Motivo</label><input name="reason" value={visitForm.reason} onChange={handleVisitChange} /></div>
-                                <div className="form-group"><label>Diagnóstico *</label><textarea name="diagnosis" rows={2} placeholder="Diagnóstico de la consulta..." value={visitForm.diagnosis} onChange={handleVisitChange} /></div>
+                                <div className="form-group"><label>Diagnóstico *</label><textarea name="diagnosis" rows={2} placeholder="Diagnóstico..." value={visitForm.diagnosis} onChange={handleVisitChange} /></div>
                                 <div className="form-group"><label>Tratamiento</label><textarea name="treatment" rows={2} placeholder="Medicación, indicaciones..." value={visitForm.treatment} onChange={handleVisitChange} /></div>
-                                <div className="form-group"><label>Observaciones adicionales</label><textarea name="observations" rows={2} placeholder="Notas extra..." value={visitForm.observations} onChange={handleVisitChange} /></div>
+                                <div className="form-group"><label>Observaciones</label><textarea name="observations" rows={2} placeholder="Notas extra..." value={visitForm.observations} onChange={handleVisitChange} /></div>
                                 <div className="form-group"><label>Próxima visita</label><input name="next_visit" type="date" value={visitForm.next_visit} onChange={handleVisitChange} /></div>
                             </div>
                             <div className="form-actions">
@@ -262,26 +352,28 @@ export default function VetDashboard() {
         .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.08; pointer-events: none; }
         .b1 { width: 500px; height: 500px; background: #6bffb8; top: -100px; left: -100px; }
         .b2 { width: 400px; height: 400px; background: #6bcaff; bottom: -100px; right: -100px; }
-        .vet-inner { max-width: 900px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
+        .vet-inner { max-width: 960px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
         .vet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
         .vet-greeting { font-size: 0.9rem; color: rgba(255,255,255,0.45); font-weight: 600; margin-bottom: 4px; }
         .vet-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
-        .success-toast { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; padding: 10px 16px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-        .vet-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
-        .vet-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px; backdrop-filter: blur(10px); }
-        .stat-icon { font-size: 1.8rem; }
-        .stat-num { font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1; }
-        .stat-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 600; margin-top: 2px; }
-        .filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-        .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
-        .filter-btn.active { background: rgba(107,255,184,0.12); border-color: rgba(107,255,184,0.35); color: #6bffb8; }
+        .success-toast { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; padding: 10px 16px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0; }
+        .tab-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: rgba(255,255,255,0.4); font-family: 'Nunito', sans-serif; font-size: 0.92rem; font-weight: 700; padding: 10px 18px; cursor: pointer; transition: all 0.2s; margin-bottom: -1px; }
+        .tab-btn:hover { color: rgba(255,255,255,0.7); }
+        .tab-btn.active { color: #6bffb8; border-bottom-color: #6bffb8; }
         .loading-state, .empty-state { text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
         .paw-spin { font-size: 3rem; animation: spin 1s linear infinite; display: block; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-state p, .empty-state p { color: rgba(255,255,255,0.4); }
         .empty-state span { font-size: 3rem; }
+        .vet-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .vet-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px; }
+        .stat-icon { font-size: 1.8rem; }
+        .stat-num { font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1; }
+        .stat-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 600; margin-top: 2px; }
+        .filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .filter-btn.active { background: rgba(107,255,184,0.12); border-color: rgba(107,255,184,0.35); color: #6bffb8; }
         .appts-list { display: flex; flex-direction: column; gap: 12px; }
         .appt-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; gap: 18px; backdrop-filter: blur(10px); transition: border-color 0.2s; }
         .appt-card:hover { border-color: rgba(107,255,184,0.2); }
@@ -296,24 +388,53 @@ export default function VetDashboard() {
         .appt-meta { display: flex; gap: 14px; flex-wrap: wrap; }
         .appt-meta span { font-size: 0.78rem; color: rgba(255,255,255,0.45); }
         .appt-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-        .btn-confirm { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; border-radius: 8px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
-        .btn-confirm:hover { background: rgba(107,255,184,0.2); }
-        .btn-visit { background: rgba(107,202,255,0.12); border: 1px solid rgba(107,202,255,0.3); color: #6bcaff; border-radius: 8px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
-        .btn-visit:hover { background: rgba(107,202,255,0.2); }
-        .btn-noshow { background: rgba(255,149,0,0.12); border: 1px solid rgba(255,149,0,0.3); color: #ff9500; border-radius: 8px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
-        .btn-noshow:hover { background: rgba(255,149,0,0.2); }
-        .btn-cancel-sm { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2); color: rgba(255,107,107,0.7); border-radius: 8px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
-        .btn-cancel-sm:hover { background: rgba(255,107,107,0.15); }
+        .btn-confirm { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; border-radius: 8px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .btn-visit { background: rgba(107,202,255,0.12); border: 1px solid rgba(107,202,255,0.3); color: #6bcaff; border-radius: 8px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .btn-noshow { background: rgba(255,149,0,0.12); border: 1px solid rgba(255,149,0,0.3); color: #ff9500; border-radius: 8px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .btn-cancel-sm { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2); color: rgba(255,107,107,0.7); border-radius: 8px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .done-label { font-size: 0.78rem; color: #6bffb8; font-weight: 700; }
         .cancelled-label { font-size: 0.78rem; color: rgba(255,107,107,0.6); font-weight: 700; }
         .noshow-label { font-size: 0.78rem; color: #ff9500; font-weight: 700; }
+        .pets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .pet-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: all 0.2s; }
+        .pet-card:hover { border-color: rgba(107,255,184,0.3); transform: translateY(-2px); }
+        .pet-avatar { width: 56px; height: 56px; border-radius: 50%; background: rgba(107,255,184,0.1); display: flex; align-items: center; justify-content: center; font-size: 2rem; overflow: hidden; }
+        .pet-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .pet-name { font-size: 1.1rem; font-weight: 900; color: #fff; }
+        .pet-species { font-size: 0.8rem; color: #6bffb8; font-weight: 700; }
+        .pet-breed { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+        .pet-owner { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+        .pet-details { display: flex; gap: 8px; flex-wrap: wrap; }
+        .pet-details span { font-size: 0.75rem; color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.05); border-radius: 6px; padding: 3px 8px; }
+        .btn-view-history { background: rgba(107,202,255,0.1); border: 1px solid rgba(107,202,255,0.25); color: #6bcaff; border-radius: 8px; padding: 8px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; align-self: flex-start; }
+        .pet-selector { margin-bottom: 20px; }
+        .selector-label { font-size: 0.8rem; color: rgba(255,255,255,0.45); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+        .pet-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+        .pet-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 20px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .pet-chip.active { background: rgba(107,255,184,0.12); border-color: rgba(107,255,184,0.35); color: #6bffb8; }
+        .pet-summary { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .summary-avatar { font-size: 2.5rem; }
+        .pet-summary h3 { font-size: 1.1rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
+        .pet-summary p { font-size: 0.8rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+        .visits-list { display: flex; flex-direction: column; gap: 14px; }
+        .visit-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px 20px; display: flex; gap: 18px; }
+        .visit-date-box { display: flex; flex-direction: column; align-items: center; background: rgba(107,202,255,0.10); border-radius: 10px; padding: 8px 12px; min-width: 52px; flex-shrink: 0; }
+        .visit-day { font-size: 1.4rem; font-weight: 900; color: #6bcaff; line-height: 1; }
+        .visit-month { font-size: 0.6rem; color: rgba(107,202,255,0.7); text-transform: uppercase; font-weight: 700; }
+        .visit-year { font-size: 0.6rem; color: rgba(255,255,255,0.3); margin-top: 2px; }
+        .visit-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .visit-top { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+        .visit-reason { font-size: 1rem; font-weight: 900; color: #fff; }
+        .visit-vet { font-size: 0.78rem; color: #6bcaff; font-weight: 700; }
+        .visit-field { font-size: 0.85rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
+        .visit-field span { font-weight: 700; color: rgba(255,255,255,0.8); }
+        .visit-next { font-size: 0.8rem; color: #ffd93d; font-weight: 700; margin-top: 4px; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .modal { background: #1e1e35; border: 1px solid rgba(255,255,255,0.10); border-radius: 24px; padding: 32px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.3s cubic-bezier(.22,.68,0,1.2) both; }
         @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-header h2 { font-family: 'Fraunces', serif; font-size: 1.4rem; font-style: italic; color: #fff; }
-        .modal-close { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); border-radius: 8px; padding: 6px 10px; cursor: pointer; transition: background 0.2s; }
-        .modal-close:hover { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+        .modal-close { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
         .form-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.4); color: #ff9999; padding: 10px 14px; border-radius: 10px; font-size: 0.86rem; margin-bottom: 16px; }
         .visit-form { display: flex; flex-direction: column; gap: 20px; }
         .form-section { display: flex; flex-direction: column; gap: 12px; }
@@ -321,16 +442,14 @@ export default function VetDashboard() {
         .form-row { display: flex; gap: 12px; }
         .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
         .form-group label { font-size: 0.76rem; font-weight: 700; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.06em; }
-        .form-group input, .form-group textarea { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
-        .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(255,255,255,0.2); }
+        .form-group input, .form-group textarea { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
         .form-group input:focus, .form-group textarea:focus { border-color: #6bffb8; box-shadow: 0 0 0 3px rgba(107,255,184,0.10); }
         .form-group textarea { resize: vertical; }
         .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
         .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; }
-        .btn-primary { background: linear-gradient(135deg, #6bffb8, #3de09a); color: #1a1a2e; border: none; border-radius: 10px; padding: 11px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; transition: transform 0.15s, opacity 0.15s; }
-        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); }
+        .btn-primary { background: linear-gradient(135deg, #6bffb8, #3de09a); color: #1a1a2e; border: none; border-radius: 10px; padding: 11px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-        @media (max-width: 700px) { .vet-stats { grid-template-columns: repeat(2, 1fr); } .appt-card { flex-direction: column; align-items: flex-start; } .form-row { flex-direction: column; } .vet-inner { padding: 20px 16px; } }
+        @media (max-width: 700px) { .vet-stats { grid-template-columns: repeat(2, 1fr); } .appt-card { flex-direction: column; align-items: flex-start; } .form-row { flex-direction: column; } .vet-inner { padding: 20px 16px; } .pets-grid { grid-template-columns: 1fr; } }
     `}</style>
         </div>
     );
