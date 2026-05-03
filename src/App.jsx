@@ -14,6 +14,7 @@ import Clinics from './pages/Clinics'
 import MedicalHistory from './pages/MedicalHistory'
 import Profile from './pages/Profile'
 import VetDashboard from './pages/VetDashboard'
+import Messages from './pages/Messages'
 
 function App() {
   return (
@@ -21,7 +22,6 @@ function App() {
       <BrowserRouter>
         <Navbar />
         <Routes>
-          {/* Públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<RegisterChoice />} />
@@ -29,16 +29,15 @@ function App() {
           <Route path="/register/clinic" element={<RegisterClinic />} />
           <Route path="/clinics" element={<Clinics />} />
 
-          {/* Dueño */}
           <Route path="/dashboard" element={<ProtectedRoute role="owner"><Dashboard /></ProtectedRoute>} />
           <Route path="/pets" element={<ProtectedRoute role="owner"><Pets /></ProtectedRoute>} />
           <Route path="/pets/new" element={<ProtectedRoute role="owner"><Pets /></ProtectedRoute>} />
           <Route path="/appointments" element={<ProtectedRoute role="owner"><Appointments /></ProtectedRoute>} />
           <Route path="/appointments/new" element={<ProtectedRoute role="owner"><Appointments /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute role="owner"><MedicalHistory /></ProtectedRoute>} />
+          <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
-          {/* Clínica */}
           <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>

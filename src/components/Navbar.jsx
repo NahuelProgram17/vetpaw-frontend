@@ -1,17 +1,28 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getAppointments, markNotificationsSeen } from '../services/api'
+import { getAppointments, markNotificationsSeen, getUnreadCount } from '../services/api'
 
 export default function Navbar() {
     const { user, logout } = useAuth()
     const navigate = useNavigate()
     const [notifications, setNotifications] = useState([])
+    const [unreadMessages, setUnreadMessages] = useState(0)
     const [showNotif, setShowNotif] = useState(false)
     const notifRef = useRef(null)
 
     useEffect(() => {
-        if (user?.role === 'owner') fetchNotifications()
+        if (user?.role === 'owner') {
+            fetchNotifications()
+            fetchUnreadMessages()
+            const interval = setInterval(fetchUnreadMessages, 30000)
+            return () => clearInterval(interval)
+        }
+        if (user?.role === 'clinic') {
+            fetchUnreadMessages()
+            const interval = setInterval(fetchUnreadMessages, 30000)
+            return () => clearInterval(interval)
+        }
     }, [user])
 
     useEffect(() => {
@@ -28,8 +39,14 @@ export default function Navbar() {
         try {
             const data = await getAppointments()
             const appts = data.results ?? data
-            const unseen = appts.filter(a => a.seen_by_owner === false)
-            setNotifications(unseen)
+            setNotifications(appts.filter(a => a.seen_by_owner === false))
+        } catch (e) { console.error(e) }
+    }
+
+    const fetchUnreadMessages = async () => {
+        try {
+            const data = await getUnreadCount()
+            setUnreadMessages(data.unread || 0)
         } catch (e) { console.error(e) }
     }
 
@@ -69,13 +86,21 @@ export default function Navbar() {
                         <Link to="/register" className="bg-[#ff6b6b] text-white text-sm px-4 py-1.5 rounded-lg hover:bg-[#ff5252] transition">Registrarme</Link>
                     </>
                 ) : user.role === 'clinic' ? (
-                        <>
-                            <Link to="/clinic/dashboard" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Mi panel</Link>
-                            <Link to="/profile" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Mi perfil</Link>
-                            <span className="text-white/50 text-sm">|</span>
-                            <span className="text-white/70 text-sm">{user.first_name || user.username}</span>
-                            <button onClick={handleLogout} className="text-white/50 text-sm px-3 py-1.5 hover:text-white transition">Salir</button>
-                        </>
+                    <>
+                        <Link to="/clinic/dashboard" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Mi panel</Link>
+                        <Link to="/messages" className="relative text-white/70 text-sm px-3 py-1.5 hover:text-white transition inline-flex items-center gap-1">
+                            💬 Mensajes
+                            {unreadMessages > 0 && (
+                                <span className="bg-[#ff6b6b] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                    {unreadMessages}
+                                </span>
+                            )}
+                        </Link>
+                        <Link to="/profile" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Mi perfil</Link>
+                        <span className="text-white/50 text-sm">|</span>
+                        <span className="text-white/70 text-sm">{user.first_name || user.username}</span>
+                        <button onClick={handleLogout} className="text-white/50 text-sm px-3 py-1.5 hover:text-white transition">Salir</button>
+                    </>
                 ) : (
                     <>
                         <Link to="/dashboard" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Mi panel</Link>
@@ -83,6 +108,14 @@ export default function Navbar() {
                         <Link to="/appointments" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Turnos</Link>
                         <Link to="/history" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Historial</Link>
                         <Link to="/clinics" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Veterinarias</Link>
+                        <Link to="/messages" className="relative text-white/70 text-sm px-3 py-1.5 hover:text-white transition inline-flex items-center gap-1">
+                            💬
+                            {unreadMessages > 0 && (
+                                <span className="bg-[#ff6b6b] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                    {unreadMessages}
+                                </span>
+                            )}
+                        </Link>
                         <Link to="/profile" className="text-white/70 text-sm px-3 py-1.5 hover:text-white transition">Mi perfil</Link>
 
                         {/* Notificaciones */}

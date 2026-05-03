@@ -111,6 +111,7 @@ export const markNoShow = (id) => api.patch(`/appointments/${id}/mark_no_show/`)
 
 // ── Clinics ───────────────────────────────────────────
 export const getClinics = () => api.get("/clinics/").then((r) => r.data);
+export const joinClinic = (id) => api.post(`/clinics/${id}/join/`).then((r) => r.data);
 
 // ── Visits ────────────────────────────────────────────
 export const getVisits = () => api.get("/visits/").then((r) => r.data);
@@ -118,5 +119,13 @@ export const createVisit = (visit) => api.post("/visits/", visit).then((r) => r.
 
 // ── Vaccines ──────────────────────────────────────────
 export const getVaccines = () => api.get("/vaccines/").then((r) => r.data);
+
+// ── Messages ──────────────────────────────────────────
+export const getConversations  = () => api.get('/messages/conversations/').then(r => r.data)
+export const getMessages       = () => api.get('/messages/').then(r => r.data)
+export const sendMessage       = (data) => api.post('/messages/', data).then(r => r.data)
+export const markMessagesRead  = (other_user_id) => api.post('/messages/mark_read/', { other_user_id }).then(r => r.data)
+export const getUnreadCount    = () => api.get('/messages/unread_count/').then(r => r.data)
+
 
 export default api;

@@ -150,17 +150,17 @@ export default function Pets() {
                         {pets.map((pet) => (
                             <div key={pet.id} className="pet-card">
                                 <div className="pet-card-top">
-                                    <div className="pet-avatar-lg">
-                                        {pet.photo
-                                            ? <img src={pet.photo} alt={pet.name} className="pet-photo" />
-                                            : petEmoji(pet.species)
-                                        }
-                                    </div>
-                                    <div className="pet-card-actions">
-                                        <button className="btn-icon" onClick={() => openEdit(pet)} title="Editar">✏️</button>
-                                        <button className="btn-icon danger" onClick={() => setDeleteConfirm(pet.id)} title="Eliminar">🗑️</button>
-                                    </div>
-                                </div>
+    <div className="pet-avatar-lg">
+        {pet.photo
+            ? <img src={pet.photo} alt={pet.name} className="pet-photo" />
+            : petEmoji(pet.species)
+        }
+    </div>
+    <div className="pet-card-actions-row">
+        <button className="btn-icon" onClick={() => openEdit(pet)} title="Editar">✏️</button>
+        <button className="btn-icon danger" onClick={() => setDeleteConfirm(pet.id)} title="Eliminar">🗑️</button>
+    </div>
+</div>
                                 <h3 className="pet-card-name">{pet.name}</h3>
                                 <p className="pet-card-species">{pet.species_display || pet.species}</p>
                                 <div className="pet-card-info">
@@ -314,9 +314,10 @@ export default function Pets() {
         .pets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .pet-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px; backdrop-filter: blur(10px); transition: border-color 0.2s, transform 0.2s; position: relative; display: flex; flex-direction: column; gap: 10px; }
         .pet-card:hover { border-color: rgba(255,107,107,0.25); transform: translateY(-3px); }
-        .pet-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
-        .pet-avatar-lg { font-size: 3.5rem; line-height: 1; }
-        .pet-photo { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,107,107,0.3); }
+        .pet-card-top { display: flex; flex-direction: column; gap: 10px; }
+        .pet-card-actions-row { display: flex; justify-content: flex-end; gap: 6px; }
+        .pet-avatar-lg { font-size: 5rem; line-height: 1; }
+        .pet-photo { width: 100%; height: 260px; border-radius: 14px; object-fit: cover; object-position: center top; border: 2px solid rgba(255,107,107,0.3); margin-bottom: 4px; }
         .pet-card-actions { display: flex; gap: 6px; }
         .btn-icon { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; padding: 6px 8px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
         .btn-icon:hover { background: rgba(255,255,255,0.12); }
