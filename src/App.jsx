@@ -15,6 +15,7 @@ import MedicalHistory from './pages/MedicalHistory'
 import Profile from './pages/Profile'
 import VetDashboard from './pages/VetDashboard'
 import Messages from './pages/Messages'
+import Tips from './pages/Tips'
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="/history" element={<ProtectedRoute role="owner"><MedicalHistory /></ProtectedRoute>} />
           <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/tips" element={<Tips />} />
 
           <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
         </Routes>

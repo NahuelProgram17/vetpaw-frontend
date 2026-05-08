@@ -66,18 +66,13 @@ export default function Home() {
 
             {/* ── HERO ── */}
             <div style={{
-                position: 'relative',
-                minHeight: 440,
-                overflow: 'hidden',
-                display: 'flex',
-                alignItems: 'center',
-                backgroundImage: 'url(/hero.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center 40%',
-                backgroundColor: '#1a2a1a',
+                position: 'relative', minHeight: 440, overflow: 'hidden',
+                display: 'flex', alignItems: 'center',
+                backgroundImage: 'url(/hero.jpg)', backgroundSize: 'cover',
+                backgroundPosition: 'center 40%', backgroundColor: '#1a2a1a',
             }}>
                 <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,10,30,0.38)' }} />
-                <div style={{ position: 'relative', zIndex: 2, padding: '48px 48px 48px', maxWidth: 520 }}>
+                <div style={{ position: 'relative', zIndex: 2, padding: '48px', maxWidth: 520 }}>
                     <div style={{
                         display: 'inline-flex', alignItems: 'center', gap: 8,
                         background: 'rgba(255,107,107,0.18)', border: '1px solid rgba(255,107,107,0.4)',
@@ -98,7 +93,7 @@ export default function Home() {
                         {user ? (
                             <Link to={user.role === 'vet' ? '/vet/dashboard' : '/dashboard'}
                                 style={{ background: '#ffd93d', color: '#1a1a2e', fontWeight: 800, fontSize: 14, padding: '12px 22px', borderRadius: 14, textDecoration: 'none' }}>
-                                Ir a mi panel →
+                                Ir a mi panel
                             </Link>
                         ) : (
                             <>
@@ -137,59 +132,40 @@ export default function Home() {
                     borderRadius: 22, overflow: 'hidden', position: 'relative',
                     background: 'linear-gradient(120deg, #1a1a2e 0%, #2d1060 40%, #ff4e00 100%)',
                     boxShadow: '0 8px 40px rgba(255,78,0,0.3)',
-                    minHeight: 200,
-                    display: 'flex',
+                    minHeight: 200, display: 'flex',
                 }}>
-                    {/* Foto perro */}
                     <div style={{ width: 260, flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-                        <img
-                            src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=500&q=85"
-                            alt="Perro"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
-                        />
+                        <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=500&q=85" alt="Perro"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 50%, rgba(45,16,96,0.8))' }} />
                     </div>
-
-                    {/* Contenido central */}
                     <div style={{ flex: 1, padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 3, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', marginBottom: 8 }}>
                             Publicidad destacada
                         </span>
-                        <h3 style={{ fontSize: 28, fontWeight: 900, color: '#fff', lineHeight: 1.05, marginBottom: 8 }}>
-                            PipetaPlus Pro
-                        </h3>
-                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', marginBottom: 6, fontWeight: 600 }}>
-                            Protección antiparasitaria total
-                        </p>
-                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginBottom: 20 }}>
-                            Para perros y gatos · Efecto 3 meses · Sin receta
-                        </p>
+                        <h3 style={{ fontSize: 28, fontWeight: 900, color: '#fff', lineHeight: 1.05, marginBottom: 8 }}>PipetaPlus Pro</h3>
+                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', marginBottom: 6, fontWeight: 600 }}>Protección antiparasitaria total</p>
+                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginBottom: 20 }}>Para perros y gatos · Efecto 3 meses · Sin receta</p>
                         <button style={{
                             background: '#ffd93d', color: '#1a1a2e', fontWeight: 900, fontSize: 13,
                             padding: '12px 24px', borderRadius: 12, border: 'none', cursor: 'pointer',
                             alignSelf: 'flex-start', boxShadow: '0 4px 20px rgba(255,217,61,0.4)',
                         }}>
-                            Comprar ahora →
+                            Comprar ahora
                         </button>
                     </div>
-
-                    {/* Precio derecha */}
                     <div style={{
-                        width: 180, flexShrink: 0,
-                        background: 'rgba(255,255,255,0.05)',
+                        width: 180, flexShrink: 0, background: 'rgba(255,255,255,0.05)',
                         borderLeft: '1px solid rgba(255,255,255,0.08)',
-                        display: 'flex', flexDirection: 'column',
-                        alignItems: 'center', justifyContent: 'center',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                         padding: '24px 16px', gap: 6,
                     }}>
                         <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textDecoration: 'line-through' }}>$14.000</span>
                         <div style={{ fontSize: 48, fontWeight: 900, color: '#ffd93d', lineHeight: 1 }}>$10k</div>
                         <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>precio especial</span>
-                        <div style={{
-                            marginTop: 8, background: '#ff4e00', color: '#fff',
-                            fontSize: 11, fontWeight: 900, padding: '5px 14px',
-                            borderRadius: 99, letterSpacing: 1,
-                        }}>🔥 OFERTA</div>
+                        <div style={{ marginTop: 8, background: '#ff4e00', color: '#fff', fontSize: 11, fontWeight: 900, padding: '5px 14px', borderRadius: 99, letterSpacing: 1 }}>
+                            🔥 OFERTA
+                        </div>
                     </div>
                 </div>
                 <p style={{ fontSize: 11, color: '#c4bfb8', marginTop: 6, textAlign: 'right' }}>Publicidad · VetPaw Ads</p>
@@ -213,11 +189,61 @@ export default function Home() {
                 </div>
             </div>
 
+            {/* ── VIAJÁS CON TU MASCOTA — SENASA ── */}
+            <div style={{ padding: '8px 32px 24px' }}>
+                <a
+                    href="https://mascotas.senasa.gob.ar/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ textDecoration: 'none', display: 'block' }}
+                >
+                    <div style={{
+                        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
+                        borderRadius: 20, padding: '24px 28px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        border: '1.5px solid rgba(107,202,255,0.2)',
+                        boxShadow: '0 4px 24px rgba(107,202,255,0.08)',
+                        transition: 'transform .2s, box-shadow .2s',
+                        cursor: 'pointer',
+                    }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(107,202,255,0.18)' }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 24px rgba(107,202,255,0.08)' }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                            <div style={{
+                                width: 56, height: 56, borderRadius: 16, flexShrink: 0,
+                                background: 'rgba(107,202,255,0.12)', border: '1.5px solid rgba(107,202,255,0.25)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26,
+                            }}>✈️</div>
+                            <div>
+                                <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, color: '#6bcaff', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>
+                                    SENASA · Trámite oficial
+                                </span>
+                                <h3 style={{ fontSize: 16, fontWeight: 900, color: '#fff', marginBottom: 4 }}>
+                                    ¿Viajás con tu mascota?
+                                </h3>
+                                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>
+                                    Consultá los requisitos oficiales para viajar dentro del país o al exterior con tu animal.
+                                </p>
+                            </div>
+                        </div>
+                        <div style={{
+                            flexShrink: 0, marginLeft: 20,
+                            background: '#6bcaff', color: '#0f172a',
+                            fontWeight: 900, fontSize: 12, padding: '10px 18px',
+                            borderRadius: 10, whiteSpace: 'nowrap',
+                        }}>
+                            Ver requisitos
+                        </div>
+                    </div>
+                </a>
+            </div>
+
             {/* ── VETERINARIAS DESTACADAS ── */}
             <div style={{ padding: '8px 32px 24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                     <h2 style={{ fontSize: 15, fontWeight: 700, color: '#1a1a2e' }}>🏥 Veterinarias destacadas</h2>
-                    <Link to="/clinics" style={{ fontSize: 12, color: '#ff6b6b', fontWeight: 700, textDecoration: 'none' }}>Ver todas →</Link>
+                    <Link to="/clinics" style={{ fontSize: 12, color: '#ff6b6b', fontWeight: 700, textDecoration: 'none' }}>Ver todas</Link>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
                     {veterinariasDestacadas.map((v, i) => (
@@ -256,7 +282,7 @@ export default function Home() {
                                     padding: '10px', borderRadius: 10, textDecoration: 'none',
                                     boxShadow: v.destacada ? '0 3px 12px rgba(255,107,107,0.35)' : 'none',
                                 }}>
-                                    Sacar turno →
+                                    Sacar turno
                                 </Link>
                             </div>
                         </div>
@@ -268,7 +294,7 @@ export default function Home() {
             <div style={{ padding: '8px 32px 24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                     <h2 style={{ fontSize: 15, fontWeight: 700, color: '#1a1a2e' }}>Sabías que...</h2>
-                    <button style={{ fontSize: 12, color: '#ff6b6b', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}>Ver más →</button>
+                    <Link to="/tips" style={{ fontSize: 12, color: '#ff6b6b', fontWeight: 700, textDecoration: 'none' }}>Ver más</Link>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
                     {curiosidades.map((c, i) => (
@@ -282,11 +308,7 @@ export default function Home() {
                             <div style={{ height: 200, overflow: 'hidden', position: 'relative' }}>
                                 <img src={c.img} alt={c.tag} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.35))' }} />
-                                <div style={{
-                                    position: 'absolute', bottom: 10, left: 10,
-                                    background: c.tagColor, color: '#fff', fontSize: 10, fontWeight: 800,
-                                    padding: '4px 12px', borderRadius: 99,
-                                }}>{c.tag}</div>
+                                <div style={{ position: 'absolute', bottom: 10, left: 10, background: c.tagColor, color: '#fff', fontSize: 10, fontWeight: 800, padding: '4px 12px', borderRadius: 99 }}>{c.tag}</div>
                             </div>
                             <div style={{ padding: '14px' }}>
                                 <h4 style={{ fontSize: 12, fontWeight: 800, color: '#1a1a2e', lineHeight: 1.4, marginBottom: 6 }}>{c.title}</h4>
@@ -388,7 +410,7 @@ export default function Home() {
                     <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 24 }}>
                         <div style={{ fontSize: 56, marginBottom: 12 }}>📣</div>
                         <button style={{ background: '#1a1a2e', color: '#ffd93d', fontWeight: 900, fontSize: 13, padding: '12px 22px', borderRadius: 12, border: 'none', cursor: 'pointer' }}>
-                            Quiero anunciar →
+                            Quiero anunciar
                         </button>
                     </div>
                 </div>
