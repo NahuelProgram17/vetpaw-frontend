@@ -5,6 +5,21 @@ import { getClinics, joinClinic } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 
+const SERVICE_LABELS = {
+    dogs: "🐶 Perros",
+    cats: "🐱 Gatos",
+    rabbits: "🐰 Conejos",
+    birds: "🦜 Aves",
+    horses: "🐴 Caballos",
+    exotic: "🦎 Exóticos",
+    surgery: "🔪 Cirugías",
+    internment: "🏥 Internación",
+    emergency: "🚨 Urgencias 24hs",
+    grooming: "✂️ Peluquería",
+    xray: "🩻 Radiografías",
+    lab: "🧪 Laboratorio",
+};
+
 export default function Clinics() {
     const navigate = useNavigate();
     const { user } = useAuth();
