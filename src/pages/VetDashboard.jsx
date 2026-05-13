@@ -90,6 +90,22 @@ export default function ClinicDashboard() {
             setTimeout(() => setSuccess(""), 3000);
         } catch (e) { console.error(e); }
     };
+    const handleDownloadPDF = async (petId, petName) => {
+    try {
+        const response = await api.get(`/pets/${petId}/pdf/`, { responseType: 'blob' });
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `historial_${petName}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error(e);
+        setError('Error al generar el PDF.');
+    }
+};
 
     const openVisitModal = (appt) => {
         setSelectedAppt(appt);
@@ -363,6 +379,7 @@ export default function ClinicDashboard() {
                                             {pet.allergies && <span>⚠️ Alergias</span>}
                                         </div>
                                         <button className="btn-view-history">Ver historial →</button>
+                                        <button className="btn-pdf" onClick={(e) => { e.stopPropagation(); handleDownloadPDF(pet.id, pet.name); }}>📄 Descargar PDF</button>
                                     </div>
                                 ))}
                             </div>
@@ -396,14 +413,17 @@ export default function ClinicDashboard() {
 
                         {selectedPet && (
                             <div className="pet-summary">
-                                <div className="summary-avatar">{SPECIES_ICON[selectedPet.species] || "🐾"}</div>
-                                <div>
-                                    <h3>{selectedPet.name}</h3>
-                                    <p>{selectedPet.species_display} · {selectedPet.breed || "Sin raza"} · {selectedPet.sex === "male" ? "Macho" : "Hembra"}</p>
-                                    <p>👤 Dueño: {selectedPet.owner_name || "—"}</p>
-                                    {selectedPet.allergies && <p>⚠️ Alergias: {selectedPet.allergies}</p>}
-                                </div>
+                            <div className="summary-avatar">{SPECIES_ICON[selectedPet.species] || "🐾"}</div>
+                            <div style={{flex:1}}>
+                                <h3>{selectedPet.name}</h3>
+                                <p>{selectedPet.species_display} · {selectedPet.breed || "Sin raza"} · {selectedPet.sex === "male" ? "Macho" : "Hembra"}</p>
+                                <p>👤 Dueño: {selectedPet.owner_name || "—"}</p>
+                                {selectedPet.allergies && <p>⚠️ Alergias: {selectedPet.allergies}</p>}
                             </div>
+                            <button className="btn-pdf" onClick={() => handleDownloadPDF(selectedPet.id, selectedPet.name)}>
+                                📄 Descargar PDF
+                            </button>
+                        </div>
                         )}
 
                         {petVisits.length === 0 ? (
@@ -790,6 +810,7 @@ export default function ClinicDashboard() {
                 .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; }
                 .btn-primary { background: linear-gradient(135deg, #6bffb8, #3de09a); color: #1a1a2e; border: none; border-radius: 10px; padding: 11px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; }
                 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+                .btn-pdf { background: rgba(255,217,61,0.12); border: 1px solid rgba(255,217,61,0.3); color: #ffd93d; border-radius: 8px; padding: 8px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
                 @media (max-width: 700px) { .vet-stats { grid-template-columns: repeat(2, 1fr); } .appt-card { flex-direction: column; align-items: flex-start; } .form-row { flex-direction: column; } .vet-inner { padding: 20px 16px; } .pets-grid { grid-template-columns: 1fr; } .vaccines-header-row { flex-direction: column; align-items: flex-start; } }
             `}</style>
         </div>
