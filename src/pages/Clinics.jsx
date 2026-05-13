@@ -265,10 +265,12 @@ export default function Clinics() {
                                         📅 Sacar turno
                                     </button>
                                     {user?.role === 'owner' && (
-                                        <button className="btn-join" onClick={() => handleJoin(clinic.id)} disabled={joining === clinic.id || !clinic.is_active}>
-                                            {joining === clinic.id ? "Asociando..." : "🔗 Asociarse"}
-                                        </button>
-                                    )}
+                                        clinic.is_member
+                                            ? <button className="btn-join" disabled style={{opacity: 0.6}}>✓ Asociado</button>
+                                            : <button className="btn-join" onClick={() => handleJoin(clinic.id)} disabled={joining === clinic.id || !clinic.is_active}>
+                                                {joining === clinic.id ? "Asociando..." : "🔗 Asociarse"}
+                                            </button>
+)}
                                 </div>
                             </div>
                         ))}
