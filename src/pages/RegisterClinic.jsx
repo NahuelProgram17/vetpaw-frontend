@@ -272,7 +272,7 @@ export default function RegisterClinic() {
                         <div className="success-emoji">🏥</div>
                         <h2 className="success-title">¡Clínica registrada!</h2>
                         <p className="success-msg">
-                            Tu clínica fue registrada con éxito. Te enviamos un email de verificación — revisá tu casilla y activá tu cuenta para empezar a recibir turnos.
+                            Tu clínica fue registrada con éxito. Ya podés iniciar sesión y empezar a recibir turnos
                         </p>
                         <button className="auth-btn" onClick={() => navigate("/login")}>
                             Ir al login →
