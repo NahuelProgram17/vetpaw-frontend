@@ -233,7 +233,7 @@ export default function Appointments() {
                                         )}
                                     </div>
                                     <div className="appt-actions">
-                                        {appt.status !== "cancelled" && appt.status !== "completed" && appt.status !== "no_show" && (
+                                        {appt.status === "pending" && (
                                             <>
                                                 <button className="btn-icon" onClick={() => openEdit(appt)} title="Editar">✏️</button>
                                                 <button
