@@ -192,7 +192,7 @@ export default function Clinics() {
 
                                 {clinic.services?.length > 0 && (
                                     <div className="clinic-specialties">
-                                        {clinic.services.map((s, i) => <span key={i} className="specialty-tag">{s}</span>)}
+                                        {clinic.services.map((s, i) => <span key={i} className="specialty-tag">{SERVICE_LABELS[s] || s}</span>)}
                                     </div>
                                 )}
 
