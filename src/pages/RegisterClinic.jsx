@@ -83,29 +83,21 @@ export default function RegisterClinic() {
     if (err) { setError(err); return; }
     setLoading(true);
     try {
-        const userRes = await api.post('/users/register-clinic/', form);
-        const userId = userRes.data.id;
-        try {
-            await api.post('/clinics/', {
-                ...clinicForm,
-                owner: userId,
-            });
-            setStep(2);
-        } catch (clinicErr) {
-            // Si falla la clínica, intentamos borrar el usuario creado
-            await api.delete(`/users/${userId}/`).catch(() => {});
-            const data = clinicErr.response?.data;
-            const msg = data
-                ? Object.values(data).flat().join(" ")
-                : "Error al registrar la clínica.";
-            setError(msg);
-        }
+        await api.post('/users/register-clinic/', {
+            ...form,
+            clinic_name: clinicForm.name,
+            clinic_address: clinicForm.address,
+            clinic_province: clinicForm.province,
+            clinic_locality: clinicForm.locality,
+            clinic_phone: clinicForm.phone,
+            clinic_description: clinicForm.description,
+            clinic_is_24h: clinicForm.is_24h,
+            clinic_services: clinicForm.services,
+        });
+        setStep(2);
     } catch (err) {
         const data = err.response?.data;
-        const msg = data
-            ? Object.values(data).flat().join(" ")
-            : "Error al registrarse. Intentá de nuevo.";
-        setError(msg);
+        setError(data ? Object.values(data).flat().join(" ") : "Error al registrarse.");
         setStep(0);
     } finally {
         setLoading(false);
