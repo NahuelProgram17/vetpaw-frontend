@@ -431,7 +431,7 @@ export default function ClinicDashboard() {
                                         setError("");
                                         setShowVisitModal(true);
                                     }}>
-                                        + Nueva consulta
+                                        + Registrar atención
                                     </button>
                                     <button className="btn-pdf" onClick={() => handleDownloadPDF(selectedPet.id, selectedPet.name)}>
                                         📄 Descargar PDF
