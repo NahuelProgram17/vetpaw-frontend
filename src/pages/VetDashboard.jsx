@@ -29,8 +29,9 @@ const SPECIES_ICON = {
 };
 
 export default function ClinicDashboard() {
-    const { user } = useAuth();
-    const [tab, setTab] = useState("turnos");
+        const { user } = useAuth();
+        const [tab, setTab] = useState("turnos");
+    const [showAllVisits, setShowAllVisits] = useState(false);
     const [appointments, setAppointments] = useState([]);
     const [pets, setPets] = useState([]);
     const [visits, setVisits] = useState([]);
@@ -440,7 +441,6 @@ export default function ClinicDashboard() {
                                 </div>
                             </div>
                         )}
-
                         {petVisits.length === 0 ? (
                             <div className="empty-state">
                                 <span>📋</span>
@@ -448,13 +448,22 @@ export default function ClinicDashboard() {
                             </div>
                         ) : (
                             <div className="visits-list">
-                                {petVisits.map((visit) => (
+                                {(showAllVisits ? petVisits : petVisits.slice(0, 5)).map((visit) => (
                                     <div key={visit.id} className="visit-card">
                                         <div className="visit-date-box">
                                             <span className="visit-day">{new Date(visit.date).getDate()}</span>
                                             <span className="visit-month">{new Date(visit.date).toLocaleString("es-AR", { month: "short" })}</span>
                                             <span className="visit-year">{new Date(visit.date).getFullYear()}</span>
                                         </div>
+                                        {petVisits.length > 5 && (
+                                            <button
+                                                className="btn-ghost"
+                                                style={{marginTop: "12px", width: "100%"}}
+                                                onClick={() => setShowAllVisits(!showAllVisits)}
+                                            >
+                                                {showAllVisits ? "Ver menos ▲" : `Ver historial completo (${petVisits.length}) ▼`}
+                                            </button>
+                                        )}
                                         <div className="visit-info">
                                             <div className="visit-top">
                                                 <h3 className="visit-reason">{visit.reason}</h3>
