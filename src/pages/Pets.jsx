@@ -3,17 +3,40 @@ import { useNavigate } from 'react-router-dom';
 import { getPets, createPet, updatePet, deletePet } from '../services/api';
 
 const SPECIES_EMOJI = {
-    dog: '🐶', perro: '🐶', cat: '🐱', gato: '🐱',
-    bird: '🦜', pajaro: '🦜', rabbit: '🐰', conejo: '🐰',
-    fish: '🐟', pez: '🐟', hamster: '🐹', turtle: '🐢', tortuga: '🐢',
+    dog: '🐶',
+    perro: '🐶',
+    cat: '🐱',
+    gato: '🐱',
+    bird: '🦜',
+    pajaro: '🦜',
+    rabbit: '🐰',
+    conejo: '🐰',
+    fish: '🐟',
+    pez: '🐟',
+    hamster: '🐹',
+    turtle: '🐢',
+    tortuga: '🐢',
 };
 
-const petEmoji = (species) => SPECIES_EMOJI[(species || '').toLowerCase()] || '🐾';
+const petEmoji = (species) =>
+    SPECIES_EMOJI[(species || '').toLowerCase()] || '🐾';
 
 const EMPTY_FORM = {
-    name: '', species: 'dog', breed: '', sex: 'male',
-    birth_date: '', weight: '', color: '', microchip: '',
-    allergies: '', notes: '', is_neutered: false, photo: null,
+    name: '',
+    species: 'dog',
+    breed: '',
+    sex: 'male',
+    birth_date: '',
+    weight: '',
+    color: '',
+    microchip: '',
+    allergies: '',
+    notes: '',
+    is_neutered: false,
+    photo: null,
+    feeding: '',
+    habitat: '',
+    lives_with_animals: false,
 };
 
 export default function Pets() {
@@ -28,14 +51,19 @@ export default function Pets() {
     const [error, setError] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-    useEffect(() => { fetchPets(); }, []);
+    useEffect(() => {
+        fetchPets();
+    }, []);
 
     const fetchPets = async () => {
         try {
             const data = await getPets();
             setPets(data.results ?? data);
-        } catch (e) { console.error(e); }
-        finally { setLoading(false); }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const openNew = () => {
@@ -49,12 +77,21 @@ export default function Pets() {
     const openEdit = (pet) => {
         setEditingPet(pet);
         setForm({
-            name: pet.name || '', species: pet.species || 'dog',
-            breed: pet.breed || '', sex: pet.sex || 'male',
-            birth_date: pet.birth_date || '', weight: pet.weight || '',
-            color: pet.color || '', microchip: pet.microchip || '',
-            allergies: pet.allergies || '', notes: pet.notes || '',
-            is_neutered: pet.is_neutered || false, photo: null,
+            name: pet.name || '',
+            species: pet.species || 'dog',
+            breed: pet.breed || '',
+            sex: pet.sex || 'male',
+            birth_date: pet.birth_date || '',
+            weight: pet.weight || '',
+            color: pet.color || '',
+            microchip: pet.microchip || '',
+            allergies: pet.allergies || '',
+            notes: pet.notes || '',
+            is_neutered: pet.is_neutered || false,
+            photo: null,
+            feeding: pet.feeding || '',
+            habitat: pet.habitat || '',
+            lives_with_animals: pet.lives_with_animals || false,
         });
         setPhotoPreview(pet.photo || null);
         setError('');
@@ -83,7 +120,10 @@ export default function Pets() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.name) { setError('El nombre es obligatorio.'); return; }
+        if (!form.name) {
+            setError('El nombre es obligatorio.');
+            return;
+        }
         setSaving(true);
         setError('');
         try {
@@ -96,8 +136,12 @@ export default function Pets() {
             closeModal();
         } catch (err) {
             const data = err.response?.data;
-            setError(data ? Object.values(data).flat().join(' ') : 'Error al guardar.');
-        } finally { setSaving(false); }
+            setError(
+                data ? Object.values(data).flat().join(' ') : 'Error al guardar.',
+            );
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleDelete = async (id) => {
@@ -105,7 +149,9 @@ export default function Pets() {
             await deletePet(id);
             setPets(pets.filter((p) => p.id !== id));
             setDeleteConfirm(null);
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+        }
     };
 
     const calcAge = (birth_date) => {
@@ -114,34 +160,49 @@ export default function Pets() {
         const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
         if (years < 1) {
             const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30.44));
-            return months <= 0 ? 'Recién nacido' : `${months} mes${months > 1 ? 'es' : ''}`;
+            return months <= 0
+                ? 'Recién nacido'
+                : `${months} mes${months > 1 ? 'es' : ''}`;
         }
         return `${years} año${years > 1 ? 's' : ''}`;
     };
 
     return (
         <div className="pets-page">
-            <div className="blob b1" /><div className="blob b2" />
+            <div className="blob b1" />
+            <div className="blob b2" />
             <div className="pets-inner">
                 <header className="pets-header">
                     <div>
                         <h1 className="pets-title">🐾 Mis mascotas</h1>
                         <p className="pets-subtitle">
-                            {pets.length === 0 ? 'Todavía no registraste ninguna mascota.'
+                            {pets.length === 0
+                                ? 'Todavía no registraste ninguna mascota.'
                                 : `Tenés ${pets.length} mascota${pets.length > 1 ? 's' : ''} registrada${pets.length > 1 ? 's' : ''}.`}
                         </p>
                     </div>
-                    <button className="btn-primary" onClick={openNew}>+ Agregar mascota</button>
+                    <button className="btn-primary" onClick={openNew}>
+                        + Agregar mascota
+                    </button>
                 </header>
 
-                {loading && <div className="loading-state"><span className="paw-spin">🐾</span><p>Cargando mascotas...</p></div>}
+                {loading && (
+                    <div className="loading-state">
+                        <span className="paw-spin">🐾</span>
+                        <p>Cargando mascotas...</p>
+                    </div>
+                )}
 
                 {!loading && pets.length === 0 && (
                     <div className="empty-state">
                         <span className="empty-emoji">🐶</span>
                         <h2>¡Tu familia peluda te espera!</h2>
-                        <p>Registrá tu primera mascota para gestionar sus turnos y vacunas.</p>
-                        <button className="btn-primary" onClick={openNew}>+ Agregar mascota</button>
+                        <p>
+                            Registrá tu primera mascota para gestionar sus turnos y vacunas.
+                        </p>
+                        <button className="btn-primary" onClick={openNew}>
+                            + Agregar mascota
+                        </button>
                     </div>
                 )}
 
@@ -150,38 +211,92 @@ export default function Pets() {
                         {pets.map((pet) => (
                             <div key={pet.id} className="pet-card">
                                 <div className="pet-card-top">
-    <div className="pet-avatar-lg">
-        {pet.photo
-            ? <img src={pet.photo} alt={pet.name} className="pet-photo" />
-            : petEmoji(pet.species)
-        }
-    </div>
-    <div className="pet-card-actions-row">
-        <button className="btn-icon" onClick={() => openEdit(pet)} title="Editar">✏️</button>
-        <button className="btn-icon danger" onClick={() => setDeleteConfirm(pet.id)} title="Eliminar">🗑️</button>
-    </div>
-</div>
+                                    <div className="pet-avatar-lg">
+                                        {pet.photo ? (
+                                            <img
+                                                src={pet.photo}
+                                                alt={pet.name}
+                                                className="pet-photo"
+                                            />
+                                        ) : (
+                                            petEmoji(pet.species)
+                                        )}
+                                    </div>
+                                    <div className="pet-card-actions-row">
+                                        <button
+                                            className="btn-icon"
+                                            onClick={() => openEdit(pet)}
+                                            title="Editar"
+                                        >
+                                            ✏️
+                                        </button>
+                                        <button
+                                            className="btn-icon danger"
+                                            onClick={() => setDeleteConfirm(pet.id)}
+                                            title="Eliminar"
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </div>
                                 <h3 className="pet-card-name">{pet.name}</h3>
-                                <p className="pet-card-species">{pet.species_display || pet.species}</p>
+                                <p className="pet-card-species">
+                                    {pet.species_display || pet.species}
+                                </p>
                                 <div className="pet-card-info">
                                     {pet.breed && <span className="pet-tag">🦴 {pet.breed}</span>}
-                                    {pet.sex && <span className="pet-tag">{pet.sex === 'male' ? '♂ Macho' : '♀ Hembra'}</span>}
-                                    {pet.birth_date && <span className="pet-tag">🎂 {calcAge(pet.birth_date)}</span>}
-                                    {pet.weight && <span className="pet-tag">⚖️ {pet.weight} kg</span>}
+                                    {pet.sex && (
+                                        <span className="pet-tag">
+                                            {pet.sex === 'male' ? '♂ Macho' : '♀ Hembra'}
+                                        </span>
+                                    )}
+                                    {pet.birth_date && (
+                                        <span className="pet-tag">
+                                            🎂 {calcAge(pet.birth_date)}
+                                        </span>
+                                    )}
+                                    {pet.weight && (
+                                        <span className="pet-tag">⚖️ {pet.weight} kg</span>
+                                    )}
                                     {pet.color && <span className="pet-tag">🎨 {pet.color}</span>}
-                                    {pet.is_neutered && <span className="pet-tag neutered">✂️ Castrado/a</span>}
+                                    {pet.is_neutered && (
+                                        <span className="pet-tag neutered">✂️ Castrado/a</span>
+                                    )}
                                 </div>
-                                {pet.allergies && <div className="pet-alert">⚠️ Alergias: {pet.allergies}</div>}
-                                {pet.vaccines && pet.vaccines.length > 0 && (
-                                    <div className="pet-vaccines">💉 {pet.vaccines.length} vacuna{pet.vaccines.length > 1 ? 's' : ''} registrada{pet.vaccines.length > 1 ? 's' : ''}</div>
+                                {pet.allergies && (
+                                    <div className="pet-alert">⚠️ Alergias: {pet.allergies}</div>
                                 )}
-                                <button className="btn-outline" onClick={() => navigate(`/appointments/new?pet=${pet.id}`)}>📅 Sacar turno</button>
+                                {pet.vaccines && pet.vaccines.length > 0 && (
+                                    <div className="pet-vaccines">
+                                        💉 {pet.vaccines.length} vacuna
+                                        {pet.vaccines.length > 1 ? 's' : ''} registrada
+                                        {pet.vaccines.length > 1 ? 's' : ''}
+                                    </div>
+                                )}
+                                <button
+                                    className="btn-outline"
+                                    onClick={() => navigate(`/appointments/new?pet=${pet.id}`)}
+                                >
+                                    📅 Sacar turno
+                                </button>
                                 {deleteConfirm === pet.id && (
                                     <div className="delete-confirm">
-                                        <p>¿Eliminar a <strong>{pet.name}</strong>?</p>
+                                        <p>
+                                            ¿Eliminar a <strong>{pet.name}</strong>?
+                                        </p>
                                         <div className="delete-btns">
-                                            <button className="btn-cancel" onClick={() => setDeleteConfirm(null)}>Cancelar</button>
-                                            <button className="btn-danger" onClick={() => handleDelete(pet.id)}>Eliminar</button>
+                                            <button
+                                                className="btn-cancel"
+                                                onClick={() => setDeleteConfirm(null)}
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                className="btn-danger"
+                                                onClick={() => handleDelete(pet.id)}
+                                            >
+                                                Eliminar
+                                            </button>
                                         </div>
                                     </div>
                                 )}
@@ -195,19 +310,32 @@ export default function Pets() {
                 <div className="modal-overlay" onClick={closeModal}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>{editingPet ? `Editar a ${editingPet.name}` : 'Nueva mascota'}</h2>
-                            <button className="modal-close" onClick={closeModal}>✕</button>
+                            <h2>
+                                {editingPet ? `Editar a ${editingPet.name}` : 'Nueva mascota'}
+                            </h2>
+                            <button className="modal-close" onClick={closeModal}>
+                                ✕
+                            </button>
                         </div>
                         {error && <div className="form-error">⚠️ {error}</div>}
                         <form onSubmit={handleSubmit} className="pet-form">
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Nombre *</label>
-                                    <input name="name" placeholder="Luna" value={form.name} onChange={handleChange} />
+                                    <input
+                                        name="name"
+                                        placeholder="Luna"
+                                        value={form.name}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                                 <div className="form-group">
                                     <label>Especie</label>
-                                    <select name="species" value={form.species} onChange={handleChange}>
+                                    <select
+                                        name="species"
+                                        value={form.species}
+                                        onChange={handleChange}
+                                    >
                                         <option value="dog">🐶 Perro</option>
                                         <option value="cat">🐱 Gato</option>
                                         <option value="bird">🦜 Ave</option>
@@ -222,7 +350,12 @@ export default function Pets() {
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Raza</label>
-                                    <input name="breed" placeholder="Labrador" value={form.breed} onChange={handleChange} />
+                                    <input
+                                        name="breed"
+                                        placeholder="Labrador"
+                                        value={form.breed}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                                 <div className="form-group">
                                     <label>Sexo</label>
@@ -235,30 +368,104 @@ export default function Pets() {
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Fecha de nacimiento</label>
-                                    <input name="birth_date" type="date" value={form.birth_date} onChange={handleChange} />
+                                    <input
+                                        name="birth_date"
+                                        type="date"
+                                        value={form.birth_date}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                                 <div className="form-group">
                                     <label>Peso (kg)</label>
-                                    <input name="weight" type="number" step="0.1" placeholder="5.2" value={form.weight} onChange={handleChange} />
+                                    <input
+                                        name="weight"
+                                        type="number"
+                                        step="0.1"
+                                        placeholder="5.2"
+                                        value={form.weight}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                             </div>
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Color</label>
-                                    <input name="color" placeholder="Marrón y blanco" value={form.color} onChange={handleChange} />
+                                    <input
+                                        name="color"
+                                        placeholder="Marrón y blanco"
+                                        value={form.color}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                                 <div className="form-group">
                                     <label>Microchip</label>
-                                    <input name="microchip" placeholder="N° de microchip" value={form.microchip} onChange={handleChange} />
+                                    <input
+                                        name="microchip"
+                                        placeholder="N° de microchip"
+                                        value={form.microchip}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                             </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Alimentación</label>
+                                    <select
+                                        name="feeding"
+                                        value={form.feeding}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">— Seleccioná —</option>
+                                        <option value="balanced">🥣 Balanceada</option>
+                                        <option value="homemade">🍖 Casera</option>
+                                        <option value="mixed">🥗 Mixta</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Hábitat</label>
+                                    <select
+                                        name="habitat"
+                                        value={form.habitat}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">— Seleccioná —</option>
+                                        <option value="apartment">🏢 Departamento</option>
+                                        <option value="house">🏠 Casa con patio</option>
+                                        <option value="field">🌾 Campo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="form-check">
+                                <input
+                                    type="checkbox"
+                                    id="lives_with_animals"
+                                    name="lives_with_animals"
+                                    checked={form.lives_with_animals}
+                                    onChange={handleChange}
+                                />
+                                <label htmlFor="lives_with_animals">
+                                    🐾 Convive con otros animales
+                                </label>
+                            </div>
+
                             <div className="form-group full">
                                 <label>Alergias</label>
-                                <input name="allergies" placeholder="Ej: Polen, pollo..." value={form.allergies} onChange={handleChange} />
+                                <input
+                                    name="allergies"
+                                    placeholder="Ej: Polen, pollo..."
+                                    value={form.allergies}
+                                    onChange={handleChange}
+                                />
                             </div>
                             <div className="form-group full">
                                 <label>Notas adicionales</label>
-                                <textarea name="notes" placeholder="Comportamiento, medicación habitual..." value={form.notes} onChange={handleChange} rows={3} />
+                                <textarea
+                                    name="notes"
+                                    placeholder="Comportamiento, medicación habitual..."
+                                    value={form.notes}
+                                    onChange={handleChange}
+                                    rows={3}
+                                />
                             </div>
 
                             {/* Foto */}
@@ -266,23 +473,48 @@ export default function Pets() {
                                 <label>Foto</label>
                                 <div className="photo-upload">
                                     {photoPreview && (
-                                        <img src={photoPreview} alt="preview" className="photo-preview" />
+                                        <img
+                                            src={photoPreview}
+                                            alt="preview"
+                                            className="photo-preview"
+                                        />
                                     )}
                                     <label className="photo-label">
                                         📷 {photoPreview ? 'Cambiar foto' : 'Subir foto'}
-                                        <input type="file" accept="image/*" onChange={handlePhotoChange} className="photo-input-hidden" />
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handlePhotoChange}
+                                            className="photo-input-hidden"
+                                        />
                                     </label>
                                 </div>
                             </div>
 
                             <div className="form-check">
-                                <input type="checkbox" id="is_neutered" name="is_neutered" checked={form.is_neutered} onChange={handleChange} />
+                                <input
+                                    type="checkbox"
+                                    id="is_neutered"
+                                    name="is_neutered"
+                                    checked={form.is_neutered}
+                                    onChange={handleChange}
+                                />
                                 <label htmlFor="is_neutered">✂️ Castrado/a</label>
                             </div>
                             <div className="form-actions">
-                                <button type="button" className="btn-ghost" onClick={closeModal}>Cancelar</button>
+                                <button
+                                    type="button"
+                                    className="btn-ghost"
+                                    onClick={closeModal}
+                                >
+                                    Cancelar
+                                </button>
                                 <button type="submit" className="btn-primary" disabled={saving}>
-                                    {saving ? 'Guardando...' : editingPet ? 'Guardar cambios' : 'Crear mascota 🐾'}
+                                    {saving
+                                        ? 'Guardando...'
+                                        : editingPet
+                                            ? 'Guardar cambios'
+                                            : 'Crear mascota 🐾'}
                                 </button>
                             </div>
                         </form>
