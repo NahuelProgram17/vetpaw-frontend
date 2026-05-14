@@ -413,17 +413,31 @@ export default function ClinicDashboard() {
 
                         {selectedPet && (
                             <div className="pet-summary">
-                            <div className="summary-avatar">{SPECIES_ICON[selectedPet.species] || "🐾"}</div>
-                            <div style={{flex:1}}>
-                                <h3>{selectedPet.name}</h3>
-                                <p>{selectedPet.species_display} · {selectedPet.breed || "Sin raza"} · {selectedPet.sex === "male" ? "Macho" : "Hembra"}</p>
-                                <p>👤 Dueño: {selectedPet.owner_name || "—"}</p>
-                                {selectedPet.allergies && <p>⚠️ Alergias: {selectedPet.allergies}</p>}
+                                <div className="summary-avatar">{SPECIES_ICON[selectedPet.species] || "🐾"}</div>
+                                <div style={{flex:1}}>
+                                    <h3>{selectedPet.name}</h3>
+                                    <p>{selectedPet.species_display} · {selectedPet.breed || "Sin raza"} · {selectedPet.sex === "male" ? "Macho" : "Hembra"}</p>
+                                    <p>👤 Dueño: {selectedPet.owner_name || "—"}</p>
+                                    {selectedPet.allergies && <p>⚠️ Alergias: {selectedPet.allergies}</p>}
+                                </div>
+                                <div style={{display:"flex", gap:"8px", flexShrink:0}}>
+                                    <button className="btn-visit" onClick={() => {
+                                        setVisitForm({
+                                            ...EMPTY_VISIT,
+                                            pet: selectedPet.id,
+                                            clinic: "",
+                                            date: new Date().toISOString().slice(0, 16),
+                                        });
+                                        setError("");
+                                        setShowVisitModal(true);
+                                    }}>
+                                        + Nueva consulta
+                                    </button>
+                                    <button className="btn-pdf" onClick={() => handleDownloadPDF(selectedPet.id, selectedPet.name)}>
+                                        📄 Descargar PDF
+                                    </button>
+                                </div>
                             </div>
-                            <button className="btn-pdf" onClick={() => handleDownloadPDF(selectedPet.id, selectedPet.name)}>
-                                📄 Descargar PDF
-                            </button>
-                        </div>
                         )}
 
                         {petVisits.length === 0 ? (
