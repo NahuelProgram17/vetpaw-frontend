@@ -159,9 +159,10 @@ export default function ClinicDashboard() {
                 vet_license: visitForm.vet_license,
             });
             setShowVisitModal(false);
-            setSuccess("Visita registrada en el historial.");
+            setSuccess("Atención registrada en el historial.");
             setTimeout(() => setSuccess(""), 4000);
             await fetchAll();
+            setTab("historial");
         } catch (err) {
             const data = err.response?.data;
             setError(data ? Object.values(data).flat().join(" ") : "Error al guardar.");
