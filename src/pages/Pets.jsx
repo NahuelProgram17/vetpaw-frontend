@@ -266,6 +266,9 @@ export default function Pets() {
                                 {pet.allergies && (
                                     <div className="pet-alert">⚠️ Alergias: {pet.allergies}</div>
                                 )}
+                                {pet.feeding && <div className="pet-tag">🥣 {pet.feeding === 'balanced' ? 'Balanceada' : pet.feeding === 'homemade' ? 'Casera' : 'Mixta'}</div>}
+                                {pet.habitat && <div className="pet-tag">🏠 {pet.habitat === 'apartment' ? 'Departamento' : pet.habitat === 'house' ? 'Casa con patio' : 'Campo'}</div>}
+                                {pet.lives_with_animals && <div className="pet-tag">🐾 Convive con otros animales</div>}
                                 {pet.vaccines && pet.vaccines.length > 0 && (
                                     <div className="pet-vaccines">
                                         💉 {pet.vaccines.length} vacuna
