@@ -934,6 +934,8 @@ export default function ClinicDashboard() {
                 .agenda-item-reason { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
                 .agenda-item-badge { font-size: 0.65rem; font-weight: 700; border-radius: 4px; padding: 2px 6px; align-self: flex-start; margin-top: 2px; }
                 .agenda-count { font-size: 0.72rem; color: rgba(255,255,255,0.25); text-align: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
+                .btn-agenda-pdf { background: rgba(255,217,61,0.10); border: 1px solid rgba(255,217,61,0.25); color: #ffd93d; border-radius: 8px; padding: 8px 12px; font-family: 'Nunito', sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 12px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+                .btn-agenda-pdf:hover { background: rgba(255,217,61,0.20); border-color: rgba(255,217,61,0.5); transform: translateY(-1px); }
             `}</style>
         </div>
     );
