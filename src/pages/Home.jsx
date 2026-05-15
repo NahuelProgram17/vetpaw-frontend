@@ -422,7 +422,7 @@ export default function Home() {
 
                     {/* Logo + descripción centrado */}
                     <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                        <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: '80px', width: 'auto', marginBottom: 12 }} />
+                        <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: '160px', width: 'auto', marginBottom: 12 }} />
                         <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, maxWidth: 320, margin: '0 auto' }}>
                             La app veterinaria de Argentina.<br />Tu mascota merece lo mejor.
                         </p>
