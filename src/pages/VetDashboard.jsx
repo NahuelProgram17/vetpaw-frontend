@@ -51,6 +51,7 @@ export default function ClinicDashboard() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [selectedPet, setSelectedPet] = useState(null);
+    const [highlightedAppt, setHighlightedAppt] = useState(null);
 
     useEffect(() => { fetchAll(); }, []);
 
@@ -311,7 +312,7 @@ export default function ClinicDashboard() {
                                     {filtered.map((appt) => {
                                         const status = STATUS_LABEL[appt.status] || STATUS_LABEL.pending;
                                         return (
-                                            <div key={appt.id} className="appt-card">
+                                            <div key={appt.id} className={`appt-card ${highlightedAppt === appt.id ? "appt-highlighted" : ""}`} id={`appt-${appt.id}`}>
                                                 <div className="appt-date-box">
                                                     <span className="appt-day">{new Date(appt.requested_date).getDate()}</span>
                                                     <span className="appt-month">{new Date(appt.requested_date).toLocaleString("es-AR", { month: "short" })}</span>
@@ -377,7 +378,7 @@ export default function ClinicDashboard() {
                                     {agendaTurnos.map(appt => {
                                         const status = STATUS_LABEL[appt.status] || STATUS_LABEL.pending;
                                         return (
-                                            <div key={appt.id} className="agenda-item" style={{ borderLeftColor: status.color }}>
+                                            <div key={appt.id} className="agenda-item" style={{ borderLeftColor: status.color, cursor: 'pointer' }} onClick={() => { setHighlightedAppt(appt.id); setFilter("all"); }}>
                                                 <div className="agenda-item-time">{formatTime(appt.requested_date)}</div>
                                                 <div className="agenda-item-info">
                                                     <div className="agenda-item-pet">{appt.pet_name || "—"}</div>
