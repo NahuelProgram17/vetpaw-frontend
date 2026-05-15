@@ -805,7 +805,7 @@ export default function ClinicDashboard() {
                 .appts-list { display: flex; flex-direction: column; gap: 12px; }
                 .appt-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; gap: 18px; backdrop-filter: blur(10px); transition: border-color 0.2s; }
                 .appt-card:hover { border-color: rgba(107,255,184,0.2); }
-                .appt-highlighted { border-color: #6bffb8 !important; box-shadow: 0 0 0 2px rgba(107,255,184,0.2); }
+                .appt-highlighted { border-color: #6bffb8 !important; box-shadow: 0 0 0 3px #6bffb8; background: rgba(107,255,184,0.08) !important; }
                 .appt-date-box { display: flex; flex-direction: column; align-items: center; background: rgba(107,255,184,0.10); border-radius: 10px; padding: 8px 12px; min-width: 52px; flex-shrink: 0; }
                 .appt-day { font-size: 1.4rem; font-weight: 900; color: #6bffb8; line-height: 1; }
                 .appt-month { font-size: 0.6rem; color: rgba(107,255,184,0.7); text-transform: uppercase; font-weight: 700; }
