@@ -74,7 +74,7 @@ export default function Navbar() {
     return (
         <nav className="bg-[#1a1a2e] px-6 h-14 flex items-center justify-between sticky top-0 z-50 border-b border-white/5">
             <Link to="/" className="flex items-center gap-2">
-                <img src="/logo_vetpaw.png" alt="VetPaw" className="h-10 w-auto" />
+                <img src="/logo_vetpaw.png" alt="VetPaw" className="h-14 w-auto" />
             </Link>
 
             <div className="flex items-center gap-2">
