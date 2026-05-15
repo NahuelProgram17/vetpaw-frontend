@@ -367,6 +367,22 @@ export default function ClinicDashboard() {
                                 <button className="agenda-nav" onClick={() => { const d = new Date(agendaDate); d.setDate(d.getDate() + 1); setAgendaDate(d); }}>›</button>
                             </div>
                             <div className="agenda-date-full">{agendaLabel}</div>
+                            <button className="btn-agenda-pdf" onClick={async () => {
+                                try {
+                                    const dateStr = agendaDate.toISOString().slice(0, 10);
+                                    const response = await api.get(`/appointments/agenda_pdf/?date=${dateStr}`, { responseType: 'blob' });
+                                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.setAttribute('download', `agenda_${dateStr}.pdf`);
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    link.remove();
+                                    window.URL.revokeObjectURL(url);
+                                } catch (e) {
+                                    console.error(e);
+                                }
+                            }}>📄 Descargar agenda</button>
 
                             {agendaTurnos.length === 0 ? (
                                 <div className="agenda-empty">
