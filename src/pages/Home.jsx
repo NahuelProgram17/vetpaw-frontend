@@ -417,53 +417,33 @@ export default function Home() {
             </div>
 
             {/* ── FOOTER ── */}
-            <footer style={{ background: '#1a1a2e', padding: '48px 32px 24px', marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+            <footer style={{ background: '#1a1a2e', padding: '28px 32px', marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
 
-                    {/* Logo + descripción centrado */}
-                    <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                        <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: '160px', width: 'auto', marginBottom: 12 }} />
-                        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, maxWidth: 320, margin: '0 auto' }}>
-                            La app veterinaria de Argentina.<br />Tu mascota merece lo mejor.
-                        </p>
-                    </div>
+                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: '100px', width: 'auto' }} />
 
-                    {/* Links centrados */}
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: 32, flexWrap: 'wrap', marginBottom: 40 }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 28, flexWrap: 'wrap' }}>
                         {['Términos', 'Privacidad', 'Sumar mi veterinaria', 'Anunciar en VetPaw', 'Contacto', 'Blog'].map(l => (
-                            <span key={l} style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, cursor: 'pointer', transition: 'color 0.2s' }}
+                            <span key={l} style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, cursor: 'pointer' }}
                                 onMouseEnter={e => e.target.style.color = '#ffd93d'}
                                 onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.4)'}
                             >{l}</span>
                         ))}
                     </div>
 
-                    {/* Redes sociales */}
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 32 }}>
-                        {[
-                            { icon: '📘', label: 'Facebook' },
-                            { icon: '📸', label: 'Instagram' },
-                            { icon: '🐦', label: 'Twitter' },
-                        ].map(s => (
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
+                        {[{ icon: '📘', label: 'Facebook' }, { icon: '📸', label: 'Instagram' }, { icon: '🐦', label: 'Twitter' }].map(s => (
                             <div key={s.label} style={{
-                                width: 40, height: 40, borderRadius: '50%',
-                                background: 'rgba(255,255,255,0.06)',
-                                border: '1px solid rgba(255,255,255,0.10)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 18, cursor: 'pointer', transition: 'all 0.2s',
-                            }}
-                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,217,61,0.15)'; e.currentTarget.style.borderColor = 'rgba(255,217,61,0.3)' }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)' }}
-                            >{s.icon}</div>
+                                width: 36, height: 36, borderRadius: '50%',
+                                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, cursor: 'pointer',
+                            }}>{s.icon}</div>
                         ))}
                     </div>
 
-                    {/* Copyright */}
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 20, textAlign: 'center' }}>
-                        <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>
-                            © 2026 VetPaw · Todos los derechos reservados · Hecho con ❤️ en Argentina
-                        </p>
-                    </div>
+                    <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12, margin: 0 }}>
+                        © 2026 VetPaw · Todos los derechos reservados · Hecho con ❤️ en Argentina
+                    </p>
                 </div>
             </footer>
 
