@@ -421,8 +421,7 @@ export default function Home() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                            <div style={{ width: 26, height: 26, background: '#ff6b6b', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 900 }}>V</div>
-                            <span style={{ color: '#fff', fontWeight: 700 }}>VetPaw</span>
+                            <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: '40px', width: 'auto' }} />
                         </div>
                         <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, maxWidth: 220 }}>La app veterinaria de Argentina. Tu mascota merece lo mejor.</p>
                     </div>

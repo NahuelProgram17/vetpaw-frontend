@@ -59,8 +59,7 @@ const handleResend = async (e) => {
 
             <div className="auth-card">
                 <div className="auth-brand">
-                    <span className="paw-icon">🐾</span>
-                    <h1 className="brand-name">VetPaw</h1>
+                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{height: '80px', width: 'auto'}} />
                 </div>
 
                 <p className="auth-tagline">Tu clínica, siempre cerca.</p>

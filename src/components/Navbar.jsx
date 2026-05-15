@@ -74,8 +74,7 @@ export default function Navbar() {
     return (
         <nav className="bg-[#1a1a2e] px-6 h-14 flex items-center justify-between sticky top-0 z-50 border-b border-white/5">
             <Link to="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[#ff6b6b] rounded-lg flex items-center justify-center text-white font-bold text-sm">V</div>
-                <span className="text-white font-medium text-lg">VetPaw</span>
+                <img src="/logo_vetpaw.png" alt="VetPaw" className="h-10 w-auto" />
             </Link>
 
             <div className="flex items-center gap-2">
