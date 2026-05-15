@@ -9,10 +9,10 @@ export default function RegisterChoice() {
             <div className="blob blob-2" />
 
             <div className="choice-card">
-                <div className="auth-brand">
-                    <span className="paw-icon">🐾</span>
-                    <h1 className="brand-name">VetPaw</h1>
+                <div className="auth-brand" style={{justifyContent: 'center', marginBottom: '16px'}}>
+                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{height: '120px', width: 'auto', display: 'block', margin: '0 auto'}} />
                 </div>
+                
                 <p className="choice-subtitle">¿Cómo querés registrarte?</p>
 
                 <div className="choice-options">

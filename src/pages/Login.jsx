@@ -59,7 +59,7 @@ const handleResend = async (e) => {
 
             <div className="auth-card">
                 <div className="auth-brand">
-                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{height: '140px', width: 'auto', display: 'block', margin: '0 auto'}} />
+                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{height: '180px', width: 'auto', display: 'block', margin: '0 auto'}} />
                 </div>
 
                 <p className="auth-tagline">Tu clínica, siempre cerca.</p>
