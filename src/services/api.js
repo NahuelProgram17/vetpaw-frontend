@@ -14,30 +14,35 @@ return config;
 
 // Auto refresh token on 401
 api.interceptors.response.use(
-(response) => response,
-async (error) => {
-    const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
-    original._retry = true;
-    const refresh = localStorage.getItem("refresh_token");
-    if (refresh) {
-        try {
-        const res = await axios.post("http://127.0.0.1:8000/api/users/token/refresh/", { refresh });
-        const newAccess = res.data.access;
-        localStorage.setItem("access_token", newAccess);
-        original.headers.Authorization = `Bearer ${newAccess}`;
-        return api(original);
-        } catch (e) {
-        localStorage.clear();
-        window.location.href = "/login";
+    (response) => response,
+    async (error) => {
+        const original = error.config;
+        // Si es una ruta pública, no redirigir al login
+        const publicRoutes = ['/lost-pets/', '/lost-pets/create/']
+        const isPublic = publicRoutes.some(route => original.url?.includes(route))
+        if (isPublic) return Promise.reject(error)
+
+        if (error.response?.status === 401 && !original._retry) {
+            original._retry = true;
+            const refresh = localStorage.getItem("refresh_token");
+            if (refresh) {
+                try {
+                    const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/token/refresh/`, { refresh });
+                    const newAccess = res.data.access;
+                    localStorage.setItem("access_token", newAccess);
+                    original.headers.Authorization = `Bearer ${newAccess}`;
+                    return api(original);
+                } catch (e) {
+                    localStorage.clear();
+                    window.location.href = "/login";
+                }
+            } else {
+                localStorage.clear();
+                window.location.href = "/login";
+            }
         }
-    } else {
-        localStorage.clear();
-        window.location.href = "/login";
+        return Promise.reject(error);
     }
-    }
-    return Promise.reject(error);
-}
 );
 
 // ── Auth ──────────────────────────────────────────────
