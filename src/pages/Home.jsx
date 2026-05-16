@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import api from '../services/api'
 
 const veterinariasDestacadas = [
     { nombre: 'Clínica Vida Animal', localidad: 'Palermo, CABA', especialidad: 'Clínica general · Cirugía', img: 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=800&q=80', destacada: true },
@@ -31,11 +32,37 @@ const curiosidades = [
 
 export default function Home() {
     const { user } = useAuth()
+
+    // Estados formulario
     const [fotoMascota, setFotoMascota] = useState(null)
     const [fotoPreview, setFotoPreview] = useState(null)
     const [descripcionMascota, setDescripcionMascota] = useState('')
+    const [contactType, setContactType] = useState('phone')
+    const [contactValue, setContactValue] = useState('')
+    const [enviando, setEnviando] = useState(false)
     const [reporteEnviado, setReporteEnviado] = useState(false)
+    const [errorEnvio, setErrorEnvio] = useState('')
     const fileRef = useRef()
+
+    // Estados muro
+    const [lostPets, setLostPets] = useState([])
+    const [cargandoMuro, setCargandoMuro] = useState(true)
+    const [reportados, setReportados] = useState({})
+
+    useEffect(() => {
+        fetchLostPets()
+    }, [])
+
+    const fetchLostPets = async () => {
+        try {
+            const res = await api.get('/lost-pets/')
+            setLostPets(res.data)
+        } catch (e) {
+            console.error('Error cargando mascotas perdidas', e)
+        } finally {
+            setCargandoMuro(false)
+        }
+    }
 
     const handleFoto = (e) => {
         const file = e.target.files[0]
@@ -48,17 +75,46 @@ export default function Home() {
         setFotoPreview(URL.createObjectURL(file))
     }
 
-    const handleReporte = (e) => {
+    const handleReporte = async (e) => {
         e.preventDefault()
-        if (!fotoMascota || !descripcionMascota.trim()) {
-            alert('Por favor agregá una foto y una descripción.')
+        setErrorEnvio('')
+        if (!fotoMascota || !descripcionMascota.trim() || !contactValue.trim()) {
+            setErrorEnvio('Por favor completá todos los campos.')
             return
         }
-        setReporteEnviado(true)
-        setFotoMascota(null)
-        setFotoPreview(null)
-        setDescripcionMascota('')
-        setTimeout(() => setReporteEnviado(false), 5000)
+        setEnviando(true)
+        try {
+            const formData = new FormData()
+            formData.append('photo', fotoMascota)
+            formData.append('description', descripcionMascota)
+            formData.append('contact_type', contactType)
+            formData.append('contact_value', contactValue)
+            await api.post('/lost-pets/create/', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+            setReporteEnviado(true)
+            setFotoMascota(null)
+            setFotoPreview(null)
+            setDescripcionMascota('')
+            setContactValue('')
+            fetchLostPets()
+            setTimeout(() => setReporteEnviado(false), 5000)
+        } catch (e) {
+            setErrorEnvio('Hubo un error al publicar. Intentá de nuevo.')
+        } finally {
+            setEnviando(false)
+        }
+    }
+
+    const handleReportar = async (id) => {
+        if (reportados[id]) return
+        try {
+            await api.post(`/lost-pets/${id}/report/`)
+            setReportados(prev => ({ ...prev, [id]: true }))
+            setLostPets(prev => prev.map(p => p.id === id ? { ...p, report_count: p.report_count + 1 } : p))
+        } catch (e) {
+            console.error('Error al reportar', e)
+        }
     }
 
     return (
@@ -191,20 +247,14 @@ export default function Home() {
 
             {/* ── VIAJÁS CON TU MASCOTA — SENASA ── */}
             <div style={{ padding: '8px 32px 24px' }}>
-                <a
-                    href="https://mascotas.senasa.gob.ar/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ textDecoration: 'none', display: 'block' }}
-                >
+                <a href="https://mascotas.senasa.gob.ar/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block' }}>
                     <div style={{
                         background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
                         borderRadius: 20, padding: '24px 28px',
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                         border: '1.5px solid rgba(107,202,255,0.2)',
                         boxShadow: '0 4px 24px rgba(107,202,255,0.08)',
-                        transition: 'transform .2s, box-shadow .2s',
-                        cursor: 'pointer',
+                        transition: 'transform .2s, box-shadow .2s', cursor: 'pointer',
                     }}
                         onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(107,202,255,0.18)' }}
                         onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 24px rgba(107,202,255,0.08)' }}
@@ -219,19 +269,15 @@ export default function Home() {
                                 <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, color: '#6bcaff', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>
                                     SENASA · Trámite oficial
                                 </span>
-                                <h3 style={{ fontSize: 16, fontWeight: 900, color: '#fff', marginBottom: 4 }}>
-                                    ¿Viajás con tu mascota?
-                                </h3>
+                                <h3 style={{ fontSize: 16, fontWeight: 900, color: '#fff', marginBottom: 4 }}>¿Viajás con tu mascota?</h3>
                                 <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>
                                     Consultá los requisitos oficiales para viajar dentro del país o al exterior con tu animal.
                                 </p>
                             </div>
                         </div>
                         <div style={{
-                            flexShrink: 0, marginLeft: 20,
-                            background: '#6bcaff', color: '#0f172a',
-                            fontWeight: 900, fontSize: 12, padding: '10px 18px',
-                            borderRadius: 10, whiteSpace: 'nowrap',
+                            flexShrink: 0, marginLeft: 20, background: '#6bcaff', color: '#0f172a',
+                            fontWeight: 900, fontSize: 12, padding: '10px 18px', borderRadius: 10, whiteSpace: 'nowrap',
                         }}>
                             Ver requisitos
                         </div>
@@ -276,8 +322,7 @@ export default function Home() {
                             <div style={{ padding: '12px 16px 16px' }}>
                                 <p style={{ fontSize: 11, color: '#b0b8c1', marginBottom: 12 }}>{v.especialidad}</p>
                                 <Link to="/register" style={{
-                                    display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 800,
-                                    color: '#fff',
+                                    display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 800, color: '#fff',
                                     background: v.destacada ? 'linear-gradient(135deg, #ff6b6b, #ff4a4a)' : '#1a1a2e',
                                     padding: '10px', borderRadius: 10, textDecoration: 'none',
                                     boxShadow: v.destacada ? '0 3px 12px rgba(255,107,107,0.35)' : 'none',
@@ -322,12 +367,16 @@ export default function Home() {
             {/* ── MASCOTAS PERDIDAS ── */}
             <div style={{ padding: '8px 32px 24px' }}>
                 <div style={{ background: '#fff', border: '1.5px solid #f0ede8', borderRadius: 24, overflow: 'hidden' }}>
+
+                    {/* Header */}
                     <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #2d1b4e 100%)', padding: '24px 28px', position: 'relative', overflow: 'hidden' }}>
                         <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, background: 'rgba(255,107,107,0.15)', borderRadius: '50%' }} />
                         <h2 style={{ fontSize: 18, fontWeight: 900, color: '#fff', marginBottom: 6, position: 'relative', zIndex: 1 }}>🐾 Mascotas perdidas</h2>
                         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', position: 'relative', zIndex: 1 }}>¿Encontraste una mascota? Publicalo y ayudá a que vuelva a casa.</p>
                     </div>
-                    <div style={{ padding: '24px 28px' }}>
+
+                    {/* Formulario */}
+                    <div style={{ padding: '24px 28px', borderBottom: '1.5px solid #f0ede8' }}>
                         {reporteEnviado ? (
                             <div style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: 14, padding: '20px', textAlign: 'center' }}>
                                 <div style={{ fontSize: 36, marginBottom: 8 }}>✅</div>
@@ -336,6 +385,8 @@ export default function Home() {
                             </div>
                         ) : (
                             <form onSubmit={handleReporte} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                                {/* Foto */}
                                 <div>
                                     <label style={{ fontSize: 13, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 8 }}>
                                         Foto de la mascota <span style={{ color: '#ff6b6b' }}>*</span>
@@ -359,29 +410,101 @@ export default function Home() {
                                     )}
                                     <input ref={fileRef} type="file" accept=".jpg,.jpeg" onChange={handleFoto} style={{ display: 'none' }} />
                                 </div>
+
+                                {/* Descripción */}
                                 <div>
                                     <label style={{ fontSize: 13, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 8 }}>
                                         ¿Dónde y cuándo la encontraste? <span style={{ color: '#ff6b6b' }}>*</span>
                                     </label>
                                     <textarea value={descripcionMascota} onChange={e => setDescripcionMascota(e.target.value)}
                                         placeholder="Ej: Encontré este perro en la calle Martín Lazarte, barrio Suárez, Moreno, Buenos Aires. Es macho, color marrón, sin collar."
-                                        rows={4}
+                                        rows={3}
                                         style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e5e7eb', borderRadius: 12, fontSize: 13, color: '#374151', resize: 'vertical', fontFamily: "'Nunito', sans-serif", outline: 'none', lineHeight: 1.6, boxSizing: 'border-box' }}
                                         onFocus={e => e.target.style.borderColor = '#ffd93d'}
                                         onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
-                                    <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>Cuanto más detalle, mejor. Incluí zona, características físicas y cómo contactarte.</p>
                                 </div>
-                                <button type="submit" style={{
-                                    background: 'linear-gradient(135deg, #ff6b6b, #ff4a4a)',
+
+                                {/* Contacto */}
+                                <div>
+                                    <label style={{ fontSize: 13, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 8 }}>
+                                        Datos de contacto <span style={{ color: '#ff6b6b' }}>*</span>
+                                    </label>
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                        <select value={contactType} onChange={e => setContactType(e.target.value)}
+                                            style={{ padding: '10px 12px', border: '1.5px solid #e5e7eb', borderRadius: 10, fontSize: 13, color: '#374151', background: '#fff', outline: 'none', cursor: 'pointer' }}>
+                                            <option value="phone">📱 Celular</option>
+                                            <option value="home_phone">📞 Tel. casa</option>
+                                            <option value="email">✉️ Email</option>
+                                        </select>
+                                        <input value={contactValue} onChange={e => setContactValue(e.target.value)}
+                                            placeholder={contactType === 'email' ? 'tucorreo@email.com' : 'Ej: 11 2345-6789'}
+                                            style={{ flex: 1, padding: '10px 14px', border: '1.5px solid #e5e7eb', borderRadius: 10, fontSize: 13, color: '#374151', outline: 'none', boxSizing: 'border-box' }}
+                                            onFocus={e => e.target.style.borderColor = '#ffd93d'}
+                                            onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
+                                    </div>
+                                </div>
+
+                                {errorEnvio && <p style={{ color: '#ff6b6b', fontSize: 12, margin: 0 }}>{errorEnvio}</p>}
+
+                                <button type="submit" disabled={enviando} style={{
+                                    background: enviando ? '#ccc' : 'linear-gradient(135deg, #ff6b6b, #ff4a4a)',
                                     color: '#fff', fontWeight: 900, fontSize: 14,
-                                    padding: '14px', borderRadius: 12, border: 'none', cursor: 'pointer',
+                                    padding: '14px', borderRadius: 12, border: 'none',
+                                    cursor: enviando ? 'not-allowed' : 'pointer',
                                     boxShadow: '0 4px 16px rgba(255,107,107,0.3)', fontFamily: "'Nunito', sans-serif",
                                 }}>
-                                    🐾 Publicar reporte de mascota perdida
+                                    {enviando ? 'Publicando...' : '🐾 Publicar reporte de mascota perdida'}
                                 </button>
                             </form>
                         )}
                     </div>
+
+                    {/* Muro de publicaciones */}
+                    <div style={{ padding: '24px 28px' }}>
+                        <h3 style={{ fontSize: 14, fontWeight: 800, color: '#1a1a2e', marginBottom: 16 }}>
+                            📋 Reportes activos ({lostPets.length})
+                        </h3>
+                        {cargandoMuro ? (
+                            <p style={{ color: '#9ca3af', fontSize: 13 }}>Cargando reportes...</p>
+                        ) : lostPets.length === 0 ? (
+                            <p style={{ color: '#9ca3af', fontSize: 13 }}>No hay reportes activos por el momento.</p>
+                        ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
+                                {lostPets.map(pet => (
+                                    <div key={pet.id} style={{ background: '#fafaf8', border: '1.5px solid #f0ede8', borderRadius: 18, overflow: 'hidden' }}>
+                                        <div style={{ height: 180, overflow: 'hidden', position: 'relative' }}>
+                                            <img src={pet.photo_url} alt="Mascota perdida"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <div style={{ position: 'absolute', top: 10, right: 10, background: '#1a1a2e', color: '#ffd93d', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 99 }}>
+                                                {pet.days_left}d restantes
+                                            </div>
+                                        </div>
+                                        <div style={{ padding: '12px 14px' }}>
+                                            <p style={{ fontSize: 12, color: '#374151', lineHeight: 1.6, marginBottom: 10 }}>
+                                                {pet.description.length > 100 ? pet.description.slice(0, 100) + '...' : pet.description}
+                                            </p>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <div style={{ fontSize: 11, color: '#6b7280' }}>
+                                                    {pet.contact_type === 'phone' ? '📱' : pet.contact_type === 'home_phone' ? '📞' : '✉️'} {pet.contact_value}
+                                                </div>
+                                                <button onClick={() => handleReportar(pet.id)}
+                                                    style={{
+                                                        background: reportados[pet.id] ? '#f0fdf4' : '#fff8f0',
+                                                        border: `1px solid ${reportados[pet.id] ? '#bbf7d0' : '#ffe4c8'}`,
+                                                        color: reportados[pet.id] ? '#16a34a' : '#ff6b6b',
+                                                        fontSize: 11, fontWeight: 700, padding: '5px 10px',
+                                                        borderRadius: 8, cursor: reportados[pet.id] ? 'default' : 'pointer',
+                                                    }}>
+                                                    {reportados[pet.id] ? '✓ Reportado' : '⚠️ Reportar'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                 </div>
             </div>
 
@@ -419,9 +542,7 @@ export default function Home() {
             {/* ── FOOTER ── */}
             <footer style={{ background: '#1a1a2e', padding: '28px 32px', marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-
                     <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: '100px', width: 'auto' }} />
-
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 28, flexWrap: 'wrap' }}>
                         {['Términos', 'Privacidad', 'Sumar mi veterinaria', 'Anunciar en VetPaw', 'Contacto', 'Blog'].map(l => (
                             <span key={l} style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, cursor: 'pointer' }}
@@ -430,7 +551,6 @@ export default function Home() {
                             >{l}</span>
                         ))}
                     </div>
-
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
                         {[{ icon: '📘', label: 'Facebook' }, { icon: '📸', label: 'Instagram' }, { icon: '🐦', label: 'Twitter' }].map(s => (
                             <div key={s.label} style={{
@@ -440,7 +560,6 @@ export default function Home() {
                             }}>{s.icon}</div>
                         ))}
                     </div>
-
                     <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12, margin: 0 }}>
                         © 2026 VetPaw · Todos los derechos reservados · Hecho con ❤️ en Argentina
                     </p>
