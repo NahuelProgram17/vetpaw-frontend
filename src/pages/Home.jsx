@@ -179,13 +179,14 @@ export default function Home() {
                         {/* Info izquierda */}
                         <div style={{ flex: 1, padding: '32px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 3, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: 10 }}>Publicidad destacada</span>
-                            <h3 style={{ fontSize: 30, fontWeight: 900, color: '#fff', lineHeight: 1.05, marginBottom: 8, fontFamily: FONT }}>PipetaPlus Pro</h3>
+                            <h3 style={{ fontSize: 30, fontWeight: 900, color: '#fff', lineHeight: 1.05, marginBottom: 8, fontFamily: FONT, animation: 'slideLeft 0.6s ease both' }}>PipetaPlus Pro</h3>
                             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', marginBottom: 6, fontWeight: 600 }}>Protección antiparasitaria total</p>
                             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 22 }}>Para perros y gatos · Efecto 3 meses · Sin receta</p>
                             <button style={{
                                 background: `linear-gradient(135deg, ${G1}, ${O1})`, color: '#fff', fontWeight: 800, fontSize: 13,
                                 padding: '12px 24px', borderRadius: 12, border: 'none', cursor: 'pointer',
                                 alignSelf: 'flex-start', boxShadow: `0 4px 20px rgba(76,175,80,0.35)`, fontFamily: FONT,
+                                animation: 'btnBounce 0.6s 0.4s cubic-bezier(.22,.68,0,1.4) both',
                             }}>Comprar ahora</button>
                         </div>
 
@@ -204,7 +205,7 @@ export default function Home() {
                                 { icon: '🚫', text: 'Sin receta médica' },
                                 { icon: '🚚', text: 'Envío gratis a todo el país' },
                             ].map((b, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, animation: `fadeUp 0.5s ${0.1 * i + 0.3}s ease both` }}>
                                     <span style={{ fontSize: 16 }}>{b.icon}</span>
                                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>{b.text}</span>
                                 </div>
@@ -221,14 +222,31 @@ export default function Home() {
                             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through' }}>$14.000</span>
                             <div style={{
                                 fontSize: 42, fontWeight: 900, color: O1, lineHeight: 1, fontFamily: FONT,
-                                animation: 'pricePop 0.6s cubic-bezier(.22,.68,0,1.4) both',
+                                animation: 'pricePop 0.6s 0.2s cubic-bezier(.22,.68,0,1.4) both, pricePulse 2s 1s ease-in-out infinite',
                             }}>$10.000</div>
                             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', textAlign: 'center' }}>precio especial</span>
                             <div style={{ marginTop: 8, background: O1, color: '#fff', fontSize: 11, fontWeight: 900, padding: '5px 14px', borderRadius: 99 }}>🔥 OFERTA</div>
                             <style>{`
                 @keyframes pricePop {
-                    from { opacity: 0; transform: translateX(30px) scale(0.8); }
+                    from { opacity: 0; transform: translateX(40px) scale(0.7); }
                     to   { opacity: 1; transform: translateX(0) scale(1); }
+                }
+                @keyframes slideLeft {
+                    from { opacity: 0; transform: translateX(-40px); }
+                    to   { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes fadeUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes btnBounce {
+                    0%   { opacity: 0; transform: scale(0.5); }
+                    70%  { transform: scale(1.1); }
+                    100% { opacity: 1; transform: scale(1); }
+                }
+                @keyframes pricePulse {
+                    0%, 100% { transform: scale(1); }
+                    50%      { transform: scale(1.06); }
                 }
             `}</style>
                         </div>
