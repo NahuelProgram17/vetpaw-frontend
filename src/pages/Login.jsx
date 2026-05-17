@@ -243,9 +243,9 @@ const handleResend = async (e) => {
         }
         .input-wrapper input::placeholder { color: rgba(255,255,255,0.25); }
         .input-wrapper input:focus {
-        border-color: #ff6b6b;
-        background: rgba(255,107,107,0.07);
-        box-shadow: 0 0 0 4px rgba(255,107,107,0.12);
+        border-color: #4CAF50;
+        background: rgba(76,175,80,0.07);
+        box-shadow: 0 0 0 4px rgba(76,175,80,0.12);
         }
 
         .auth-btn {
