@@ -377,8 +377,8 @@ export default function Appointments() {
                 .appts-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
                 .appts-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
                 .appts-subtitle { color: rgba(255,255,255,0.45); font-size: 0.9rem; margin-top: 4px; }
-                .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); box-shadow: 0 6px 20px rgba(76,175,80,0.35); }
-                .btn-primary:hover:not(:disabled) { box-shadow: 0 10px 28px rgba(76,175,80,0.5); }
+                .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 12px; padding: 12px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(76,175,80,0.3); transition: transform 0.15s, box-shadow 0.15s; }
+                .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(76,175,80,0.5); }
                 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
                 .review-toast { background: rgba(255,217,61,0.12); border: 1px solid rgba(255,217,61,0.3); color: #ffd93d; padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; font-weight: 700; margin-bottom: 16px; }
                 .filters { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
