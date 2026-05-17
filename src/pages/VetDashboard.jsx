@@ -911,7 +911,8 @@ export default function ClinicDashboard() {
                 .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; }
                 .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 10px; padding: 11px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 16px rgba(76,175,80,0.3); }
                 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-                .btn-pdf { background: rgba(255,217,61,0.12); border: 1px solid rgba(255,217,61,0.3); color: #ffd93d; border-radius: 8px; padding: 8px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+                .btn-pdf { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; border-radius: 8px; padding: 8px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; box-shadow: 0 4px 14px rgba(239,68,68,0.3); transition: opacity 0.15s; }
+                .btn-pdf:hover { opacity: 0.9; }
                 @media (max-width: 700px) { .vet-stats { grid-template-columns: repeat(2, 1fr); } .appt-card { flex-direction: column; align-items: flex-start; } .form-row { flex-direction: column; } .vet-inner { padding: 20px 16px; } .pets-grid { grid-template-columns: 1fr; } .vaccines-header-row { flex-direction: column; align-items: flex-start; } .turnos-layout { grid-template-columns: 1fr; } .agenda-panel { position: static; } }
                 .turnos-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; align-items: start; }
                 .turnos-main { display: flex; flex-direction: column; }
@@ -934,8 +935,8 @@ export default function ClinicDashboard() {
                 .agenda-item-reason { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
                 .agenda-item-badge { font-size: 0.65rem; font-weight: 700; border-radius: 4px; padding: 2px 6px; align-self: flex-start; margin-top: 2px; }
                 .agenda-count { font-size: 0.72rem; color: rgba(255,255,255,0.25); text-align: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
-                .btn-agenda-pdf { background: rgba(255,217,61,0.10); border: 1px solid rgba(255,217,61,0.25); color: #ffd93d; border-radius: 8px; padding: 8px 12px; font-family: 'Nunito', sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 12px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-                .btn-agenda-pdf:hover { background: rgba(255,217,61,0.20); border-color: rgba(255,217,61,0.5); transform: translateY(-1px); }
+                .btn-agenda-pdf { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; border-radius: 8px; padding: 8px 12px; font-family: 'Nunito', sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 12px; box-shadow: 0 4px 14px rgba(239,68,68,0.3); transition: opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+                .btn-agenda-pdf:hover { opacity: 0.9; }
             `}</style>
         </div>
     );
