@@ -164,16 +164,19 @@ export default function Home() {
                 <div style={{ padding: '28px 40px' }}>
                     <div style={{
                         borderRadius: 24, overflow: 'hidden', position: 'relative',
-                        background: `linear-gradient(120deg, ${DARK2} 0%, #1a1060 50%, #3d1a00 100%)`,
+                        background: `linear-gradient(120deg, #0f1923 0%, #1a1060 50%, #3d1a00 100%)`,
                         boxShadow: `0 8px 48px rgba(255,152,0,0.2)`,
                         minHeight: 200, display: 'flex',
                         border: '1px solid rgba(255,152,0,0.15)',
                     }}>
+                        {/* Foto */}
                         <div style={{ width: 260, flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
                             <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=500&q=85" alt="Perro"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
                             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 40%, rgba(26,16,96,0.9))' }} />
                         </div>
+
+                        {/* Info izquierda */}
                         <div style={{ flex: 1, padding: '32px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 3, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: 10 }}>Publicidad destacada</span>
                             <h3 style={{ fontSize: 30, fontWeight: 900, color: '#fff', lineHeight: 1.05, marginBottom: 8, fontFamily: FONT }}>PipetaPlus Pro</h3>
@@ -185,16 +188,49 @@ export default function Home() {
                                 alignSelf: 'flex-start', boxShadow: `0 4px 20px rgba(76,175,80,0.35)`, fontFamily: FONT,
                             }}>Comprar ahora</button>
                         </div>
+
+                        {/* Centro — beneficios */}
                         <div style={{
-                            width: 180, flexShrink: 0, background: 'rgba(255,255,255,0.04)',
+                            width: 220, flexShrink: 0,
+                            display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                            padding: '24px 20px', gap: 12,
                             borderLeft: '1px solid rgba(255,255,255,0.07)',
+                            borderRight: '1px solid rgba(255,255,255,0.07)',
+                        }}>
+                            {[
+                                { icon: '✅', text: 'Elimina pulgas y garrapatas' },
+                                { icon: '🐶', text: 'Para perros y gatos' },
+                                { icon: '⏱️', text: 'Efecto hasta 3 meses' },
+                                { icon: '🚫', text: 'Sin receta médica' },
+                                { icon: '🚚', text: 'Envío gratis a todo el país' },
+                            ].map((b, i) => (
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <span style={{ fontSize: 16 }}>{b.icon}</span>
+                                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>{b.text}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Precio animado */}
+                        <div style={{
+                            width: 180, flexShrink: 0,
                             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                             padding: '24px 16px', gap: 6,
+                            background: 'rgba(255,255,255,0.03)',
                         }}>
                             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through' }}>$14.000</span>
-                            <div style={{ fontSize: 48, fontWeight: 900, color: O1, lineHeight: 1, fontFamily: FONT }}>$10k</div>
+                            <div style={{
+                                fontSize: 42, fontWeight: 900, color: O1, lineHeight: 1, fontFamily: FONT,
+                                animation: 'pricePop 0.6s cubic-bezier(.22,.68,0,1.4) both',
+                            }}>$10.000</div>
                             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', textAlign: 'center' }}>precio especial</span>
                             <div style={{ marginTop: 8, background: O1, color: '#fff', fontSize: 11, fontWeight: 900, padding: '5px 14px', borderRadius: 99 }}>🔥 OFERTA</div>
+                            <style>{`
+                @keyframes pricePop {
+                    from { opacity: 0; transform: translateX(30px) scale(0.8); }
+                    to   { opacity: 1; transform: translateX(0) scale(1); }
+                }
+            `}</style>
                         </div>
                     </div>
                     <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 8, textAlign: 'right' }}>Publicidad · VetPaw Ads</p>
