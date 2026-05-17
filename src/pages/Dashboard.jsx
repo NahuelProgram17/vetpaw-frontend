@@ -474,8 +474,8 @@ export default function Dashboard() {
                 .empty-state { text-align: center; padding: 24px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
                 .empty-state span { font-size: 2.5rem; }
                 .empty-state p { color: rgba(255,255,255,0.35); font-size: 0.88rem; }
-                .btn-sm { background: rgba(76,175,80,0.15); border: 1px solid rgba(76,175,80,0.3); color: #4CAF50; }
-                .btn-sm:hover { background: rgba(76,175,80,0.25); }
+                .btn-sm { background: linear-gradient(135deg, #4CAF50, #FF9800); border: none; color: #fff; border-radius: 8px; padding: 8px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(76,175,80,0.3); transition: opacity 0.15s; }
+                .btn-sm:hover { opacity: 0.9; }
 
                 .pets-list { display: flex; flex-direction: column; gap: 10px; }
                 .pet-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); transition: border-color 0.2s; }
