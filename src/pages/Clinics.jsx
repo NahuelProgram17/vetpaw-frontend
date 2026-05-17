@@ -289,7 +289,7 @@ export default function Clinics() {
                 .clinics-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
                 .clinics-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
                 .clinics-subtitle { color: rgba(255,255,255,0.45); font-size: 0.9rem; margin-top: 4px; }
-                .btn-primary { background: linear-gradient(135deg, #ff6b6b, #ff4a4a); color: #fff; border: none; border-radius: 12px; padding: 12px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 6px 20px rgba(255,107,107,0.35); transition: transform 0.15s; }
+                .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 12px; padding: 12px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 6px 20px rgba(76,175,80,0.35); transition: transform 0.15s; }
                 .btn-primary:hover { transform: translateY(-2px); }
                 .location-banner { padding: 10px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; margin-bottom: 16px; border: 1px solid; }
                 .location-loading { background: rgba(107,202,255,0.08); border-color: rgba(107,202,255,0.2); color: rgba(107,202,255,0.7); }
@@ -351,8 +351,8 @@ export default function Clinics() {
                 .review-comment { font-size: 0.82rem; color: rgba(255,255,255,0.6); font-style: italic; line-height: 1.4; margin-top: 2px; }
                 .clinic-card-actions { display: flex; gap: 8px; margin-top: 4px; }
                 .clinic-card-actions .btn-turno { flex: 1; }
-                .btn-turno { padding: 11px; background: rgba(107,202,255,0.10); border: 1.5px solid rgba(107,202,255,0.25); color: #6bcaff; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
-                .btn-turno:hover:not(:disabled) { background: rgba(107,202,255,0.18); }
+                .btn-turno { padding: 11px; background: rgba(76,175,80,0.10); border: 1.5px solid rgba(76,175,80,0.25); color: #4CAF50; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+                .btn-turno:hover:not(:disabled) { background: rgba(76,175,80,0.18); }
                 .btn-turno:disabled { opacity: 0.4; cursor: not-allowed; }
                 .btn-join { padding: 11px 16px; background: rgba(255,217,61,0.10); border: 1.5px solid rgba(255,217,61,0.25); color: #ffd93d; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
                 .btn-join:hover:not(:disabled) { background: rgba(255,217,61,0.18); }

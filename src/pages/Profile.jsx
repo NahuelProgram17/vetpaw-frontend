@@ -331,7 +331,7 @@ export default function Profile() {
         .loading-state p { color: rgba(255,255,255,0.4); }
         .profile-layout { display: grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: start; }
         .avatar-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; backdrop-filter: blur(10px); }
-        .avatar-wrapper { width: 90px; height: 90px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,107,107,0.4); margin-bottom: 4px; }
+        .avatar-wrapper { width: 90px; height: 90px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(76,175,80,0.4); margin-bottom: 4px; }
         .avatar-img { width: 100%; height: 100%; object-fit: cover; }
         .avatar-initials { width: 100%; height: 100%; background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 900; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
         .avatar-name { font-size: 1rem; font-weight: 900; color: #fff; text-align: center; }
@@ -356,18 +356,18 @@ export default function Profile() {
         .form-group label { font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; }
         .form-group input, .form-group textarea { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 11px 14px; font-family: 'Nunito', sans-serif; font-size: 0.92rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
         .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(255,255,255,0.2); }
-        .form-group input:focus, .form-group textarea:focus { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,0.12); }
+        .form-group input:focus, .form-group textarea:focus { border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76,175,80,0.12); }
         .form-group textarea { resize: vertical; }
         .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
-        .btn-primary { background: linear-gradient(135deg, #ff6b6b, #ff4a4a); color: #fff; border: none; border-radius: 12px; padding: 12px 24px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 6px 20px rgba(255,107,107,0.35); transition: transform 0.15s, box-shadow 0.15s; }
-        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,107,0.5); }
+        .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 12px; padding: 12px 24px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 6px 20px rgba(76,175,80,0.35); transition: transform 0.15s, box-shadow 0.15s; }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(76,175,80,0.5); }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: border-color 0.2s; }
         .btn-ghost:hover { border-color: rgba(255,255,255,0.25); }
         @media (max-width: 700px) { .profile-layout { grid-template-columns: 1fr; } .form-row { flex-direction: column; } .view-row { flex-direction: column; } .profile-inner { padding: 20px 16px; } }
         .form-group select { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 11px 14px; font-family: 'Nunito', sans-serif; font-size: 0.92rem; outline: none; transition: border-color 0.2s; cursor: pointer; }
         .form-group select option { background: #1a1a2e; color: #fff; }
-        .form-group select:focus { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,0.12); }        
+        .form-group select:focus { border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76,175,80,0.12); }        
     `}</style>
         </div>
     );

@@ -354,7 +354,7 @@ export default function Messages() {
                 .messages-inner { max-width: 1100px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 20px; height: calc(100vh - 56px); }
                 .messages-header { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
                 .messages-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
-                .btn-new-conv { background: linear-gradient(135deg, #6bcaff, #3aaee0); color: #1a1a2e; border: none; border-radius: 10px; padding: 10px 20px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 900; cursor: pointer; }
+                .btn-new-conv { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 900; cursor: pointer; }
                 .messages-layout { display: grid; grid-template-columns: 300px 1fr; gap: 16px; flex: 1; min-height: 0; }
                 .conv-list { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow-y: auto; display: flex; flex-direction: column; }
                 .conv-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px 20px; text-align: center; flex: 1; }
@@ -389,7 +389,7 @@ export default function Messages() {
                 .msg-row.theirs { align-items: flex-start; }
                 .msg-appt-tag { font-size: 0.7rem; color: rgba(255,217,61,0.7); background: rgba(255,217,61,0.08); border: 1px solid rgba(255,217,61,0.15); border-radius: 6px; padding: 2px 8px; margin-bottom: 4px; }
                 .msg-bubble { max-width: 72%; padding: 10px 14px; border-radius: 14px; font-size: 0.88rem; line-height: 1.5; word-break: break-word; }
-                .msg-bubble.mine { background: linear-gradient(135deg, #6bcaff, #3aaee0); color: #1a1a2e; border-bottom-right-radius: 4px; }
+                .msg-bubble.mine { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border-bottom-right-radius: 4px; }
                 .msg-bubble.theirs { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); border-bottom-left-radius: 4px; }
                 .msg-time { font-size: 0.65rem; color: rgba(255,255,255,0.3); margin-top: 3px; }
                 .chat-input-area { padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -400,9 +400,9 @@ export default function Messages() {
                 .quick-reply-btn:hover { background: rgba(107,202,255,0.12); border-color: rgba(107,202,255,0.3); color: #6bcaff; }
                 .input-row { display: flex; gap: 8px; }
                 .chat-input { flex: 1; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
-                .chat-input:focus { border-color: #6bcaff; }
+                .chat-input:focus { border-color: #4CAF50; }
                 .chat-input::placeholder { color: rgba(255,255,255,0.25); }
-                .btn-send { background: linear-gradient(135deg, #6bcaff, #3aaee0); color: #1a1a2e; border: none; border-radius: 10px; width: 42px; height: 42px; font-size: 1.2rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.2s; }
+                .btn-send { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 10px; width: 42px; height: 42px; font-size: 1.2rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.2s; }
                 .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
                 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
                 .modal { background: #1e1e35; border: 1px solid rgba(255,255,255,0.10); border-radius: 20px; padding: 28px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 16px; }
@@ -415,7 +415,7 @@ export default function Messages() {
                 .form-group select option { background: #1a1a2e; }
                 .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
                 .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 10px 18px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; }
-                .btn-primary-msg { background: linear-gradient(135deg, #6bcaff, #3aaee0); color: #1a1a2e; border: none; border-radius: 10px; padding: 10px 20px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 900; cursor: pointer; }
+                .btn-primary-msg { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 900; cursor: pointer; }
                 .btn-primary-msg:disabled { opacity: 0.5; cursor: not-allowed; }
                 @media (max-width: 700px) {
                     .messages-layout { grid-template-columns: 1fr; }
