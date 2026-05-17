@@ -125,7 +125,7 @@ export default function Home() {
 
                         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                             {user ? (
-                                <Link to={user.role === 'vet' ? '/vet/dashboard' : '/dashboard'}
+                                <Link to={user.role === 'clinic' ? '/clinic/dashboard' : '/dashboard'}
                                     style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, color: '#fff', fontWeight: 800, fontSize: 15, padding: '14px 28px', borderRadius: 14, textDecoration: 'none', boxShadow: `0 6px 24px rgba(76,175,80,0.35)` }}>
                                     Ir a mi panel →
                                 </Link>
