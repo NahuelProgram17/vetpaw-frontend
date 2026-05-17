@@ -573,11 +573,18 @@ export default function Home() {
                             La app veterinaria de Argentina.<br />Tu mascota merece lo mejor.
                         </p>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: 28, flexWrap: 'wrap' }}>
-                            {['Términos', 'Privacidad', 'Sumar mi veterinaria', 'Anunciar en VetPaw', 'Contacto', 'Blog'].map(l => (
-                                <span key={l} style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, cursor: 'pointer', fontWeight: 500, transition: 'color .2s' }}
+                            {[
+                                { l: 'Términos', to: '/terminos' },
+                                { l: 'Privacidad', to: '/privacidad' },
+                                { l: 'Sumar mi veterinaria', to: '/sumar-veterinaria' },
+                                { l: 'Anunciar en VetPaw', to: '/anunciar' },
+                                { l: 'Contacto', to: '/contacto' },
+                                { l: 'Blog', to: '/blog' },
+                            ].map(item => (
+                                <Link key={item.l} to={item.to} style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, cursor: 'pointer', fontWeight: 500, transition: 'color .2s', textDecoration: 'none' }}
                                     onMouseEnter={e => e.target.style.color = G2}
                                     onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.3)'}
-                                >{l}</span>
+                                >{item.l}</Link>
                             ))}
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>

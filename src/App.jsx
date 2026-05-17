@@ -16,6 +16,12 @@ import Profile from './pages/Profile'
 import VetDashboard from './pages/VetDashboard'
 import Messages from './pages/Messages'
 import Tips from './pages/Tips'
+import TerminosCondiciones from './pages/TerminosCondiciones'
+import Privacidad from './pages/Privacidad'
+import Contacto from './pages/Contacto'
+import SumarVeterinaria from './pages/SumarVeterinaria'
+import AnunciarVetPaw from './pages/AnunciarVetPaw'
+import Blog from './pages/Blog'
 
 function App() {
   return (
@@ -41,6 +47,13 @@ function App() {
           <Route path="/tips" element={<Tips />} />
 
           <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
+
+          <Route path="/terminos" element={<TerminosCondiciones />} />
+          <Route path="/privacidad" element={<Privacidad />} />
+          <Route path="/contacto" element={<Contacto />} />
+          <Route path="/sumar-veterinaria" element={<SumarVeterinaria />} />
+          <Route path="/anunciar" element={<AnunciarVetPaw />} />
+          <Route path="/blog" element={<Blog />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
