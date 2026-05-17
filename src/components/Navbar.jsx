@@ -72,11 +72,17 @@ export default function Navbar() {
     const linkStyle = {
         fontFamily: FONT, fontSize: 15, fontWeight: 600,
         color: 'rgba(255,255,255,0.65)', padding: '6px 10px',
-        textDecoration: 'none', borderRadius: 8, transition: 'color .15s',
+        textDecoration: 'none', borderRadius: 8, transition: 'color .15s, background .15s',
         letterSpacing: 0.2,
     }
-    const linkHover = (e) => e.currentTarget.style.color = '#fff'
-    const linkLeave = (e) => e.currentTarget.style.color = 'rgba(255,255,255,0.65)'
+    const linkHover = (e) => {
+        e.currentTarget.style.color = '#4CAF50'
+        e.currentTarget.style.background = 'rgba(76,175,80,0.08)'
+    }
+    const linkLeave = (e) => {
+        e.currentTarget.style.color = 'rgba(255,255,255,0.65)'
+        e.currentTarget.style.background = 'transparent'
+    }
 
     const btnOutline = {
         fontFamily: FONT, fontSize: 15, fontWeight: 700,
@@ -101,14 +107,14 @@ export default function Navbar() {
             <nav style={{
                 background: '#0a1520',
                 borderBottom: '1px solid rgba(255,255,255,0.06)',
-                padding: '0 28px', height: 58,
+                padding: '0 28px', height: 68,
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 position: 'sticky', top: 0, zIndex: 50,
                 backdropFilter: 'blur(12px)',
             }}>
                 {/* Logo */}
                 <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
-                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 68, width: 'auto' }} />
+                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 58, width: 'auto' }} />
                 </Link>
 
                 {/* Links */}
