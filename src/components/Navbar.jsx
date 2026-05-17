@@ -70,7 +70,7 @@ export default function Navbar() {
 
     // Estilos reutilizables
     const linkStyle = {
-        fontFamily: FONT, fontSize: 13, fontWeight: 600,
+        fontFamily: FONT, fontSize: 15, fontWeight: 600,
         color: 'rgba(255,255,255,0.65)', padding: '6px 10px',
         textDecoration: 'none', borderRadius: 8, transition: 'color .15s',
         letterSpacing: 0.2,
@@ -79,7 +79,7 @@ export default function Navbar() {
     const linkLeave = (e) => e.currentTarget.style.color = 'rgba(255,255,255,0.65)'
 
     const btnOutline = {
-        fontFamily: FONT, fontSize: 13, fontWeight: 700,
+        fontFamily: FONT, fontSize: 15, fontWeight: 700,
         color: '#fff', padding: '7px 18px', borderRadius: 10,
         border: '1.5px solid rgba(255,255,255,0.2)',
         textDecoration: 'none', transition: 'border-color .15s, background .15s',
@@ -87,7 +87,7 @@ export default function Navbar() {
     }
 
     const btnGradient = {
-        fontFamily: FONT, fontSize: 13, fontWeight: 700,
+        fontFamily: FONT, fontSize: 15, fontWeight: 700,
         color: '#fff', padding: '7px 18px', borderRadius: 10,
         background: `linear-gradient(135deg, ${G1}, ${O1})`,
         textDecoration: 'none',
@@ -108,7 +108,7 @@ export default function Navbar() {
             }}>
                 {/* Logo */}
                 <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
-                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 48, width: 'auto' }} />
+                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 68, width: 'auto' }} />
                 </Link>
 
                 {/* Links */}
@@ -205,7 +205,7 @@ export default function Navbar() {
                                             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                                                 {notifications.map((n) => (
                                                     <div key={n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                                                        <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, fontFamily: FONT }}>
+                                                        <p style={{ color: '#fff', fontSize: 15, fontWeight: 700, fontFamily: FONT }}>
                                                             {statusLabel(n.status)} — {n.reason || 'Turno'}
                                                         </p>
                                                         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>
