@@ -536,8 +536,8 @@ export default function Pets() {
         .pets-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
         .pets-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
         .pets-subtitle { color: rgba(255,255,255,0.45); font-size: 0.9rem; margin-top: 4px; }
-        .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); box-shadow: 0 6px 20px rgba(76,175,80,0.35); }
-        .btn-primary:hover:not(:disabled) { box-shadow: 0 10px 28px rgba(76,175,80,0.5); }
+        .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 12px; padding: 12px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(76,175,80,0.3); transition: transform 0.15s, box-shadow 0.15s; }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(76,175,80,0.5); }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
         .loading-state, .empty-state { text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
         .paw-spin { font-size: 3rem; animation: spin 1s linear infinite; display: block; }
@@ -564,8 +564,8 @@ export default function Pets() {
         .pet-tag.neutered { background: rgba(107,202,255,0.1); color: #6bcaff; border-color: rgba(107,202,255,0.2); }
         .pet-alert { background: rgba(255,217,61,0.1); border: 1px solid rgba(255,217,61,0.2); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; color: #ffd93d; }
         .pet-vaccines { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
-        .btn-outline { border: 1.5px solid rgba(76,175,80,0.3); color: #4CAF50; }
-        .btn-outline:hover { background: rgba(76,175,80,0.1); border-color: rgba(76,175,80,0.5); }
+        .btn-outline { background: linear-gradient(135deg, #4CAF50, #FF9800); border: none; color: #fff; border-radius: 10px; padding: 9px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(76,175,80,0.3); transition: opacity 0.15s; margin-top: 4px; }
+        .btn-outline:hover { opacity: 0.9; }
         .delete-confirm { position: absolute; inset: 0; border-radius: 20px; background: rgba(26,26,46,0.95); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 20px; }
         .delete-confirm p { color: #fff; font-size: 0.95rem; text-align: center; }
         .delete-confirm strong { color: #ff6b6b; }
