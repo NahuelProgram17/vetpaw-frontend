@@ -79,8 +79,8 @@ export default function Tips() {
                 <Link to="/" style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, textDecoration: 'none', display: 'inline-block', marginBottom: 24 }}>
                     ← Volver al inicio
                 </Link>
-                <div style={{ marginBottom: 18, filter: 'drop-shadow(0 0 24px rgba(76,175,80,0.6))' }}>
-                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 100, width: 'auto' }} />
+                <div style={{ marginBottom: 18, filter: 'drop-shadow(0 0 24px rgba(76,175,80,0.6))', display: 'flex', justifyContent: 'center' }}>
+                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 180, width: 'auto' }} />
                 </div>
                 <h1 style={{ fontSize: 50, fontWeight: 900, marginBottom: 14, letterSpacing: -2, background: 'linear-gradient(135deg, #ff6b35 0%, #ffd93d 45%, #4ade80 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                     Tips & Curiosidades
