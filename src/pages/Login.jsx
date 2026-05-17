@@ -250,14 +250,14 @@ const handleResend = async (e) => {
 
         .auth-btn {
         margin-top: 6px; padding: 14px;
-        background: linear-gradient(135deg, #ff6b6b 0%, #ff4a4a 100%);
+        background: linear-gradient(135deg, #4CAF50 0%, #FF9800 100%);
         color: #fff; font-family: 'Nunito', sans-serif;
         font-size: 1rem; font-weight: 900; border: none;
         border-radius: 12px; cursor: pointer; letter-spacing: 0.03em;
         transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-        box-shadow: 0 6px 20px rgba(255,107,107,0.35);
+        box-shadow: 0 6px 20px rgba(76,175,80,0.35);
         }
-        .auth-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,107,0.5); }
+        .auth-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(76,175,80,0.5); }
         .auth-btn:active:not(:disabled) { transform: translateY(0); }
         .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 

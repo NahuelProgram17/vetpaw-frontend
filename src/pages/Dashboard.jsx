@@ -408,14 +408,14 @@ export default function Dashboard() {
                 .dash-greeting { font-size: 0.9rem; color: rgba(255,255,255,0.45); margin-bottom: 4px; font-weight: 600; }
                 .dash-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
                 .btn-new-appt {
-                    background: linear-gradient(135deg, #ff6b6b, #ff4a4a);
+                    background: linear-gradient(135deg, #4CAF50, #FF9800);
                     color: #fff; border: none; border-radius: 12px;
                     padding: 12px 22px; font-family: 'Nunito', sans-serif;
                     font-size: 0.95rem; font-weight: 900; cursor: pointer;
-                    box-shadow: 0 6px 20px rgba(255,107,107,0.35);
+                    box-shadow: 0 6px 20px rgba(76,175,80,0.35);
                     transition: transform 0.15s, box-shadow 0.15s;
                 }
-                .btn-new-appt:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,107,0.5); }
+                .btn-new-appt:hover { box-shadow: 0 10px 28px rgba(76,175,80,0.5); }
 
                 .stats-grid {
                     display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
@@ -474,8 +474,8 @@ export default function Dashboard() {
                 .empty-state { text-align: center; padding: 24px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
                 .empty-state span { font-size: 2.5rem; }
                 .empty-state p { color: rgba(255,255,255,0.35); font-size: 0.88rem; }
-                .btn-sm { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #ff6b6b; border-radius: 8px; padding: 8px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
-                .btn-sm:hover { background: rgba(255,107,107,0.25); }
+                .btn-sm { background: rgba(76,175,80,0.15); border: 1px solid rgba(76,175,80,0.3); color: #4CAF50; }
+                .btn-sm:hover { background: rgba(76,175,80,0.25); }
 
                 .pets-list { display: flex; flex-direction: column; gap: 10px; }
                 .pet-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); transition: border-color 0.2s; }
@@ -517,14 +517,14 @@ export default function Dashboard() {
                 .fab {
                     position: fixed; bottom: 28px; right: 28px;
                     width: 56px; height: 56px; border-radius: 50%;
-                    background: linear-gradient(135deg, #ff6b6b, #ff4a4a);
+                    background: linear-gradient(135deg, #4CAF50, #FF9800);
                     color: #fff; font-size: 1.8rem; font-weight: 300;
                     border: none; cursor: pointer;
-                    box-shadow: 0 8px 24px rgba(255,107,107,0.45);
+                    box-shadow: 0 8px 24px rgba(76,175,80,0.45);
                     transition: transform 0.15s, box-shadow 0.15s;
                     z-index: 100; display: flex; align-items: center; justify-content: center;
                 }
-                .fab:hover { transform: scale(1.1) rotate(90deg); box-shadow: 0 12px 32px rgba(255,107,107,0.6); }
+                .fab:hover { box-shadow: 0 12px 32px rgba(76,175,80,0.6); }
 
                 @media (max-width: 900px) {
                     .stats-grid { grid-template-columns: repeat(2, 1fr); }

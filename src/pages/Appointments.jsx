@@ -377,14 +377,14 @@ export default function Appointments() {
                 .appts-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
                 .appts-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
                 .appts-subtitle { color: rgba(255,255,255,0.45); font-size: 0.9rem; margin-top: 4px; }
-                .btn-primary { background: linear-gradient(135deg, #ff6b6b, #ff4a4a); color: #fff; border: none; border-radius: 12px; padding: 12px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 6px 20px rgba(255,107,107,0.35); transition: transform 0.15s, box-shadow 0.15s; }
-                .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,107,0.5); }
+                .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); box-shadow: 0 6px 20px rgba(76,175,80,0.35); }
+                .btn-primary:hover:not(:disabled) { box-shadow: 0 10px 28px rgba(76,175,80,0.5); }
                 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
                 .review-toast { background: rgba(255,217,61,0.12); border: 1px solid rgba(255,217,61,0.3); color: #ffd93d; padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; font-weight: 700; margin-bottom: 16px; }
                 .filters { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
                 .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
                 .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
-                .filter-btn.active { background: rgba(255,107,107,0.15); border-color: rgba(255,107,107,0.4); color: #ff6b6b; }
+                .filter-btn.active { background: rgba(76,175,80,0.15); border-color: rgba(76,175,80,0.4); color: #4CAF50; }
                 .loading-state, .empty-state { text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
                 .paw-spin { font-size: 3rem; animation: spin 1s linear infinite; display: block; }
                 @keyframes spin { to { transform: rotate(360deg); } }
@@ -395,9 +395,9 @@ export default function Appointments() {
                 .appt-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 20px; display: flex; align-items: center; gap: 20px; backdrop-filter: blur(10px); transition: border-color 0.2s, transform 0.2s; position: relative; overflow: hidden; }
                 .appt-card:hover { border-color: rgba(255,107,107,0.2); transform: translateY(-2px); }
                 .appt-card.past { opacity: 0.65; }
-                .appt-date-box { display: flex; flex-direction: column; align-items: center; background: rgba(255,107,107,0.12); border-radius: 12px; padding: 10px 14px; min-width: 56px; flex-shrink: 0; }
-                .appt-day { font-size: 1.6rem; font-weight: 900; color: #ff6b6b; line-height: 1; }
-                .appt-month { font-size: 0.65rem; color: rgba(255,107,107,0.7); text-transform: uppercase; font-weight: 700; }
+                .appt-date-box { background: rgba(76,175,80,0.12); }
+                .appt-day { color: #4CAF50; }
+                .appt-month { color: rgba(76,175,80,0.7); }
                 .appt-time { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 4px; font-weight: 600; }
                 .appt-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
                 .appt-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -447,7 +447,7 @@ export default function Appointments() {
                 .form-group select { cursor: pointer; appearance: none; }
                 .form-group select option { background: #1a1a2e; }
                 .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(255,255,255,0.2); }
-                .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,0.12); }
+                .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76,175,80,0.12); }
                 .form-group textarea { resize: vertical; }
                 .form-actions { display: flex; gap: 10px; margin-top: 8px; justify-content: flex-end; }
                 .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: border-color 0.2s; }
