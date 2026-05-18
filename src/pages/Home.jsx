@@ -3,11 +3,10 @@ import { useAuth } from '../context/AuthContext'
 import { useState, useRef, useEffect } from 'react'
 import api from '../services/api'
 
-// ── Paleta del logo ──────────────────────────────────
-const G1 = '#4CAF50'   // verde logo
-const G2 = '#66BB6A'   // verde claro
-const O1 = '#FF9800'   // naranja logo
-const O2 = '#FFB74D'   // naranja claro
+const G1 = '#4CAF50'
+const G2 = '#66BB6A'
+const O1 = '#FF9800'
+const O2 = '#FFB74D'
 const DARK = '#0f1923'
 const DARK2 = '#162032'
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
@@ -81,8 +80,69 @@ export default function Home() {
 
     return (
         <>
-            {/* Google Font */}
             <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+            <style>{`
+                * { box-sizing: border-box; }
+                @keyframes pricePop {
+                    from { opacity: 0; transform: translateX(40px) scale(0.7); }
+                    to   { opacity: 1; transform: translateX(0) scale(1); }
+                }
+                @keyframes slideLeft {
+                    from { opacity: 0; transform: translateX(-40px); }
+                    to   { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes fadeUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes btnBounce {
+                    0%   { opacity: 0; transform: scale(0.5); }
+                    70%  { transform: scale(1.1); }
+                    100% { opacity: 1; transform: scale(1); }
+                }
+                @keyframes pricePulse {
+                    0%, 100% { transform: scale(1); }
+                    50%      { transform: scale(1.06); }
+                }
+
+                /* ── MOBILE ── */
+                @media (max-width: 768px) {
+                    .hero-inner { padding: 40px 20px !important; }
+                    .hero-title { font-size: 30px !important; letter-spacing: -0.5px !important; }
+                    .hero-sub { font-size: 14px !important; }
+                    .hero-btns { flex-direction: column !important; gap: 10px !important; }
+                    .hero-btns a { text-align: center !important; }
+
+                    .stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+
+                    .section-pad { padding: 16px !important; }
+
+                    .banner-ad-wrap { flex-direction: column !important; }
+                    .banner-ad-foto { width: 100% !important; height: 200px !important; flex-shrink: unset !important; }
+                    .banner-ad-info { padding: 20px 16px !important; }
+                    .banner-ad-centro { display: none !important; }
+                    .banner-ad-precio { width: 100% !important; flex-direction: row !important; justify-content: space-around !important; padding: 16px !important; }
+
+                    .grid-3 { grid-template-columns: 1fr !important; }
+                    .grid-2 { grid-template-columns: 1fr !important; }
+
+                    .senasa-inner { flex-direction: column !important; gap: 14px !important; }
+                    .senasa-btn { width: 100% !important; text-align: center !important; margin-left: 0 !important; }
+
+                    .banner-anun-inner { flex-direction: column !important; text-align: center !important; }
+                    .banner-anun-stats { justify-content: center !important; }
+                    .banner-anun-right { margin-left: 0 !important; margin-top: 16px !important; }
+
+                    .footer-pad { padding: 24px 20px !important; }
+
+                    .lost-form-pad { padding: 20px 16px !important; }
+                    .lost-muro-pad { padding: 16px !important; }
+                    .lost-header-pad { padding: 20px 16px !important; }
+
+                    .contact-row { flex-direction: column !important; }
+                    .contact-row select { width: 100% !important; }
+                }
+            `}</style>
 
             <div style={{ minHeight: '100vh', background: DARK, fontFamily: FONT }}>
 
@@ -92,15 +152,11 @@ export default function Home() {
                     display: 'flex', alignItems: 'center',
                     backgroundImage: 'url(/hero.jpg)', backgroundSize: 'cover', backgroundPosition: 'center 35%',
                 }}>
-                    {/* Overlay degradado con colores del logo */}
                     <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(120deg, rgba(15,25,35,0.92) 0%, rgba(15,25,35,0.75) 50%, rgba(255,152,0,0.25) 100%)` }} />
-                    {/* Glow naranja decorativo */}
                     <div style={{ position: 'absolute', top: -100, right: -100, width: 500, height: 500, background: `radial-gradient(circle, rgba(255,152,0,0.15) 0%, transparent 70%)`, pointerEvents: 'none' }} />
-                    {/* Glow verde decorativo */}
                     <div style={{ position: 'absolute', bottom: -80, left: 300, width: 400, height: 400, background: `radial-gradient(circle, rgba(76,175,80,0.12) 0%, transparent 70%)`, pointerEvents: 'none' }} />
 
-                    <div style={{ position: 'relative', zIndex: 2, padding: '56px 56px', maxWidth: 580 }}>
-                        {/* Badge */}
+                    <div className="hero-inner" style={{ position: 'relative', zIndex: 2, padding: '56px 56px', maxWidth: 580 }}>
                         <div style={{
                             display: 'inline-flex', alignItems: 'center', gap: 8,
                             background: 'rgba(76,175,80,0.15)', border: `1px solid rgba(76,175,80,0.4)`,
@@ -111,7 +167,7 @@ export default function Home() {
                             La app veterinaria de Argentina
                         </div>
 
-                        <h1 style={{ fontSize: 48, fontWeight: 900, color: '#fff', lineHeight: 1.1, marginBottom: 18, letterSpacing: -1.5 }}>
+                        <h1 className="hero-title" style={{ fontSize: 48, fontWeight: 900, color: '#fff', lineHeight: 1.1, marginBottom: 18, letterSpacing: -1.5 }}>
                             El historial de tu{' '}
                             <span style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                                 mascota
@@ -119,11 +175,11 @@ export default function Home() {
                             ,<br />siempre con vos
                         </h1>
 
-                        <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 16, lineHeight: 1.75, marginBottom: 32, fontWeight: 400 }}>
+                        <p className="hero-sub" style={{ color: 'rgba(255,255,255,0.65)', fontSize: 16, lineHeight: 1.75, marginBottom: 32, fontWeight: 400 }}>
                             Expediente digital, turnos online y tu veterinaria de confianza.<br />Sin papeles, sin llamadas.
                         </p>
 
-                        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                        <div className="hero-btns" style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                             {user ? (
                                 <Link to={user.role === 'clinic' ? '/clinic/dashboard' : '/dashboard'}
                                     style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, color: '#fff', fontWeight: 800, fontSize: 15, padding: '14px 28px', borderRadius: 14, textDecoration: 'none', boxShadow: `0 6px 24px rgba(76,175,80,0.35)` }}>
@@ -146,7 +202,7 @@ export default function Home() {
                 </div>
 
                 {/* ── STATS ── */}
-                <div style={{ background: DARK2, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', borderBottom: `1px solid rgba(255,255,255,0.06)` }}>
+                <div className="stats-grid" style={{ background: DARK2, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', borderBottom: `1px solid rgba(255,255,255,0.06)` }}>
                     {[
                         { n: '+200', l: 'Veterinarias', color: G1 },
                         { n: '+5.000', l: 'Mascotas registradas', color: O1 },
@@ -161,23 +217,21 @@ export default function Home() {
                 </div>
 
                 {/* ── BANNER PUBLICITARIO ── */}
-                <div style={{ padding: '28px 40px' }}>
-                    <div style={{
+                <div className="section-pad" style={{ padding: '28px 40px' }}>
+                    <div className="banner-ad-wrap" style={{
                         borderRadius: 24, overflow: 'hidden', position: 'relative',
                         background: `linear-gradient(120deg, #0f1923 0%, #1a1060 50%, #3d1a00 100%)`,
                         boxShadow: `0 8px 48px rgba(255,152,0,0.2)`,
                         minHeight: 200, display: 'flex',
                         border: '1px solid rgba(255,152,0,0.15)',
                     }}>
-                        {/* Foto */}
-                        <div style={{ width: 260, flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
+                        <div className="banner-ad-foto" style={{ width: 260, flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
                             <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=500&q=85" alt="Perro"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
                             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 40%, rgba(26,16,96,0.9))' }} />
                         </div>
 
-                        {/* Info izquierda */}
-                        <div style={{ flex: 1, padding: '32px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <div className="banner-ad-info" style={{ flex: 1, padding: '32px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 3, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: 10 }}>Publicidad destacada</span>
                             <h3 style={{ fontSize: 30, fontWeight: 900, color: '#fff', lineHeight: 1.05, marginBottom: 8, fontFamily: FONT, animation: 'slideLeft 0.6s ease both' }}>PipetaPlus Pro</h3>
                             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', marginBottom: 6, fontWeight: 600 }}>Protección antiparasitaria total</p>
@@ -190,8 +244,7 @@ export default function Home() {
                             }}>Comprar ahora</button>
                         </div>
 
-                        {/* Centro — beneficios */}
-                        <div style={{
+                        <div className="banner-ad-centro" style={{
                             width: 220, flexShrink: 0,
                             display: 'flex', flexDirection: 'column', justifyContent: 'center',
                             padding: '24px 20px', gap: 12,
@@ -212,8 +265,7 @@ export default function Home() {
                             ))}
                         </div>
 
-                        {/* Precio animado */}
-                        <div style={{
+                        <div className="banner-ad-precio" style={{
                             width: 180, flexShrink: 0,
                             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                             padding: '24px 16px', gap: 6,
@@ -226,38 +278,15 @@ export default function Home() {
                             }}>$10.000</div>
                             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', textAlign: 'center' }}>precio especial</span>
                             <div style={{ marginTop: 8, background: O1, color: '#fff', fontSize: 11, fontWeight: 900, padding: '5px 14px', borderRadius: 99 }}>🔥 OFERTA</div>
-                            <style>{`
-                @keyframes pricePop {
-                    from { opacity: 0; transform: translateX(40px) scale(0.7); }
-                    to   { opacity: 1; transform: translateX(0) scale(1); }
-                }
-                @keyframes slideLeft {
-                    from { opacity: 0; transform: translateX(-40px); }
-                    to   { opacity: 1; transform: translateX(0); }
-                }
-                @keyframes fadeUp {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes btnBounce {
-                    0%   { opacity: 0; transform: scale(0.5); }
-                    70%  { transform: scale(1.1); }
-                    100% { opacity: 1; transform: scale(1); }
-                }
-                @keyframes pricePulse {
-                    0%, 100% { transform: scale(1); }
-                    50%      { transform: scale(1.06); }
-                }
-            `}</style>
                         </div>
                     </div>
                     <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 8, textAlign: 'right' }}>Publicidad · VetPaw Ads</p>
                 </div>
 
                 {/* ── FEATURES ── */}
-                <div style={{ padding: '4px 40px 28px' }}>
+                <div className="section-pad" style={{ padding: '4px 40px 28px' }}>
                     <h2 style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: 2 }}>¿Qué podés hacer?</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
+                    <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
                         {[
                             { bg: 'rgba(76,175,80,0.08)', border: 'rgba(76,175,80,0.25)', iconBg: 'rgba(76,175,80,0.15)', icon: '📋', title: 'Expediente digital', text: 'Vacunas, alergias y toda la historia clínica en un lugar seguro.', accent: G1 },
                             { bg: 'rgba(255,152,0,0.08)', border: 'rgba(255,152,0,0.25)', iconBg: 'rgba(255,152,0,0.15)', icon: '📅', title: 'Turnos online', text: 'Pedí turno con tu veterinaria sin llamar, en cualquier momento.', accent: O1 },
@@ -279,40 +308,41 @@ export default function Home() {
                 </div>
 
                 {/* ── SENASA ── */}
-                <div style={{ padding: '4px 40px 28px' }}>
+                <div className="section-pad" style={{ padding: '4px 40px 28px' }}>
                     <a href="https://mascotas.senasa.gob.ar/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block' }}>
                         <div style={{
                             background: 'linear-gradient(135deg, #0f172a 0%, #0c2a4a 100%)',
                             borderRadius: 20, padding: '24px 28px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                             border: '1.5px solid rgba(107,202,255,0.15)',
                             transition: 'transform .2s, border-color .2s', cursor: 'pointer',
                         }}
                             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(107,202,255,0.4)' }}
                             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(107,202,255,0.15)' }}
                         >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-                                <div style={{ width: 56, height: 56, borderRadius: 16, flexShrink: 0, background: 'rgba(107,202,255,0.1)', border: '1.5px solid rgba(107,202,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 }}>✈️</div>
-                                <div>
-                                    <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: '#6bcaff', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>SENASA · Trámite oficial</span>
-                                    <h3 style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 4, fontFamily: FONT }}>¿Viajás con tu mascota?</h3>
-                                    <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>Consultá los requisitos oficiales para viajar dentro del país o al exterior.</p>
+                            <div className="senasa-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                                    <div style={{ width: 56, height: 56, borderRadius: 16, flexShrink: 0, background: 'rgba(107,202,255,0.1)', border: '1.5px solid rgba(107,202,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 }}>✈️</div>
+                                    <div>
+                                        <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: '#6bcaff', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>SENASA · Trámite oficial</span>
+                                        <h3 style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 4, fontFamily: FONT }}>¿Viajás con tu mascota?</h3>
+                                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>Consultá los requisitos oficiales para viajar dentro del país o al exterior.</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div style={{ flexShrink: 0, marginLeft: 20, background: '#6bcaff', color: '#0f172a', fontWeight: 800, fontSize: 12, padding: '10px 18px', borderRadius: 10, whiteSpace: 'nowrap', fontFamily: FONT }}>
-                                Ver requisitos
+                                <div className="senasa-btn" style={{ flexShrink: 0, marginLeft: 20, background: '#6bcaff', color: '#0f172a', fontWeight: 800, fontSize: 12, padding: '10px 18px', borderRadius: 10, whiteSpace: 'nowrap', fontFamily: FONT }}>
+                                    Ver requisitos
+                                </div>
                             </div>
                         </div>
                     </a>
                 </div>
 
                 {/* ── VETERINARIAS DESTACADAS ── */}
-                <div style={{ padding: '4px 40px 28px' }}>
+                <div className="section-pad" style={{ padding: '4px 40px 28px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
                         <h2 style={{ fontSize: 18, fontWeight: 800, color: '#fff', fontFamily: FONT }}>🏥 Veterinarias destacadas</h2>
                         <Link to="/clinics" style={{ fontSize: 13, color: G2, fontWeight: 700, textDecoration: 'none' }}>Ver todas →</Link>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18 }}>
+                    <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18 }}>
                         {veterinariasDestacadas.map((v, i) => (
                             <div key={i} style={{
                                 borderRadius: 20, overflow: 'hidden', cursor: 'pointer',
@@ -358,12 +388,12 @@ export default function Home() {
                 </div>
 
                 {/* ── SABÍAS QUE ── */}
-                <div style={{ padding: '4px 40px 28px' }}>
+                <div className="section-pad" style={{ padding: '4px 40px 28px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
                         <h2 style={{ fontSize: 18, fontWeight: 800, color: '#fff', fontFamily: FONT }}>💡 Sabías que...</h2>
                         <Link to="/tips" style={{ fontSize: 13, color: G2, fontWeight: 700, textDecoration: 'none' }}>Ver más →</Link>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
+                    <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
                         {curiosidades.map((c, i) => (
                             <div key={i} style={{
                                 background: DARK2, border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 20,
@@ -387,19 +417,15 @@ export default function Home() {
                 </div>
 
                 {/* ── MASCOTAS PERDIDAS ── */}
-                <div style={{ padding: '4px 40px 28px' }}>
+                <div className="section-pad" style={{ padding: '4px 40px 28px' }}>
                     <div style={{ background: DARK2, border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 24, overflow: 'hidden' }}>
-
-                        {/* Header */}
-                        <div style={{ background: `linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 100%)`, padding: '26px 32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        <div className="lost-header-pad" style={{ background: `linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 100%)`, padding: '26px 32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                             <div style={{ position: 'absolute', top: -40, right: -40, width: 150, height: 150, background: `rgba(76,175,80,0.1)`, borderRadius: '50%' }} />
-                            <div style={{ position: 'absolute', bottom: -30, right: 80, width: 100, height: 100, background: `rgba(255,152,0,0.08)`, borderRadius: '50%' }} />
                             <h2 style={{ fontSize: 20, fontWeight: 900, color: '#fff', marginBottom: 6, position: 'relative', zIndex: 1, fontFamily: FONT }}>🐾 Mascotas perdidas</h2>
                             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', position: 'relative', zIndex: 1 }}>¿Encontraste una mascota? Publicalo y ayudá a que vuelva a casa.</p>
                         </div>
 
-                        {/* Formulario */}
-                        <div style={{ padding: '28px 32px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        <div className="lost-form-pad" style={{ padding: '28px 32px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                             {reporteEnviado ? (
                                 <div style={{ background: 'rgba(76,175,80,0.1)', border: `1.5px solid rgba(76,175,80,0.3)`, borderRadius: 16, padding: '24px', textAlign: 'center' }}>
                                     <div style={{ fontSize: 40, marginBottom: 10 }}>✅</div>
@@ -408,7 +434,6 @@ export default function Home() {
                                 </div>
                             ) : (
                                 <form onSubmit={handleReporte} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                                    {/* Foto */}
                                     <div>
                                         <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>
                                             Foto de la mascota <span style={{ color: O1 }}>*</span>
@@ -433,7 +458,6 @@ export default function Home() {
                                         <input ref={fileRef} type="file" accept=".jpg,.jpeg" onChange={handleFoto} style={{ display: 'none' }} />
                                     </div>
 
-                                    {/* Descripción */}
                                     <div>
                                         <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>
                                             ¿Dónde y cuándo la encontraste? <span style={{ color: O1 }}>*</span>
@@ -446,12 +470,11 @@ export default function Home() {
                                             onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                     </div>
 
-                                    {/* Contacto */}
                                     <div>
                                         <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>
                                             Datos de contacto <span style={{ color: O1 }}>*</span>
                                         </label>
-                                        <div style={{ display: 'flex', gap: 10 }}>
+                                        <div className="contact-row" style={{ display: 'flex', gap: 10 }}>
                                             <select value={contactType} onChange={e => setContactType(e.target.value)}
                                                 style={{ padding: '12px 14px', border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 13, color: '#fff', background: 'rgba(255,255,255,0.07)', outline: 'none', cursor: 'pointer', fontFamily: FONT }}>
                                                 <option value="phone" style={{ background: DARK2 }}>📱 Celular</option>
@@ -482,8 +505,7 @@ export default function Home() {
                             )}
                         </div>
 
-                        {/* Muro */}
-                        <div style={{ padding: '24px 32px' }}>
+                        <div className="lost-muro-pad" style={{ padding: '24px 32px' }}>
                             <h3 style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 18, fontFamily: FONT }}>
                                 📋 Reportes activos <span style={{ color: G1 }}>({lostPets.length})</span>
                             </h3>
@@ -492,7 +514,7 @@ export default function Home() {
                             ) : lostPets.length === 0 ? (
                                 <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>No hay reportes activos por el momento.</p>
                             ) : (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
+                                <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
                                     {lostPets.map(pet => (
                                         <div key={pet.id} style={{ background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.08)', borderRadius: 18, overflow: 'hidden' }}>
                                             <div style={{ height: 180, overflow: 'hidden', position: 'relative' }}>
@@ -505,7 +527,7 @@ export default function Home() {
                                                 <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.65, marginBottom: 12 }}>
                                                     {pet.description.length > 100 ? pet.description.slice(0, 100) + '...' : pet.description}
                                                 </p>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
                                                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
                                                         {pet.contact_type === 'phone' ? '📱' : pet.contact_type === 'home_phone' ? '📞' : '✉️'} {pet.contact_value}
                                                     </div>
@@ -530,49 +552,51 @@ export default function Home() {
                 </div>
 
                 {/* ── BANNER ANUNCIANTES ── */}
-                <div style={{ padding: '4px 40px 28px' }}>
+                <div className="section-pad" style={{ padding: '4px 40px 28px' }}>
                     <div style={{
                         background: `linear-gradient(135deg, rgba(76,175,80,0.12) 0%, rgba(255,152,0,0.12) 100%)`,
                         border: `1.5px solid rgba(76,175,80,0.2)`,
                         borderRadius: 24, padding: '32px 36px',
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     }}>
-                        <div>
-                            <h3 style={{ color: '#fff', fontWeight: 900, fontSize: 20, marginBottom: 8, fontFamily: FONT }}>¿Tenés una marca de productos para mascotas?</h3>
-                            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 20, lineHeight: 1.65 }}>
-                                Miles de dueños buscan lo mejor para sus animales cada día. Hacé que te encuentren primero en VetPaw.
-                            </p>
-                            <div style={{ display: 'flex', gap: 28 }}>
-                                {[{ n: '+5.000', l: 'usuarios activos', c: G1 }, { n: '+200', l: 'veterinarias', c: O1 }, { n: '100%', l: 'audiencia target', c: G1 }].map((s, i) => (
-                                    <div key={i}>
-                                        <p style={{ fontWeight: 900, fontSize: 20, color: s.c, fontFamily: FONT }}>{s.n}</p>
-                                        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{s.l}</p>
-                                    </div>
-                                ))}
+                        <div className="banner-anun-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div>
+                                <h3 style={{ color: '#fff', fontWeight: 900, fontSize: 20, marginBottom: 8, fontFamily: FONT }}>¿Tenés una marca de productos para mascotas?</h3>
+                                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 20, lineHeight: 1.65 }}>
+                                    Miles de dueños buscan lo mejor para sus animales cada día. Hacé que te encuentren primero en VetPaw.
+                                </p>
+                                <div className="banner-anun-stats" style={{ display: 'flex', gap: 28 }}>
+                                    {[{ n: '+5.000', l: 'usuarios activos', c: G1 }, { n: '+200', l: 'veterinarias', c: O1 }, { n: '100%', l: 'audiencia target', c: G1 }].map((s, i) => (
+                                        <div key={i}>
+                                            <p style={{ fontWeight: 900, fontSize: 20, color: s.c, fontFamily: FONT }}>{s.n}</p>
+                                            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{s.l}</p>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                        <div style={{ textAlign: 'center', flexShrink: 0, marginLeft: 32 }}>
-                            <div style={{ fontSize: 56, marginBottom: 14 }}>📣</div>
-                            <button style={{
-                                background: `linear-gradient(135deg, ${G1}, ${O1})`,
-                                color: '#fff', fontWeight: 800, fontSize: 13, padding: '13px 24px',
-                                borderRadius: 14, border: 'none', cursor: 'pointer', fontFamily: FONT,
-                                boxShadow: `0 6px 24px rgba(76,175,80,0.3)`,
-                            }}>
-                                Quiero anunciar
-                            </button>
+                            <div className="banner-anun-right" style={{ textAlign: 'center', flexShrink: 0, marginLeft: 32 }}>
+                                <div style={{ fontSize: 56, marginBottom: 14 }}>📣</div>
+                                <Link to="/anunciar" style={{
+                                    display: 'inline-block',
+                                    background: `linear-gradient(135deg, ${G1}, ${O1})`,
+                                    color: '#fff', fontWeight: 800, fontSize: 13, padding: '13px 24px',
+                                    borderRadius: 14, textDecoration: 'none', fontFamily: FONT,
+                                    boxShadow: `0 6px 24px rgba(76,175,80,0.3)`,
+                                }}>
+                                    Quiero anunciar
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* ── FOOTER ── */}
-                <footer style={{ background: '#080f16', padding: '32px 40px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <footer className="footer-pad" style={{ background: '#080f16', padding: '32px 40px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
                         <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: '100px', width: 'auto' }} />
                         <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13, textAlign: 'center', maxWidth: 300, lineHeight: 1.6 }}>
                             La app veterinaria de Argentina.<br />Tu mascota merece lo mejor.
                         </p>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: 28, flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, flexWrap: 'wrap', padding: '0 16px' }}>
                             {[
                                 { l: 'Términos', to: '/terminos' },
                                 { l: 'Privacidad', to: '/privacidad' },
