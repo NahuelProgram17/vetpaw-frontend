@@ -105,7 +105,9 @@ export default function Home() {
                     50%      { transform: scale(1.06); }
                 }
 
-                /* ── MOBILE ── */
+                /* ══════════════════════════════
+                   MOBILE (≤768px)
+                ══════════════════════════════ */
                 @media (max-width: 768px) {
                     .hero-inner { padding: 40px 20px !important; }
                     .hero-title { font-size: 30px !important; letter-spacing: -0.5px !important; }
@@ -117,11 +119,31 @@ export default function Home() {
 
                     .section-pad { padding: 16px !important; }
 
+                    /* Banner publicitario — columna en mobile */
                     .banner-ad-wrap { flex-direction: column !important; }
                     .banner-ad-foto { width: 100% !important; height: 200px !important; flex-shrink: unset !important; }
                     .banner-ad-info { padding: 20px 16px !important; }
                     .banner-ad-centro { display: none !important; }
-                    .banner-ad-precio { width: 100% !important; flex-direction: row !important; justify-content: space-around !important; padding: 16px !important; }
+
+                    /* ── FIX OFERTA: precio en fila, sin overflow, sin corte ── */
+                    .banner-ad-precio {
+                        width: 100% !important;
+                        flex-direction: row !important;
+                        flex-wrap: wrap !important;
+                        justify-content: center !important;
+                        align-items: center !important;
+                        gap: 12px !important;
+                        padding: 18px 16px !important;
+                    }
+                    .banner-precio-num {
+                        font-size: 36px !important;
+                        animation: none !important;
+                    }
+                    .banner-oferta-badge {
+                        white-space: nowrap !important;
+                        flex-shrink: 0 !important;
+                        margin-top: 0 !important;
+                    }
 
                     .grid-3 { grid-template-columns: 1fr !important; }
                     .grid-2 { grid-template-columns: 1fr !important; }
@@ -225,12 +247,14 @@ export default function Home() {
                         minHeight: 200, display: 'flex',
                         border: '1px solid rgba(255,152,0,0.15)',
                     }}>
+                        {/* Foto */}
                         <div className="banner-ad-foto" style={{ width: 260, flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
                             <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=500&q=85" alt="Perro"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
                             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 40%, rgba(26,16,96,0.9))' }} />
                         </div>
 
+                        {/* Info */}
                         <div className="banner-ad-info" style={{ flex: 1, padding: '32px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 3, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: 10 }}>Publicidad destacada</span>
                             <h3 style={{ fontSize: 30, fontWeight: 900, color: '#fff', lineHeight: 1.05, marginBottom: 8, fontFamily: FONT, animation: 'slideLeft 0.6s ease both' }}>PipetaPlus Pro</h3>
@@ -244,6 +268,7 @@ export default function Home() {
                             }}>Comprar ahora</button>
                         </div>
 
+                        {/* Beneficios — oculto en mobile */}
                         <div className="banner-ad-centro" style={{
                             width: 220, flexShrink: 0,
                             display: 'flex', flexDirection: 'column', justifyContent: 'center',
@@ -265,19 +290,30 @@ export default function Home() {
                             ))}
                         </div>
 
+                        {/* ── Precio + OFERTA ── */}
                         <div className="banner-ad-precio" style={{
-                            width: 180, flexShrink: 0,
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                            width: 200, flexShrink: 0,
+                            display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', justifyContent: 'center',
                             padding: '24px 16px', gap: 6,
                             background: 'rgba(255,255,255,0.03)',
+                            overflow: 'visible',
                         }}>
                             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through' }}>$14.000</span>
-                            <div style={{
-                                fontSize: 42, fontWeight: 900, color: O1, lineHeight: 1, fontFamily: FONT,
+                            <div className="banner-precio-num" style={{
+                                fontSize: 40, fontWeight: 900, color: O1, lineHeight: 1,
+                                fontFamily: FONT, whiteSpace: 'nowrap',
                                 animation: 'pricePop 0.6s 0.2s cubic-bezier(.22,.68,0,1.4) both, pricePulse 2s 1s ease-in-out infinite',
                             }}>$10.000</div>
                             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', textAlign: 'center' }}>precio especial</span>
-                            <div style={{ marginTop: 8, background: O1, color: '#fff', fontSize: 11, fontWeight: 900, padding: '5px 14px', borderRadius: 99 }}>🔥 OFERTA</div>
+                            {/* Badge OFERTA — con clase para override en mobile */}
+                            <div className="banner-oferta-badge" style={{
+                                marginTop: 8,
+                                background: O1, color: '#fff',
+                                fontSize: 12, fontWeight: 900,
+                                padding: '6px 16px', borderRadius: 99,
+                                whiteSpace: 'nowrap', flexShrink: 0,
+                            }}>🔥 OFERTA</div>
                         </div>
                     </div>
                     <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 8, textAlign: 'right' }}>Publicidad · VetPaw Ads</p>
