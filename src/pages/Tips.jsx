@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 const categorias = ['Todos', 'Perros', 'Gatos', 'Conejos', 'Aves', 'Caballos', 'Reptiles', 'Emergencias', 'Cuidados']
@@ -53,6 +53,7 @@ export default function Tips() {
     const [categoriaActiva, setCategoriaActiva] = useState('Todos')
     const [busqueda, setBusqueda] = useState('')
     const [expandido, setExpandido] = useState(null)
+    useEffect(() => { window.scrollTo(0, 0); }, []);
 
     const filtrar = (items) => items.filter(t => {
         const matchCat = categoriaActiva === 'Todos' || categoriaActiva === 'Emergencias' || categoriaActiva === 'Cuidados'
