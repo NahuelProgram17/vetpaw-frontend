@@ -267,6 +267,7 @@ export default function MedicalHistory() {
 
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&family=DM+Mono:wght@400;500&display=swap');
+                html, body { background: #1a1a2e !important; margin: 0; }
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
                 .history-page {
