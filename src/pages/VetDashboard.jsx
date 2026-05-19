@@ -39,7 +39,7 @@ export default function ClinicDashboard() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("pending");
     const [agendaDate, setAgendaDate] = useState(new Date());
-    const [showAgenda, setShowAgenda] = useState(false); // mobile toggle
+    const [showAgenda, setShowAgenda] = useState(false);
 
     const [showVisitModal, setShowVisitModal] = useState(false);
     const [selectedAppt, setSelectedAppt] = useState(null);
@@ -196,11 +196,11 @@ export default function ClinicDashboard() {
         } finally { setSaving(false); }
     };
 
-    const filtered = filter === "all" ? appointments : appointments.filter((a) => a.status === filter);
-    const pending  = appointments.filter((a) => a.status === "pending").length;
+    const filtered  = filter === "all" ? appointments : appointments.filter((a) => a.status === filter);
+    const pending   = appointments.filter((a) => a.status === "pending").length;
     const confirmed = appointments.filter((a) => a.status === "confirmed").length;
     const completed = appointments.filter((a) => a.status === "completed").length;
-    const noShow   = appointments.filter((a) => a.status === "no_show").length;
+    const noShow    = appointments.filter((a) => a.status === "no_show").length;
 
     const formatDate = (d) => {
         if (!d) return "—";
@@ -228,8 +228,68 @@ export default function ClinicDashboard() {
     const agendaLabel = agendaDate.toLocaleDateString("es-AR", { weekday: "long", day: "2-digit", month: "long" });
     const isToday = new Date().toDateString() === agendaDate.toDateString();
 
-    const petVisits  = selectedPet ? visits.filter(v => v.pet === selectedPet.id)   : visits;
+    const petVisits   = selectedPet ? visits.filter(v => v.pet === selectedPet.id)   : visits;
     const petVaccines = selectedPet ? vaccines.filter(v => v.pet === selectedPet.id) : vaccines;
+
+    // Componente interno reutilizable para la agenda
+    const AgendaContent = () => (
+        <>
+            <div className="agenda-header">
+                <button className="agenda-nav" onClick={() => { const d = new Date(agendaDate); d.setDate(d.getDate() - 1); setAgendaDate(d); }}>‹</button>
+                <div className="agenda-title-wrap">
+                    <span className="agenda-day-label">{isToday ? "Hoy" : agendaLabel}</span>
+                    {!isToday && <button className="agenda-today-btn" onClick={() => setAgendaDate(new Date())}>Hoy</button>}
+                </div>
+                <button className="agenda-nav" onClick={() => { const d = new Date(agendaDate); d.setDate(d.getDate() + 1); setAgendaDate(d); }}>›</button>
+            </div>
+            <div className="agenda-date-full">{agendaLabel}</div>
+            <button className="btn-agenda-pdf" onClick={async () => {
+                try {
+                    const dateStr = agendaDate.toISOString().slice(0, 10);
+                    const response = await api.get(`/appointments/agenda_pdf/?date=${dateStr}`, { responseType: 'blob' });
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', `agenda_${dateStr}.pdf`);
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    window.URL.revokeObjectURL(url);
+                } catch (e) { console.error(e); }
+            }}>📄 Descargar agenda</button>
+            {agendaTurnos.length === 0 ? (
+                <div className="agenda-empty"><span>📭</span><p>Sin turnos este día</p></div>
+            ) : (
+                <div className="agenda-list">
+                    {agendaTurnos.map(appt => {
+                        const status = STATUS_LABEL[appt.status] || STATUS_LABEL.pending;
+                        return (
+                            <div key={appt.id} className="agenda-item"
+                                style={{ borderLeftColor: status.color, cursor: 'pointer' }}
+                                onClick={() => {
+                                    setHighlightedAppt(appt.id);
+                                    setFilter("all");
+                                    setShowAgenda(false);
+                                    setTimeout(() => {
+                                        const el = document.getElementById(`appt-${appt.id}`);
+                                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }, 100);
+                                }}>
+                                <div className="agenda-item-time">{formatTime(appt.requested_date)}</div>
+                                <div className="agenda-item-info">
+                                    <div className="agenda-item-pet">{appt.pet_name || "—"}</div>
+                                    <div className="agenda-item-owner">{appt.owner_name || "—"}</div>
+                                    <div className="agenda-item-reason">{appt.reason || "Consulta"}</div>
+                                </div>
+                                <span className="agenda-item-badge" style={{ color: status.color, background: `${status.color}18` }}>{status.label}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+            <div className="agenda-count">{agendaTurnos.length} turno{agendaTurnos.length !== 1 ? "s" : ""} este día</div>
+        </>
+    );
 
     return (
         <div className="vet-page">
@@ -247,7 +307,7 @@ export default function ClinicDashboard() {
                 {/* ── Tabs ── */}
                 <div className="tabs">
                     {[
-                        { id: "turnos",   label: "📅 Turnos" },
+                        { id: "turnos",    label: "📅 Turnos" },
                         { id: "pacientes", label: "🐾 Pacientes" },
                         { id: "historial", label: "📋 Historial" },
                         { id: "vacunas",   label: "💉 Vacunas" },
@@ -273,6 +333,7 @@ export default function ClinicDashboard() {
                 {!loading && tab === "turnos" && (
                     <div className="turnos-layout">
                         <div className="turnos-main">
+
                             {/* Stats */}
                             <div className="vet-stats">
                                 <div className="vet-stat"><span className="stat-icon">⏳</span><div><p className="stat-num">{pending}</p><p className="stat-label">Pendientes</p></div></div>
@@ -281,58 +342,15 @@ export default function ClinicDashboard() {
                                 <div className="vet-stat"><span className="stat-icon">❌</span><div><p className="stat-num">{noShow}</p><p className="stat-label">Ausentes</p></div></div>
                             </div>
 
-                            {/* Botón agenda mobile */}
+                            {/* Toggle agenda — solo visible en mobile */}
                             <button className="btn-toggle-agenda" onClick={() => setShowAgenda(!showAgenda)}>
-                                📅 {showAgenda ? "Ocultar agenda" : `Ver agenda del día (${agendaTurnos.length})`}
+                                📅 {showAgenda ? "Ocultar agenda" : `Ver agenda (${agendaTurnos.length} turnos hoy)`}
                             </button>
 
-                            {/* Agenda mobile (colapsable) */}
+                            {/* Agenda colapsable mobile */}
                             {showAgenda && (
                                 <div className="agenda-panel agenda-mobile">
-                                    <div className="agenda-header">
-                                        <button className="agenda-nav" onClick={() => { const d = new Date(agendaDate); d.setDate(d.getDate() - 1); setAgendaDate(d); }}>‹</button>
-                                        <div className="agenda-title-wrap">
-                                            <span className="agenda-day-label">{isToday ? "Hoy" : agendaLabel}</span>
-                                            {!isToday && <button className="agenda-today-btn" onClick={() => setAgendaDate(new Date())}>Hoy</button>}
-                                        </div>
-                                        <button className="agenda-nav" onClick={() => { const d = new Date(agendaDate); d.setDate(d.getDate() + 1); setAgendaDate(d); }}>›</button>
-                                    </div>
-                                    <div className="agenda-date-full">{agendaLabel}</div>
-                                    <button className="btn-agenda-pdf" onClick={async () => {
-                                        try {
-                                            const dateStr = agendaDate.toISOString().slice(0, 10);
-                                            const response = await api.get(`/appointments/agenda_pdf/?date=${dateStr}`, { responseType: 'blob' });
-                                            const url = window.URL.createObjectURL(new Blob([response.data]));
-                                            const link = document.createElement('a');
-                                            link.href = url;
-                                            link.setAttribute('download', `agenda_${dateStr}.pdf`);
-                                            document.body.appendChild(link);
-                                            link.click();
-                                            link.remove();
-                                            window.URL.revokeObjectURL(url);
-                                        } catch (e) { console.error(e); }
-                                    }}>📄 Descargar agenda</button>
-                                    {agendaTurnos.length === 0 ? (
-                                        <div className="agenda-empty"><span>📭</span><p>Sin turnos este día</p></div>
-                                    ) : (
-                                        <div className="agenda-list">
-                                            {agendaTurnos.map(appt => {
-                                                const status = STATUS_LABEL[appt.status] || STATUS_LABEL.pending;
-                                                return (
-                                                    <div key={appt.id} className="agenda-item" style={{ borderLeftColor: status.color }}>
-                                                        <div className="agenda-item-time">{formatTime(appt.requested_date)}</div>
-                                                        <div className="agenda-item-info">
-                                                            <div className="agenda-item-pet">{appt.pet_name || "—"}</div>
-                                                            <div className="agenda-item-owner">{appt.owner_name || "—"}</div>
-                                                            <div className="agenda-item-reason">{appt.reason || "Consulta"}</div>
-                                                        </div>
-                                                        <span className="agenda-item-badge" style={{ color: status.color, background: `${status.color}18` }}>{status.label}</span>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                    <div className="agenda-count">{agendaTurnos.length} turno{agendaTurnos.length !== 1 ? "s" : ""} este día</div>
+                                    <AgendaContent />
                                 </div>
                             )}
 
@@ -370,11 +388,10 @@ export default function ClinicDashboard() {
                                                         </span>
                                                     </div>
                                                     <div className="appt-meta">
-                                                        {appt.pet_name  && <span>🐾 {appt.pet_name}</span>}
+                                                        {appt.pet_name   && <span>🐾 {appt.pet_name}</span>}
                                                         {appt.owner_name && <span>👤 {appt.owner_name}</span>}
                                                         <span>📆 {formatDate(appt.requested_date)}</span>
                                                     </div>
-                                                    {/* Acciones dentro del info en mobile */}
                                                     <div className="appt-actions">
                                                         {appt.status === "pending" && (
                                                             <>
@@ -389,7 +406,7 @@ export default function ClinicDashboard() {
                                                                 <button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button>
                                                             </>
                                                         )}
-                                                        {appt.status === "completed"  && <span className="done-label">✅ Visita registrada</span>}
+                                                        {appt.status === "completed" && <span className="done-label">✅ Visita registrada</span>}
                                                         {appt.status === "cancelled"  && <span className="cancelled-label">✕ Cancelado</span>}
                                                         {appt.status === "no_show"    && <span className="noshow-label">❌ Ausente</span>}
                                                     </div>
@@ -401,60 +418,9 @@ export default function ClinicDashboard() {
                             )}
                         </div>
 
-                        {/* ── Agenda lateral (desktop) ── */}
+                        {/* Agenda lateral desktop */}
                         <div className="agenda-panel agenda-desktop">
-                            <div className="agenda-header">
-                                <button className="agenda-nav" onClick={() => { const d = new Date(agendaDate); d.setDate(d.getDate() - 1); setAgendaDate(d); }}>‹</button>
-                                <div className="agenda-title-wrap">
-                                    <span className="agenda-day-label">{isToday ? "Hoy" : agendaLabel}</span>
-                                    {!isToday && <button className="agenda-today-btn" onClick={() => setAgendaDate(new Date())}>Hoy</button>}
-                                </div>
-                                <button className="agenda-nav" onClick={() => { const d = new Date(agendaDate); d.setDate(d.getDate() + 1); setAgendaDate(d); }}>›</button>
-                            </div>
-                            <div className="agenda-date-full">{agendaLabel}</div>
-                            <button className="btn-agenda-pdf" onClick={async () => {
-                                try {
-                                    const dateStr = agendaDate.toISOString().slice(0, 10);
-                                    const response = await api.get(`/appointments/agenda_pdf/?date=${dateStr}`, { responseType: 'blob' });
-                                    const url = window.URL.createObjectURL(new Blob([response.data]));
-                                    const link = document.createElement('a');
-                                    link.href = url;
-                                    link.setAttribute('download', `agenda_${dateStr}.pdf`);
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    link.remove();
-                                    window.URL.revokeObjectURL(url);
-                                } catch (e) { console.error(e); }
-                            }}>📄 Descargar agenda</button>
-                            {agendaTurnos.length === 0 ? (
-                                <div className="agenda-empty"><span>📭</span><p>Sin turnos este día</p></div>
-                            ) : (
-                                <div className="agenda-list">
-                                    {agendaTurnos.map(appt => {
-                                        const status = STATUS_LABEL[appt.status] || STATUS_LABEL.pending;
-                                        return (
-                                            <div key={appt.id} className="agenda-item" style={{ borderLeftColor: status.color, cursor: 'pointer' }}
-                                                onClick={() => {
-                                                    setHighlightedAppt(appt.id);
-                                                    setFilter("all");
-                                                    setTimeout(() => {
-                                                        const el = document.getElementById(`appt-${appt.id}`);
-                                                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                    }, 100);
-                                                }}>
-                                                <div className="agenda-item-time">{formatTime(appt.requested_date)}</div>
-                                                <div className="agenda-item-info">
-                                                    <div className="agenda-item-pet">{appt.pet_name || "—"}</div>
-                                                    <div className="agenda-item-owner">{appt.owner_name || "—"}</div>
-                                                    <div className="agenda-item-reason">{appt.reason || "Consulta"}</div>
-                                                </div>
-                                                <span className="agenda-item-badge" style={{ color: status.color, background: `${status.color}18` }}>{status.label}</span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                            <div className="agenda-count">{agendaTurnos.length} turno{agendaTurnos.length !== 1 ? "s" : ""} este día</div>
+                            <AgendaContent />
                         </div>
                     </div>
                 )}
@@ -773,11 +739,22 @@ export default function ClinicDashboard() {
                 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-                .vet-page { min-height: 100vh; background: #1a1a2e; font-family: 'Nunito', sans-serif; position: relative; overflow-x: hidden; padding-bottom: 60px; }
+                .vet-page {
+                    min-height: 100vh; background: #1a1a2e;
+                    font-family: 'Nunito', sans-serif;
+                    position: relative;
+                    overflow-x: clip; /* clip permite scroll interno sin cortar */
+                    padding-bottom: 60px;
+                }
                 .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.08; pointer-events: none; }
                 .b1 { width: 500px; height: 500px; background: #6bffb8; top: -100px; left: -100px; }
                 .b2 { width: 400px; height: 400px; background: #6bcaff; bottom: -100px; right: -100px; }
-                .vet-inner { max-width: 960px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
+
+                .vet-inner {
+                    max-width: 960px; margin: 0 auto; padding: 32px 24px;
+                    position: relative; z-index: 1;
+                    overflow-x: hidden;
+                }
 
                 /* ── Header ── */
                 .vet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
@@ -786,7 +763,7 @@ export default function ClinicDashboard() {
                 .success-toast { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; padding: 10px 16px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; }
 
                 /* ── Tabs ── */
-                .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+                .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
                 .tabs::-webkit-scrollbar { display: none; }
                 .tab-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: rgba(255,255,255,0.4); font-family: 'Nunito', sans-serif; font-size: 0.92rem; font-weight: 700; padding: 10px 16px; cursor: pointer; transition: all 0.2s; margin-bottom: -1px; white-space: nowrap; flex-shrink: 0; }
                 .tab-btn:hover { color: rgba(255,255,255,0.7); }
@@ -801,27 +778,27 @@ export default function ClinicDashboard() {
 
                 /* ── Stats ── */
                 .vet-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
-                .vet-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px; }
+                .vet-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px; min-width: 0; overflow: hidden; }
                 .stat-icon { font-size: 1.8rem; flex-shrink: 0; }
                 .stat-num { font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1; }
                 .stat-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 600; margin-top: 2px; }
 
-                /* ── Botón toggle agenda (mobile) ── */
+                /* ── Toggle agenda — oculto desktop ── */
                 .btn-toggle-agenda { display: none; }
 
                 /* ── Filtros ── */
-                .filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+                .filters { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
                 .filters::-webkit-scrollbar { display: none; }
                 .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
                 .filter-btn.active { background: rgba(76,175,80,0.12); border-color: rgba(76,175,80,0.35); color: #4CAF50; }
 
-                /* ── Turnos layout ── */
+                /* ── Layout ── */
                 .turnos-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; align-items: start; }
-                .turnos-main { display: flex; flex-direction: column; }
+                .turnos-main { display: flex; flex-direction: column; min-width: 0; }
 
-                /* ── Lista de turnos ── */
+                /* ── Appt cards ── */
                 .appts-list { display: flex; flex-direction: column; gap: 12px; }
-                .appt-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px 18px; display: flex; align-items: flex-start; gap: 16px; backdrop-filter: blur(10px); transition: border-color 0.2s; }
+                .appt-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px 18px; display: flex; align-items: flex-start; gap: 16px; backdrop-filter: blur(10px); transition: border-color 0.2s; overflow: hidden; }
                 .appt-card:hover { border-color: rgba(107,255,184,0.2); }
                 .appt-highlighted { border-color: #6bffb8 !important; box-shadow: 0 0 0 3px rgba(107,255,184,0.2); background: rgba(107,255,184,0.06) !important; }
                 .appt-date-box { display: flex; flex-direction: column; align-items: center; background: rgba(107,255,184,0.10); border-radius: 10px; padding: 8px 12px; min-width: 52px; flex-shrink: 0; }
@@ -843,7 +820,7 @@ export default function ClinicDashboard() {
                 .cancelled-label { font-size: 0.78rem; color: rgba(255,107,107,0.6); font-weight: 700; }
                 .noshow-label { font-size: 0.78rem; color: #ff9500; font-weight: 700; }
 
-                /* ── Agenda panel ── */
+                /* ── Agenda ── */
                 .agenda-panel { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; }
                 .agenda-desktop { position: sticky; top: 20px; }
                 .agenda-mobile { margin-bottom: 16px; }
@@ -885,10 +862,10 @@ export default function ClinicDashboard() {
                 .btn-pdf { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; border-radius: 8px; padding: 8px 12px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; box-shadow: 0 4px 14px rgba(239,68,68,0.3); transition: opacity 0.15s; }
                 .btn-pdf:hover { opacity: 0.9; }
 
-                /* ── Historial ── */
+                /* ── Historial / Selector ── */
                 .pet-selector { margin-bottom: 20px; }
                 .selector-label { font-size: 0.8rem; color: rgba(255,255,255,0.45); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
-                .pet-chips { display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+                .pet-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
                 .pet-chips::-webkit-scrollbar { display: none; }
                 .pet-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 20px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
                 .pet-chip.active { background: rgba(107,255,184,0.12); border-color: rgba(107,255,184,0.35); color: #6bffb8; }
@@ -917,7 +894,7 @@ export default function ClinicDashboard() {
                 .btn-add-vaccine { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; border-radius: 10px; padding: 10px 18px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
                 .btn-sm-vaccine { background: rgba(107,255,184,0.1); border: 1px solid rgba(107,255,184,0.25); color: #6bffb8; border-radius: 8px; padding: 8px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; }
                 .vaccine-table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
-                .vaccine-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+                .vaccine-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; min-width: 500px; }
                 .vaccine-table thead tr { background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.08); }
                 .vaccine-table th { padding: 12px 16px; text-align: left; font-size: 0.72rem; font-weight: 900; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
                 .vaccine-table td { padding: 12px 16px; color: rgba(255,255,255,0.75); border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
@@ -955,8 +932,8 @@ export default function ClinicDashboard() {
                 ══════════════════════════════ */
                 @media (max-width: 800px) {
                     .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-                    .vet-stats .stat-icon { font-size: 1.5rem; }
-                    .vet-stats .stat-num { font-size: 1.4rem; }
+                    .stat-icon { font-size: 1.5rem; }
+                    .stat-num { font-size: 1.4rem; }
                 }
 
                 /* ══════════════════════════════
@@ -964,56 +941,59 @@ export default function ClinicDashboard() {
                 ══════════════════════════════ */
                 @media (max-width: 700px) {
                     .vet-inner { padding: 16px 14px; }
-                    .vet-title { font-size: 1.5rem; }
+                    .vet-title { font-size: 1.4rem; }
                     .vet-header { margin-bottom: 16px; }
 
-                    /* Tabs: scroll horizontal */
-                    .tabs { gap: 0; }
-                    .tab-btn { font-size: 0.82rem; padding: 10px 12px; }
+                    /* Tabs */
+                    .tab-btn { font-size: 0.82rem; padding: 10px 11px; }
 
-                    /* Stats 2x2 */
-                    .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
-                    .vet-stat { padding: 12px; border-radius: 12px; }
+                    /* Stats — 2 columnas que entran completas */
+                    .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+                    .vet-stat { padding: 10px 12px; border-radius: 12px; gap: 8px; }
+                    .stat-icon { font-size: 1.4rem; }
+                    .stat-num { font-size: 1.3rem; }
+                    .stat-label { font-size: 0.66rem; }
 
-                    /* Turnos: 1 columna, agenda oculta */
+                    /* Layout: 1 columna */
                     .turnos-layout { grid-template-columns: 1fr; gap: 0; }
                     .agenda-desktop { display: none; }
 
-                    /* Botón toggle agenda visible */
+                    /* Botón toggle agenda — visible en mobile */
                     .btn-toggle-agenda {
                         display: block; width: 100%; margin-bottom: 14px;
                         background: rgba(107,255,184,0.08); border: 1px solid rgba(107,255,184,0.2);
                         color: #6bffb8; border-radius: 10px; padding: 10px 16px;
-                        font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700;
+                        font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700;
                         cursor: pointer; text-align: center;
+                        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
                     }
 
-                    /* Appt card: acciones dentro del info, no columna separada */
-                    .appt-card { flex-direction: row; align-items: flex-start; padding: 14px 14px; border-radius: 14px; }
-                    .appt-date-box { min-width: 44px; padding: 6px 8px; }
-                    .appt-day { font-size: 1.2rem; }
+                    /* Appt card */
+                    .appt-card { padding: 12px; border-radius: 14px; gap: 10px; }
+                    .appt-date-box { min-width: 42px; padding: 6px 8px; }
+                    .appt-day { font-size: 1.1rem; }
 
-                    /* Pacientes: 1 columna */
+                    /* Pacientes */
                     .pets-grid { grid-template-columns: 1fr; gap: 12px; }
 
-                    /* Visit card: columna en mobile */
+                    /* Visit card — columna */
                     .visit-card { flex-direction: column; gap: 12px; padding: 14px; border-radius: 14px; }
                     .visit-date-box { flex-direction: row; align-items: center; gap: 8px; min-width: unset; width: fit-content; padding: 6px 12px; border-radius: 8px; }
                     .visit-day { font-size: 1.1rem; }
                     .visit-month { font-size: 0.7rem; }
                     .visit-year { font-size: 0.7rem; margin-top: 0; margin-left: 4px; }
 
-                    /* Pet summary: columna en mobile */
+                    /* Pet summary */
                     .pet-summary { flex-direction: column; align-items: flex-start; padding: 14px; }
                     .summary-actions { width: 100%; }
                     .summary-actions .btn-visit,
                     .summary-actions .btn-pdf { flex: 1; text-align: center; }
 
-                    /* Vaccines header row */
+                    /* Vacunas */
                     .vaccines-header-row { flex-direction: column; align-items: flex-start; }
                     .btn-add-vaccine { width: 100%; text-align: center; }
 
-                    /* Modales: bottom sheet */
+                    /* Modales — bottom sheet */
                     .modal-overlay { padding: 0; align-items: flex-end; }
                     .modal { border-radius: 24px 24px 0 0; padding: 24px 16px; max-height: 92vh; border-bottom: none; }
                     .modal-header h2 { font-size: 1.15rem; }
@@ -1028,8 +1008,11 @@ export default function ClinicDashboard() {
                 ══════════════════════════════ */
                 @media (max-width: 380px) {
                     .vet-inner { padding: 12px 10px; }
-                    .vet-title { font-size: 1.3rem; }
-                    .tab-btn { font-size: 0.75rem; padding: 8px 10px; }
+                    .vet-title { font-size: 1.2rem; }
+                    .tab-btn { font-size: 0.72rem; padding: 8px 9px; }
+                    .vet-stat { padding: 8px 10px; }
+                    .stat-num { font-size: 1.1rem; }
+                    .stat-label { font-size: 0.62rem; }
                 }
             `}</style>
         </div>
