@@ -460,7 +460,7 @@ export default function Clinics() {
                 .clinic-card:hover { border-color: rgba(107,202,255,0.25); transform: translateY(-3px); }
                 .clinic-card.inactive { opacity: 0.55; }
 
-                .clinic-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; overflow: hidden; }
+                .clinic-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
                 .clinic-logo { width: 52px; height: 52px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; overflow: hidden; flex-shrink: 0; min-width: 52px; }
                 .clinic-logo img { width: 100%; height: 100%; object-fit: cover; }
                 .clinic-badges { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 4px;max-width: calc(100% - 68px); overflow: hidden; }
@@ -556,8 +556,9 @@ export default function Clinics() {
                 .clinic-badges {
                     flex-direction: row; align-items: center;
                     flex-wrap: wrap; gap: 4px;
-                    max-width: 60%;
-                }
+                    max-width: 55%;
+                    }
+                    .badge { white-space: nowrap; }
 
                 /* Specialties — scroll horizontal, tags no se achican */
                 .clinic-specialties {
