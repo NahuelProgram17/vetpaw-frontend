@@ -190,11 +190,11 @@ export default function Home() {
                         </div>
 
                         <h1 className="hero-title" style={{ fontSize: 48, fontWeight: 900, color: '#fff', lineHeight: 1.1, marginBottom: 18, letterSpacing: -1.5 }}>
-                            El historial de tu{' '}
+                            La plataforma que{' '}
                             <span style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                                mascota
+                                conecta
                             </span>
-                            ,<br />siempre con vos
+                            ,<br />veterinarias y dueños de mascotas
                         </h1>
 
                         <p className="hero-sub" style={{ color: 'rgba(255,255,255,0.65)', fontSize: 16, lineHeight: 1.75, marginBottom: 32, fontWeight: 400 }}>
