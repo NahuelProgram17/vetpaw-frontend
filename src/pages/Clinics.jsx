@@ -1,288 +1,386 @@
 // Clinics.jsx
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { getClinics, joinClinic } from "../services/api";
-import { useAuth } from "../context/AuthContext";
-import api from "../services/api";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getClinics, joinClinic } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 const SERVICE_LABELS = {
-    dogs: "🐶 Perros",
-    cats: "🐱 Gatos",
-    rabbits: "🐰 Conejos",
-    birds: "🦜 Aves",
-    horses: "🐴 Caballos",
-    exotic: "🦎 Exóticos",
-    surgery: "🔪 Cirugías",
-    internment: "🏥 Internación",
-    emergency: "🚨 Urgencias 24hs",
-    grooming: "✂️ Peluquería",
-    xray: "🩻 Radiografías",
-    lab: "🧪 Laboratorio",
+  dogs: '🐶 Perros',
+  cats: '🐱 Gatos',
+  rabbits: '🐰 Conejos',
+  birds: '🦜 Aves',
+  horses: '🐴 Caballos',
+  exotic: '🦎 Exóticos',
+  surgery: '🔪 Cirugías',
+  internment: '🏥 Internación',
+  emergency: '🚨 Urgencias 24hs',
+  grooming: '✂️ Peluquería',
+  xray: '🩻 Radiografías',
+  lab: '🧪 Laboratorio',
 };
 
 export default function Clinics() {
-    const navigate = useNavigate();
-    const { user } = useAuth();
-    const [clinics, setClinics] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState("");
-    const [filter24h, setFilter24h] = useState(false);
-    const [joining, setJoining] = useState(null);
-    const [joinSuccess, setJoinSuccess] = useState("");
-    const [reviewsByClinic, setReviewsByClinic] = useState({});
-    const [expandedReviews, setExpandedReviews] = useState(null);
-    const [locationStatus, setLocationStatus] = useState("idle");
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [clinics, setClinics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filter24h, setFilter24h] = useState(false);
+  const [joining, setJoining] = useState(null);
+  const [joinSuccess, setJoinSuccess] = useState('');
+  const [reviewsByClinic, setReviewsByClinic] = useState({});
+  const [expandedReviews, setExpandedReviews] = useState(null);
+  const [locationStatus, setLocationStatus] = useState('idle');
 
-    useEffect(() => {
-        setLocationStatus("loading");
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                const { latitude, longitude } = pos.coords;
-                setLocationStatus("ok");
-                fetchClinics(latitude, longitude);
-            },
-            () => {
-                setLocationStatus("denied");
-                if (user?.latitude && user?.longitude) {
-                    fetchClinics(user.latitude, user.longitude);
-                } else {
-                    fetchClinics();
-                }
-            }
-        );
-    }, []);
-
-    const fetchClinics = (lat, lon) => {
-        let url = "/clinics/";
-        if (lat && lon) url += `?lat=${lat}&lon=${lon}`;
-        api.get(url)
-            .then(res => setClinics(res.data.results ?? res.data))
-            .catch(console.error)
-            .finally(() => setLoading(false));
-    };
-
-    const fetchReviews = async (clinicId) => {
-        if (reviewsByClinic[clinicId]) {
-            setExpandedReviews(expandedReviews === clinicId ? null : clinicId);
-            return;
+  useEffect(() => {
+    setLocationStatus('loading');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setLocationStatus('ok');
+        fetchClinics(latitude, longitude);
+      },
+      () => {
+        setLocationStatus('denied');
+        if (user?.latitude && user?.longitude) {
+          fetchClinics(user.latitude, user.longitude);
+        } else {
+          fetchClinics();
         }
-        try {
-            const res = await api.get(`/reviews/?clinic=${clinicId}`);
-            const reviews = res.data.results ?? res.data;
-            setReviewsByClinic(prev => ({ ...prev, [clinicId]: reviews }));
-            setExpandedReviews(clinicId);
-        } catch (e) { console.error(e); }
-    };
+      },
+    );
+  }, []);
 
-    const filtered = clinics.filter(c => {
-        const matchSearch =
-            c.name?.toLowerCase().includes(search.toLowerCase()) ||
-            c.locality?.toLowerCase().includes(search.toLowerCase()) ||
-            c.province?.toLowerCase().includes(search.toLowerCase());
-        return matchSearch && (filter24h ? c.is_24h : true);
+  const fetchClinics = (lat, lon) => {
+    let url = '/clinics/';
+    if (lat && lon) url += `?lat=${lat}&lon=${lon}`;
+    api
+      .get(url)
+      .then((res) => setClinics(res.data.results ?? res.data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  };
+
+  const fetchReviews = async (clinicId) => {
+    if (reviewsByClinic[clinicId]) {
+      setExpandedReviews(expandedReviews === clinicId ? null : clinicId);
+      return;
+    }
+    try {
+      const res = await api.get(`/reviews/?clinic=${clinicId}`);
+      const reviews = res.data.results ?? res.data;
+      setReviewsByClinic((prev) => ({ ...prev, [clinicId]: reviews }));
+      setExpandedReviews(clinicId);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const filtered = clinics.filter((c) => {
+    const matchSearch =
+      c.name?.toLowerCase().includes(search.toLowerCase()) ||
+      c.locality?.toLowerCase().includes(search.toLowerCase()) ||
+      c.province?.toLowerCase().includes(search.toLowerCase());
+    return matchSearch && (filter24h ? c.is_24h : true);
+  });
+
+  const handleJoin = async (clinicId) => {
+    setJoining(clinicId);
+    try {
+      await joinClinic(clinicId);
+      setJoinSuccess('¡Te asociaste exitosamente! 🎉');
+      setTimeout(() => setJoinSuccess(''), 3000);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al asociarse.');
+    } finally {
+      setJoining(null);
+    }
+  };
+
+  const renderStars = (rating, small = false) => {
+    return [1, 2, 3, 4, 5].map((s) => (
+      <span
+        key={s}
+        style={{
+          color: s <= Math.round(rating) ? '#ffd93d' : 'rgba(255,255,255,0.15)',
+          fontSize: small ? '0.85rem' : '1rem',
+        }}
+      >
+        ★
+      </span>
+    ));
+  };
+
+  const formatDate = (d) =>
+    new Date(d).toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
     });
 
-    const handleJoin = async (clinicId) => {
-        setJoining(clinicId);
-        try {
-            await joinClinic(clinicId);
-            setJoinSuccess("¡Te asociaste exitosamente! 🎉");
-            setTimeout(() => setJoinSuccess(""), 3000);
-        } catch (err) {
-            alert(err.response?.data?.error || "Error al asociarse.");
-        } finally { setJoining(null); }
-    };
+  return (
+    <div className="clinics-page">
+      <div className="blob b1" />
+      <div className="blob b2" />
+      <div className="clinics-inner">
+        <header className="clinics-header">
+          <div>
+            <h1 className="clinics-title">🏥 Veterinarias</h1>
+            <p className="clinics-subtitle">
+              {clinics.length === 0
+                ? 'No hay clínicas registradas todavía.'
+                : `${filtered.length} clínica${filtered.length !== 1 ? 's' : ''} disponible${filtered.length !== 1 ? 's' : ''}`}
+            </p>
+          </div>
+          <button
+            className="btn-primary"
+            onClick={() => navigate('/appointments/new')}
+          >
+            📅 Sacar turno
+          </button>
+        </header>
 
-    const renderStars = (rating, small = false) => {
-        return [1,2,3,4,5].map(s => (
-            <span key={s} style={{
-                color: s <= Math.round(rating) ? "#ffd93d" : "rgba(255,255,255,0.15)",
-                fontSize: small ? "0.85rem" : "1rem",
-            }}>★</span>
-        ));
-    };
+        {/* Banner de ubicación */}
+        {locationStatus === 'loading' && (
+          <div className="location-banner location-loading">
+            📍 Obteniendo tu ubicación...
+          </div>
+        )}
+        {locationStatus === 'ok' && (
+          <div className="location-banner location-ok">
+            📍 Mostrando clínicas cercanas a tu ubicación
+          </div>
+        )}
+        {locationStatus === 'denied' && (
+          <div className="location-banner location-denied">
+            📍 Ubicación no disponible — mostrando todas las clínicas
+          </div>
+        )}
 
-    const formatDate = (d) => new Date(d).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric" });
+        {/* Buscador */}
+        <div className="search-bar">
+          <div className="search-input-wrapper">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Buscar por nombre, localidad..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button className="search-clear" onClick={() => setSearch('')}>
+                ✕
+              </button>
+            )}
+          </div>
+          <button
+            className={`filter-24h ${filter24h ? 'active' : ''}`}
+            onClick={() => setFilter24h(!filter24h)}
+          >
+            🕐 24hs
+          </button>
+        </div>
 
-    return (
-        <div className="clinics-page">
-            <div className="blob b1" /><div className="blob b2" />
-            <div className="clinics-inner">
+        {joinSuccess && <div className="join-toast">✅ {joinSuccess}</div>}
 
-                <header className="clinics-header">
-                    <div>
-                        <h1 className="clinics-title">🏥 Veterinarias</h1>
-                        <p className="clinics-subtitle">
-                            {clinics.length === 0
-                                ? "No hay clínicas registradas todavía."
-                                : `${filtered.length} clínica${filtered.length !== 1 ? "s" : ""} disponible${filtered.length !== 1 ? "s" : ""}`}
-                        </p>
-                    </div>
-                    <button className="btn-primary" onClick={() => navigate("/appointments/new")}>
-                        📅 Sacar turno
-                    </button>
-                </header>
+        {loading && (
+          <div className="loading-state">
+            <span className="paw-spin">🐾</span>
+            <p>Cargando clínicas...</p>
+          </div>
+        )}
 
-                {/* Banner de ubicación */}
-                {locationStatus === "loading" && (
-                    <div className="location-banner location-loading">📍 Obteniendo tu ubicación...</div>
-                )}
-                {locationStatus === "ok" && (
-                    <div className="location-banner location-ok">📍 Mostrando clínicas cercanas a tu ubicación</div>
-                )}
-                {locationStatus === "denied" && (
-                    <div className="location-banner location-denied">📍 Ubicación no disponible — mostrando todas las clínicas</div>
-                )}
+        {!loading && filtered.length === 0 && (
+          <div className="empty-state">
+            <span className="empty-emoji">🏥</span>
+            <h2>Sin resultados</h2>
+            <p>
+              {search
+                ? `No encontramos clínicas con "${search}".`
+                : 'No hay clínicas registradas todavía.'}
+            </p>
+            {search && (
+              <button className="btn-ghost" onClick={() => setSearch('')}>
+                Limpiar búsqueda
+              </button>
+            )}
+          </div>
+        )}
 
-                {/* Buscador */}
-                <div className="search-bar">
-                    <div className="search-input-wrapper">
-                        <span className="search-icon">🔍</span>
-                        <input
-                            type="text"
-                            placeholder="Buscar por nombre, localidad..."
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                        />
-                        {search && <button className="search-clear" onClick={() => setSearch("")}>✕</button>}
-                    </div>
-                    <button className={`filter-24h ${filter24h ? "active" : ""}`} onClick={() => setFilter24h(!filter24h)}>
-                        🕐 24hs
-                    </button>
+        {!loading && filtered.length > 0 && (
+          <div className="clinics-grid">
+            {filtered.map((clinic) => (
+              <div
+                key={clinic.id}
+                className={`clinic-card ${!clinic.is_active ? 'inactive' : ''}`}
+              >
+                <div className="clinic-card-top">
+                  <div className="clinic-logo">
+                    {clinic.logo ? (
+                      <img src={clinic.logo} alt={clinic.name} />
+                    ) : (
+                      <span>🏥</span>
+                    )}
+                  </div>
+                  <div className="clinic-badges">
+                    {clinic.distance_km != null && (
+                      <span className="badge badge-distance">
+                        📍 {clinic.distance_km} km
+                      </span>
+                    )}
+                    {clinic.is_24h && (
+                      <span className="badge badge-24h">🕐 24hs</span>
+                    )}
+                    {clinic.is_active ? (
+                      <span className="badge badge-active">● Activa</span>
+                    ) : (
+                      <span className="badge badge-inactive">● Inactiva</span>
+                    )}
+                  </div>
                 </div>
 
-                {joinSuccess && <div className="join-toast">✅ {joinSuccess}</div>}
+                <h3 className="clinic-name">{clinic.name}</h3>
 
-                {loading && <div className="loading-state"><span className="paw-spin">🐾</span><p>Cargando clínicas...</p></div>}
+                <div className="clinic-rating">
+                  {clinic.rating_avg ? (
+                    <>
+                      <div className="stars-display">
+                        {renderStars(clinic.rating_avg)}
+                      </div>
+                      <span className="rating-num">{clinic.rating_avg}</span>
+                      <span className="rating-count">
+                        ({clinic.reviews_count} reseña
+                        {clinic.reviews_count !== 1 ? 's' : ''})
+                      </span>
+                    </>
+                  ) : (
+                    <span className="no-rating">Sin reseñas aún</span>
+                  )}
+                </div>
 
-                {!loading && filtered.length === 0 && (
-                    <div className="empty-state">
-                        <span className="empty-emoji">🏥</span>
-                        <h2>Sin resultados</h2>
-                        <p>{search ? `No encontramos clínicas con "${search}".` : "No hay clínicas registradas todavía."}</p>
-                        {search && <button className="btn-ghost" onClick={() => setSearch("")}>Limpiar búsqueda</button>}
-                    </div>
+                {clinic.description && (
+                  <p className="clinic-desc">{clinic.description}</p>
                 )}
 
-                {!loading && filtered.length > 0 && (
-                    <div className="clinics-grid">
-                        {filtered.map(clinic => (
-                            <div key={clinic.id} className={`clinic-card ${!clinic.is_active ? "inactive" : ""}`}>
-                                <div className="clinic-card-top">
-                                    <div className="clinic-logo">
-                                        {clinic.logo ? <img src={clinic.logo} alt={clinic.name} /> : <span>🏥</span>}
-                                    </div>
-                                    <div className="clinic-badges">
-                                        {clinic.distance_km != null && (
-                                            <span className="badge badge-distance">📍 {clinic.distance_km} km</span>
-                                        )}
-                                        {clinic.is_24h && <span className="badge badge-24h">🕐 24hs</span>}
-                                        {clinic.is_active
-                                            ? <span className="badge badge-active">● Activa</span>
-                                            : <span className="badge badge-inactive">● Inactiva</span>}
-                                    </div>
-                                </div>
+                {clinic.services?.length > 0 && (
+                  <div className="clinic-specialties">
+                    {clinic.services.map((s, i) => (
+                      <span key={i} className="specialty-tag">
+                        {SERVICE_LABELS[s] || s}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
-                                <h3 className="clinic-name">{clinic.name}</h3>
+                <div className="clinic-details">
+                  {(clinic.address || clinic.locality || clinic.province) && (
+                    <div className="clinic-detail">
+                      <span className="detail-icon">📍</span>
+                      <span>
+                        {[clinic.address, clinic.locality, clinic.province]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </span>
+                    </div>
+                  )}
+                  {clinic.phone && (
+                    <div className="clinic-detail">
+                      <span className="detail-icon">📞</span>
+                      <a href={`tel:${clinic.phone}`}>{clinic.phone}</a>
+                    </div>
+                  )}
+                  {clinic.email && (
+                    <div className="clinic-detail">
+                      <span className="detail-icon">✉️</span>
+                      <a href={`mailto:${clinic.email}`}>{clinic.email}</a>
+                    </div>
+                  )}
+                  {clinic.members_count > 0 && (
+                    <div className="clinic-detail">
+                      <span className="detail-icon">👥</span>
+                      <span>
+                        {clinic.members_count} miembro
+                        {clinic.members_count !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-                                <div className="clinic-rating">
-                                    {clinic.rating_avg ? (
-                                        <>
-                                            <div className="stars-display">{renderStars(clinic.rating_avg)}</div>
-                                            <span className="rating-num">{clinic.rating_avg}</span>
-                                            <span className="rating-count">({clinic.reviews_count} reseña{clinic.reviews_count !== 1 ? "s" : ""})</span>
-                                        </>
-                                    ) : (
-                                        <span className="no-rating">Sin reseñas aún</span>
-                                    )}
-                                </div>
+                {clinic.reviews_count > 0 && (
+                  <button
+                    className="btn-toggle-reviews"
+                    onClick={() => fetchReviews(clinic.id)}
+                  >
+                    {expandedReviews === clinic.id
+                      ? '▲ Ocultar reseñas'
+                      : `▼ Ver reseñas (${clinic.reviews_count})`}
+                  </button>
+                )}
 
-                                {clinic.description && <p className="clinic-desc">{clinic.description}</p>}
-
-                                {clinic.services?.length > 0 && (
-                                    <div className="clinic-specialties">
-                                        {clinic.services.map((s, i) => (
-                                            <span key={i} className="specialty-tag">{SERVICE_LABELS[s] || s}</span>
-                                        ))}
-                                    </div>
-                                )}
-
-                                <div className="clinic-details">
-                                    {(clinic.address || clinic.locality || clinic.province) && (
-                                        <div className="clinic-detail">
-                                            <span className="detail-icon">📍</span>
-                                            <span>{[clinic.address, clinic.locality, clinic.province].filter(Boolean).join(", ")}</span>
-                                        </div>
-                                    )}
-                                    {clinic.phone && (
-                                        <div className="clinic-detail">
-                                            <span className="detail-icon">📞</span>
-                                            <a href={`tel:${clinic.phone}`}>{clinic.phone}</a>
-                                        </div>
-                                    )}
-                                    {clinic.email && (
-                                        <div className="clinic-detail">
-                                            <span className="detail-icon">✉️</span>
-                                            <a href={`mailto:${clinic.email}`}>{clinic.email}</a>
-                                        </div>
-                                    )}
-                                    {clinic.members_count > 0 && (
-                                        <div className="clinic-detail">
-                                            <span className="detail-icon">👥</span>
-                                            <span>{clinic.members_count} miembro{clinic.members_count !== 1 ? "s" : ""}</span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {clinic.reviews_count > 0 && (
-                                    <button className="btn-toggle-reviews" onClick={() => fetchReviews(clinic.id)}>
-                                        {expandedReviews === clinic.id ? "▲ Ocultar reseñas" : `▼ Ver reseñas (${clinic.reviews_count})`}
-                                    </button>
-                                )}
-
-                                {expandedReviews === clinic.id && reviewsByClinic[clinic.id] && (
-                                    <div className="reviews-list">
-                                        {reviewsByClinic[clinic.id].map(r => (
-                                            <div key={r.id} className="review-item">
-                                                <div className="review-top">
-                                                    <div className="review-stars">{renderStars(r.rating, true)}</div>
-                                                    <span className="review-author">👤 {r.owner_name}</span>
-                                                    <span className="review-date">{formatDate(r.created_at)}</span>
-                                                </div>
-                                                {r.pet_name && <span className="review-pet">🐾 {r.pet_name}</span>}
-                                                {r.comment && <p className="review-comment">"{r.comment}"</p>}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                <div className="clinic-card-actions">
-                                    <button
-                                        className="btn-turno"
-                                        onClick={() => navigate("/appointments/new")}
-                                        disabled={!clinic.is_active}
-                                    >
-                                        📅 Sacar turno
-                                    </button>
-                                    {user?.role === 'owner' && (
-                                        clinic.is_member
-                                            ? <button className="btn-join" disabled style={{opacity: 0.6}}>✓ Asociado</button>
-                                            : <button
-                                                className="btn-join"
-                                                onClick={() => handleJoin(clinic.id)}
-                                                disabled={joining === clinic.id || !clinic.is_active}
-                                              >
-                                                {joining === clinic.id ? "Asociando..." : "🔗 Asociarse"}
-                                              </button>
-                                    )}
-                                </div>
+                {expandedReviews === clinic.id &&
+                  reviewsByClinic[clinic.id] && (
+                    <div className="reviews-list">
+                      {reviewsByClinic[clinic.id].map((r) => (
+                        <div key={r.id} className="review-item">
+                          <div className="review-top">
+                            <div className="review-stars">
+                              {renderStars(r.rating, true)}
                             </div>
-                        ))}
+                            <span className="review-author">
+                              👤 {r.owner_name}
+                            </span>
+                            <span className="review-date">
+                              {formatDate(r.created_at)}
+                            </span>
+                          </div>
+                          {r.pet_name && (
+                            <span className="review-pet">🐾 {r.pet_name}</span>
+                          )}
+                          {r.comment && (
+                            <p className="review-comment">"{r.comment}"</p>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                )}
-            </div>
+                  )}
 
-            <style>{`
+                <div className="clinic-card-actions">
+                  <button
+                    className="btn-turno"
+                    onClick={() => navigate('/appointments/new')}
+                    disabled={!clinic.is_active}
+                  >
+                    📅 Sacar turno
+                  </button>
+                  {user?.role === 'owner' &&
+                    (clinic.is_member ? (
+                      <button
+                        className="btn-join"
+                        disabled
+                        style={{ opacity: 0.6 }}
+                      >
+                        ✓ Asociado
+                      </button>
+                    ) : (
+                      <button
+                        className="btn-join"
+                        onClick={() => handleJoin(clinic.id)}
+                        disabled={joining === clinic.id || !clinic.is_active}
+                      >
+                        {joining === clinic.id
+                          ? 'Asociando...'
+                          : '🔗 Asociarse'}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -433,40 +531,53 @@ export default function Clinics() {
                 RESPONSIVE — MOBILE (≤600px)
                 ══════════════════════════════ */
                 @media (max-width: 600px) {
-                    .clinics-inner { padding: 16px 14px; }
+    .clinics-inner { padding: 16px 14px; }
 
-                    /* Header */
-                    .clinics-header { flex-direction: column; align-items: flex-start; margin-bottom: 16px; }
-                    .clinics-title { font-size: 1.5rem; }
-                    .clinics-header .btn-primary { width: 100%; text-align: center; }
+    /* Header — botón compacto, no full width */
+    .clinics-header { flex-direction: column; align-items: flex-start; margin-bottom: 16px; }
+    .clinics-title { font-size: 1.5rem; }
+    .clinics-header .btn-primary {
+        align-self: flex-start;
+        padding: 10px 18px;
+        font-size: 0.88rem;
+    }
 
-                    /* Search: buscador full width, filtro 24h al lado */
-                    .search-bar { flex-direction: row; gap: 8px; }
-                    .filter-24h { padding: 13px 14px; font-size: 0.82rem; }
+    /* Search */
+    .search-bar { flex-direction: row; gap: 8px; }
+    .filter-24h { padding: 13px 14px; font-size: 0.82rem; }
 
-                    /* Grid: 1 columna */
-                    .clinics-grid { grid-template-columns: 1fr; gap: 14px; }
+    /* Grid: 1 columna */
+    .clinics-grid { grid-template-columns: 1fr; gap: 14px; }
 
-                    /* Card */
-                    .clinic-card { padding: 18px 16px; border-radius: 16px; gap: 10px; }
+    /* Card */
+    .clinic-card { padding: 18px 16px; border-radius: 16px; gap: 10px; }
 
-                    /* Badges en fila en mobile */
-                    .clinic-badges { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 4px; }
+    /* Badges — en fila, con wrap para que no se salgan */
+    .clinic-badges {
+        flex-direction: row; align-items: center;
+        flex-wrap: wrap; gap: 4px;
+        max-width: 60%;
+    }
 
-                    /* Acciones: botones al ancho completo en mobile */
-                    .clinic-card-actions { flex-direction: column; gap: 8px; }
-                    .btn-turno { flex: none; width: 100%; padding: 12px; }
-                    .btn-join { width: 100%; padding: 12px; text-align: center; }
+    /* Specialties — scroll horizontal, tags no se achican */
+    .clinic-specialties {
+        flex-wrap: nowrap; overflow-x: auto;
+        padding-bottom: 6px;
+        -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .clinic-specialties::-webkit-scrollbar { display: none; }
+    .specialty-tag { flex-shrink: 0; }
 
-                    /* Specialties: scroll horizontal */
-                    .clinic-specialties { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-                    .clinic-specialties::-webkit-scrollbar { display: none; }
+    /* Acciones: columna */
+    .clinic-card-actions { flex-direction: column; gap: 8px; }
+    .btn-turno { flex: none; width: 100%; padding: 12px; }
+    .btn-join { width: 100%; padding: 12px; text-align: center; }
 
-                    /* Empty state */
-                    .empty-state { padding: 48px 16px; }
-                    .empty-emoji { font-size: 3.5rem; }
-                    .empty-state h2 { font-size: 1.3rem; }
-                }
+    /* Empty state */
+    .empty-state { padding: 48px 16px; }
+    .empty-emoji { font-size: 3.5rem; }
+    .empty-state h2 { font-size: 1.3rem; }
+}
 
                 /* ══════════════════════════════
                 RESPONSIVE — MOBILE XS (≤380px)
@@ -478,6 +589,6 @@ export default function Clinics() {
                     .filter-24h { padding: 13px 10px; font-size: 0.78rem; }
                 }
             `}</style>
-        </div>
-    );
+    </div>
+  );
 }
