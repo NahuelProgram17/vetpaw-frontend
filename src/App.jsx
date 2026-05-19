@@ -22,11 +22,13 @@ import Contacto from './pages/Contacto'
 import SumarVeterinaria from './pages/SumarVeterinaria'
 import AnunciarVetPaw from './pages/AnunciarVetPaw'
 import Blog from './pages/Blog'
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+      <ScrollToTop />
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
