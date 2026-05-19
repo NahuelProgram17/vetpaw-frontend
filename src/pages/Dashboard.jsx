@@ -88,7 +88,6 @@ export default function Dashboard() {
         fetchAll();
     };
 
-    // Aviso libreta sanitaria
     const apptsPendientes = appointments.filter(
         a => a.status === "pending" || a.status === "confirmed"
     );
@@ -378,7 +377,7 @@ export default function Dashboard() {
                     font-family: 'Nunito', sans-serif;
                     position: relative;
                     overflow-x: hidden;
-                    padding-bottom: 80px;
+                    padding-bottom: 100px;
                 }
                 .blob {
                     position: fixed; border-radius: 50%;
@@ -400,6 +399,7 @@ export default function Dashboard() {
                     display: flex; flex-direction: column; gap: 20px;
                 }
 
+                /* ── Header ── */
                 .dash-header {
                     display: flex; align-items: center;
                     justify-content: space-between;
@@ -414,9 +414,11 @@ export default function Dashboard() {
                     font-size: 0.95rem; font-weight: 900; cursor: pointer;
                     box-shadow: 0 6px 20px rgba(76,175,80,0.35);
                     transition: transform 0.15s, box-shadow 0.15s;
+                    white-space: nowrap;
                 }
                 .btn-new-appt:hover { box-shadow: 0 10px 28px rgba(76,175,80,0.5); }
 
+                /* ── Stats ── */
                 .stats-grid {
                     display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
                 }
@@ -427,11 +429,11 @@ export default function Dashboard() {
                     backdrop-filter: blur(10px); transition: border-color 0.2s, transform 0.2s;
                 }
                 .stat-card:hover { border-color: rgba(255,107,107,0.3); transform: translateY(-2px); }
-                .stat-icon { font-size: 2rem; }
+                .stat-icon { font-size: 2rem; flex-shrink: 0; }
                 .stat-num { font-size: 1.8rem; font-weight: 900; color: #fff; line-height: 1; }
                 .stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 600; margin-top: 2px; }
 
-                /* Aviso libreta */
+                /* ── Aviso libreta ── */
                 .libreta-aviso {
                     background: rgba(255,217,61,0.06);
                     border: 1px solid rgba(255,217,61,0.25);
@@ -443,7 +445,7 @@ export default function Dashboard() {
                 .libreta-text { font-size: 0.84rem; color: rgba(255,255,255,0.55); line-height: 1.6; }
                 .libreta-text strong { color: rgba(255,255,255,0.85); }
 
-                /* Notificaciones */
+                /* ── Notificaciones ── */
                 .notif-section {
                     border-color: rgba(255,217,61,0.25);
                     background: rgba(255,217,61,0.04);
@@ -460,39 +462,69 @@ export default function Dashboard() {
                     background: rgba(255,217,61,0.04) !important;
                 }
 
+                /* ── Rows ── */
                 .dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
+                /* ── Cards ── */
                 .dash-card {
                     background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
                     border-radius: 20px; padding: 24px; backdrop-filter: blur(10px);
                 }
-                .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+                .card-header {
+                    display: flex; align-items: center; justify-content: space-between;
+                    margin-bottom: 18px; gap: 8px; flex-wrap: wrap;
+                }
                 .card-header h2 { font-size: 1rem; font-weight: 900; color: #fff; }
-                .btn-link { background: none; border: none; color: #ffd93d; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: color 0.15s; }
+                .btn-link { background: none; border: none; color: #ffd93d; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: color 0.15s; white-space: nowrap; }
                 .btn-link:hover { color: #ffe97a; }
 
+                /* ── Empty state ── */
                 .empty-state { text-align: center; padding: 24px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
                 .empty-state span { font-size: 2.5rem; }
                 .empty-state p { color: rgba(255,255,255,0.35); font-size: 0.88rem; }
-                .btn-sm { background: linear-gradient(135deg, #4CAF50, #FF9800); border: none; color: #fff; border-radius: 8px; padding: 8px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(76,175,80,0.3); transition: opacity 0.15s; }
+                .btn-sm {
+                    background: linear-gradient(135deg, #4CAF50, #FF9800);
+                    border: none; color: #fff; border-radius: 8px;
+                    padding: 8px 16px; font-family: 'Nunito', sans-serif;
+                    font-size: 0.84rem; font-weight: 700; cursor: pointer;
+                    box-shadow: 0 4px 14px rgba(76,175,80,0.3); transition: opacity 0.15s;
+                }
                 .btn-sm:hover { opacity: 0.9; }
 
+                /* ── Pets ── */
                 .pets-list { display: flex; flex-direction: column; gap: 10px; }
-                .pet-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); transition: border-color 0.2s; }
+                .pet-item {
+                    display: flex; align-items: center; gap: 12px;
+                    padding: 10px 12px; border-radius: 12px;
+                    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+                    transition: border-color 0.2s;
+                }
                 .pet-item:hover { border-color: rgba(255,217,61,0.25); }
-                .pet-avatar { font-size: 1.8rem; }
-                .pet-name { font-weight: 800; color: #fff; font-size: 0.95rem; }
-                .pet-meta { font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: capitalize; }
-                .pet-age { margin-left: auto; font-size: 0.75rem; font-weight: 700; color: #ffd93d; background: rgba(255,217,61,0.1); border-radius: 6px; padding: 3px 8px; }
+                .pet-avatar { font-size: 1.8rem; flex-shrink: 0; }
+                .pet-info { flex: 1; min-width: 0; }
+                .pet-name { font-weight: 800; color: #fff; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .pet-meta { font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .pet-age { margin-left: auto; font-size: 0.75rem; font-weight: 700; color: #ffd93d; background: rgba(255,217,61,0.1); border-radius: 6px; padding: 3px 8px; white-space: nowrap; flex-shrink: 0; }
 
+                /* ── Appointments ── */
                 .appts-list { display: flex; flex-direction: column; gap: 10px; }
-                .appt-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); transition: border-color 0.2s; }
+                .appt-item {
+                    display: flex; align-items: center; gap: 10px;
+                    padding: 10px 12px; border-radius: 12px;
+                    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+                    transition: border-color 0.2s;
+                }
                 .appt-item:hover { border-color: rgba(255,107,107,0.25); }
-                .appt-date-box { display: flex; flex-direction: column; align-items: center; background: rgba(255,107,107,0.12); border-radius: 10px; padding: 6px 10px; min-width: 44px; flex-shrink: 0; }
+                .appt-date-box {
+                    display: flex; flex-direction: column; align-items: center;
+                    background: rgba(255,107,107,0.12); border-radius: 10px;
+                    padding: 6px 10px; min-width: 44px; flex-shrink: 0;
+                }
                 .appt-day { font-size: 1.2rem; font-weight: 900; color: #ff6b6b; line-height: 1; }
                 .appt-month { font-size: 0.65rem; color: rgba(255,107,107,0.7); text-transform: uppercase; font-weight: 700; }
-                .appt-title { font-weight: 800; color: #fff; font-size: 0.9rem; }
-                .appt-meta { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+                .appt-info { flex: 1; min-width: 0; }
+                .appt-title { font-weight: 800; color: #fff; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .appt-meta { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
                 .appt-status { margin-left: auto; font-size: 0.7rem; font-weight: 700; border-radius: 6px; padding: 3px 8px; white-space: nowrap; flex-shrink: 0; }
                 .appt-status.confirmed { background: rgba(107,202,255,0.12); color: #6bcaff; }
@@ -501,19 +533,32 @@ export default function Dashboard() {
                 .appt-status.completed { background: rgba(107,255,184,0.12); color: #6bffb8; }
                 .appt-status.no_show   { background: rgba(255,149,0,0.12);   color: #ff9500; }
 
+                /* ── Clinics ── */
                 .clinics-list { display: flex; flex-direction: column; gap: 10px; }
-                .clinic-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
-                .clinic-icon { font-size: 1.6rem; }
-                .clinic-name { font-weight: 800; color: #fff; font-size: 0.9rem; }
-                .clinic-meta { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
-                .clinic-phone { margin-left: auto; font-size: 0.75rem; color: rgba(255,255,255,0.35); white-space: nowrap; }
+                .clinic-item {
+                    display: flex; align-items: center; gap: 12px;
+                    padding: 10px 12px; border-radius: 12px;
+                    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+                }
+                .clinic-icon { font-size: 1.6rem; flex-shrink: 0; }
+                .clinic-info { flex: 1; min-width: 0; }
+                .clinic-name { font-weight: 800; color: #fff; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .clinic-meta { font-size: 0.75rem; color: rgba(255,255,255,0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .clinic-phone { margin-left: auto; font-size: 0.75rem; color: rgba(255,255,255,0.35); white-space: nowrap; flex-shrink: 0; }
 
+                /* ── Recent ── */
                 .recent-list { display: flex; flex-direction: column; gap: 10px; }
-                .recent-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+                .recent-item {
+                    display: flex; align-items: center; gap: 12px;
+                    padding: 10px 12px; border-radius: 12px;
+                    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+                }
                 .recent-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff6b6b; flex-shrink: 0; }
-                .recent-title { font-weight: 700; color: #fff; font-size: 0.9rem; }
-                .recent-date { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+                .recent-info { flex: 1; min-width: 0; }
+                .recent-title { font-weight: 700; color: #fff; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .recent-date { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+                /* ── FAB ── */
                 .fab {
                     position: fixed; bottom: 28px; right: 28px;
                     width: 56px; height: 56px; border-radius: 50%;
@@ -526,13 +571,71 @@ export default function Dashboard() {
                 }
                 .fab:hover { box-shadow: 0 12px 32px rgba(76,175,80,0.6); }
 
+                /* ══════════════════════════════
+                RESPONSIVE — TABLET (≤900px)
+                ══════════════════════════════ */
                 @media (max-width: 900px) {
-                    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+                    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
                     .dash-row { grid-template-columns: 1fr; }
                 }
-                @media (max-width: 480px) {
-                    .dash-inner { padding: 20px 16px; }
+
+                /* ══════════════════════════════
+                RESPONSIVE — MOBILE (≤600px)
+                ══════════════════════════════ */
+                @media (max-width: 600px) {
+                    .dash-inner { padding: 16px 14px; gap: 14px; }
+
+                    /* Header */
+                    .dash-header { flex-direction: column; align-items: flex-start; gap: 10px; }
                     .dash-title { font-size: 1.5rem; }
+                    .btn-new-appt { width: 100%; text-align: center; padding: 13px 16px; font-size: 0.95rem; }
+
+                    /* Stats */
+                    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+                    .stat-card { padding: 14px 12px; gap: 10px; border-radius: 14px; }
+                    .stat-icon { font-size: 1.6rem; }
+                    .stat-num { font-size: 1.5rem; }
+                    .stat-label { font-size: 0.7rem; }
+
+                    /* Aviso libreta */
+                    .libreta-aviso { padding: 14px; gap: 10px; border-radius: 14px; }
+                    .libreta-icon { font-size: 1.4rem; }
+                    .libreta-title { font-size: 0.88rem; }
+                    .libreta-text { font-size: 0.8rem; }
+
+                    /* Cards */
+                    .dash-card { padding: 16px 14px; border-radius: 16px; }
+                    .card-header { margin-bottom: 12px; }
+                    .card-header h2 { font-size: 0.92rem; }
+
+                    /* Notif badge — en mobile el título es largo, lo bajamos */
+                    .notif-section .card-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+
+                    /* Appt items — el status tag debajo en pantallas muy chicas */
+                    .appt-item { flex-wrap: wrap; gap: 8px; }
+                    .appt-info { min-width: 0; flex: 1 1 0; }
+                    .appt-status { margin-left: 0; }
+
+                    /* Recent items */
+                    .recent-item { flex-wrap: wrap; gap: 8px; }
+                    .recent-info { flex: 1 1 0; }
+
+                    /* Clinic phone — ocultarlo en mobile para no romper layout */
+                    .clinic-phone { display: none; }
+
+                    /* FAB más abajo en mobile para no tapar contenido */
+                    .fab { bottom: 20px; right: 16px; width: 52px; height: 52px; font-size: 1.6rem; }
+                }
+
+                /* ══════════════════════════════
+                RESPONSIVE — MOBILE XS (≤380px)
+                ══════════════════════════════ */
+                @media (max-width: 380px) {
+                    .dash-inner { padding: 12px 10px; }
+                    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+                    .stat-card { padding: 12px 10px; }
+                    .stat-num { font-size: 1.3rem; }
+                    .dash-title { font-size: 1.3rem; }
                 }
             `}</style>
         </div>

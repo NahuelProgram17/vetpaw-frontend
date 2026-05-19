@@ -49,13 +49,14 @@ export default function MedicalHistory() {
                     <p className="history-subtitle">El registro completo de salud de tus mascotas.</p>
                 </header>
 
+                {/* Filtros por mascota */}
                 {pets.length > 0 && (
                     <div className="pet-filters">
                         <button
                             className={`pet-filter-btn ${selectedPet === "all" ? "active" : ""}`}
                             onClick={() => setSelectedPet("all")}
                         >
-                            Todas las mascotas
+                            Todas
                         </button>
                         {pets.map(p => (
                             <button
@@ -69,6 +70,7 @@ export default function MedicalHistory() {
                     </div>
                 )}
 
+                {/* Tabs consultas / libreta */}
                 <div className="section-tabs">
                     <button
                         className={`section-tab ${section === "visits" ? "active" : ""}`}
@@ -80,7 +82,7 @@ export default function MedicalHistory() {
                         className={`section-tab ${section === "vaccines" ? "active" : ""}`}
                         onClick={() => setSection("vaccines")}
                     >
-                        💉 Libreta sanitaria ({filteredVaccines.length})
+                        💉 Libreta ({filteredVaccines.length})
                     </button>
                 </div>
 
@@ -91,7 +93,7 @@ export default function MedicalHistory() {
                     </div>
                 )}
 
-                {/* ── CONSULTAS ── */}
+                {/* ══ CONSULTAS ══ */}
                 {!loading && section === "visits" && (
                     filteredVisits.length === 0 ? (
                         <div className="empty-state">
@@ -154,7 +156,7 @@ export default function MedicalHistory() {
                     )
                 )}
 
-                {/* ── LIBRETA SANITARIA ── */}
+                {/* ══ LIBRETA SANITARIA ══ */}
                 {!loading && section === "vaccines" && (
                     filteredVaccines.length === 0 ? (
                         <div className="empty-state">
@@ -165,7 +167,6 @@ export default function MedicalHistory() {
                     ) : (
                         <div className="libreta-wrap">
 
-                            {/* Encabezado estilo libreta */}
                             <div className="libreta-header">
                                 <div className="libreta-header-left">
                                     <div className="libreta-icon">💉</div>
@@ -185,7 +186,7 @@ export default function MedicalHistory() {
                                 )}
                             </div>
 
-                            {/* Tabla estilo libreta */}
+                            {/* Tabla — scroll horizontal en mobile */}
                             <div className="libreta-table-wrap">
                                 <table className="libreta-table">
                                     <thead>
@@ -193,12 +194,12 @@ export default function MedicalHistory() {
                                             <th className="col-num">#</th>
                                             <th>Vacuna</th>
                                             {selectedPet === "all" && <th>Paciente</th>}
-                                            <th>Fecha de aplicación</th>
-                                            <th>Próxima dosis</th>
-                                            <th>Veterinario actuante</th>
+                                            <th>Fecha</th>
+                                            <th>Próx. dosis</th>
+                                            <th>Veterinario</th>
                                             <th>Matrícula</th>
-                                            <th>N° de lote</th>
-                                            <th>Observaciones</th>
+                                            <th>Lote</th>
+                                            <th>Notas</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -221,9 +222,7 @@ export default function MedicalHistory() {
                                                             </span>
                                                         ) : <span className="td-muted">—</span>}
                                                     </td>
-                                                    <td className="vet-cell">
-                                                        Dr/a. {v.vet_first_name} {v.vet_last_name}
-                                                    </td>
+                                                    <td className="vet-cell">Dr/a. {v.vet_first_name} {v.vet_last_name}</td>
                                                     <td className="td-muted mono">{v.vet_license}</td>
                                                     <td className="td-muted mono">{v.batch || "—"}</td>
                                                     <td className="td-muted">{v.notes || "—"}</td>
@@ -234,14 +233,14 @@ export default function MedicalHistory() {
                                 </table>
                             </div>
 
-                            {/* Pie de libreta */}
+                            {/* Footer libreta */}
                             <div className="libreta-footer">
                                 <div className="libreta-footer-item">
-                                    <span className="footer-label">Total de vacunas registradas</span>
+                                    <span className="footer-label">Total registradas</span>
                                     <span className="footer-value">{filteredVaccines.length}</span>
                                 </div>
                                 <div className="libreta-footer-item">
-                                    <span className="footer-label">Próximas a vencer (7 días)</span>
+                                    <span className="footer-label">Próx. a vencer (7d)</span>
                                     <span className="footer-value warning">
                                         {filteredVaccines.filter(v => {
                                             if (!v.next_dose) return false;
@@ -269,28 +268,62 @@ export default function MedicalHistory() {
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&family=DM+Mono:wght@400;500&display=swap');
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-                .history-page { min-height: 100vh; background: #1a1a2e; font-family: 'Nunito', sans-serif; position: relative; overflow-x: hidden; padding-bottom: 60px; }
+
+                .history-page {
+                    min-height: 100vh; background: #1a1a2e;
+                    font-family: 'Nunito', sans-serif;
+                    position: relative; overflow-x: hidden; padding-bottom: 60px;
+                }
                 .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.08; pointer-events: none; }
                 .b1 { width: 500px; height: 500px; background: #6bcaff; top: -100px; right: -100px; }
                 .b2 { width: 400px; height: 400px; background: #6bffb8; bottom: -100px; left: -100px; }
-                .history-inner { max-width: 980px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 24px; }
+
+                .history-inner {
+                    max-width: 980px; margin: 0 auto; padding: 32px 24px;
+                    position: relative; z-index: 1;
+                    display: flex; flex-direction: column; gap: 24px;
+                }
+
+                /* ── Header ── */
                 .history-header { display: flex; flex-direction: column; gap: 4px; }
                 .history-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
                 .history-subtitle { color: rgba(255,255,255,0.45); font-size: 0.9rem; }
 
-                /* Filtros */
-                .pet-filters { display: flex; gap: 8px; flex-wrap: wrap; }
-                .pet-filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+                /* ── Filtros mascota ── */
+                .pet-filters {
+                    display: flex; gap: 8px;
+                    flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px;
+                    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+                }
+                .pet-filters::-webkit-scrollbar { display: none; }
+                .pet-filter-btn {
+                    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+                    color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 16px;
+                    font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700;
+                    cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+                }
                 .pet-filter-btn:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
                 .pet-filter-btn.active { background: rgba(107,202,255,0.12); border-color: rgba(107,202,255,0.35); color: #6bcaff; }
 
-                /* Tabs */
-                .section-tabs { display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-                .section-tab { background: transparent; border: none; border-bottom: 2px solid transparent; color: rgba(255,255,255,0.4); font-family: 'Nunito', sans-serif; font-size: 0.92rem; font-weight: 700; padding: 10px 18px; cursor: pointer; transition: all 0.2s; margin-bottom: -1px; }
+                /* ── Tabs ── */
+                .section-tabs {
+                    display: flex; gap: 4px;
+                    border-bottom: 1px solid rgba(255,255,255,0.08);
+                    overflow-x: auto; scrollbar-width: none;
+                }
+                .section-tabs::-webkit-scrollbar { display: none; }
+                .section-tab {
+                    background: transparent; border: none;
+                    border-bottom: 2px solid transparent;
+                    color: rgba(255,255,255,0.4); font-family: 'Nunito', sans-serif;
+                    font-size: 0.92rem; font-weight: 700; padding: 10px 18px;
+                    cursor: pointer; transition: all 0.2s; margin-bottom: -1px;
+                    white-space: nowrap; flex-shrink: 0;
+                }
                 .section-tab:hover { color: rgba(255,255,255,0.7); }
                 .section-tab.active { color: #6bcaff; border-bottom-color: #6bcaff; }
 
-                /* Loading / empty */
+                /* ── Loading / Empty ── */
                 .loading-state, .empty-state { text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
                 .paw-spin { font-size: 3rem; animation: spin 1s linear infinite; display: block; }
                 @keyframes spin { to { transform: rotate(360deg); } }
@@ -298,53 +331,66 @@ export default function MedicalHistory() {
                 .empty-state span { font-size: 4rem; }
                 .empty-state h2 { font-family: 'Fraunces', serif; font-size: 1.5rem; font-style: italic; color: #fff; }
 
-                /* Consultas */
+                /* ── Consultas — timeline ── */
                 .visits-list { display: flex; flex-direction: column; gap: 0; }
                 .visit-card { display: flex; gap: 0; }
                 .visit-left { display: flex; flex-direction: column; align-items: center; width: 70px; flex-shrink: 0; }
-                .visit-date-box { display: flex; flex-direction: column; align-items: center; background: rgba(107,202,255,0.12); border: 1px solid rgba(107,202,255,0.2); border-radius: 12px; padding: 8px 10px; width: 56px; }
+                .visit-date-box {
+                    display: flex; flex-direction: column; align-items: center;
+                    background: rgba(107,202,255,0.12); border: 1px solid rgba(107,202,255,0.2);
+                    border-radius: 12px; padding: 8px 10px; width: 56px;
+                }
                 .visit-day { font-size: 1.4rem; font-weight: 900; color: #6bcaff; line-height: 1; }
                 .visit-month { font-size: 0.6rem; color: rgba(107,202,255,0.7); text-transform: uppercase; font-weight: 700; }
                 .visit-year { font-size: 0.6rem; color: rgba(255,255,255,0.3); font-weight: 600; margin-top: 2px; }
                 .visit-line { flex: 1; width: 2px; background: rgba(255,255,255,0.06); margin: 8px 0; }
-                .visit-content { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(10px); display: flex; flex-direction: column; gap: 12px; }
+                .visit-content {
+                    flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 16px; padding: 18px 20px; margin-bottom: 16px;
+                    backdrop-filter: blur(10px); display: flex; flex-direction: column; gap: 12px;
+                    min-width: 0;
+                }
                 .visit-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
                 .visit-reason { font-size: 1rem; font-weight: 900; color: #fff; }
-                .next-visit-badge { font-size: 0.72rem; font-weight: 700; background: rgba(255,217,61,0.10); border: 1px solid rgba(255,217,61,0.25); color: #ffd93d; border-radius: 6px; padding: 3px 10px; }
-                .visit-meta { display: flex; gap: 14px; flex-wrap: wrap; }
+                .next-visit-badge { font-size: 0.72rem; font-weight: 700; background: rgba(255,217,61,0.10); border: 1px solid rgba(255,217,61,0.25); color: #ffd93d; border-radius: 6px; padding: 3px 10px; white-space: nowrap; flex-shrink: 0; }
+                .visit-meta { display: flex; gap: 10px; flex-wrap: wrap; }
                 .visit-meta span { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
                 .visit-details { display: flex; flex-direction: column; gap: 10px; }
                 .detail-block { display: flex; flex-direction: column; gap: 4px; }
                 .detail-label { font-size: 0.72rem; font-weight: 900; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; }
                 .detail-block p { font-size: 0.88rem; color: rgba(255,255,255,0.7); line-height: 1.5; }
 
-                /* ── LIBRETA SANITARIA ── */
+                /* ── Libreta sanitaria ── */
                 .libreta-wrap { display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; border: 1px solid rgba(107,202,255,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
 
-                /* Header libreta */
-                .libreta-header { background: linear-gradient(135deg, #1e2a4a, #162040); border-bottom: 2px solid rgba(107,202,255,0.25); padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
-                .libreta-header-left { display: flex; align-items: center; gap: 16px; }
-                .libreta-icon { width: 52px; height: 52px; background: rgba(107,202,255,0.12); border: 1.5px solid rgba(107,202,255,0.3); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; }
-                .libreta-title { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -0.5px; }
-                .libreta-sub { font-size: 0.78rem; color: rgba(107,202,255,0.6); font-weight: 600; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.08em; }
-                .libreta-pet-info { text-align: right; background: rgba(107,202,255,0.08); border: 1px solid rgba(107,202,255,0.2); border-radius: 10px; padding: 10px 16px; }
+                .libreta-header {
+                    background: linear-gradient(135deg, #1e2a4a, #162040);
+                    border-bottom: 2px solid rgba(107,202,255,0.25);
+                    padding: 20px 24px; display: flex; align-items: center;
+                    justify-content: space-between; flex-wrap: wrap; gap: 14px;
+                }
+                .libreta-header-left { display: flex; align-items: center; gap: 14px; }
+                .libreta-icon { width: 48px; height: 48px; background: rgba(107,202,255,0.12); border: 1.5px solid rgba(107,202,255,0.3); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+                .libreta-title { font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -0.5px; }
+                .libreta-sub { font-size: 0.72rem; color: rgba(107,202,255,0.6); font-weight: 600; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.08em; }
+                .libreta-pet-info { background: rgba(107,202,255,0.08); border: 1px solid rgba(107,202,255,0.2); border-radius: 10px; padding: 10px 16px; }
                 .libreta-pet-name { font-size: 1rem; font-weight: 900; color: #fff; }
                 .libreta-pet-detail { font-size: 0.75rem; color: rgba(107,202,255,0.7); margin-top: 2px; text-transform: capitalize; }
 
-                /* Tabla libreta */
-                .libreta-table-wrap { overflow-x: auto; background: rgba(255,255,255,0.02); }
-                .libreta-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+                /* Tabla con scroll horizontal */
+                .libreta-table-wrap { overflow-x: auto; background: rgba(255,255,255,0.02); -webkit-overflow-scrolling: touch; }
+                .libreta-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; min-width: 600px; }
                 .libreta-table thead tr { background: rgba(107,202,255,0.08); border-bottom: 1.5px solid rgba(107,202,255,0.2); }
-                .libreta-table th { padding: 13px 16px; text-align: left; font-size: 0.7rem; font-weight: 900; color: rgba(107,202,255,0.7); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
-                .libreta-table td { padding: 13px 16px; color: rgba(255,255,255,0.8); border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+                .libreta-table th { padding: 12px 14px; text-align: left; font-size: 0.7rem; font-weight: 900; color: rgba(107,202,255,0.7); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+                .libreta-table td { padding: 12px 14px; color: rgba(255,255,255,0.8); border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
                 .row-even { background: rgba(255,255,255,0.015); }
                 .row-odd  { background: rgba(255,255,255,0.03); }
                 .libreta-table tbody tr:last-child td { border-bottom: none; }
                 .libreta-table tbody tr:hover td { background: rgba(107,202,255,0.06); }
-                .col-num { width: 40px; }
+                .col-num { width: 36px; }
                 .col-num-val { text-align: center; font-weight: 900; color: rgba(107,202,255,0.5); font-size: 0.75rem; }
                 .vaccine-name-cell { font-weight: 900; color: #fff; white-space: nowrap; }
-                .pet-cell { font-weight: 700; color: #6bcaff; }
+                .pet-cell { font-weight: 700; color: #6bcaff; white-space: nowrap; }
                 .date-cell { white-space: nowrap; color: rgba(255,255,255,0.6); }
                 .vet-cell { white-space: nowrap; color: rgba(255,255,255,0.75); }
                 .td-muted { color: rgba(255,255,255,0.35) !important; }
@@ -353,7 +399,7 @@ export default function MedicalHistory() {
                 .badge-overdue { background: rgba(255,149,0,0.12); color: #ff9500; border: 1px solid rgba(255,149,0,0.25); border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
 
                 /* Footer libreta */
-                .libreta-footer { background: rgba(107,202,255,0.05); border-top: 1.5px solid rgba(107,202,255,0.15); padding: 16px 28px; display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
+                .libreta-footer { background: rgba(107,202,255,0.05); border-top: 1.5px solid rgba(107,202,255,0.15); padding: 14px 20px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
                 .libreta-footer-item { display: flex; flex-direction: column; gap: 2px; }
                 .footer-label { font-size: 0.68rem; color: rgba(255,255,255,0.35); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
                 .footer-value { font-size: 1.1rem; font-weight: 900; color: #fff; }
@@ -362,13 +408,46 @@ export default function MedicalHistory() {
                 .libreta-footer-powered { margin-left: auto; font-size: 0.72rem; color: rgba(255,255,255,0.25); font-style: italic; }
                 .libreta-footer-powered strong { color: rgba(107,202,255,0.5); }
 
+                /* ══════════════════════════════
+                RESPONSIVE — MOBILE (≤600px)
+                ══════════════════════════════ */
                 @media (max-width: 600px) {
-                    .history-inner { padding: 20px 16px; }
-                    .visit-left { width: 50px; }
-                    .libreta-header { flex-direction: column; align-items: flex-start; }
-                    .libreta-pet-info { text-align: left; }
-                    .libreta-footer { gap: 16px; }
-                    .libreta-footer-powered { margin-left: 0; }
+                    .history-inner { padding: 16px 14px; gap: 16px; }
+                    .history-title { font-size: 1.5rem; }
+
+                    /* Timeline: columna izquierda más angosta */
+                    .visit-left { width: 48px; }
+                    .visit-date-box { width: 48px; padding: 6px 8px; }
+                    .visit-day { font-size: 1.2rem; }
+                    .visit-content { padding: 14px; border-radius: 14px; }
+                    .visit-reason { font-size: 0.95rem; }
+
+                    /* Libreta header: columna en mobile */
+                    .libreta-header { flex-direction: column; align-items: flex-start; padding: 16px; }
+                    .libreta-pet-info { width: 100%; }
+                    .libreta-title { font-size: 1.15rem; }
+                    .libreta-icon { width: 40px; height: 40px; font-size: 1.3rem; }
+
+                    /* Footer libreta: compacto */
+                    .libreta-footer { gap: 16px; padding: 12px 14px; }
+                    .libreta-footer-powered { margin-left: 0; width: 100%; }
+                    .footer-value { font-size: 1rem; }
+
+                    /* Empty state */
+                    .empty-state { padding: 48px 16px; }
+                    .empty-state span { font-size: 3rem; }
+                    .empty-state h2 { font-size: 1.3rem; }
+                }
+
+                /* ══════════════════════════════
+                RESPONSIVE — MOBILE XS (≤380px)
+                ══════════════════════════════ */
+                @media (max-width: 380px) {
+                    .history-inner { padding: 12px 10px; }
+                    .history-title { font-size: 1.3rem; }
+                    .visit-left { width: 40px; }
+                    .visit-date-box { width: 40px; padding: 5px 6px; }
+                    .visit-day { font-size: 1rem; }
                 }
             `}</style>
         </div>

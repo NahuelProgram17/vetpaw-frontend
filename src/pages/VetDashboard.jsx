@@ -39,6 +39,7 @@ export default function ClinicDashboard() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("pending");
     const [agendaDate, setAgendaDate] = useState(new Date());
+    const [showAgenda, setShowAgenda] = useState(false); // mobile toggle
 
     const [showVisitModal, setShowVisitModal] = useState(false);
     const [selectedAppt, setSelectedAppt] = useState(null);
@@ -93,6 +94,7 @@ export default function ClinicDashboard() {
             setTimeout(() => setSuccess(""), 3000);
         } catch (e) { console.error(e); }
     };
+
     const handleDownloadPDF = async (petId, petName) => {
         try {
             const response = await api.get(`/pets/${petId}/pdf/`, { responseType: 'blob' });
@@ -149,16 +151,11 @@ export default function ClinicDashboard() {
         setSaving(true); setError("");
         try {
             await createVisit({
-                pet: visitForm.pet,
-                clinic: visitForm.clinic,
-                date: visitForm.date,
-                reason: visitForm.reason,
-                diagnosis: visitForm.diagnosis,
-                treatment: visitForm.treatment,
-                observations: visitForm.observations,
+                pet: visitForm.pet, clinic: visitForm.clinic, date: visitForm.date,
+                reason: visitForm.reason, diagnosis: visitForm.diagnosis,
+                treatment: visitForm.treatment, observations: visitForm.observations,
                 next_visit: visitForm.next_visit || null,
-                vet_first_name: visitForm.vet_name,
-                vet_last_name: visitForm.vet_lastname,
+                vet_first_name: visitForm.vet_name, vet_last_name: visitForm.vet_lastname,
                 vet_license: visitForm.vet_license,
             });
             setShowVisitModal(false);
@@ -182,12 +179,9 @@ export default function ClinicDashboard() {
         setSaving(true); setError("");
         try {
             await api.post("/vaccines/", {
-                pet: vaccineForm.pet,
-                name: vaccineForm.name,
-                date_applied: vaccineForm.date_applied,
-                next_dose: vaccineForm.next_dose || null,
-                batch: vaccineForm.batch,
-                notes: vaccineForm.notes,
+                pet: vaccineForm.pet, name: vaccineForm.name,
+                date_applied: vaccineForm.date_applied, next_dose: vaccineForm.next_dose || null,
+                batch: vaccineForm.batch, notes: vaccineForm.notes,
                 vet_first_name: vaccineForm.vet_first_name,
                 vet_last_name: vaccineForm.vet_last_name,
                 vet_license: vaccineForm.vet_license,
@@ -203,22 +197,18 @@ export default function ClinicDashboard() {
     };
 
     const filtered = filter === "all" ? appointments : appointments.filter((a) => a.status === filter);
-    const pending = appointments.filter((a) => a.status === "pending").length;
+    const pending  = appointments.filter((a) => a.status === "pending").length;
     const confirmed = appointments.filter((a) => a.status === "confirmed").length;
     const completed = appointments.filter((a) => a.status === "completed").length;
-    const noShow = appointments.filter((a) => a.status === "no_show").length;
+    const noShow   = appointments.filter((a) => a.status === "no_show").length;
 
     const formatDate = (d) => {
         if (!d) return "—";
-        return new Date(d).toLocaleDateString("es-AR", {
-            weekday: "short", day: "2-digit", month: "short", year: "numeric",
-        });
+        return new Date(d).toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
     };
     const formatDateShort = (d) => {
         if (!d) return "—";
-        return new Date(d).toLocaleDateString("es-AR", {
-            day: "2-digit", month: "short", year: "numeric",
-        });
+        return new Date(d).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric" });
     };
     const formatTime = (d) => {
         if (!d) return "";
@@ -238,8 +228,7 @@ export default function ClinicDashboard() {
     const agendaLabel = agendaDate.toLocaleDateString("es-AR", { weekday: "long", day: "2-digit", month: "long" });
     const isToday = new Date().toDateString() === agendaDate.toDateString();
 
-
-    const petVisits = selectedPet ? visits.filter(v => v.pet === selectedPet.id) : visits;
+    const petVisits  = selectedPet ? visits.filter(v => v.pet === selectedPet.id)   : visits;
     const petVaccines = selectedPet ? vaccines.filter(v => v.pet === selectedPet.id) : vaccines;
 
     return (
@@ -255,12 +244,13 @@ export default function ClinicDashboard() {
                     {success && <div className="success-toast">✅ {success}</div>}
                 </header>
 
+                {/* ── Tabs ── */}
                 <div className="tabs">
                     {[
-                        { id: "turnos", label: "📅 Turnos" },
-                        { id: "pacientes", label: "🐾 Mis pacientes" },
-                        { id: "historial", label: "📋 Historial clínico" },
-                        { id: "vacunas", label: "💉 Libreta sanitaria" },
+                        { id: "turnos",   label: "📅 Turnos" },
+                        { id: "pacientes", label: "🐾 Pacientes" },
+                        { id: "historial", label: "📋 Historial" },
+                        { id: "vacunas",   label: "💉 Vacunas" },
                     ].map((t) => (
                         <button
                             key={t.id}
@@ -279,10 +269,11 @@ export default function ClinicDashboard() {
                     </div>
                 )}
 
-                {/* ── TAB TURNOS ── */}
+                {/* ══ TAB TURNOS ══ */}
                 {!loading && tab === "turnos" && (
                     <div className="turnos-layout">
                         <div className="turnos-main">
+                            {/* Stats */}
                             <div className="vet-stats">
                                 <div className="vet-stat"><span className="stat-icon">⏳</span><div><p className="stat-num">{pending}</p><p className="stat-label">Pendientes</p></div></div>
                                 <div className="vet-stat"><span className="stat-icon">✅</span><div><p className="stat-num">{confirmed}</p><p className="stat-label">Confirmados</p></div></div>
@@ -290,18 +281,71 @@ export default function ClinicDashboard() {
                                 <div className="vet-stat"><span className="stat-icon">❌</span><div><p className="stat-num">{noShow}</p><p className="stat-label">Ausentes</p></div></div>
                             </div>
 
+                            {/* Botón agenda mobile */}
+                            <button className="btn-toggle-agenda" onClick={() => setShowAgenda(!showAgenda)}>
+                                📅 {showAgenda ? "Ocultar agenda" : `Ver agenda del día (${agendaTurnos.length})`}
+                            </button>
+
+                            {/* Agenda mobile (colapsable) */}
+                            {showAgenda && (
+                                <div className="agenda-panel agenda-mobile">
+                                    <div className="agenda-header">
+                                        <button className="agenda-nav" onClick={() => { const d = new Date(agendaDate); d.setDate(d.getDate() - 1); setAgendaDate(d); }}>‹</button>
+                                        <div className="agenda-title-wrap">
+                                            <span className="agenda-day-label">{isToday ? "Hoy" : agendaLabel}</span>
+                                            {!isToday && <button className="agenda-today-btn" onClick={() => setAgendaDate(new Date())}>Hoy</button>}
+                                        </div>
+                                        <button className="agenda-nav" onClick={() => { const d = new Date(agendaDate); d.setDate(d.getDate() + 1); setAgendaDate(d); }}>›</button>
+                                    </div>
+                                    <div className="agenda-date-full">{agendaLabel}</div>
+                                    <button className="btn-agenda-pdf" onClick={async () => {
+                                        try {
+                                            const dateStr = agendaDate.toISOString().slice(0, 10);
+                                            const response = await api.get(`/appointments/agenda_pdf/?date=${dateStr}`, { responseType: 'blob' });
+                                            const url = window.URL.createObjectURL(new Blob([response.data]));
+                                            const link = document.createElement('a');
+                                            link.href = url;
+                                            link.setAttribute('download', `agenda_${dateStr}.pdf`);
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            link.remove();
+                                            window.URL.revokeObjectURL(url);
+                                        } catch (e) { console.error(e); }
+                                    }}>📄 Descargar agenda</button>
+                                    {agendaTurnos.length === 0 ? (
+                                        <div className="agenda-empty"><span>📭</span><p>Sin turnos este día</p></div>
+                                    ) : (
+                                        <div className="agenda-list">
+                                            {agendaTurnos.map(appt => {
+                                                const status = STATUS_LABEL[appt.status] || STATUS_LABEL.pending;
+                                                return (
+                                                    <div key={appt.id} className="agenda-item" style={{ borderLeftColor: status.color }}>
+                                                        <div className="agenda-item-time">{formatTime(appt.requested_date)}</div>
+                                                        <div className="agenda-item-info">
+                                                            <div className="agenda-item-pet">{appt.pet_name || "—"}</div>
+                                                            <div className="agenda-item-owner">{appt.owner_name || "—"}</div>
+                                                            <div className="agenda-item-reason">{appt.reason || "Consulta"}</div>
+                                                        </div>
+                                                        <span className="agenda-item-badge" style={{ color: status.color, background: `${status.color}18` }}>{status.label}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                    <div className="agenda-count">{agendaTurnos.length} turno{agendaTurnos.length !== 1 ? "s" : ""} este día</div>
+                                </div>
+                            )}
+
+                            {/* Filtros */}
                             <div className="filters">
                                 {["pending", "confirmed", "completed", "cancelled", "no_show", "all"].map((f) => (
-                                    <button
-                                        key={f}
-                                        className={`filter-btn ${filter === f ? "active" : ""}`}
-                                        onClick={() => setFilter(f)}
-                                    >
+                                    <button key={f} className={`filter-btn ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>
                                         {f === "all" ? "Todos" : STATUS_LABEL[f]?.label}
                                     </button>
                                 ))}
                             </div>
 
+                            {/* Lista de turnos */}
                             {filtered.length === 0 ? (
                                 <div className="empty-state">
                                     <span>📭</span>
@@ -326,28 +370,29 @@ export default function ClinicDashboard() {
                                                         </span>
                                                     </div>
                                                     <div className="appt-meta">
-                                                        {appt.pet_name && <span>🐾 {appt.pet_name}</span>}
+                                                        {appt.pet_name  && <span>🐾 {appt.pet_name}</span>}
                                                         {appt.owner_name && <span>👤 {appt.owner_name}</span>}
                                                         <span>📆 {formatDate(appt.requested_date)}</span>
                                                     </div>
-                                                </div>
-                                                <div className="appt-actions">
-                                                    {appt.status === "pending" && (
-                                                        <>
-                                                            <button className="btn-confirm" onClick={() => handleConfirm(appt.id)}>✅ Confirmar</button>
-                                                            <button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button>
-                                                        </>
-                                                    )}
-                                                    {appt.status === "confirmed" && (
-                                                        <>
-                                                            <button className="btn-visit" onClick={() => openVisitModal(appt)}>📋 Cargar visita</button>
-                                                            <button className="btn-noshow" onClick={() => handleNoShow(appt.id)}>❌ Ausente</button>
-                                                            <button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button>
-                                                        </>
-                                                    )}
-                                                    {appt.status === "completed" && <span className="done-label">✅ Visita registrada</span>}
-                                                    {appt.status === "cancelled" && <span className="cancelled-label">✕ Cancelado</span>}
-                                                    {appt.status === "no_show" && <span className="noshow-label">❌ Ausente</span>}
+                                                    {/* Acciones dentro del info en mobile */}
+                                                    <div className="appt-actions">
+                                                        {appt.status === "pending" && (
+                                                            <>
+                                                                <button className="btn-confirm" onClick={() => handleConfirm(appt.id)}>✅ Confirmar</button>
+                                                                <button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button>
+                                                            </>
+                                                        )}
+                                                        {appt.status === "confirmed" && (
+                                                            <>
+                                                                <button className="btn-visit" onClick={() => openVisitModal(appt)}>📋 Cargar visita</button>
+                                                                <button className="btn-noshow" onClick={() => handleNoShow(appt.id)}>❌ Ausente</button>
+                                                                <button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button>
+                                                            </>
+                                                        )}
+                                                        {appt.status === "completed"  && <span className="done-label">✅ Visita registrada</span>}
+                                                        {appt.status === "cancelled"  && <span className="cancelled-label">✕ Cancelado</span>}
+                                                        {appt.status === "no_show"    && <span className="noshow-label">❌ Ausente</span>}
+                                                    </div>
                                                 </div>
                                             </div>
                                         );
@@ -356,8 +401,8 @@ export default function ClinicDashboard() {
                             )}
                         </div>
 
-                        {/* ── AGENDA LATERAL ── */}
-                        <div className="agenda-panel">
+                        {/* ── Agenda lateral (desktop) ── */}
+                        <div className="agenda-panel agenda-desktop">
                             <div className="agenda-header">
                                 <button className="agenda-nav" onClick={() => { const d = new Date(agendaDate); d.setDate(d.getDate() - 1); setAgendaDate(d); }}>‹</button>
                                 <div className="agenda-title-wrap">
@@ -379,71 +424,52 @@ export default function ClinicDashboard() {
                                     link.click();
                                     link.remove();
                                     window.URL.revokeObjectURL(url);
-                                } catch (e) {
-                                    console.error(e);
-                                }
+                                } catch (e) { console.error(e); }
                             }}>📄 Descargar agenda</button>
-
                             {agendaTurnos.length === 0 ? (
-                                <div className="agenda-empty">
-                                    <span>📭</span>
-                                    <p>Sin turnos este día</p>
-                                </div>
+                                <div className="agenda-empty"><span>📭</span><p>Sin turnos este día</p></div>
                             ) : (
                                 <div className="agenda-list">
                                     {agendaTurnos.map(appt => {
                                         const status = STATUS_LABEL[appt.status] || STATUS_LABEL.pending;
                                         return (
-                                            <div key={appt.id} className="agenda-item" style={{ borderLeftColor: status.color, cursor: 'pointer' }} onClick={() => {
-                                                setHighlightedAppt(appt.id);
-                                                setFilter("all");
-                                                setTimeout(() => {
-                                                    const el = document.getElementById(`appt-${appt.id}`);
-                                                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                }, 100);
-                                            }}>
+                                            <div key={appt.id} className="agenda-item" style={{ borderLeftColor: status.color, cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setHighlightedAppt(appt.id);
+                                                    setFilter("all");
+                                                    setTimeout(() => {
+                                                        const el = document.getElementById(`appt-${appt.id}`);
+                                                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                    }, 100);
+                                                }}>
                                                 <div className="agenda-item-time">{formatTime(appt.requested_date)}</div>
                                                 <div className="agenda-item-info">
                                                     <div className="agenda-item-pet">{appt.pet_name || "—"}</div>
                                                     <div className="agenda-item-owner">{appt.owner_name || "—"}</div>
                                                     <div className="agenda-item-reason">{appt.reason || "Consulta"}</div>
                                                 </div>
-                                                <span className="agenda-item-badge" style={{ color: status.color, background: `${status.color}18` }}>
-                                                    {status.label}
-                                                </span>
+                                                <span className="agenda-item-badge" style={{ color: status.color, background: `${status.color}18` }}>{status.label}</span>
                                             </div>
                                         );
                                     })}
                                 </div>
                             )}
-                            <div className="agenda-count">
-                                {agendaTurnos.length} turno{agendaTurnos.length !== 1 ? "s" : ""} este día
-                            </div>
+                            <div className="agenda-count">{agendaTurnos.length} turno{agendaTurnos.length !== 1 ? "s" : ""} este día</div>
                         </div>
                     </div>
                 )}
 
-                {/* ── TAB PACIENTES ── */}
+                {/* ══ TAB PACIENTES ══ */}
                 {!loading && tab === "pacientes" && (
                     <div className="patients-section">
                         {pets.length === 0 ? (
-                            <div className="empty-state">
-                                <span>🐾</span>
-                                <p>No hay mascotas vinculadas a tu clínica todavía.</p>
-                            </div>
+                            <div className="empty-state"><span>🐾</span><p>No hay mascotas vinculadas a tu clínica todavía.</p></div>
                         ) : (
                             <div className="pets-grid">
                                 {pets.map((pet) => (
-                                    <div
-                                        key={pet.id}
-                                        className="pet-card"
-                                        onClick={() => { setSelectedPet(pet); setTab("historial"); }}
-                                    >
+                                    <div key={pet.id} className="pet-card" onClick={() => { setSelectedPet(pet); setTab("historial"); }}>
                                         <div className="pet-avatar">
-                                            {pet.photo
-                                                ? <img src={pet.photo} alt={pet.name} />
-                                                : <span>{SPECIES_ICON[pet.species] || "🐾"}</span>
-                                            }
+                                            {pet.photo ? <img src={pet.photo} alt={pet.name} /> : <span>{SPECIES_ICON[pet.species] || "🐾"}</span>}
                                         </div>
                                         <div className="pet-info">
                                             <h3 className="pet-name">{pet.name}</h3>
@@ -456,8 +482,10 @@ export default function ClinicDashboard() {
                                             {pet.is_neutered && <span>✂️ Castrado/a</span>}
                                             {pet.allergies && <span>⚠️ Alergias</span>}
                                         </div>
-                                        <button className="btn-view-history">Ver historial →</button>
-                                        <button className="btn-pdf" onClick={(e) => { e.stopPropagation(); handleDownloadPDF(pet.id, pet.name); }}>📄 Descargar PDF</button>
+                                        <div className="pet-card-btns">
+                                            <button className="btn-view-history">Ver historial →</button>
+                                            <button className="btn-pdf" onClick={(e) => { e.stopPropagation(); handleDownloadPDF(pet.id, pet.name); }}>📄 PDF</button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -465,24 +493,15 @@ export default function ClinicDashboard() {
                     </div>
                 )}
 
-                {/* ── TAB HISTORIAL ── */}
+                {/* ══ TAB HISTORIAL ══ */}
                 {!loading && tab === "historial" && (
                     <div className="history-section">
                         <div className="pet-selector">
                             <p className="selector-label">Seleccioná una mascota:</p>
                             <div className="pet-chips">
-                                <button
-                                    className={`pet-chip ${!selectedPet ? "active" : ""}`}
-                                    onClick={() => setSelectedPet(null)}
-                                >
-                                    Todas
-                                </button>
+                                <button className={`pet-chip ${!selectedPet ? "active" : ""}`} onClick={() => setSelectedPet(null)}>Todas</button>
                                 {pets.map((pet) => (
-                                    <button
-                                        key={pet.id}
-                                        className={`pet-chip ${selectedPet?.id === pet.id ? "active" : ""}`}
-                                        onClick={() => setSelectedPet(pet)}
-                                    >
+                                    <button key={pet.id} className={`pet-chip ${selectedPet?.id === pet.id ? "active" : ""}`} onClick={() => setSelectedPet(pet)}>
                                         {SPECIES_ICON[pet.species]} {pet.name}
                                     </button>
                                 ))}
@@ -492,36 +511,24 @@ export default function ClinicDashboard() {
                         {selectedPet && (
                             <div className="pet-summary">
                                 <div className="summary-avatar">{SPECIES_ICON[selectedPet.species] || "🐾"}</div>
-                                <div style={{ flex: 1 }}>
+                                <div style={{ flex: 1, minWidth: 0 }}>
                                     <h3>{selectedPet.name}</h3>
                                     <p>{selectedPet.species_display} · {selectedPet.breed || "Sin raza"} · {selectedPet.sex === "male" ? "Macho" : "Hembra"}</p>
-                                    <p>👤 Dueño: {selectedPet.owner_name || "—"}</p>
+                                    <p>👤 {selectedPet.owner_name || "—"}</p>
                                     {selectedPet.allergies && <p>⚠️ Alergias: {selectedPet.allergies}</p>}
                                 </div>
-                                <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                                <div className="summary-actions">
                                     <button className="btn-visit" onClick={() => {
-                                        setVisitForm({
-                                            ...EMPTY_VISIT,
-                                            pet: selectedPet.id,
-                                            clinic: "",
-                                            date: new Date().toISOString().slice(0, 16),
-                                        });
-                                        setError("");
-                                        setShowVisitModal(true);
-                                    }}>
-                                        + Registrar atención
-                                    </button>
-                                    <button className="btn-pdf" onClick={() => handleDownloadPDF(selectedPet.id, selectedPet.name)}>
-                                        📄 Descargar PDF
-                                    </button>
+                                        setVisitForm({ ...EMPTY_VISIT, pet: selectedPet.id, clinic: "", date: new Date().toISOString().slice(0, 16) });
+                                        setError(""); setShowVisitModal(true);
+                                    }}>+ Registrar</button>
+                                    <button className="btn-pdf" onClick={() => handleDownloadPDF(selectedPet.id, selectedPet.name)}>📄 PDF</button>
                                 </div>
                             </div>
                         )}
+
                         {petVisits.length === 0 ? (
-                            <div className="empty-state">
-                                <span>📋</span>
-                                <p>No hay visitas registradas{selectedPet ? ` para ${selectedPet.name}` : ""}.</p>
-                            </div>
+                            <div className="empty-state"><span>📋</span><p>No hay visitas registradas{selectedPet ? ` para ${selectedPet.name}` : ""}.</p></div>
                         ) : (
                             <div className="visits-list">
                                 {(showAllVisits ? petVisits : petVisits.slice(0, 5)).map((visit) => (
@@ -531,52 +538,37 @@ export default function ClinicDashboard() {
                                             <span className="visit-month">{new Date(visit.date).toLocaleString("es-AR", { month: "short" })}</span>
                                             <span className="visit-year">{new Date(visit.date).getFullYear()}</span>
                                         </div>
-                                        {petVisits.length > 5 && (
-                                            <button
-                                                className="btn-ghost"
-                                                style={{ marginTop: "12px", width: "100%" }}
-                                                onClick={() => setShowAllVisits(!showAllVisits)}
-                                            >
-                                                {showAllVisits ? "Ver menos ▲" : `Ver historial completo (${petVisits.length}) ▼`}
-                                            </button>
-                                        )}
                                         <div className="visit-info">
                                             <div className="visit-top">
                                                 <h3 className="visit-reason">{visit.reason}</h3>
-                                                <span className="visit-vet">
-                                                    🩺 Dr/a. {visit.vet_first_name} {visit.vet_last_name} · Mat. {visit.vet_license}
-                                                </span>
+                                                <span className="visit-vet">🩺 Dr/a. {visit.vet_first_name} {visit.vet_last_name} · Mat. {visit.vet_license}</span>
                                             </div>
-                                            {visit.diagnosis && <p className="visit-field"><span>Diagnóstico:</span> {visit.diagnosis}</p>}
-                                            {visit.treatment && <p className="visit-field"><span>Tratamiento:</span> {visit.treatment}</p>}
+                                            {visit.diagnosis    && <p className="visit-field"><span>Diagnóstico:</span> {visit.diagnosis}</p>}
+                                            {visit.treatment    && <p className="visit-field"><span>Tratamiento:</span> {visit.treatment}</p>}
                                             {visit.observations && <p className="visit-field"><span>Observaciones:</span> {visit.observations}</p>}
-                                            {visit.next_visit && <p className="visit-next">📅 Próxima visita: {formatDate(visit.next_visit)}</p>}
+                                            {visit.next_visit   && <p className="visit-next">📅 Próxima visita: {formatDate(visit.next_visit)}</p>}
                                         </div>
                                     </div>
                                 ))}
+                                {petVisits.length > 5 && (
+                                    <button className="btn-ghost" style={{ width: "100%" }} onClick={() => setShowAllVisits(!showAllVisits)}>
+                                        {showAllVisits ? "Ver menos ▲" : `Ver historial completo (${petVisits.length}) ▼`}
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
                 )}
 
-                {/* ── TAB VACUNAS ── */}
+                {/* ══ TAB VACUNAS ══ */}
                 {!loading && tab === "vacunas" && (
                     <div className="vaccines-section">
                         <div className="pet-selector">
                             <p className="selector-label">Seleccioná una mascota:</p>
                             <div className="pet-chips">
-                                <button
-                                    className={`pet-chip ${!selectedPet ? "active" : ""}`}
-                                    onClick={() => setSelectedPet(null)}
-                                >
-                                    Todas
-                                </button>
+                                <button className={`pet-chip ${!selectedPet ? "active" : ""}`} onClick={() => setSelectedPet(null)}>Todas</button>
                                 {pets.map((pet) => (
-                                    <button
-                                        key={pet.id}
-                                        className={`pet-chip ${selectedPet?.id === pet.id ? "active" : ""}`}
-                                        onClick={() => setSelectedPet(pet)}
-                                    >
+                                    <button key={pet.id} className={`pet-chip ${selectedPet?.id === pet.id ? "active" : ""}`} onClick={() => setSelectedPet(pet)}>
                                         {SPECIES_ICON[pet.species]} {pet.name}
                                     </button>
                                 ))}
@@ -592,12 +584,7 @@ export default function ClinicDashboard() {
                                         <p>{selectedPet.species_display} · {selectedPet.owner_name || "—"}</p>
                                     </div>
                                 </div>
-                                <button
-                                    className="btn-add-vaccine"
-                                    onClick={() => openVaccineModal(selectedPet)}
-                                >
-                                    + Registrar vacuna
-                                </button>
+                                <button className="btn-add-vaccine" onClick={() => openVaccineModal(selectedPet)}>+ Registrar vacuna</button>
                             </div>
                         )}
 
@@ -605,11 +592,7 @@ export default function ClinicDashboard() {
                             <div className="empty-state">
                                 <span>💉</span>
                                 <p>No hay vacunas registradas{selectedPet ? ` para ${selectedPet.name}` : ""}.</p>
-                                {selectedPet && (
-                                    <button className="btn-sm-vaccine" onClick={() => openVaccineModal(selectedPet)}>
-                                        + Registrar primera vacuna
-                                    </button>
-                                )}
+                                {selectedPet && <button className="btn-sm-vaccine" onClick={() => openVaccineModal(selectedPet)}>+ Registrar primera vacuna</button>}
                             </div>
                         ) : (
                             <div className="vaccine-table-wrap">
@@ -634,9 +617,7 @@ export default function ClinicDashboard() {
                                             return (
                                                 <tr key={v.id}>
                                                     <td className="vaccine-name">{v.name}</td>
-                                                    {!selectedPet && (
-                                                        <td>{petObj ? `${SPECIES_ICON[petObj.species]} ${petObj.name}` : "—"}</td>
-                                                    )}
+                                                    {!selectedPet && <td>{petObj ? `${SPECIES_ICON[petObj.species]} ${petObj.name}` : "—"}</td>}
                                                     <td>{formatDateShort(v.date_applied)}</td>
                                                     <td>
                                                         {v.next_dose ? (
@@ -658,7 +639,6 @@ export default function ClinicDashboard() {
                         )}
                     </div>
                 )}
-
             </div>
 
             {/* ── Modal visita ── */}
@@ -792,47 +772,69 @@ export default function ClinicDashboard() {
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
                 .vet-page { min-height: 100vh; background: #1a1a2e; font-family: 'Nunito', sans-serif; position: relative; overflow-x: hidden; padding-bottom: 60px; }
                 .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.08; pointer-events: none; }
                 .b1 { width: 500px; height: 500px; background: #6bffb8; top: -100px; left: -100px; }
                 .b2 { width: 400px; height: 400px; background: #6bcaff; bottom: -100px; right: -100px; }
                 .vet-inner { max-width: 960px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
+
+                /* ── Header ── */
                 .vet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
                 .vet-greeting { font-size: 0.9rem; color: rgba(255,255,255,0.45); font-weight: 600; margin-bottom: 4px; }
                 .vet-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
                 .success-toast { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; padding: 10px 16px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; }
-                .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0; flex-wrap: wrap; }
-                .tab-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: rgba(255,255,255,0.4); font-family: 'Nunito', sans-serif; font-size: 0.92rem; font-weight: 700; padding: 10px 18px; cursor: pointer; transition: all 0.2s; margin-bottom: -1px; }
+
+                /* ── Tabs ── */
+                .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+                .tabs::-webkit-scrollbar { display: none; }
+                .tab-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: rgba(255,255,255,0.4); font-family: 'Nunito', sans-serif; font-size: 0.92rem; font-weight: 700; padding: 10px 16px; cursor: pointer; transition: all 0.2s; margin-bottom: -1px; white-space: nowrap; flex-shrink: 0; }
                 .tab-btn:hover { color: rgba(255,255,255,0.7); }
                 .tab-btn.active { color: #4CAF50; border-bottom-color: #4CAF50; }
+
+                /* ── Loading / Empty ── */
                 .loading-state, .empty-state { text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
                 .paw-spin { font-size: 3rem; animation: spin 1s linear infinite; display: block; }
                 @keyframes spin { to { transform: rotate(360deg); } }
                 .loading-state p, .empty-state p { color: rgba(255,255,255,0.4); }
                 .empty-state span { font-size: 3rem; }
-                .vet-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+
+                /* ── Stats ── */
+                .vet-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
                 .vet-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px; }
-                .stat-icon { font-size: 1.8rem; }
+                .stat-icon { font-size: 1.8rem; flex-shrink: 0; }
                 .stat-num { font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1; }
                 .stat-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 600; margin-top: 2px; }
-                .filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-                .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+
+                /* ── Botón toggle agenda (mobile) ── */
+                .btn-toggle-agenda { display: none; }
+
+                /* ── Filtros ── */
+                .filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+                .filters::-webkit-scrollbar { display: none; }
+                .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
                 .filter-btn.active { background: rgba(76,175,80,0.12); border-color: rgba(76,175,80,0.35); color: #4CAF50; }
+
+                /* ── Turnos layout ── */
+                .turnos-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; align-items: start; }
+                .turnos-main { display: flex; flex-direction: column; }
+
+                /* ── Lista de turnos ── */
                 .appts-list { display: flex; flex-direction: column; gap: 12px; }
-                .appt-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; gap: 18px; backdrop-filter: blur(10px); transition: border-color 0.2s; }
+                .appt-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px 18px; display: flex; align-items: flex-start; gap: 16px; backdrop-filter: blur(10px); transition: border-color 0.2s; }
                 .appt-card:hover { border-color: rgba(107,255,184,0.2); }
-                .appt-highlighted { border-color: #6bffb8 !important; box-shadow: 0 0 0 3px #6bffb8; background: rgba(107,255,184,0.08) !important; }
+                .appt-highlighted { border-color: #6bffb8 !important; box-shadow: 0 0 0 3px rgba(107,255,184,0.2); background: rgba(107,255,184,0.06) !important; }
                 .appt-date-box { display: flex; flex-direction: column; align-items: center; background: rgba(107,255,184,0.10); border-radius: 10px; padding: 8px 12px; min-width: 52px; flex-shrink: 0; }
                 .appt-day { font-size: 1.4rem; font-weight: 900; color: #6bffb8; line-height: 1; }
                 .appt-month { font-size: 0.6rem; color: rgba(107,255,184,0.7); text-transform: uppercase; font-weight: 700; }
                 .appt-time { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 3px; font-weight: 600; }
-                .appt-info { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+                .appt-info { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
                 .appt-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
                 .appt-reason { font-size: 0.98rem; font-weight: 900; color: #fff; }
-                .appt-status-badge { font-size: 0.7rem; font-weight: 700; border-radius: 6px; padding: 3px 9px; border: 1px solid; }
-                .appt-meta { display: flex; gap: 14px; flex-wrap: wrap; }
+                .appt-status-badge { font-size: 0.7rem; font-weight: 700; border-radius: 6px; padding: 3px 9px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+                .appt-meta { display: flex; gap: 10px; flex-wrap: wrap; }
                 .appt-meta span { font-size: 0.78rem; color: rgba(255,255,255,0.45); }
-                .appt-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+                .appt-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
                 .btn-confirm { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; border-radius: 8px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
                 .btn-visit { background: rgba(107,202,255,0.12); border: 1px solid rgba(107,202,255,0.3); color: #6bcaff; border-radius: 8px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
                 .btn-noshow { background: rgba(255,149,0,0.12); border: 1px solid rgba(255,149,0,0.3); color: #ff9500; border-radius: 8px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
@@ -840,83 +842,11 @@ export default function ClinicDashboard() {
                 .done-label { font-size: 0.78rem; color: #6bffb8; font-weight: 700; }
                 .cancelled-label { font-size: 0.78rem; color: rgba(255,107,107,0.6); font-weight: 700; }
                 .noshow-label { font-size: 0.78rem; color: #ff9500; font-weight: 700; }
-                .pets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-                .pet-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: all 0.2s; }
-                .pet-card:hover { border-color: rgba(107,255,184,0.3); transform: translateY(-2px); }
-                .pet-avatar { width: 56px; height: 56px; border-radius: 50%; background: rgba(107,255,184,0.1); display: flex; align-items: center; justify-content: center; font-size: 2rem; overflow: hidden; }
-                .pet-avatar img { width: 100%; height: 100%; object-fit: cover; }
-                .pet-name { font-size: 1.1rem; font-weight: 900; color: #fff; }
-                .pet-species { font-size: 0.8rem; color: #6bffb8; font-weight: 700; }
-                .pet-breed { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
-                .pet-owner { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
-                .pet-details { display: flex; gap: 8px; flex-wrap: wrap; }
-                .pet-details span { font-size: 0.75rem; color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.05); border-radius: 6px; padding: 3px 8px; }
-                .btn-view-history { background: rgba(107,202,255,0.1); border: 1px solid rgba(107,202,255,0.25); color: #6bcaff; border-radius: 8px; padding: 8px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; align-self: flex-start; }
-                .pet-selector { margin-bottom: 20px; }
-                .selector-label { font-size: 0.8rem; color: rgba(255,255,255,0.45); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
-                .pet-chips { display: flex; gap: 8px; flex-wrap: wrap; }
-                .pet-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 20px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-                .pet-chip.active { background: rgba(107,255,184,0.12); border-color: rgba(107,255,184,0.35); color: #6bffb8; }
-                .pet-summary { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-                .summary-avatar { font-size: 2.5rem; }
-                .pet-summary h3 { font-size: 1.1rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
-                .pet-summary p { font-size: 0.8rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
-                .visits-list { display: flex; flex-direction: column; gap: 14px; }
-                .visit-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px 20px; display: flex; gap: 18px; }
-                .visit-date-box { display: flex; flex-direction: column; align-items: center; background: rgba(107,202,255,0.10); border-radius: 10px; padding: 8px 12px; min-width: 52px; flex-shrink: 0; }
-                .visit-day { font-size: 1.4rem; font-weight: 900; color: #6bcaff; line-height: 1; }
-                .visit-month { font-size: 0.6rem; color: rgba(107,202,255,0.7); text-transform: uppercase; font-weight: 700; }
-                .visit-year { font-size: 0.6rem; color: rgba(255,255,255,0.3); margin-top: 2px; }
-                .visit-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-                .visit-top { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
-                .visit-reason { font-size: 1rem; font-weight: 900; color: #fff; }
-                .visit-vet { font-size: 0.78rem; color: #6bcaff; font-weight: 700; }
-                .visit-field { font-size: 0.85rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
-                .visit-field span { font-weight: 700; color: rgba(255,255,255,0.8); }
-                .visit-next { font-size: 0.8rem; color: #ffd93d; font-weight: 700; margin-top: 4px; }
-                /* Vacunas */
-                .vaccines-section { display: flex; flex-direction: column; gap: 20px; }
-                .vaccines-header-row { display: flex; align-items: center; gap: 16px; margin-bottom: 4px; }
-                .btn-add-vaccine { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; border-radius: 10px; padding: 10px 18px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-                .btn-sm-vaccine { background: rgba(107,255,184,0.1); border: 1px solid rgba(107,255,184,0.25); color: #6bffb8; border-radius: 8px; padding: 8px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; }
-                .vaccine-table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
-                .vaccine-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
-                .vaccine-table thead tr { background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.08); }
-                .vaccine-table th { padding: 12px 16px; text-align: left; font-size: 0.72rem; font-weight: 900; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
-                .vaccine-table td { padding: 12px 16px; color: rgba(255,255,255,0.75); border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
-                .vaccine-table tbody tr:last-child td { border-bottom: none; }
-                .vaccine-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
-                .vaccine-name { font-weight: 900; color: #fff; }
-                .td-muted { color: rgba(255,255,255,0.4) !important; font-size: 0.8rem; }
-                .nextdose-badge { background: rgba(107,255,184,0.1); color: #6bffb8; border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
-                .overdue-badge { background: rgba(255,149,0,0.12); color: #ff9500; border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
-                /* Modales */
-                .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-                .modal { background: #1e1e35; border: 1px solid rgba(255,255,255,0.10); border-radius: 24px; padding: 32px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.3s cubic-bezier(.22,.68,0,1.2) both; }
-                @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-                .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-                .modal-header h2 { font-family: 'Fraunces', serif; font-size: 1.4rem; font-style: italic; color: #fff; }
-                .modal-close { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-                .form-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.4); color: #ff9999; padding: 10px 14px; border-radius: 10px; font-size: 0.86rem; margin-bottom: 16px; }
-                .visit-form { display: flex; flex-direction: column; gap: 20px; }
-                .form-section { display: flex; flex-direction: column; gap: 12px; }
-                .section-title { font-size: 0.85rem; font-weight: 900; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-                .form-row { display: flex; gap: 12px; }
-                .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-                .form-group label { font-size: 0.76rem; font-weight: 700; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.06em; }
-                .form-group input, .form-group textarea { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
-                .form-group input:focus, .form-group textarea:focus { border-color: #6bffb8; box-shadow: 0 0 0 3px rgba(107,255,184,0.10); }
-                .form-group textarea { resize: vertical; }
-                .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
-                .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; }
-                .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 10px; padding: 11px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 16px rgba(76,175,80,0.3); }
-                .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-                .btn-pdf { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; border-radius: 8px; padding: 8px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; box-shadow: 0 4px 14px rgba(239,68,68,0.3); transition: opacity 0.15s; }
-                .btn-pdf:hover { opacity: 0.9; }
-                @media (max-width: 700px) { .vet-stats { grid-template-columns: repeat(2, 1fr); } .appt-card { flex-direction: column; align-items: flex-start; } .form-row { flex-direction: column; } .vet-inner { padding: 20px 16px; } .pets-grid { grid-template-columns: 1fr; } .vaccines-header-row { flex-direction: column; align-items: flex-start; } .turnos-layout { grid-template-columns: 1fr; } .agenda-panel { position: static; } }
-                .turnos-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; align-items: start; }
-                .turnos-main { display: flex; flex-direction: column; }
-                .agenda-panel { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; position: sticky; top: 20px; }
+
+                /* ── Agenda panel ── */
+                .agenda-panel { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; }
+                .agenda-desktop { position: sticky; top: 20px; }
+                .agenda-mobile { margin-bottom: 16px; }
                 .agenda-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
                 .agenda-title-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
                 .agenda-day-label { font-size: 0.9rem; font-weight: 900; color: #fff; text-transform: capitalize; }
@@ -935,8 +865,172 @@ export default function ClinicDashboard() {
                 .agenda-item-reason { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
                 .agenda-item-badge { font-size: 0.65rem; font-weight: 700; border-radius: 4px; padding: 2px 6px; align-self: flex-start; margin-top: 2px; }
                 .agenda-count { font-size: 0.72rem; color: rgba(255,255,255,0.25); text-align: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
-                .btn-agenda-pdf { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; border-radius: 8px; padding: 8px 12px; font-family: 'Nunito', sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 12px; box-shadow: 0 4px 14px rgba(239,68,68,0.3); transition: opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+                .btn-agenda-pdf { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; border-radius: 8px; padding: 8px 12px; font-family: 'Nunito', sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: opacity 0.15s; }
                 .btn-agenda-pdf:hover { opacity: 0.9; }
+
+                /* ── Pacientes ── */
+                .pets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+                .pet-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: all 0.2s; }
+                .pet-card:hover { border-color: rgba(107,255,184,0.3); transform: translateY(-2px); }
+                .pet-avatar { width: 56px; height: 56px; border-radius: 50%; background: rgba(107,255,184,0.1); display: flex; align-items: center; justify-content: center; font-size: 2rem; overflow: hidden; }
+                .pet-avatar img { width: 100%; height: 100%; object-fit: cover; }
+                .pet-name { font-size: 1.1rem; font-weight: 900; color: #fff; }
+                .pet-species { font-size: 0.8rem; color: #6bffb8; font-weight: 700; }
+                .pet-breed { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+                .pet-owner { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+                .pet-details { display: flex; gap: 8px; flex-wrap: wrap; }
+                .pet-details span { font-size: 0.75rem; color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.05); border-radius: 6px; padding: 3px 8px; }
+                .pet-card-btns { display: flex; gap: 8px; }
+                .btn-view-history { flex: 1; background: rgba(107,202,255,0.1); border: 1px solid rgba(107,202,255,0.25); color: #6bcaff; border-radius: 8px; padding: 8px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+                .btn-pdf { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; border-radius: 8px; padding: 8px 12px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; box-shadow: 0 4px 14px rgba(239,68,68,0.3); transition: opacity 0.15s; }
+                .btn-pdf:hover { opacity: 0.9; }
+
+                /* ── Historial ── */
+                .pet-selector { margin-bottom: 20px; }
+                .selector-label { font-size: 0.8rem; color: rgba(255,255,255,0.45); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+                .pet-chips { display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+                .pet-chips::-webkit-scrollbar { display: none; }
+                .pet-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 20px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+                .pet-chip.active { background: rgba(107,255,184,0.12); border-color: rgba(107,255,184,0.35); color: #6bffb8; }
+                .pet-summary { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+                .summary-avatar { font-size: 2.5rem; flex-shrink: 0; }
+                .pet-summary h3 { font-size: 1.1rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
+                .pet-summary p { font-size: 0.8rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+                .summary-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+                .visits-list { display: flex; flex-direction: column; gap: 14px; }
+                .visit-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px 20px; display: flex; gap: 18px; }
+                .visit-date-box { display: flex; flex-direction: column; align-items: center; background: rgba(107,202,255,0.10); border-radius: 10px; padding: 8px 12px; min-width: 52px; flex-shrink: 0; }
+                .visit-day { font-size: 1.4rem; font-weight: 900; color: #6bcaff; line-height: 1; }
+                .visit-month { font-size: 0.6rem; color: rgba(107,202,255,0.7); text-transform: uppercase; font-weight: 700; }
+                .visit-year { font-size: 0.6rem; color: rgba(255,255,255,0.3); margin-top: 2px; }
+                .visit-info { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+                .visit-top { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+                .visit-reason { font-size: 1rem; font-weight: 900; color: #fff; }
+                .visit-vet { font-size: 0.78rem; color: #6bcaff; font-weight: 700; }
+                .visit-field { font-size: 0.85rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
+                .visit-field span { font-weight: 700; color: rgba(255,255,255,0.8); }
+                .visit-next { font-size: 0.8rem; color: #ffd93d; font-weight: 700; margin-top: 4px; }
+
+                /* ── Vacunas ── */
+                .vaccines-section { display: flex; flex-direction: column; gap: 20px; }
+                .vaccines-header-row { display: flex; align-items: center; gap: 16px; margin-bottom: 4px; flex-wrap: wrap; }
+                .btn-add-vaccine { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; border-radius: 10px; padding: 10px 18px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+                .btn-sm-vaccine { background: rgba(107,255,184,0.1); border: 1px solid rgba(107,255,184,0.25); color: #6bffb8; border-radius: 8px; padding: 8px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; }
+                .vaccine-table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
+                .vaccine-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+                .vaccine-table thead tr { background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.08); }
+                .vaccine-table th { padding: 12px 16px; text-align: left; font-size: 0.72rem; font-weight: 900; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+                .vaccine-table td { padding: 12px 16px; color: rgba(255,255,255,0.75); border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+                .vaccine-table tbody tr:last-child td { border-bottom: none; }
+                .vaccine-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+                .vaccine-name { font-weight: 900; color: #fff; }
+                .td-muted { color: rgba(255,255,255,0.4) !important; font-size: 0.8rem; }
+                .nextdose-badge { background: rgba(107,255,184,0.1); color: #6bffb8; border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+                .overdue-badge { background: rgba(255,149,0,0.12); color: #ff9500; border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+
+                /* ── Modales ── */
+                .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+                .modal { background: #1e1e35; border: 1px solid rgba(255,255,255,0.10); border-radius: 24px; padding: 28px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.3s cubic-bezier(.22,.68,0,1.2) both; }
+                @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+                .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; }
+                .modal-header h2 { font-family: 'Fraunces', serif; font-size: 1.4rem; font-style: italic; color: #fff; flex: 1; min-width: 0; }
+                .modal-close { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); border-radius: 8px; padding: 6px 10px; cursor: pointer; flex-shrink: 0; min-width: 36px; min-height: 36px; display: flex; align-items: center; justify-content: center; }
+                .form-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.4); color: #ff9999; padding: 10px 14px; border-radius: 10px; font-size: 0.86rem; margin-bottom: 16px; }
+                .visit-form { display: flex; flex-direction: column; gap: 20px; }
+                .form-section { display: flex; flex-direction: column; gap: 12px; }
+                .section-title { font-size: 0.85rem; font-weight: 900; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+                .form-row { display: flex; gap: 12px; }
+                .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+                .form-group label { font-size: 0.76rem; font-weight: 700; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.06em; }
+                .form-group input, .form-group textarea { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; width: 100%; }
+                .form-group input:focus, .form-group textarea:focus { border-color: #6bffb8; box-shadow: 0 0 0 3px rgba(107,255,184,0.10); }
+                .form-group textarea { resize: vertical; }
+                .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+                .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; }
+                .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 10px; padding: 11px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 16px rgba(76,175,80,0.3); }
+                .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+                /* ══════════════════════════════
+                RESPONSIVE — TABLET (≤800px)
+                ══════════════════════════════ */
+                @media (max-width: 800px) {
+                    .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+                    .vet-stats .stat-icon { font-size: 1.5rem; }
+                    .vet-stats .stat-num { font-size: 1.4rem; }
+                }
+
+                /* ══════════════════════════════
+                RESPONSIVE — MOBILE (≤700px)
+                ══════════════════════════════ */
+                @media (max-width: 700px) {
+                    .vet-inner { padding: 16px 14px; }
+                    .vet-title { font-size: 1.5rem; }
+                    .vet-header { margin-bottom: 16px; }
+
+                    /* Tabs: scroll horizontal */
+                    .tabs { gap: 0; }
+                    .tab-btn { font-size: 0.82rem; padding: 10px 12px; }
+
+                    /* Stats 2x2 */
+                    .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+                    .vet-stat { padding: 12px; border-radius: 12px; }
+
+                    /* Turnos: 1 columna, agenda oculta */
+                    .turnos-layout { grid-template-columns: 1fr; gap: 0; }
+                    .agenda-desktop { display: none; }
+
+                    /* Botón toggle agenda visible */
+                    .btn-toggle-agenda {
+                        display: block; width: 100%; margin-bottom: 14px;
+                        background: rgba(107,255,184,0.08); border: 1px solid rgba(107,255,184,0.2);
+                        color: #6bffb8; border-radius: 10px; padding: 10px 16px;
+                        font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700;
+                        cursor: pointer; text-align: center;
+                    }
+
+                    /* Appt card: acciones dentro del info, no columna separada */
+                    .appt-card { flex-direction: row; align-items: flex-start; padding: 14px 14px; border-radius: 14px; }
+                    .appt-date-box { min-width: 44px; padding: 6px 8px; }
+                    .appt-day { font-size: 1.2rem; }
+
+                    /* Pacientes: 1 columna */
+                    .pets-grid { grid-template-columns: 1fr; gap: 12px; }
+
+                    /* Visit card: columna en mobile */
+                    .visit-card { flex-direction: column; gap: 12px; padding: 14px; border-radius: 14px; }
+                    .visit-date-box { flex-direction: row; align-items: center; gap: 8px; min-width: unset; width: fit-content; padding: 6px 12px; border-radius: 8px; }
+                    .visit-day { font-size: 1.1rem; }
+                    .visit-month { font-size: 0.7rem; }
+                    .visit-year { font-size: 0.7rem; margin-top: 0; margin-left: 4px; }
+
+                    /* Pet summary: columna en mobile */
+                    .pet-summary { flex-direction: column; align-items: flex-start; padding: 14px; }
+                    .summary-actions { width: 100%; }
+                    .summary-actions .btn-visit,
+                    .summary-actions .btn-pdf { flex: 1; text-align: center; }
+
+                    /* Vaccines header row */
+                    .vaccines-header-row { flex-direction: column; align-items: flex-start; }
+                    .btn-add-vaccine { width: 100%; text-align: center; }
+
+                    /* Modales: bottom sheet */
+                    .modal-overlay { padding: 0; align-items: flex-end; }
+                    .modal { border-radius: 24px 24px 0 0; padding: 24px 16px; max-height: 92vh; border-bottom: none; }
+                    .modal-header h2 { font-size: 1.15rem; }
+                    .form-row { flex-direction: column; gap: 10px; }
+                    .form-actions { flex-direction: column-reverse; gap: 8px; }
+                    .form-actions .btn-ghost,
+                    .form-actions .btn-primary { width: 100%; text-align: center; padding: 13px; }
+                }
+
+                /* ══════════════════════════════
+                RESPONSIVE — MOBILE XS (≤380px)
+                ══════════════════════════════ */
+                @media (max-width: 380px) {
+                    .vet-inner { padding: 12px 10px; }
+                    .vet-title { font-size: 1.3rem; }
+                    .tab-btn { font-size: 0.75rem; padding: 8px 10px; }
+                }
             `}</style>
         </div>
     );

@@ -29,7 +29,6 @@ export default function Appointments() {
     const [cancelError, setCancelError] = useState("");
     const [filter, setFilter] = useState("all");
 
-    // Review state
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [reviewAppt, setReviewAppt] = useState(null);
     const [reviewRating, setReviewRating] = useState(0);
@@ -56,7 +55,6 @@ export default function Appointments() {
             setAppointments(appts);
             setPets(p.results ?? p);
             setClinics(c.results ?? c);
-            // Obtener reseñas ya hechas para marcar qué turnos ya fueron calificados
             const reviews = await api.get('/reviews/');
             const reviewed = new Set((reviews.data.results ?? reviews.data).map(r => r.appointment));
             setReviewedAppts(reviewed);
@@ -199,11 +197,16 @@ export default function Appointments() {
                             const alreadyReviewed = reviewedAppts.has(appt.id);
                             return (
                                 <div key={appt.id} className={`appt-card ${isPast ? "past" : ""}`}>
-                                    <div className="appt-date-box">
-                                        <span className="appt-day">{new Date(appt.requested_date).getDate()}</span>
-                                        <span className="appt-month">{new Date(appt.requested_date).toLocaleString("es-AR", { month: "short" })}</span>
-                                        <span className="appt-time">{formatTime(appt.requested_date)}</span>
+                                    {/* Fecha */}
+                                    <div className="appt-date-col">
+                                        <div className="appt-date-box">
+                                            <span className="appt-day">{new Date(appt.requested_date).getDate()}</span>
+                                            <span className="appt-month">{new Date(appt.requested_date).toLocaleString("es-AR", { month: "short" })}</span>
+                                            <span className="appt-time">{formatTime(appt.requested_date)}</span>
+                                        </div>
                                     </div>
+
+                                    {/* Info */}
                                     <div className="appt-info">
                                         <div className="appt-top">
                                             <h3 className="appt-reason">{appt.reason || "Consulta"}</h3>
@@ -219,7 +222,6 @@ export default function Appointments() {
                                         {cancelError === appt.id && (
                                             <p className="cancel-warning">⚠️ No podés cancelar con menos de 24hs de anticipación.</p>
                                         )}
-                                        {/* Botón calificar */}
                                         {appt.status === "completed" && (
                                             <div className="review-row">
                                                 {alreadyReviewed ? (
@@ -232,20 +234,21 @@ export default function Appointments() {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="appt-actions">
-                                        {appt.status === "pending" && (
-                                            <>
-                                                <button className="btn-icon" onClick={() => openEdit(appt)} title="Editar">✏️</button>
-                                                <button
-                                                    className={`btn-icon ${canCancelThis ? "danger" : "locked"}`}
-                                                    onClick={() => handleCancelClick(appt)}
-                                                    title={canCancelThis ? "Cancelar" : "No se puede cancelar con menos de 24hs"}
-                                                >
-                                                    {canCancelThis ? "✕" : "🔒"}
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
+
+                                    {/* Acciones */}
+                                    {appt.status === "pending" && (
+                                        <div className="appt-actions">
+                                            <button className="btn-icon" onClick={() => openEdit(appt)} title="Editar">✏️</button>
+                                            <button
+                                                className={`btn-icon ${canCancelThis ? "danger" : "locked"}`}
+                                                onClick={() => handleCancelClick(appt)}
+                                                title={canCancelThis ? "Cancelar" : "No se puede cancelar con menos de 24hs"}
+                                            >
+                                                {canCancelThis ? "✕" : "🔒"}
+                                            </button>
+                                        </div>
+                                    )}
+
                                     {cancelConfirm === appt.id && (
                                         <div className="cancel-overlay">
                                             <p>¿Cancelar este turno?</p>
@@ -369,69 +372,126 @@ export default function Appointments() {
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-                .appts-page { min-height: 100vh; background: #1a1a2e; font-family: 'Nunito', sans-serif; position: relative; overflow-x: hidden; padding-bottom: 60px; }
+
+                .appts-page {
+                    min-height: 100vh; background: #1a1a2e;
+                    font-family: 'Nunito', sans-serif;
+                    position: relative; overflow-x: hidden; padding-bottom: 60px;
+                }
                 .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.08; pointer-events: none; }
                 .b1 { width: 500px; height: 500px; background: #ffd93d; top: -100px; left: -100px; }
                 .b2 { width: 400px; height: 400px; background: #ff6b6b; bottom: -100px; right: -100px; }
+
                 .appts-inner { max-width: 860px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
+
+                /* ── Header ── */
                 .appts-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
                 .appts-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
                 .appts-subtitle { color: rgba(255,255,255,0.45); font-size: 0.9rem; margin-top: 4px; }
-                .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 12px; padding: 12px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(76,175,80,0.3); transition: transform 0.15s, box-shadow 0.15s; }
+
+                .btn-primary {
+                    background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none;
+                    border-radius: 12px; padding: 12px 22px; font-family: 'Nunito', sans-serif;
+                    font-size: 0.95rem; font-weight: 900; cursor: pointer;
+                    box-shadow: 0 4px 14px rgba(76,175,80,0.3); transition: transform 0.15s, box-shadow 0.15s;
+                    white-space: nowrap;
+                }
                 .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(76,175,80,0.5); }
                 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+                /* ── Toast ── */
                 .review-toast { background: rgba(255,217,61,0.12); border: 1px solid rgba(255,217,61,0.3); color: #ffd93d; padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; font-weight: 700; margin-bottom: 16px; }
+
+                /* ── Filtros ── */
                 .filters { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-                .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 16px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+                .filter-btn {
+                    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+                    color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 14px;
+                    font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700;
+                    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+                }
                 .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
                 .filter-btn.active { background: rgba(76,175,80,0.15); border-color: rgba(76,175,80,0.4); color: #4CAF50; }
+
+                /* ── Loading / Empty ── */
                 .loading-state, .empty-state { text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
                 .paw-spin { font-size: 3rem; animation: spin 1s linear infinite; display: block; }
                 @keyframes spin { to { transform: rotate(360deg); } }
                 .loading-state p, .empty-state p { color: rgba(255,255,255,0.4); }
                 .empty-emoji { font-size: 5rem; }
                 .empty-state h2 { font-family: 'Fraunces', serif; font-size: 1.6rem; font-style: italic; color: #fff; }
+
+                /* ── Lista de turnos ── */
                 .appts-list { display: flex; flex-direction: column; gap: 14px; }
-                .appt-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 20px; display: flex; align-items: center; gap: 20px; backdrop-filter: blur(10px); transition: border-color 0.2s, transform 0.2s; position: relative; overflow: hidden; }
+
+                /* ── Card turno ── */
+                .appt-card {
+                    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 18px; padding: 20px;
+                    display: flex; align-items: center; gap: 20px;
+                    backdrop-filter: blur(10px); transition: border-color 0.2s, transform 0.2s;
+                    position: relative; overflow: hidden;
+                }
                 .appt-card:hover { border-color: rgba(255,107,107,0.2); transform: translateY(-2px); }
                 .appt-card.past { opacity: 0.65; }
-                .appt-date-box { background: rgba(76,175,80,0.12); }
-                .appt-day { color: #4CAF50; }
-                .appt-month { color: rgba(76,175,80,0.7); }
+
+                /* Date box */
+                .appt-date-col { flex-shrink: 0; }
+                .appt-date-box {
+                    display: flex; flex-direction: column; align-items: center;
+                    background: rgba(76,175,80,0.12); border-radius: 12px;
+                    padding: 10px 14px; min-width: 52px;
+                }
+                .appt-day { font-size: 1.5rem; font-weight: 900; color: #4CAF50; line-height: 1; }
+                .appt-month { font-size: 0.65rem; color: rgba(76,175,80,0.7); text-transform: uppercase; font-weight: 700; }
                 .appt-time { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 4px; font-weight: 600; }
-                .appt-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+                /* Info */
+                .appt-info { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
                 .appt-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-                .appt-reason { font-size: 1rem; font-weight: 900; color: #fff; }
-                .appt-status-badge { font-size: 0.72rem; font-weight: 700; border-radius: 6px; padding: 3px 10px; border: 1px solid; }
-                .appt-meta { display: flex; gap: 14px; flex-wrap: wrap; }
+                .appt-reason { font-size: 1rem; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+                .appt-status-badge { font-size: 0.72rem; font-weight: 700; border-radius: 6px; padding: 3px 10px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+                .appt-meta { display: flex; gap: 10px; flex-wrap: wrap; }
                 .appt-meta span { font-size: 0.8rem; color: rgba(255,255,255,0.45); }
                 .cancel-warning { font-size: 0.78rem; color: #ff9500; background: rgba(255,149,0,0.1); border: 1px solid rgba(255,149,0,0.25); border-radius: 8px; padding: 6px 10px; }
+
+                /* Review */
                 .review-row { margin-top: 4px; }
                 .btn-review { background: rgba(255,217,61,0.10); border: 1px solid rgba(255,217,61,0.25); color: #ffd93d; border-radius: 8px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
                 .btn-review:hover { background: rgba(255,217,61,0.18); }
                 .review-done { font-size: 0.78rem; color: rgba(255,217,61,0.6); font-weight: 700; }
+
+                /* Acciones */
                 .appt-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-                .btn-icon { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; padding: 7px 9px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
+                .btn-icon { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; padding: 7px 9px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; min-width: 36px; min-height: 36px; display: flex; align-items: center; justify-content: center; }
                 .btn-icon:hover { background: rgba(255,255,255,0.12); }
                 .btn-icon.danger:hover { background: rgba(255,107,107,0.15); }
                 .btn-icon.locked { opacity: 0.5; cursor: not-allowed; }
-                .cancel-overlay { position: absolute; inset: 0; border-radius: 18px; background: rgba(26,26,46,0.95); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 20px; }
+
+                /* Cancel overlay */
+                .cancel-overlay { position: absolute; inset: 0; border-radius: 18px; background: rgba(26,26,46,0.95); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 20px; z-index: 2; }
                 .cancel-overlay p { color: #fff; font-size: 0.95rem; font-weight: 700; text-align: center; }
                 .cancel-policy { font-size: 0.78rem !important; color: rgba(255,255,255,0.4) !important; font-weight: 400 !important; }
                 .cancel-btns { display: flex; gap: 10px; }
                 .btn-ghost-sm { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.6); border-radius: 8px; padding: 7px 16px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; font-size: 0.88rem; }
                 .btn-danger-sm { background: linear-gradient(135deg, #ff6b6b, #ff4a4a); border: none; color: #fff; border-radius: 8px; padding: 7px 16px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; font-size: 0.88rem; }
-                .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-                .modal { background: #1e1e35; border: 1px solid rgba(255,255,255,0.10); border-radius: 24px; padding: 32px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.3s cubic-bezier(.22,.68,0,1.2) both; }
+
+                /* ── Modal ── */
+                .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+                .modal { background: #1e1e35; border: 1px solid rgba(255,255,255,0.10); border-radius: 24px; padding: 28px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.3s cubic-bezier(.22,.68,0,1.2) both; }
                 @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-                .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-                .modal-header h2 { font-family: 'Fraunces', serif; font-size: 1.4rem; font-style: italic; color: #fff; }
-                .modal-close { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); border-radius: 8px; padding: 6px 10px; cursor: pointer; transition: background 0.2s; }
+                .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; }
+                .modal-header h2 { font-family: 'Fraunces', serif; font-size: 1.4rem; font-style: italic; color: #fff; flex: 1; min-width: 0; }
+                .modal-close { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); border-radius: 8px; padding: 6px 10px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; min-width: 36px; min-height: 36px; display: flex; align-items: center; justify-content: center; }
                 .modal-close:hover { background: rgba(255,107,107,0.15); color: #ff6b6b; }
                 .form-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.4); color: #ff9999; padding: 10px 14px; border-radius: 10px; font-size: 0.86rem; margin-bottom: 16px; }
+
+                /* Review modal info */
                 .review-clinic-info { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; }
                 .review-clinic-name { font-size: 1rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
                 .review-appt-detail { font-size: 0.8rem; color: rgba(255,255,255,0.45); }
+
+                /* Stars */
                 .review-form { display: flex; flex-direction: column; gap: 16px; }
                 .stars-section { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 0; }
                 .stars-label { font-size: 0.85rem; color: rgba(255,255,255,0.6); font-weight: 700; }
@@ -440,10 +500,12 @@ export default function Appointments() {
                 .star-btn.active { color: #ffd93d; }
                 .star-btn:hover { transform: scale(1.15); }
                 .stars-text { font-size: 0.85rem; color: #ffd93d; font-weight: 700; }
-                .appt-form, .review-form { display: flex; flex-direction: column; gap: 14px; }
+
+                /* Form */
+                .appt-form { display: flex; flex-direction: column; gap: 14px; }
                 .form-group { display: flex; flex-direction: column; gap: 6px; }
                 .form-group label { font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; }
-                .form-group input, .form-group select, .form-group textarea { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 11px 14px; font-family: 'Nunito', sans-serif; font-size: 0.92rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+                .form-group input, .form-group select, .form-group textarea { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 11px 14px; font-family: 'Nunito', sans-serif; font-size: 0.92rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; width: 100%; }
                 .form-group select { cursor: pointer; appearance: none; }
                 .form-group select option { background: #1a1a2e; }
                 .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(255,255,255,0.2); }
@@ -452,7 +514,74 @@ export default function Appointments() {
                 .form-actions { display: flex; gap: 10px; margin-top: 8px; justify-content: flex-end; }
                 .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: border-color 0.2s; }
                 .btn-ghost:hover { border-color: rgba(255,255,255,0.25); }
-                @media (max-width: 600px) { .appt-card { flex-direction: column; align-items: flex-start; } .appts-inner { padding: 20px 16px; } }
+
+                /* ══════════════════════════════
+                RESPONSIVE — MOBILE (≤600px)
+                ══════════════════════════════ */
+                @media (max-width: 600px) {
+                    .appts-inner { padding: 16px 14px; }
+
+                    /* Header */
+                    .appts-header { flex-direction: column; align-items: flex-start; margin-bottom: 16px; }
+                    .appts-title { font-size: 1.5rem; }
+                    .appts-header .btn-primary { width: 100%; text-align: center; }
+
+                    /* Filtros — scroll horizontal en mobile */
+                    .filters { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+                    .filters::-webkit-scrollbar { display: none; }
+                    .filter-btn { flex-shrink: 0; padding: 6px 12px; font-size: 0.8rem; }
+
+                    /* Card — columna en mobile */
+                    .appt-card { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 14px; border-radius: 16px; }
+
+                    /* Date box en mobile: horizontal (día + mes + hora en fila) */
+                    .appt-date-col { width: 100%; }
+                    .appt-date-box {
+                        flex-direction: row; align-items: center; gap: 8px;
+                        padding: 8px 14px; border-radius: 10px; min-width: unset; width: 100%;
+                        justify-content: flex-start;
+                    }
+                    .appt-day { font-size: 1.3rem; }
+                    .appt-month { font-size: 0.72rem; }
+                    .appt-time { font-size: 0.72rem; margin-top: 0; margin-left: auto; }
+
+                    /* Info */
+                    .appt-info { width: 100%; }
+                    .appt-top { gap: 8px; }
+                    .appt-reason { font-size: 0.95rem; }
+                    .appt-meta { gap: 8px; }
+                    .appt-meta span { font-size: 0.78rem; }
+
+                    /* Acciones — fila horizontal en mobile */
+                    .appt-actions { flex-direction: row; width: 100%; justify-content: flex-end; }
+
+                    /* Empty state */
+                    .empty-state { padding: 48px 16px; }
+                    .empty-emoji { font-size: 3.5rem; }
+                    .empty-state h2 { font-size: 1.3rem; }
+
+                    /* Modal — bottom sheet */
+                    .modal-overlay { padding: 0; align-items: flex-end; }
+                    .modal { border-radius: 24px 24px 0 0; padding: 24px 18px; max-height: 92vh; border-bottom: none; }
+                    .modal-header h2 { font-size: 1.15rem; }
+
+                    /* Form actions */
+                    .form-actions { flex-direction: column-reverse; gap: 8px; }
+                    .form-actions .btn-ghost,
+                    .form-actions .btn-primary { width: 100%; text-align: center; padding: 13px; }
+
+                    /* Stars más grandes para tocar fácil */
+                    .star-btn { font-size: 2.8rem; }
+                }
+
+                /* ══════════════════════════════
+                RESPONSIVE — MOBILE XS (≤380px)
+                ══════════════════════════════ */
+                @media (max-width: 380px) {
+                    .appts-inner { padding: 12px 10px; }
+                    .appts-title { font-size: 1.3rem; }
+                    .appt-card { padding: 14px 12px; }
+                }
             `}</style>
         </div>
     );
