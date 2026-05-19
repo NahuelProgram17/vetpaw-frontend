@@ -456,6 +456,7 @@ export default function Clinics() {
                     border-radius: 20px; padding: 24px; backdrop-filter: blur(10px);
                     display: flex; flex-direction: column; gap: 12px;
                     transition: border-color 0.2s, transform 0.2s;
+                    overflow: hidden;
                 }
                 .clinic-card:hover { border-color: rgba(107,202,255,0.25); transform: translateY(-3px); }
                 .clinic-card.inactive { opacity: 0.55; }
