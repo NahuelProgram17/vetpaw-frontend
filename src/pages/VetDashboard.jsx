@@ -375,7 +375,7 @@ export default function ClinicDashboard() {
                                     {selectedPet.allergies && <p>⚠️ Alergias: {selectedPet.allergies}</p>}
                                 </div>
                                 <div className="summary-actions">
-                                    <button className="btn-visit" onClick={() => { setVisitForm({ ...EMPTY_VISIT, pet: selectedPet.id, clinic: "", date: new Date().toISOString().slice(0, 16) }); setError(""); setShowVisitModal(true); }}>+ Registrar</button>
+                                    <button className="btn-visit" onClick={() => { setVisitForm({ ...EMPTY_VISIT, pet: selectedPet.id, clinic: "", date: new Date().toISOString().slice(0, 16) }); setError(""); setShowVisitModal(true); }}>📝 Observacion</button>
                                     <button className="btn-pdf" onClick={() => handleDownloadPDF(selectedPet.id, selectedPet.name)}>📄 PDF</button>
                                 </div>
                             </div>
