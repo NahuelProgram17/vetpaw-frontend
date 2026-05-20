@@ -371,7 +371,17 @@ export default function ClinicDashboard() {
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <h3>{selectedPet.name}</h3>
                                     <p>{selectedPet.species_display} · {selectedPet.breed || "Sin raza"} · {selectedPet.sex === "male" ? "Macho" : "Hembra"}</p>
-                                    <p>👤 {selectedPet.owner_name || "—"}</p>
+                                    <p>👤 {selectedPet.owner_name || "—"}
+                                        {selectedPet.owner_phone && (
+                                            <a href={`https://wa.me/${selectedPet.owner_phone.replace(/\D/g, '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{ marginLeft: 10, color: '#25D366', fontWeight: 700, textDecoration: 'none', fontSize: '0.8rem' }}
+                                        >
+                                            📱 {selectedPet.owner_phone}
+                                            </a>
+                                        )}
+                                    </p>
                                     {selectedPet.allergies && <p>⚠️ Alergias: {selectedPet.allergies}</p>}
                                 </div>
                                 <div className="summary-actions">
