@@ -5,11 +5,11 @@ import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const STATUS_LABEL = {
-    pending:   { label: "Pendiente",  color: "#ffd93d" },
+    pending: { label: "Pendiente", color: "#ffd93d" },
     confirmed: { label: "Confirmado", color: "#6bcaff" },
-    cancelled: { label: "Cancelado",  color: "#ff6b6b" },
-    completed: { label: "Realizado",  color: "#6bffb8" },
-    no_show:   { label: "Ausente",    color: "#ff9500" },
+    cancelled: { label: "Cancelado", color: "#ff6b6b" },
+    completed: { label: "Realizado", color: "#6bffb8" },
+    no_show: { label: "Ausente", color: "#ff9500" },
 };
 
 const EMPTY_VISIT = {
@@ -136,11 +136,11 @@ export default function ClinicDashboard() {
         finally { setSaving(false); }
     };
 
-    const filtered  = filter === "all" ? appointments : appointments.filter(a => a.status === filter);
-    const pending   = appointments.filter(a => a.status === "pending").length;
+    const filtered = filter === "all" ? appointments : appointments.filter(a => a.status === filter);
+    const pending = appointments.filter(a => a.status === "pending").length;
     const confirmed = appointments.filter(a => a.status === "confirmed").length;
     const completed = appointments.filter(a => a.status === "completed").length;
-    const noShow    = appointments.filter(a => a.status === "no_show").length;
+    const noShow = appointments.filter(a => a.status === "no_show").length;
 
     const formatDate = (d) => { if (!d) return "—"; return new Date(d).toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }); };
     const formatDateShort = (d) => { if (!d) return "—"; return new Date(d).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric" }); };
@@ -153,22 +153,22 @@ export default function ClinicDashboard() {
 
     const agendaLabel = agendaDate.toLocaleDateString("es-AR", { weekday: "long", day: "2-digit", month: "long" });
     const isToday = new Date().toDateString() === agendaDate.toDateString();
-    const petVisits   = selectedPet ? visits.filter(v => v.pet === selectedPet.id)   : visits;
+    const petVisits = selectedPet ? visits.filter(v => v.pet === selectedPet.id) : visits;
     const petVaccines = selectedPet ? vaccines.filter(v => v.pet === selectedPet.id) : vaccines;
 
     // Tabs — en mobile se agrega "Agenda" y se acortan los labels
     const TABS_DESKTOP = [
-        { id: "turnos",    label: "📅 Turnos" },
+        { id: "turnos", label: "📅 Turnos" },
         { id: "pacientes", label: "🐾 Pacientes" },
         { id: "historial", label: "📋 Historial" },
-        { id: "vacunas",   label: "💉 Vacunas" },
+        { id: "vacunas", label: "💉 Vacunas" },
     ];
     const TABS_MOBILE = [
-        { id: "turnos",    label: "📅 Turnos" },
-        { id: "agenda",    label: "🗓 Agenda" },
+        { id: "turnos", label: "📅 Turnos" },
+        { id: "agenda", label: "🗓 Agenda" },
         { id: "pacientes", label: "🐾 Pacientes" },
         { id: "historial", label: "📋 Historial" },
-        { id: "vacunas",   label: "💉 Vacunas" },
+        { id: "vacunas", label: "💉 Vacunas" },
     ];
     const TABS = isMobile ? TABS_MOBILE : TABS_DESKTOP;
 
@@ -249,67 +249,69 @@ export default function ClinicDashboard() {
 
                 {/* ══ TAB TURNOS ══ */}
                 {!loading && tab === "turnos" && (
-                    <div className="turnos-layout">
-                        <div className="turnos-main">
-                            {/* Stats */}
-                            <div className="vet-stats">
-                                <div className="vet-stat"><span className="stat-icon">⏳</span><div><p className="stat-num">{pending}</p><p className="stat-label">Pendientes</p></div></div>
-                                <div className="vet-stat"><span className="stat-icon">✅</span><div><p className="stat-num">{confirmed}</p><p className="stat-label">Confirmados</p></div></div>
-                                <div className="vet-stat"><span className="stat-icon">📋</span><div><p className="stat-num">{completed}</p><p className="stat-label">Realizados</p></div></div>
-                                <div className="vet-stat"><span className="stat-icon">❌</span><div><p className="stat-num">{noShow}</p><p className="stat-label">Ausentes</p></div></div>
-                            </div>
-
-                            {/* Filtros */}
-                            <div className="filters">
-                                {["pending", "confirmed", "completed", "cancelled", "no_show", "all"].map(f => (
-                                    <button key={f} className={`filter-btn ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>
-                                        {f === "all" ? "Todos" : STATUS_LABEL[f]?.label}
-                                    </button>
-                                ))}
-                            </div>
-
-                            {/* Lista */}
-                            {filtered.length === 0 ? (
-                                <div className="empty-state"><span>📭</span><p>No hay turnos {filter !== "all" ? `con estado "${STATUS_LABEL[filter]?.label}"` : ""}.</p></div>
-                            ) : (
-                                <div className="appts-list">
-                                    {filtered.map(appt => {
-                                        const status = STATUS_LABEL[appt.status] || STATUS_LABEL.pending;
-                                        return (
-                                            <div key={appt.id} className={`appt-card ${highlightedAppt === appt.id ? "appt-highlighted" : ""}`} id={`appt-${appt.id}`}>
-                                                <div className="appt-date-box">
-                                                    <span className="appt-day">{new Date(appt.requested_date).getDate()}</span>
-                                                    <span className="appt-month">{new Date(appt.requested_date).toLocaleString("es-AR", { month: "short" })}</span>
-                                                    <span className="appt-time">{formatTime(appt.requested_date)}</span>
-                                                </div>
-                                                <div className="appt-info">
-                                                    <div className="appt-top">
-                                                        <h3 className="appt-reason">{appt.reason || "Consulta"}</h3>
-                                                        <span className="appt-status-badge" style={{ color: status.color, background: `${status.color}18`, borderColor: `${status.color}30` }}>{status.label}</span>
-                                                    </div>
-                                                    <div className="appt-meta">
-                                                        {appt.pet_name   && <span>🐾 {appt.pet_name}</span>}
-                                                        {appt.owner_name && <span>👤 {appt.owner_name}</span>}
-                                                        <span>📆 {formatDate(appt.requested_date)}</span>
-                                                    </div>
-                                                    <div className="appt-actions">
-                                                        {appt.status === "pending" && (<><button className="btn-confirm" onClick={() => handleConfirm(appt.id)}>✅ Confirmar</button><button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button></>)}
-                                                        {appt.status === "confirmed" && (<><button className="btn-visit" onClick={() => openVisitModal(appt)}>📋 Cargar visita</button><button className="btn-noshow" onClick={() => handleNoShow(appt.id)}>❌ Ausente</button><button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button></>)}
-                                                        {appt.status === "completed" && <span className="done-label">✅ Visita registrada</span>}
-                                                        {appt.status === "cancelled"  && <span className="cancelled-label">✕ Cancelado</span>}
-                                                        {appt.status === "no_show"    && <span className="noshow-label">❌ Ausente</span>}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                    <>
+                        {/* Stats — fuera del grid para que no se corten */}
+                        <div className="vet-stats">
+                            <div className="vet-stat"><span className="stat-icon">⏳</span><div><p className="stat-num">{pending}</p><p className="stat-label">Pendientes</p></div></div>
+                            <div className="vet-stat"><span className="stat-icon">✅</span><div><p className="stat-num">{confirmed}</p><p className="stat-label">Confirmados</p></div></div>
+                            <div className="vet-stat"><span className="stat-icon">📋</span><div><p className="stat-num">{completed}</p><p className="stat-label">Realizados</p></div></div>
+                            <div className="vet-stat"><span className="stat-icon">❌</span><div><p className="stat-num">{noShow}</p><p className="stat-label">Ausentes</p></div></div>
                         </div>
 
-                        {/* Agenda lateral — solo desktop */}
-                        {!isMobile && <AgendaContent />}
-                    </div>
+                        <div className="turnos-layout">
+                            <div className="turnos-main">
+                                {/* Filtros */}
+                                <div className="filters">
+                                    {["pending", "confirmed", "completed", "cancelled", "no_show", "all"].map(f => (
+                                        <button key={f} className={`filter-btn ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>
+                                            {f === "all" ? "Todos" : STATUS_LABEL[f]?.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Lista */}
+                                {filtered.length === 0 ? (
+                                    <div className="empty-state"><span>📭</span><p>No hay turnos {filter !== "all" ? `con estado "${STATUS_LABEL[filter]?.label}"` : ""}.</p></div>
+                                ) : (
+                                    <div className="appts-list">
+                                        {filtered.map(appt => {
+                                            const status = STATUS_LABEL[appt.status] || STATUS_LABEL.pending;
+                                            return (
+                                                <div key={appt.id} className={`appt-card ${highlightedAppt === appt.id ? "appt-highlighted" : ""}`} id={`appt-${appt.id}`}>
+                                                    <div className="appt-date-box">
+                                                        <span className="appt-day">{new Date(appt.requested_date).getDate()}</span>
+                                                        <span className="appt-month">{new Date(appt.requested_date).toLocaleString("es-AR", { month: "short" })}</span>
+                                                        <span className="appt-time">{formatTime(appt.requested_date)}</span>
+                                                    </div>
+                                                    <div className="appt-info">
+                                                        <div className="appt-top">
+                                                            <h3 className="appt-reason">{appt.reason || "Consulta"}</h3>
+                                                            <span className="appt-status-badge" style={{ color: status.color, background: `${status.color}18`, borderColor: `${status.color}30` }}>{status.label}</span>
+                                                        </div>
+                                                        <div className="appt-meta">
+                                                            {appt.pet_name && <span>🐾 {appt.pet_name}</span>}
+                                                            {appt.owner_name && <span>👤 {appt.owner_name}</span>}
+                                                            <span>📆 {formatDate(appt.requested_date)}</span>
+                                                        </div>
+                                                        <div className="appt-actions">
+                                                            {appt.status === "pending" && (<><button className="btn-confirm" onClick={() => handleConfirm(appt.id)}>✅ Confirmar</button><button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button></>)}
+                                                            {appt.status === "confirmed" && (<><button className="btn-visit" onClick={() => openVisitModal(appt)}>📋 Cargar visita</button><button className="btn-noshow" onClick={() => handleNoShow(appt.id)}>❌ Ausente</button><button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button></>)}
+                                                            {appt.status === "completed" && <span className="done-label">✅ Visita registrada</span>}
+                                                            {appt.status === "cancelled" && <span className="cancelled-label">✕ Cancelado</span>}
+                                                            {appt.status === "no_show" && <span className="noshow-label">❌ Ausente</span>}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Agenda lateral — solo desktop */}
+                            {!isMobile && <AgendaContent />}
+                        </div>
+                    </>
                 )}
 
                 {/* ══ TAB AGENDA (solo mobile) ══ */}
@@ -374,11 +376,11 @@ export default function ClinicDashboard() {
                                     <p>👤 {selectedPet.owner_name || "—"}
                                         {selectedPet.owner_phone && (
                                             <a href={`https://wa.me/${selectedPet.owner_phone.replace(/\D/g, '')}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{ marginLeft: 10, color: '#25D366', fontWeight: 700, textDecoration: 'none', fontSize: '0.8rem' }}
-                                        >
-                                            📱 {selectedPet.owner_phone}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{ marginLeft: 10, color: '#25D366', fontWeight: 700, textDecoration: 'none', fontSize: '0.8rem' }}
+                                            >
+                                                📱 {selectedPet.owner_phone}
                                             </a>
                                         )}
                                     </p>
@@ -403,10 +405,10 @@ export default function ClinicDashboard() {
                                         </div>
                                         <div className="visit-info">
                                             <div className="visit-top"><h3 className="visit-reason">{visit.reason}</h3><span className="visit-vet">🩺 Dr/a. {visit.vet_first_name} {visit.vet_last_name} · Mat. {visit.vet_license}</span></div>
-                                            {visit.diagnosis    && <p className="visit-field"><span>Diagnóstico:</span> {visit.diagnosis}</p>}
-                                            {visit.treatment    && <p className="visit-field"><span>Tratamiento:</span> {visit.treatment}</p>}
+                                            {visit.diagnosis && <p className="visit-field"><span>Diagnóstico:</span> {visit.diagnosis}</p>}
+                                            {visit.treatment && <p className="visit-field"><span>Tratamiento:</span> {visit.treatment}</p>}
                                             {visit.observations && <p className="visit-field"><span>Observaciones:</span> {visit.observations}</p>}
-                                            {visit.next_visit   && <p className="visit-next">📅 Próxima visita: {formatDate(visit.next_visit)}</p>}
+                                            {visit.next_visit && <p className="visit-next">📅 Próxima visita: {formatDate(visit.next_visit)}</p>}
                                         </div>
                                     </div>
                                 ))}
@@ -593,7 +595,7 @@ export default function ClinicDashboard() {
                 .filter-btn.active { background: rgba(76,175,80,0.12); border-color: rgba(76,175,80,0.35); color: #4CAF50; }
 
                 /* Turnos layout */
-                .turnos-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; align-items: start; }
+                .turnos-layout { display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start; }
                 .turnos-main { display: flex; flex-direction: column; min-width: 0; }
 
                 /* Appt cards */
