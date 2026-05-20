@@ -438,7 +438,8 @@ export default function ClinicDashboard() {
                             <div className="vaccines-header-row">
                                 <div className="pet-summary" style={{ flex: 1, marginBottom: 0 }}>
                                     <div className="summary-avatar">{SPECIES_ICON[selectedPet.species] || "🐾"}</div>
-                                    <div><h3>{selectedPet.name}</h3><p>{selectedPet.species_display} · {selectedPet.owner_name || "—"}</p></div>
+                                    <div><h3>{selectedPet.name}</h3><p>{selectedPet.species_display} · {selectedPet.owner_name || "—"}</p>
+                                    <p style={{color:'red'}}>{JSON.stringify(selectedPet)}</p></div>
                                 </div>
                                 <button className="btn-add-vaccine" onClick={() => openVaccineModal(selectedPet)}>+ Registrar vacuna</button>
                             </div>
