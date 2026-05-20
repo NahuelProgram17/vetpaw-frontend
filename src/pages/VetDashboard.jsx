@@ -258,8 +258,7 @@ export default function ClinicDashboard() {
                             <div className="vet-stat"><span className="stat-icon">❌</span><div><p className="stat-num">{noShow}</p><p className="stat-label">Ausentes</p></div></div>
                         </div>
 
-                        <div className="turnos-layout">
-                            <div className="turnos-main">
+                        
                                 {/* Filtros */}
                                 <div className="filters">
                                     {["pending", "confirmed", "completed", "cancelled", "no_show", "all"].map(f => (
@@ -268,6 +267,8 @@ export default function ClinicDashboard() {
                                         </button>
                                     ))}
                                 </div>
+                                <div className="turnos-layout">
+                                    <div className="turnos-main">
 
                                 {/* Lista */}
                                 {filtered.length === 0 ? (
