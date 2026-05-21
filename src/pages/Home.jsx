@@ -37,7 +37,9 @@ export default function Home() {
     const [lostPets, setLostPets] = useState([])
     const [cargandoMuro, setCargandoMuro] = useState(true)
     const [reportados, setReportados] = useState({})
+    const [reportType, setReportType] = useState('found')
 
+    
     useEffect(() => { fetchLostPets() }, [])
 
     const fetchLostPets = async () => {
@@ -60,6 +62,7 @@ export default function Home() {
         setEnviando(true)
         try {
             const formData = new FormData()
+            formData.append('report_type', reportType)
             formData.append('photo', fotoMascota); formData.append('description', descripcionMascota)
             formData.append('contact_type', contactType); formData.append('contact_value', contactValue)
             await api.post('/lost-pets/create/', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -455,12 +458,38 @@ export default function Home() {
                 {/* ── MASCOTAS PERDIDAS ── */}
                 <div className="section-pad" style={{ padding: '4px 40px 28px' }}>
                     <div style={{ background: DARK2, border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 24, overflow: 'hidden' }}>
-                        <div className="lost-header-pad" style={{ background: `linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 100%)`, padding: '26px 32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                            <div style={{ position: 'absolute', top: -40, right: -40, width: 150, height: 150, background: `rgba(76,175,80,0.1)`, borderRadius: '50%' }} />
-                            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#fff', marginBottom: 6, position: 'relative', zIndex: 1, fontFamily: FONT }}>🐾 Mascotas perdidas</h2>
-                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', position: 'relative', zIndex: 1 }}>¿Encontraste una mascota? Publicalo y ayudá a que vuelva a casa.</p>
+
+                        {/* Header estilo urgente */}
+                        <div className="lost-header-pad" style={{
+                            background: `linear-gradient(135deg, #1a0505 0%, #3d0a0a 50%, #1a0a05 100%)`,
+                            padding: '28px 32px', position: 'relative', overflow: 'hidden',
+                            borderBottom: '3px solid rgba(239,68,68,0.4)',
+                        }}>
+                            <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'rgba(239,68,68,0.08)', borderRadius: '50%' }} />
+                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #ef4444, #f97316, #ef4444)' }} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 16, position: 'relative', zIndex: 1 }}>
+                                <div style={{
+                                    background: '#ef4444', color: '#fff',
+                                    fontSize: 11, fontWeight: 900, letterSpacing: 3,
+                                    padding: '6px 14px', borderRadius: 6,
+                                    textTransform: 'uppercase', flexShrink: 0,
+                                    boxShadow: '0 0 20px rgba(239,68,68,0.5)',
+                                    animation: 'pricePulse 2s ease-in-out infinite',
+                                }}>🐾 ALERTA</div>
+                                <div>
+                                    <h2 style={{
+                                        fontSize: 22, fontWeight: 900, color: '#fff',
+                                        textTransform: 'uppercase', letterSpacing: 1,
+                                        fontFamily: FONT, marginBottom: 4,
+                                    }}>Mascotas perdidas o encontradas</h2>
+                                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
+                                        ¿Perdiste tu mascota o encontraste una en la calle? Publicalo acá y ayudá a reunirlos.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
+                        {/* Formulario */}
                         <div className="lost-form-pad" style={{ padding: '28px 32px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                             {reporteEnviado ? (
                                 <div style={{ background: 'rgba(76,175,80,0.1)', border: `1.5px solid rgba(76,175,80,0.3)`, borderRadius: 16, padding: '24px', textAlign: 'center' }}>
@@ -470,6 +499,36 @@ export default function Home() {
                                 </div>
                             ) : (
                                 <form onSubmit={handleReporte} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+                                    {/* Selector tipo de reporte */}
+                                    <div>
+                                        <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>
+                                            ¿Qué querés reportar? <span style={{ color: O1 }}>*</span>
+                                        </label>
+                                        <div style={{ display: 'flex', gap: 10 }}>
+                                            <button type="button"
+                                                onClick={() => setReportType('found')}
+                                                style={{
+                                                    flex: 1, padding: '12px', borderRadius: 12, border: `2px solid ${reportType === 'found' ? G1 : 'rgba(255,255,255,0.1)'}`,
+                                                    background: reportType === 'found' ? 'rgba(76,175,80,0.12)' : 'rgba(255,255,255,0.04)',
+                                                    color: reportType === 'found' ? G1 : 'rgba(255,255,255,0.5)',
+                                                    fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: FONT, transition: 'all .2s',
+                                                }}>
+                                                📍 Encontré una mascota
+                                            </button>
+                                            <button type="button"
+                                                onClick={() => setReportType('lost')}
+                                                style={{
+                                                    flex: 1, padding: '12px', borderRadius: 12, border: `2px solid ${reportType === 'lost' ? '#ef4444' : 'rgba(255,255,255,0.1)'}`,
+                                                    background: reportType === 'lost' ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.04)',
+                                                    color: reportType === 'lost' ? '#ef4444' : 'rgba(255,255,255,0.5)',
+                                                    fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: FONT, transition: 'all .2s',
+                                                }}>
+                                                😢 Perdí mi mascota
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>
                                             Foto de la mascota <span style={{ color: O1 }}>*</span>
@@ -496,10 +555,12 @@ export default function Home() {
 
                                     <div>
                                         <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>
-                                            ¿Dónde y cuándo la encontraste? <span style={{ color: O1 }}>*</span>
+                                            {reportType === 'lost' ? '¿Dónde y cuándo la perdiste?' : '¿Dónde y cuándo la encontraste?'} <span style={{ color: O1 }}>*</span>
                                         </label>
                                         <textarea value={descripcionMascota} onChange={e => setDescripcionMascota(e.target.value)}
-                                            placeholder="Ej: Encontré este perro en la calle Martín Lazarte, barrio Suárez, Moreno. Es macho, color marrón, sin collar."
+                                            placeholder={reportType === 'lost'
+                                                ? 'Ej: Perdí a mi perro el martes en el barrio Suárez, Moreno. Es macho, color marrón, sin collar.'
+                                                : 'Ej: Encontré este perro en la calle Martín Lazarte, barrio Suárez, Moreno. Es macho, color marrón, sin collar.'}
                                             rows={3}
                                             style={{ width: '100%', padding: '13px 16px', border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 13, color: '#fff', resize: 'vertical', fontFamily: FONT, outline: 'none', lineHeight: 1.65, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)' }}
                                             onFocus={e => e.target.style.borderColor = G1}
@@ -528,19 +589,22 @@ export default function Home() {
                                     {errorEnvio && <p style={{ color: '#f87171', fontSize: 12, margin: 0, fontWeight: 600 }}>{errorEnvio}</p>}
 
                                     <button type="submit" disabled={enviando} style={{
-                                        background: enviando ? 'rgba(255,255,255,0.1)' : `linear-gradient(135deg, ${G1}, ${O1})`,
+                                        background: enviando ? 'rgba(255,255,255,0.1)' : reportType === 'lost'
+                                            ? 'linear-gradient(135deg, #ef4444, #dc2626)'
+                                            : `linear-gradient(135deg, ${G1}, ${O1})`,
                                         color: '#fff', fontWeight: 800, fontSize: 14,
                                         padding: '15px', borderRadius: 14, border: 'none',
                                         cursor: enviando ? 'not-allowed' : 'pointer',
-                                        boxShadow: enviando ? 'none' : `0 6px 24px rgba(76,175,80,0.3)`,
+                                        boxShadow: enviando ? 'none' : '0 6px 24px rgba(76,175,80,0.3)',
                                         fontFamily: FONT, letterSpacing: 0.3,
                                     }}>
-                                        {enviando ? 'Publicando...' : '🐾 Publicar reporte de mascota perdida'}
+                                        {enviando ? 'Publicando...' : reportType === 'lost' ? '😢 Publicar mascota perdida' : '📍 Publicar mascota encontrada'}
                                     </button>
                                 </form>
                             )}
                         </div>
 
+                        {/* Muro */}
                         <div className="lost-muro-pad" style={{ padding: '24px 32px' }}>
                             <h3 style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 18, fontFamily: FONT }}>
                                 📋 Reportes activos <span style={{ color: G1 }}>({lostPets.length})</span>
@@ -551,36 +615,61 @@ export default function Home() {
                                 <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>No hay reportes activos por el momento.</p>
                             ) : (
                                 <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
-                                    {lostPets.map(pet => (
-                                        <div key={pet.id} style={{ background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.08)', borderRadius: 18, overflow: 'hidden' }}>
-                                            <div style={{ height: 180, overflow: 'hidden', position: 'relative' }}>
-                                                <img src={pet.photo_url} alt="Mascota perdida" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                <div style={{ position: 'absolute', top: 10, right: 10, background: DARK, color: G2, fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 99, border: `1px solid rgba(76,175,80,0.3)` }}>
-                                                    {pet.days_left}d restantes
-                                                </div>
-                                            </div>
-                                            <div style={{ padding: '14px 16px' }}>
-                                                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.65, marginBottom: 12 }}>
-                                                    {pet.description.length > 100 ? pet.description.slice(0, 100) + '...' : pet.description}
-                                                </p>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                                                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
-                                                        {pet.contact_type === 'phone' ? '📱' : pet.contact_type === 'home_phone' ? '📞' : '✉️'} {pet.contact_value}
-                                                    </div>
-                                                    <button onClick={() => handleReportar(pet.id)}
+                                    {lostPets.map(pet => {
+                                        const isLost = pet.report_type === 'lost'
+                                        const badgeColor = isLost ? '#ef4444' : G1
+                                        const badgeBg = isLost ? 'rgba(239,68,68,0.15)' : 'rgba(76,175,80,0.15)'
+                                        const badgeText = isLost ? '🔍 SE BUSCA' : '📍 ENCONTRADA'
+                                        return (
+                                            <div key={pet.id} style={{
+                                                background: 'rgba(255,255,255,0.04)',
+                                                border: `1.5px solid ${isLost ? 'rgba(239,68,68,0.2)' : 'rgba(76,175,80,0.2)'}`,
+                                                borderRadius: 18, overflow: 'hidden',
+                                            }}>
+                                                <div style={{ height: 180, overflow: 'hidden', position: 'relative' }}>
+                                                    <img src={pet.photo_url} alt="Mascota"
                                                         style={{
-                                                            background: reportados[pet.id] ? 'rgba(76,175,80,0.1)' : 'rgba(255,152,0,0.1)',
-                                                            border: `1px solid ${reportados[pet.id] ? 'rgba(76,175,80,0.3)' : 'rgba(255,152,0,0.3)'}`,
-                                                            color: reportados[pet.id] ? G2 : O2,
-                                                            fontSize: 11, fontWeight: 700, padding: '5px 10px',
-                                                            borderRadius: 8, cursor: reportados[pet.id] ? 'default' : 'pointer', fontFamily: FONT,
-                                                        }}>
-                                                        {reportados[pet.id] ? '✓ Reportado' : '⚠️ Reportar'}
-                                                    </button>
+                                                            width: '100%', height: '100%', objectFit: 'cover',
+                                                            filter: isLost ? 'grayscale(40%)' : 'none',
+                                                        }} />
+                                                    {/* Badge tipo */}
+                                                    <div style={{
+                                                        position: 'absolute', top: 10, left: 10,
+                                                        background: badgeBg, color: badgeColor,
+                                                        fontSize: 10, fontWeight: 900, letterSpacing: 1,
+                                                        padding: '4px 10px', borderRadius: 6,
+                                                        border: `1px solid ${badgeColor}`,
+                                                        textTransform: 'uppercase',
+                                                        backdropFilter: 'blur(8px)',
+                                                    }}>{badgeText}</div>
+                                                    {/* Días restantes */}
+                                                    <div style={{ position: 'absolute', top: 10, right: 10, background: DARK, color: G2, fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 99, border: `1px solid rgba(76,175,80,0.3)` }}>
+                                                        {pet.days_left}d restantes
+                                                    </div>
+                                                </div>
+                                                <div style={{ padding: '14px 16px' }}>
+                                                    <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.65, marginBottom: 12 }}>
+                                                        {pet.description.length > 100 ? pet.description.slice(0, 100) + '...' : pet.description}
+                                                    </p>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+                                                            {pet.contact_type === 'phone' ? '📱' : pet.contact_type === 'home_phone' ? '📞' : '✉️'} {pet.contact_value}
+                                                        </div>
+                                                        <button onClick={() => handleReportar(pet.id)}
+                                                            style={{
+                                                                background: reportados[pet.id] ? 'rgba(76,175,80,0.1)' : 'rgba(255,152,0,0.1)',
+                                                                border: `1px solid ${reportados[pet.id] ? 'rgba(76,175,80,0.3)' : 'rgba(255,152,0,0.3)'}`,
+                                                                color: reportados[pet.id] ? G2 : O2,
+                                                                fontSize: 11, fontWeight: 700, padding: '5px 10px',
+                                                                borderRadius: 8, cursor: reportados[pet.id] ? 'default' : 'pointer', fontFamily: FONT,
+                                                            }}>
+                                                            {reportados[pet.id] ? '✓ Visto' : '👁 Lo vi'}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        )
+                                    })}
                                 </div>
                             )}
                         </div>
