@@ -648,17 +648,16 @@ export default function Home() {
                             ))}
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-                            {[{ icon: '📘', label: 'Facebook' }, { icon: '📸', label: 'Instagram' }, { icon: '🐦', label: 'Twitter' }].map(s => (
-                                <div key={s.label} style={{
+                            <a href="https://www.instagram.com/vetpawoficial" target="_blank" rel="noopener noreferrer"
+                                style={{
                                     width: 38, height: 38, borderRadius: '50%',
                                     background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, cursor: 'pointer',
-                                    transition: 'all .2s',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
+                                    cursor: 'pointer', transition: 'all .2s', textDecoration: 'none',
                                 }}
-                                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(76,175,80,0.15)'; e.currentTarget.style.borderColor = 'rgba(76,175,80,0.3)' }}
-                                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
-                                >{s.icon}</div>
-                            ))}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(193,53,132,0.15)'; e.currentTarget.style.borderColor = 'rgba(193,53,132,0.4)' }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+                            >📸</a>
                         </div>
                         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 18, width: '100%', textAlign: 'center' }}>
                             <p style={{ color: 'rgba(255,255,255,0.15)', fontSize: 12 }}>
