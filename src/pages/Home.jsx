@@ -39,7 +39,7 @@ export default function Home() {
     const [reportados, setReportados] = useState({})
     const [reportType, setReportType] = useState('found')
 
-    
+
     useEffect(() => { fetchLostPets() }, [])
 
     const fetchLostPets = async () => {
@@ -630,6 +630,7 @@ export default function Home() {
                                                     <img src={pet.photo_url} alt="Mascota"
                                                         style={{
                                                             width: '100%', height: '100%', objectFit: 'cover',
+                                                            objectPosition: 'center 20%',
                                                             filter: isLost ? 'grayscale(40%)' : 'none',
                                                         }} />
                                                     {/* Badge tipo */}
@@ -641,6 +642,7 @@ export default function Home() {
                                                         border: `1px solid ${badgeColor}`,
                                                         textTransform: 'uppercase',
                                                         backdropFilter: 'blur(8px)',
+                                                        
                                                     }}>{badgeText}</div>
                                                     {/* Días restantes */}
                                                     <div style={{ position: 'absolute', top: 10, right: 10, background: DARK, color: G2, fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 99, border: `1px solid rgba(76,175,80,0.3)` }}>
@@ -655,16 +657,30 @@ export default function Home() {
                                                         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
                                                             {pet.contact_type === 'phone' ? '📱' : pet.contact_type === 'home_phone' ? '📞' : '✉️'} {pet.contact_value}
                                                         </div>
-                                                        <button onClick={() => handleReportar(pet.id)}
-                                                            style={{
-                                                                background: reportados[pet.id] ? 'rgba(76,175,80,0.1)' : 'rgba(255,152,0,0.1)',
-                                                                border: `1px solid ${reportados[pet.id] ? 'rgba(76,175,80,0.3)' : 'rgba(255,152,0,0.3)'}`,
-                                                                color: reportados[pet.id] ? G2 : O2,
-                                                                fontSize: 11, fontWeight: 700, padding: '5px 10px',
-                                                                borderRadius: 8, cursor: reportados[pet.id] ? 'default' : 'pointer', fontFamily: FONT,
-                                                            }}>
-                                                            {reportados[pet.id] ? '✓ Visto' : '👁 Lo vi'}
-                                                        </button>
+                                                        {pet.contact_type === 'email' ? (
+                                                            <a href={`mailto:${pet.contact_value}`}
+                                                                style={{
+                                                                    background: 'rgba(107,202,255,0.1)',
+                                                                    border: '1px solid rgba(107,202,255,0.3)',
+                                                                    color: '#6bcaff', fontSize: 11, fontWeight: 700,
+                                                                    padding: '5px 10px', borderRadius: 8,
+                                                                    textDecoration: 'none', fontFamily: FONT,
+                                                                }}>
+                                                                ✉️ Contactar
+                                                            </a>
+                                                        ) : (
+                                                            <a href={`https://wa.me/54${pet.contact_value.replace(/\D/g, '')}`}
+                                                                target="_blank" rel="noopener noreferrer"
+                                                                style={{
+                                                                    background: 'rgba(37,211,102,0.1)',
+                                                                    border: '1px solid rgba(37,211,102,0.3)',
+                                                                    color: '#25D366', fontSize: 11, fontWeight: 700,
+                                                                    padding: '5px 10px', borderRadius: 8,
+                                                                    textDecoration: 'none', fontFamily: FONT,
+                                                                }}>
+                                                                💬 Contactar
+                                                            </a>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
