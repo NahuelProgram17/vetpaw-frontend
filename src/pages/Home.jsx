@@ -663,16 +663,15 @@ export default function Home() {
                                 </svg>
                             </a>
                         </div>
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 18, width: '100%', textAlign: 'center' }}>
+                            <p style={{ color: 'rgba(255,255,255,0.15)', fontSize: 12 }}>
+                                © 2026 VetPaw · Todos los derechos reservados · Hecho con ❤️ en Argentina
+                            </p>
+                        </div>
                     </div>
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 18, width: '100%', textAlign: 'center' }}>
-                        <p style={{ color: 'rgba(255,255,255,0.15)', fontSize: 12 }}>
-                            © 2026 VetPaw · Todos los derechos reservados · Hecho con ❤️ en Argentina
-                        </p>
-                    </div>
-            </div>
-        </footer >
+                </footer>
 
-            </div >
+            </div>
         </>
     )
 }
