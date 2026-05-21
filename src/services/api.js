@@ -132,5 +132,12 @@ export const sendMessage       = (data) => api.post('/messages/', data).then(r =
 export const markMessagesRead  = (other_user_id) => api.post('/messages/mark_read/', { other_user_id }).then(r => r.data)
 export const getUnreadCount    = () => api.get('/messages/unread_count/').then(r => r.data)
 
+// ── Password Reset ────────────────────────────────────
+export const requestPasswordReset = (email) =>
+    api.post("/users/password-reset/", { email }).then(r => r.data);
+
+export const confirmPasswordReset = (uidb64, token, password, password2) =>
+    api.post(`/users/password-reset-confirm/${uidb64}/${token}/`, { password, password2 }).then(r => r.data);
+
 
 export default api;

@@ -1,0 +1,106 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { requestPasswordReset } from "../services/api";
+
+export default function ForgotPassword() {
+    const [email, setEmail] = useState("");
+    const [sent, setSent] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true); setError("");
+        try {
+            await requestPasswordReset(email);
+            setSent(true);
+        } catch {
+            setError("Hubo un error. Intentá de nuevo.");
+        } finally { setLoading(false); }
+    };
+
+    return (
+        <div className="auth-page">
+            <div className="blob blob-1" /><div className="blob blob-2" /><div className="blob blob-3" />
+            <div className="auth-card">
+                <div className="auth-brand">
+                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: '140px', width: 'auto', display: 'block', margin: '0 auto' }} />
+                </div>
+                <p className="auth-tagline">Tu clínica, siempre cerca.</p>
+                <h2 className="auth-title">Recuperar contraseña</h2>
+
+                {!sent ? (
+                    <>
+                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.88rem', marginBottom: 20, lineHeight: 1.6 }}>
+                            Ingresá tu email y te enviaremos un link para restablecer tu contraseña.
+                        </p>
+                        {error && <div className="auth-error"><span>⚠️</span> {error}</div>}
+                        <form onSubmit={handleSubmit} className="auth-form">
+                            <div className="field-group">
+                                <label>Email</label>
+                                <div className="input-wrapper">
+                                    <span className="input-icon">✉️</span>
+                                    <input
+                                        type="email" placeholder="tu@email.com"
+                                        value={email} onChange={e => setEmail(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <button type="submit" className="auth-btn" disabled={loading}>
+                                {loading ? <span className="btn-loading"><span className="spinner" /> Enviando...</span> : "Enviar link 🔑"}
+                            </button>
+                        </form>
+                    </>
+                ) : (
+                    <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: 16 }}>📬</div>
+                        <p style={{ color: '#6bffb8', fontWeight: 700, fontSize: '1rem', marginBottom: 8 }}>¡Mail enviado!</p>
+                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.88rem', lineHeight: 1.6 }}>
+                            Revisá tu casilla de email. El link expira en 24 horas.
+                        </p>
+                    </div>
+                )}
+
+                <p className="auth-switch" style={{ marginTop: 20 }}>
+                    <Link to="/login" className="auth-link" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>
+                        ← Volver al login
+                    </Link>
+                </p>
+            </div>
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
+                *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+                .auth-page { min-height: 100vh; background: #1a1a2e; display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; position: relative; overflow: hidden; }
+                .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.18; animation: blobFloat 8s ease-in-out infinite alternate; }
+                .blob-1 { width: 420px; height: 420px; background: #ff6b6b; top: -100px; left: -120px; animation-duration: 9s; }
+                .blob-2 { width: 320px; height: 320px; background: #ffd93d; bottom: -80px; right: -80px; animation-duration: 11s; animation-delay: -3s; }
+                .blob-3 { width: 200px; height: 200px; background: #6bcaff; top: 50%; right: 15%; animation-duration: 7s; animation-delay: -1.5s; }
+                @keyframes blobFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,25px) scale(1.08); } }
+                .auth-card { position: relative; z-index: 10; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); backdrop-filter: blur(20px); border-radius: 28px; padding: 48px 44px 40px; width: 100%; max-width: 420px; box-shadow: 0 32px 80px rgba(0,0,0,0.5); animation: cardIn 0.55s cubic-bezier(.22,.68,0,1.2) both; }
+                @keyframes cardIn { from { opacity: 0; transform: translateY(28px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+                .auth-tagline { font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-bottom: 28px; letter-spacing: 0.06em; text-transform: uppercase; }
+                .auth-title { font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 20px; }
+                .auth-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.4); color: #ff9999; padding: 10px 14px; border-radius: 10px; font-size: 0.86rem; margin-bottom: 16px; display: flex; gap: 8px; align-items: center; }
+                .auth-form { display: flex; flex-direction: column; gap: 18px; }
+                .field-group { display: flex; flex-direction: column; gap: 6px; }
+                .field-group label { font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.08em; }
+                .input-wrapper { position: relative; display: flex; align-items: center; }
+                .input-icon { position: absolute; left: 14px; font-size: 1rem; pointer-events: none; }
+                .input-wrapper input { width: 100%; padding: 13px 14px 13px 42px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 12px; color: #fff; font-family: 'Nunito', sans-serif; font-size: 0.96rem; transition: border-color 0.2s; outline: none; }
+                .input-wrapper input::placeholder { color: rgba(255,255,255,0.25); }
+                .input-wrapper input:focus { border-color: #4CAF50; background: rgba(76,175,80,0.07); box-shadow: 0 0 0 4px rgba(76,175,80,0.12); }
+                .auth-btn { margin-top: 6px; padding: 14px; background: linear-gradient(135deg, #4CAF50 0%, #FF9800 100%); color: #fff; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 900; border: none; border-radius: 12px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 6px 20px rgba(76,175,80,0.35); }
+                .auth-btn:hover:not(:disabled) { transform: translateY(-2px); }
+                .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+                .btn-loading { display: flex; align-items: center; justify-content: center; gap: 10px; }
+                .spinner { width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+                @keyframes spin { to { transform: rotate(360deg); } }
+                .auth-switch { text-align: center; margin-top: 22px; font-size: 0.88rem; color: rgba(255,255,255,0.4); }
+                .auth-link { color: #ffd93d; font-weight: 700; text-decoration: none; }
+                .auth-link:hover { text-decoration: underline; }
+                @media (max-width: 480px) { .auth-card { padding: 36px 24px 32px; margin: 16px; border-radius: 20px; } }
+            `}</style>
+        </div>
+    );
+}

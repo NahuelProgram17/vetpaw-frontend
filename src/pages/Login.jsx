@@ -9,7 +9,7 @@ export default function Login() {
     const [form, setForm] = useState({ username: "", password: "" });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [showResend, setShowResend] = useState(false);    
+    const [showResend, setShowResend] = useState(false);
     const [resendMsg, setResendMsg] = useState("");
     const [resendEmail, setResendEmail] = useState("");
 
@@ -17,40 +17,40 @@ export default function Login() {
         setForm({ ...form, [e.target.name]: e.target.value });
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-        const userData = await login(form.username, form.password);
-        if (userData?.role === "clinic") {
-            navigate("/clinic/dashboard");
-        } else {
-            navigate("/dashboard");
-        }       
-    } catch (err) {
-        const data = err.response?.data;
-        const msg = data?.email?.[0] || data?.detail || "Credenciales incorrectas. Intentá de nuevo.";
-        setError(msg);
-        if (data?.email?.[0]?.includes('verificar')) {
-            setShowResend(true);
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+        try {
+            const userData = await login(form.username, form.password);
+            if (userData?.role === "clinic") {
+                navigate("/clinic/dashboard");
+            } else {
+                navigate("/dashboard");
+            }
+        } catch (err) {
+            const data = err.response?.data;
+            const msg = data?.email?.[0] || data?.detail || "Credenciales incorrectas. Intentá de nuevo.";
+            setError(msg);
+            if (data?.email?.[0]?.includes('verificar')) {
+                setShowResend(true);
+            }
+        } finally {
+            setLoading(false);
         }
-    } finally {
-        setLoading(false);
-    }
-};
-const handleResend = async (e) => {
-    e.preventDefault();
-    try {
-        await fetch("http://localhost:8000/api/users/resend-verification/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: resendEmail }),
-        });
-        setResendMsg("Email reenviado. Revisá tu casilla 📬");
-    } catch {
-        setResendMsg("Hubo un error. Intentá de nuevo.");
-    }
-};
+    };
+    const handleResend = async (e) => {
+        e.preventDefault();
+        try {
+            await fetch("http://localhost:8000/api/users/resend-verification/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: resendEmail }),
+            });
+            setResendMsg("Email reenviado. Revisá tu casilla 📬");
+        } catch {
+            setResendMsg("Hubo un error. Intentá de nuevo.");
+        }
+    };
     return (
         <div className="auth-page">
             <div className="blob blob-1" />
@@ -59,7 +59,7 @@ const handleResend = async (e) => {
 
             <div className="auth-card">
                 <div className="auth-brand">
-                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{height: '180px', width: 'auto', display: 'block', margin: '0 auto'}} />
+                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: '180px', width: 'auto', display: 'block', margin: '0 auto' }} />
                 </div>
 
                 <p className="auth-tagline">Tu clínica, siempre cerca.</p>
@@ -67,27 +67,27 @@ const handleResend = async (e) => {
                 <h2 className="auth-title">Iniciá sesión</h2>
 
                 {error && (
-    <div className="auth-error">
-        <span>⚠️</span> {error}
-    </div>
-)}
+                    <div className="auth-error">
+                        <span>⚠️</span> {error}
+                    </div>
+                )}
 
-{showResend && (
-    <div className="resend-box">
-        <p>¿No recibiste el email?</p>
-        <form onSubmit={handleResend} className="resend-form">
-            <input
-                type="email"
-                placeholder="Tu email"
-                value={resendEmail}
-                onChange={(e) => setResendEmail(e.target.value)}
-                required
-            />
-            <button type="submit">Reenviar 📬</button>
-        </form>
-        {resendMsg && <p className="resend-msg">{resendMsg}</p>}
-    </div>
-)}
+                {showResend && (
+                    <div className="resend-box">
+                        <p>¿No recibiste el email?</p>
+                        <form onSubmit={handleResend} className="resend-form">
+                            <input
+                                type="email"
+                                placeholder="Tu email"
+                                value={resendEmail}
+                                onChange={(e) => setResendEmail(e.target.value)}
+                                required
+                            />
+                            <button type="submit">Reenviar 📬</button>
+                        </form>
+                        {resendMsg && <p className="resend-msg">{resendMsg}</p>}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="field-group">
@@ -135,6 +135,11 @@ const handleResend = async (e) => {
                     </button>
                 </form>
 
+                <p className="auth-switch" style={{ marginTop: 12 }}>
+                    <Link to="/forgot-password" className="auth-link" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>
+                        ¿Olvidaste tu contraseña?
+                    </Link>
+                </p>
                 <p className="auth-switch">
                     ¿No tenés cuenta?{" "}
                     <Link to="/register" className="auth-link">

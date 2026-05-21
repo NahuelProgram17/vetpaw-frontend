@@ -23,6 +23,9 @@ import SumarVeterinaria from './pages/SumarVeterinaria'
 import AnunciarVetPaw from './pages/AnunciarVetPaw'
 import Blog from './pages/Blog'
 import ScrollToTop from './components/ScrollToTop';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
 
 function App() {
   return (
@@ -49,7 +52,8 @@ function App() {
           <Route path="/tips" element={<Tips />} />
 
           <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
-
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:uidb64/:token" element={<ResetPassword />} />
           <Route path="/terminos" element={<TerminosCondiciones />} />
           <Route path="/privacidad" element={<Privacidad />} />
           <Route path="/contacto" element={<Contacto />} />
