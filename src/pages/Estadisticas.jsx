@@ -117,7 +117,20 @@ export default function Estadisticas() {
     // Mejor día
     const maxDia = porDia.indexOf(Math.max(...porDia));
     const maxHora = porHora.indexOf(Math.max(...porHora)) + 8;
+    
+    const getLogoBase64 = async () => {
+        try {
+            const res = await fetch('/logo_vetpaw.png');
+            const blob = await res.blob();
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
+        } catch { return null; }
+    };
 
+    
     useEffect(() => {
         if (loading) return;
         const loadCharts = async () => {
@@ -224,14 +237,17 @@ export default function Estadisticas() {
     };
 
     const handleDownloadPDF = async () => {
-        const { default: jsPDF } = await import('https://esm.sh/jspdf@2.5.1');
-        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-        const fecha = now.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+    const { default: jsPDF } = await import('https://esm.sh/jspdf@2.5.1');
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const fecha = now.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+    const logo = await getLogoBase64();
 
-        doc.setFillColor(15, 25, 35);
-        doc.rect(0, 0, 210, 297, 'F');
+    doc.setFillColor(15, 25, 35);
+    doc.rect(0, 0, 210, 297, 'F');
 
-        doc.setTextColor(76, 175, 80);
+    if (logo) doc.addImage(logo, 'PNG', 155, 8, 35, 35);
+
+    doc.setTextColor(76, 175, 80);
         doc.setFontSize(22); doc.setFont('helvetica', 'bold');
         doc.text('VetPaw — Reporte de estadísticas', 20, 24);
 
