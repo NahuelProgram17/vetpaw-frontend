@@ -182,21 +182,13 @@ export default function Home() {
                             src="/chicha_petshop.png"
                             alt="Chica Petshop — Todo lo que tu perro necesita"
                             style={{
-                                width: '70%',
+                                width: '92%',
                                 borderRadius: 20,
                                 display: 'block',
                                 cursor: 'pointer',
                                 margin: '0 auto'
                             }}
                         />
-                    </a>
-
-                    <p style={{
-                        fontSize: 11,
-                        color: 'rgba(255,255,255,0.2)',
-                        marginTop: 8,
-                        textAlign: 'right'
-                    }}>
                         Publicidad · VetPaw Ads
                     </p>
                 </div>
