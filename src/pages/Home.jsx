@@ -184,7 +184,7 @@ export default function Home() {
                         style={{ display: 'block', textDecoration: 'none' }}
                     >
                         <img
-                            src="/chicha_petshop.png"
+                            src="/chicha_petshop_v2.png"
                             alt="Chica Petshop — Todo lo que tu perro necesita"
                             style={{
                                 width: '92%',
