@@ -245,7 +245,7 @@ export default function Estadisticas() {
     doc.setFillColor(15, 25, 35);
     doc.rect(0, 0, 210, 297, 'F');
 
-    if (logo) doc.addImage(logo, 'PNG', 160, 8, 28, 28);
+    if (logo) doc.addImage(logo, 'PNG', 155, 8, 35, 25);
 
     doc.setTextColor(76, 175, 80);
         doc.setFontSize(22); doc.setFont('helvetica', 'bold');
