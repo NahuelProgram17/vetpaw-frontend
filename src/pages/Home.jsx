@@ -177,7 +177,12 @@ export default function Home() {
                 </div>
 
                 <div className="section-pad" style={{ padding: '10px 20px' }}>
-                    <a href="https://wa.me/541169345282" target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
+                    <a
+                        href="https://wa.me/541169345282"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: 'block', textDecoration: 'none' }}
+                    >
                         <img
                             src="/chicha_petshop.png"
                             alt="Chica Petshop — Todo lo que tu perro necesita"
@@ -189,8 +194,18 @@ export default function Home() {
                                 margin: '0 auto'
                             }}
                         />
-                        Publicidad · VetPaw Ads
-                    </p>
+
+                        <p
+                            style={{
+                                fontSize: 11,
+                                color: 'rgba(255,255,255,0.2)',
+                                marginTop: 8,
+                                textAlign: 'right'
+                            }}
+                        >
+                            Publicidad · VetPaw Ads
+                        </p>
+                    </a>
                 </div>
 
                 {/* FEATURES */}
