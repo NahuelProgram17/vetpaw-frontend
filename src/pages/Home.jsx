@@ -176,16 +176,29 @@ export default function Home() {
                     ))}
                 </div>
 
-                {/* ── BANNER PUBLICITARIO ── */}
-                <div className="section-pad" style={{ padding: '28px 40px' }}>
+                <div className="section-pad" style={{ padding: '10px 20px' }}>
                     <a href="https://wa.me/541169345282" target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
                         <img
                             src="/chicha_petshop.png"
                             alt="Chica Petshop — Todo lo que tu perro necesita"
-                            style={{ width: '100%', borderRadius: 20, display: 'block', cursor: 'pointer' }}
+                            style={{
+                                width: '70%',
+                                borderRadius: 20,
+                                display: 'block',
+                                cursor: 'pointer',
+                                margin: '0 auto'
+                            }}
                         />
                     </a>
-                    <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 8, textAlign: 'right' }}>Publicidad · VetPaw Ads</p>
+
+                    <p style={{
+                        fontSize: 11,
+                        color: 'rgba(255,255,255,0.2)',
+                        marginTop: 8,
+                        textAlign: 'right'
+                    }}>
+                        Publicidad · VetPaw Ads
+                    </p>
                 </div>
 
                 {/* FEATURES */}
