@@ -25,6 +25,7 @@ import Blog from './pages/Blog'
 import ScrollToTop from './components/ScrollToTop';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Estadisticas from './pages/Estadisticas';
 
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
           <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/tips" element={<Tips />} />
+          <Route path="/clinic/estadisticas" element={<ProtectedRoute role="clinic"><Estadisticas /></ProtectedRoute>} />
 
           <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

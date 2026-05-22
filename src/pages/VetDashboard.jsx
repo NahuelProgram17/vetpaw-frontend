@@ -233,7 +233,18 @@ export default function ClinicDashboard() {
                         <p className="vet-greeting">🏥 Panel de clínica</p>
                         <h1 className="vet-title">Bienvenido/a, {user?.username}</h1>
                     </div>
-                    {success && <div className="success-toast">✅ {success}</div>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                        {success && <div className="success-toast">✅ {success}</div>}
+                        <a href="/clinic/estadisticas" style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 8,
+                            background: 'rgba(76,175,80,0.12)', border: '1px solid rgba(76,175,80,0.35)',
+                            color: '#4CAF50', borderRadius: 12, padding: '10px 20px',
+                            fontFamily: "'Nunito', sans-serif", fontWeight: 700, fontSize: '0.9rem',
+                            textDecoration: 'none',
+                        }}>
+                            📊 Estadísticas
+                        </a>
+                    </div>
                 </header>
 
                 {/* ── Tabs ── */}
@@ -258,17 +269,17 @@ export default function ClinicDashboard() {
                             <div className="vet-stat"><span className="stat-icon">❌</span><div><p className="stat-num">{noShow}</p><p className="stat-label">Ausentes</p></div></div>
                         </div>
 
-                        
-                                {/* Filtros */}
-                                <div className="filters">
-                                    {["pending", "confirmed", "completed", "cancelled", "no_show", "all"].map(f => (
-                                        <button key={f} className={`filter-btn ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>
-                                            {f === "all" ? "Todos" : STATUS_LABEL[f]?.label}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="turnos-layout">
-                                    <div className="turnos-main">
+
+                        {/* Filtros */}
+                        <div className="filters">
+                            {["pending", "confirmed", "completed", "cancelled", "no_show", "all"].map(f => (
+                                <button key={f} className={`filter-btn ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>
+                                    {f === "all" ? "Todos" : STATUS_LABEL[f]?.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="turnos-layout">
+                            <div className="turnos-main">
 
                                 {/* Lista */}
                                 {filtered.length === 0 ? (
