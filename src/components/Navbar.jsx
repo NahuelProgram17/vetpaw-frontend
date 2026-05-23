@@ -298,6 +298,9 @@ export default function Navbar() {
                                 )}
                             </button>
                         )}
+
+                        {/* Install PWA */}
+                        <InstallPWA />
                         {/* Hamburger */}
                         <button
                             onClick={() => setMenuOpen(!menuOpen)}
