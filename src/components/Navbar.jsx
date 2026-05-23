@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getAppointments, markNotificationsSeen, getUnreadCount } from '../services/api'
+import InstallPWA from './InstallPWA'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const G1 = '#4CAF50'
@@ -176,6 +177,7 @@ export default function Navbar() {
                         {!user ? (
                             <>
                                 <Link to="/clinics" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Veterinarias</Link>
+                                <InstallPWA />   {/* ← ACÁ */}
                                 <Link to="/login" style={{ ...btnOutline, marginLeft: 8 }}
                                     onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
                                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.background = 'transparent' }}>
@@ -195,6 +197,7 @@ export default function Navbar() {
                                     )}
                                 </Link>
                                 <Link to="/profile" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi perfil</Link>
+                                <InstallPWA />   {/* ← ACÁ */}
                                 <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 4px' }}>|</span>
                                 <span style={{ ...linkStyle, color: G1, fontWeight: 700 }}>{user.first_name || user.username}</span>
                                 <button onClick={handleLogout} style={{ ...linkStyle, background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)' }}
@@ -221,6 +224,7 @@ export default function Navbar() {
                                 </Link>
 
                                 <Link to="/profile" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi perfil</Link>
+                                <InstallPWA />   {/* ← AGREGÁ ACÁ */}
 
                                 {/* Notificaciones */}
                                 <div style={{ position: 'relative' }} ref={notifRef}>
