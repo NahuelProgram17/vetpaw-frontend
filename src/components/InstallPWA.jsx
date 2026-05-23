@@ -23,26 +23,19 @@ export default function InstallPWA() {
     const modalRef = useRef(null);
 
     useEffect(() => {
-        // Si ya está instalada como app, no mostrar
         if (isInStandaloneMode()) {
             setInstalled(true);
             return;
         }
-
-        // Capturar el evento nativo (Android/Desktop)
         const handler = (e) => {
             e.preventDefault();
             setInstallPrompt(e);
         };
         window.addEventListener("beforeinstallprompt", handler);
-
-        // Si se instala, ocultar
         window.addEventListener("appinstalled", () => setInstalled(true));
-
         return () => window.removeEventListener("beforeinstallprompt", handler);
     }, []);
 
-    // Cerrar modal al hacer click afuera
     useEffect(() => {
         const handler = (e) => {
             if (modalRef.current && !modalRef.current.contains(e.target)) {
@@ -57,15 +50,12 @@ export default function InstallPWA() {
 
     const handleClick = async () => {
         if (isIOS()) {
-            // iOS: mostrar instrucciones
             setShowModal(true);
         } else if (installPrompt) {
-            // Android/Desktop: prompt nativo
             installPrompt.prompt();
             const { outcome } = await installPrompt.userChoice;
             if (outcome === "accepted") setInstalled(true);
         } else {
-            // Chrome desktop sin prompt capturado: mostrar instrucciones genéricas
             setShowModal(true);
         }
     };
@@ -75,14 +65,17 @@ export default function InstallPWA() {
     return (
         <>
             {/* Botón navbar */}
-            <button onClick={handleClick} style={{
-                display: "flex", alignItems: "center", gap: 6,
-                background: "linear-gradient(135deg, #4CAF50, #FF9800)",
-                border: "none", borderRadius: 8, padding: "7px 14px",
-                cursor: "pointer", fontFamily: FONT, fontSize: 14,
-                fontWeight: 700, color: "#fff", whiteSpace: "nowrap",
-                transition: "opacity 0.2s, transform 0.15s",
-            }}
+            <button
+                onClick={handleClick}
+                style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    background: "linear-gradient(135deg, #43A047, #FB8C00)",
+                    border: "none", borderRadius: 10, padding: "8px 16px",
+                    cursor: "pointer", fontFamily: FONT, fontSize: 14,
+                    fontWeight: 700, color: "#fff", whiteSpace: "nowrap",
+                    boxShadow: "0 2px 12px rgba(67,160,71,0.35)",
+                    transition: "opacity 0.2s, transform 0.15s",
+                }}
                 onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}
             >
@@ -135,7 +128,7 @@ export default function InstallPWA() {
                         </div>
 
                         <button onClick={() => setShowModal(false)} style={{
-                            width: "100%", background: "linear-gradient(135deg, #4CAF50, #FF9800)",
+                            width: "100%", background: "linear-gradient(135deg, #43A047, #FB8C00)",
                             border: "none", borderRadius: 12, padding: 14,
                             fontFamily: FONT, fontSize: 15, fontWeight: 700,
                             color: "#fff", cursor: "pointer",
@@ -147,10 +140,10 @@ export default function InstallPWA() {
             )}
 
             <style>{`
-        @media (max-width: 380px) {
-            .install-label { display: none; }
-        }
-    `}</style>
+                @media (max-width: 380px) {
+                    .install-label { display: none; }
+                }
+            `}</style>
         </>
     );
 }
@@ -163,7 +156,7 @@ function Step({ n, text }) {
         }}>
             <div style={{
                 minWidth: 28, height: 28, borderRadius: "50%",
-                background: "linear-gradient(135deg, #4CAF50, #FF9800)",
+                background: "linear-gradient(135deg, #43A047, #FB8C00)",
                 color: "#fff", fontWeight: 700, fontSize: 13,
                 display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>{n}</div>
