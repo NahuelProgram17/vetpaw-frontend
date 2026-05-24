@@ -1,5 +1,5 @@
 // VetDashboard.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getAppointments, confirmAppointment, cancelAppointment, createVisit, markNoShow } from "../services/api";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -52,12 +52,25 @@ export default function ClinicDashboard() {
     const [selectedPet, setSelectedPet] = useState(null);
     const [highlightedAppt, setHighlightedAppt] = useState(null);
 
+    // ── Fotos state ──
+    const [photos, setPhotos] = useState([]);
+    const [photosLoading, setPhotosLoading] = useState(false);
+    const [photoUploading, setPhotoUploading] = useState(false);
+    const [photoError, setPhotoError] = useState("");
+    const [photoCaption, setPhotoCaption] = useState("");
+    const fileInputRef = useRef(null);
+
     useEffect(() => {
         fetchAll();
         const onResize = () => setIsMobile(window.innerWidth <= 700);
         window.addEventListener('resize', onResize);
         return () => window.removeEventListener('resize', onResize);
     }, []);
+
+    // Cargar fotos cuando se entra al tab
+    useEffect(() => {
+        if (tab === "fotos") fetchPhotos();
+    }, [tab]);
 
     const fetchAll = async () => {
         setLoading(true);
@@ -74,6 +87,61 @@ export default function ClinicDashboard() {
             setVaccines(vaccineData.data.results ?? vaccineData.data);
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
+    };
+
+    const fetchPhotos = async () => {
+        setPhotosLoading(true);
+        try {
+            const res = await api.get("/clinic-photos/list/");
+            setPhotos(res.data);
+        } catch (e) { console.error(e); }
+        finally { setPhotosLoading(false); }
+    };
+
+    const handlePhotoUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 3 * 1024 * 1024) {
+            setPhotoError("La foto no puede superar los 3MB.");
+            return;
+        }
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            setPhotoError("Solo se permiten imágenes JPG, PNG o WebP.");
+            return;
+        }
+
+        setPhotoError("");
+        setPhotoUploading(true);
+        const formData = new FormData();
+        formData.append("image", file);
+        if (photoCaption) formData.append("caption", photoCaption);
+
+        try {
+            await api.post("/clinic-photos/upload/", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            setPhotoCaption("");
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            await fetchPhotos();
+            setSuccess("Foto subida exitosamente.");
+            setTimeout(() => setSuccess(""), 3000);
+        } catch (err) {
+            const msg = err.response?.data?.image?.[0] || err.response?.data?.error || "Error al subir la foto.";
+            setPhotoError(msg);
+        } finally {
+            setPhotoUploading(false);
+        }
+    };
+
+    const handlePhotoDelete = async (id) => {
+        if (!confirm("¿Eliminás esta foto?")) return;
+        try {
+            await api.delete(`/clinic-photos/${id}/delete/`);
+            await fetchPhotos();
+            setSuccess("Foto eliminada.");
+            setTimeout(() => setSuccess(""), 3000);
+        } catch (e) { console.error(e); }
     };
 
     const handleConfirm = async (id) => {
@@ -156,23 +224,23 @@ export default function ClinicDashboard() {
     const petVisits = selectedPet ? visits.filter(v => v.pet === selectedPet.id) : visits;
     const petVaccines = selectedPet ? vaccines.filter(v => v.pet === selectedPet.id) : vaccines;
 
-    // Tabs — en mobile se agrega "Agenda" y se acortan los labels
     const TABS_DESKTOP = [
-        { id: "turnos", label: "📅 Turnos" },
+        { id: "turnos",    label: "📅 Turnos" },
         { id: "pacientes", label: "🐾 Pacientes" },
         { id: "historial", label: "📋 Historial" },
-        { id: "vacunas", label: "💉 Vacunas" },
+        { id: "vacunas",   label: "💉 Vacunas" },
+        { id: "fotos",     label: "📷 Fotos" },
     ];
     const TABS_MOBILE = [
-        { id: "turnos", label: "📅 Turnos" },
-        { id: "agenda", label: "🗓 Agenda" },
+        { id: "turnos",    label: "📅 Turnos" },
+        { id: "agenda",    label: "🗓 Agenda" },
         { id: "pacientes", label: "🐾 Pacientes" },
         { id: "historial", label: "📋 Historial" },
-        { id: "vacunas", label: "💉 Vacunas" },
+        { id: "vacunas",   label: "💉 Vacunas" },
+        { id: "fotos",     label: "📷 Fotos" },
     ];
     const TABS = isMobile ? TABS_MOBILE : TABS_DESKTOP;
 
-    // Contenido de la agenda (reutilizable desktop + mobile tab)
     const AgendaContent = ({ compact = false }) => (
         <div className={compact ? "" : "agenda-panel agenda-desktop"}>
             <div className="agenda-header">
@@ -247,7 +315,6 @@ export default function ClinicDashboard() {
                     </div>
                 </header>
 
-                {/* ── Tabs ── */}
                 <div className="tabs">
                     {TABS.map(t => (
                         <button key={t.id} className={`tab-btn ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
@@ -261,16 +328,12 @@ export default function ClinicDashboard() {
                 {/* ══ TAB TURNOS ══ */}
                 {!loading && tab === "turnos" && (
                     <>
-                        {/* Stats — fuera del grid para que no se corten */}
                         <div className="vet-stats">
                             <div className="vet-stat"><span className="stat-icon">⏳</span><div><p className="stat-num">{pending}</p><p className="stat-label">Pendientes</p></div></div>
                             <div className="vet-stat"><span className="stat-icon">✅</span><div><p className="stat-num">{confirmed}</p><p className="stat-label">Confirmados</p></div></div>
                             <div className="vet-stat"><span className="stat-icon">📋</span><div><p className="stat-num">{completed}</p><p className="stat-label">Realizados</p></div></div>
                             <div className="vet-stat"><span className="stat-icon">❌</span><div><p className="stat-num">{noShow}</p><p className="stat-label">Ausentes</p></div></div>
                         </div>
-
-
-                        {/* Filtros */}
                         <div className="filters">
                             {["pending", "confirmed", "completed", "cancelled", "no_show", "all"].map(f => (
                                 <button key={f} className={`filter-btn ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>
@@ -280,8 +343,6 @@ export default function ClinicDashboard() {
                         </div>
                         <div className="turnos-layout">
                             <div className="turnos-main">
-
-                                {/* Lista */}
                                 {filtered.length === 0 ? (
                                     <div className="empty-state"><span>📭</span><p>No hay turnos {filter !== "all" ? `con estado "${STATUS_LABEL[filter]?.label}"` : ""}.</p></div>
                                 ) : (
@@ -319,8 +380,6 @@ export default function ClinicDashboard() {
                                     </div>
                                 )}
                             </div>
-
-                            {/* Agenda lateral — solo desktop */}
                             {!isMobile && <AgendaContent />}
                         </div>
                     </>
@@ -328,9 +387,7 @@ export default function ClinicDashboard() {
 
                 {/* ══ TAB AGENDA (solo mobile) ══ */}
                 {!loading && tab === "agenda" && (
-                    <div className="agenda-mobile-tab">
-                        <AgendaContent compact />
-                    </div>
+                    <div className="agenda-mobile-tab"><AgendaContent compact /></div>
                 )}
 
                 {/* ══ TAB PACIENTES ══ */}
@@ -388,10 +445,8 @@ export default function ClinicDashboard() {
                                     <p>👤 {selectedPet.owner_name || "—"}
                                         {selectedPet.owner_phone && (
                                             <a href={`https://wa.me/${selectedPet.owner_phone.replace(/\D/g, '')}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                style={{ marginLeft: 10, color: '#25D366', fontWeight: 700, textDecoration: 'none', fontSize: '0.8rem' }}
-                                            >
+                                                target="_blank" rel="noopener noreferrer"
+                                                style={{ marginLeft: 10, color: '#25D366', fontWeight: 700, textDecoration: 'none', fontSize: '0.8rem' }}>
                                                 📱 {selectedPet.owner_phone}
                                             </a>
                                         )}
@@ -452,8 +507,7 @@ export default function ClinicDashboard() {
                             <div className="vaccines-header-row">
                                 <div className="pet-summary" style={{ flex: 1, marginBottom: 0 }}>
                                     <div className="summary-avatar">{SPECIES_ICON[selectedPet.species] || "🐾"}</div>
-                                    <div><h3>{selectedPet.name}</h3><p>{selectedPet.species_display} · {selectedPet.owner_name || "—"}</p>
-                                    </div>
+                                    <div><h3>{selectedPet.name}</h3><p>{selectedPet.species_display} · {selectedPet.owner_name || "—"}</p></div>
                                 </div>
                                 <button className="btn-add-vaccine" onClick={() => openVaccineModal(selectedPet)}>+ Registrar vacuna</button>
                             </div>
@@ -494,6 +548,85 @@ export default function ClinicDashboard() {
                         )}
                     </div>
                 )}
+
+                {/* ══ TAB FOTOS ══ */}
+                {tab === "fotos" && (
+                    <div className="photos-section">
+                        <div className="photos-header">
+                            <div>
+                                <h2 className="photos-title">📷 Fotos del local</h2>
+                                <p className="photos-subtitle">
+                                    {photos.length}/5 fotos — Se muestran en tu perfil público
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Upload box */}
+                        {photos.length < 5 && (
+                            <div className="photo-upload-box">
+                                <div className="form-group" style={{ marginBottom: 10 }}>
+                                    <label>Descripción (opcional)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ej: Sala de espera, Consultorio..."
+                                        value={photoCaption}
+                                        onChange={e => setPhotoCaption(e.target.value)}
+                                        maxLength={100}
+                                    />
+                                </div>
+                                {photoError && <div className="form-error">⚠️ {photoError}</div>}
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    onChange={handlePhotoUpload}
+                                    style={{ display: 'none' }}
+                                />
+                                <button
+                                    className="btn-upload-photo"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={photoUploading}
+                                >
+                                    {photoUploading ? "⏳ Subiendo..." : "📤 Subir foto"}
+                                </button>
+                                <p className="photos-hint">JPG, PNG o WebP · Máximo 3MB por foto</p>
+                            </div>
+                        )}
+
+                        {photos.length >= 5 && (
+                            <div className="photos-limit-notice">
+                                ✅ Llegaste al límite de 5 fotos. Eliminá una para subir otra.
+                            </div>
+                        )}
+
+                        {/* Grid de fotos */}
+                        {photosLoading ? (
+                            <div className="loading-state"><span className="paw-spin">🐾</span><p>Cargando fotos...</p></div>
+                        ) : photos.length === 0 ? (
+                            <div className="empty-state">
+                                <span>📷</span>
+                                <p>Todavía no subiste fotos de tu local.</p>
+                                <p style={{ fontSize: '0.8rem' }}>Las fotos aparecen en tu perfil público y generan más confianza.</p>
+                            </div>
+                        ) : (
+                            <div className="photos-grid">
+                                {photos.map(photo => (
+                                    <div key={photo.id} className="photo-card">
+                                        <img src={photo.image} alt={photo.caption || "Foto del local"} />
+                                        {photo.caption && <p className="photo-caption">{photo.caption}</p>}
+                                        <button
+                                            className="btn-delete-photo"
+                                            onClick={() => handlePhotoDelete(photo.id)}
+                                        >
+                                            🗑 Eliminar
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
             </div>
 
             {/* ── Modal visita ── */}
@@ -573,44 +706,37 @@ export default function ClinicDashboard() {
                 .b2 { width: 400px; height: 400px; background: #6bcaff; bottom: -100px; right: -100px; }
                 .vet-inner { max-width: 960px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; overflow-x: hidden; }
 
-                /* Header */
                 .vet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
                 .vet-greeting { font-size: 0.9rem; color: rgba(255,255,255,0.45); font-weight: 600; margin-bottom: 4px; }
                 .vet-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
                 .success-toast { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; padding: 10px 16px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; }
 
-                /* Tabs */
                 .tabs { display: flex; gap: 2px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
                 .tabs::-webkit-scrollbar { display: none; }
                 .tab-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: rgba(255,255,255,0.4); font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700; padding: 10px 14px; cursor: pointer; transition: all 0.2s; margin-bottom: -1px; white-space: nowrap; flex-shrink: 0; }
                 .tab-btn:hover { color: rgba(255,255,255,0.7); }
                 .tab-btn.active { color: #4CAF50; border-bottom-color: #4CAF50; }
 
-                /* Loading / Empty */
                 .loading-state, .empty-state { text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
                 .paw-spin { font-size: 3rem; animation: spin 1s linear infinite; display: block; }
                 @keyframes spin { to { transform: rotate(360deg); } }
                 .loading-state p, .empty-state p { color: rgba(255,255,255,0.4); }
                 .empty-state span { font-size: 3rem; }
 
-                /* Stats */
                 .vet-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
                 .vet-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px; min-width: 0; overflow: hidden; }
                 .stat-icon { font-size: 1.8rem; flex-shrink: 0; }
                 .stat-num { font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1; }
                 .stat-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 600; margin-top: 2px; }
 
-                /* Filtros */
                 .filters { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
                 .filters::-webkit-scrollbar { display: none; }
                 .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
                 .filter-btn.active { background: rgba(76,175,80,0.12); border-color: rgba(76,175,80,0.35); color: #4CAF50; }
 
-                /* Turnos layout */
                 .turnos-layout { display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start; }
                 .turnos-main { display: flex; flex-direction: column; min-width: 0; }
 
-                /* Appt cards */
                 .appts-list { display: flex; flex-direction: column; gap: 12px; }
                 .appt-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px 18px; display: flex; align-items: flex-start; gap: 16px; backdrop-filter: blur(10px); transition: border-color 0.2s; overflow: hidden; }
                 .appt-card:hover { border-color: rgba(107,255,184,0.2); }
@@ -634,10 +760,8 @@ export default function ClinicDashboard() {
                 .cancelled-label { font-size: 0.78rem; color: rgba(255,107,107,0.6); font-weight: 700; }
                 .noshow-label { font-size: 0.78rem; color: #ff9500; font-weight: 700; }
 
-                /* Agenda desktop */
                 .agenda-panel { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; }
                 .agenda-desktop { position: sticky; top: 20px; }
-                /* Agenda mobile tab — pantalla completa */
                 .agenda-mobile-tab { display: flex; flex-direction: column; gap: 0; }
                 .agenda-mobile-tab .agenda-panel { border-radius: 16px; }
                 .agenda-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
@@ -662,7 +786,6 @@ export default function ClinicDashboard() {
                 .btn-agenda-pdf { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; border-radius: 8px; padding: 10px 12px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: opacity 0.15s; }
                 .btn-agenda-pdf:hover { opacity: 0.9; }
 
-                /* Pacientes */
                 .pets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
                 .pet-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: all 0.2s; }
                 .pet-card:hover { border-color: rgba(107,255,184,0.3); transform: translateY(-2px); }
@@ -679,7 +802,6 @@ export default function ClinicDashboard() {
                 .btn-pdf { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; border-radius: 8px; padding: 8px 12px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; box-shadow: 0 4px 14px rgba(239,68,68,0.3); transition: opacity 0.15s; }
                 .btn-pdf:hover { opacity: 0.9; }
 
-                /* Historial */
                 .pet-selector { margin-bottom: 20px; }
                 .selector-label { font-size: 0.8rem; color: rgba(255,255,255,0.45); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
                 .pet-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
@@ -705,7 +827,6 @@ export default function ClinicDashboard() {
                 .visit-field span { font-weight: 700; color: rgba(255,255,255,0.8); }
                 .visit-next { font-size: 0.8rem; color: #ffd93d; font-weight: 700; margin-top: 4px; }
 
-                /* Vacunas */
                 .vaccines-section { display: flex; flex-direction: column; gap: 20px; }
                 .vaccines-header-row { display: flex; align-items: center; gap: 16px; margin-bottom: 4px; flex-wrap: wrap; }
                 .btn-add-vaccine { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; border-radius: 10px; padding: 10px 18px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
@@ -722,7 +843,24 @@ export default function ClinicDashboard() {
                 .nextdose-badge { background: rgba(107,255,184,0.1); color: #6bffb8; border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
                 .overdue-badge { background: rgba(255,149,0,0.12); color: #ff9500; border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
 
-                /* Modales */
+                /* ── Fotos ── */
+                .photos-section { display: flex; flex-direction: column; gap: 20px; }
+                .photos-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+                .photos-title { font-family: 'Fraunces', serif; font-size: 1.4rem; font-style: italic; color: #fff; }
+                .photos-subtitle { font-size: 0.82rem; color: rgba(255,255,255,0.4); margin-top: 4px; }
+                .photo-upload-box { background: rgba(255,255,255,0.04); border: 1.5px dashed rgba(255,255,255,0.15); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+                .btn-upload-photo { background: linear-gradient(135deg, #4CAF50, #66BB6A); border: none; color: #fff; border-radius: 10px; padding: 12px 24px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 16px rgba(76,175,80,0.3); transition: opacity 0.15s; width: fit-content; }
+                .btn-upload-photo:hover:not(:disabled) { opacity: 0.9; }
+                .btn-upload-photo:disabled { opacity: 0.5; cursor: not-allowed; }
+                .photos-hint { font-size: 0.75rem; color: rgba(255,255,255,0.3); }
+                .photos-limit-notice { background: rgba(107,255,184,0.08); border: 1px solid rgba(107,255,184,0.2); color: #6bffb8; padding: 12px 16px; border-radius: 12px; font-size: 0.88rem; font-weight: 700; }
+                .photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+                .photo-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+                .photo-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
+                .photo-caption { font-size: 0.8rem; color: rgba(255,255,255,0.5); padding: 8px 12px; }
+                .btn-delete-photo { background: rgba(255,107,107,0.08); border: none; border-top: 1px solid rgba(255,255,255,0.06); color: rgba(255,107,107,0.7); padding: 10px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s; width: 100%; }
+                .btn-delete-photo:hover { background: rgba(255,107,107,0.15); }
+
                 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
                 .modal { background: #1e1e35; border: 1px solid rgba(255,255,255,0.10); border-radius: 24px; padding: 28px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.3s cubic-bezier(.22,.68,0,1.2) both; }
                 @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
@@ -744,76 +882,54 @@ export default function ClinicDashboard() {
                 .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 10px; padding: 11px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 16px rgba(76,175,80,0.3); }
                 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-                /* ══ TABLET (≤800px) ══ */
                 @media (max-width: 800px) {
                     .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
                     .stat-icon { font-size: 1.5rem; }
                     .stat-num { font-size: 1.4rem; }
                 }
 
-                /* ══ MOBILE (≤700px) ══ */
                 @media (max-width: 700px) {
                     .vet-inner { padding: 16px 14px; }
                     .vet-title { font-size: 1.4rem; }
                     .vet-header { margin-bottom: 16px; }
-
-                    /* Tabs más pequeños */
                     .tab-btn { font-size: 0.78rem; padding: 8px 10px; }
-
-                    /* Stats 2x2 compactas */
                     .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
                     .vet-stat { padding: 10px 12px; border-radius: 12px; gap: 8px; }
                     .stat-icon { font-size: 1.3rem; }
                     .stat-num { font-size: 1.2rem; }
                     .stat-label { font-size: 0.66rem; }
-
-                    /* Layout 1 columna */
                     .turnos-layout { grid-template-columns: 1fr; gap: 0; }
-
-                    /* Appt cards */
                     .appt-card { padding: 12px; border-radius: 14px; gap: 10px; }
                     .appt-date-box { min-width: 42px; padding: 6px 8px; }
                     .appt-day { font-size: 1.1rem; }
-
-                    /* Agenda tab mobile — más espaciosa */
                     .agenda-mobile-tab { padding: 4px 0; }
-
-                    /* Pacientes */
                     .pets-grid { grid-template-columns: 1fr; gap: 12px; }
-
-                    /* Visit card */
                     .visit-card { flex-direction: column; gap: 12px; padding: 14px; border-radius: 14px; }
                     .visit-date-box { flex-direction: row; align-items: center; gap: 8px; min-width: unset; width: fit-content; padding: 6px 12px; border-radius: 8px; }
                     .visit-day { font-size: 1.1rem; }
                     .visit-month { font-size: 0.7rem; }
                     .visit-year { font-size: 0.7rem; margin-top: 0; margin-left: 4px; }
-
-                    /* Pet summary */
                     .pet-summary { flex-direction: column; align-items: flex-start; padding: 14px; }
                     .summary-actions { width: 100%; }
-                    .summary-actions .btn-visit,
-                    .summary-actions .btn-pdf { flex: 1; text-align: center; }
-
-                    /* Vacunas */
+                    .summary-actions .btn-visit, .summary-actions .btn-pdf { flex: 1; text-align: center; }
                     .vaccines-header-row { flex-direction: column; align-items: flex-start; }
                     .btn-add-vaccine { width: 100%; text-align: center; }
-
-                    /* Modales bottom sheet */
+                    .photos-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+                    .photo-card img { height: 120px; }
                     .modal-overlay { padding: 0; align-items: flex-end; }
                     .modal { border-radius: 24px 24px 0 0; padding: 24px 16px; max-height: 92vh; border-bottom: none; }
                     .modal-header h2 { font-size: 1.15rem; }
                     .form-row { flex-direction: column; gap: 10px; }
                     .form-actions { flex-direction: column-reverse; gap: 8px; }
-                    .form-actions .btn-ghost,
-                    .form-actions .btn-primary { width: 100%; text-align: center; padding: 13px; }
+                    .form-actions .btn-ghost, .form-actions .btn-primary { width: 100%; text-align: center; padding: 13px; }
                 }
 
-                /* ══ MOBILE XS (≤380px) ══ */
                 @media (max-width: 380px) {
                     .vet-inner { padding: 12px 10px; }
                     .vet-title { font-size: 1.2rem; }
                     .tab-btn { font-size: 0.7rem; padding: 7px 8px; }
                     .stat-num { font-size: 1.1rem; }
+                    .photos-grid { grid-template-columns: 1fr; }
                 }
             `}</style>
         </div>
