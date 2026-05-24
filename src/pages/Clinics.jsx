@@ -141,7 +141,6 @@ export default function Clinics() {
                     </button>
                 </header>
 
-                {/* Banner de ubicación */}
                 {locationStatus === 'loading' && (
                     <div className="location-banner location-loading">
                         📍 Obteniendo tu ubicación...
@@ -158,7 +157,6 @@ export default function Clinics() {
                     </div>
                 )}
 
-                {/* Buscador */}
                 <div className="search-bar">
                     <div className="search-input-wrapper">
                         <span className="search-icon">🔍</span>
@@ -353,6 +351,12 @@ export default function Clinics() {
                                     >
                                         📅 Sacar turno
                                     </button>
+                                    <button
+                                        className="btn-perfil"
+                                        onClick={() => navigate(`/clinicas/${clinic.slug}`)}
+                                    >
+                                        👁 Ver perfil
+                                    </button>
                                     {user?.role === 'owner' &&
                                         (clinic.is_member ? (
                                             <button
@@ -395,7 +399,6 @@ export default function Clinics() {
 
                 .clinics-inner { max-width: 1100px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
 
-                /* ── Header ── */
                 .clinics-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
                 .clinics-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
                 .clinics-subtitle { color: rgba(255,255,255,0.45); font-size: 0.9rem; margin-top: 4px; }
@@ -408,13 +411,11 @@ export default function Clinics() {
                 }
                 .btn-primary:hover { transform: translateY(-2px); }
 
-                /* ── Banners ── */
                 .location-banner { padding: 10px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; margin-bottom: 16px; border: 1px solid; }
                 .location-loading { background: rgba(107,202,255,0.08); border-color: rgba(107,202,255,0.2); color: rgba(107,202,255,0.7); }
                 .location-ok { background: rgba(107,255,184,0.08); border-color: rgba(107,255,184,0.2); color: #6bffb8; }
                 .location-denied { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.35); }
 
-                /* ── Search ── */
                 .search-bar { display: flex; gap: 12px; margin-bottom: 20px; }
                 .search-input-wrapper { flex: 1; position: relative; display: flex; align-items: center; }
                 .search-icon { position: absolute; left: 14px; font-size: 1rem; pointer-events: none; }
@@ -435,10 +436,8 @@ export default function Clinics() {
                 }
                 .filter-24h.active { background: rgba(255,217,61,0.12); border-color: rgba(255,217,61,0.4); color: #ffd93d; }
 
-                /* ── Toast ── */
                 .join-toast { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; font-weight: 700; margin-bottom: 16px; }
 
-                /* ── Loading / Empty ── */
                 .loading-state, .empty-state { text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
                 .paw-spin { font-size: 3rem; animation: spin 1s linear infinite; display: block; }
                 @keyframes spin { to { transform: rotate(360deg); } }
@@ -447,16 +446,13 @@ export default function Clinics() {
                 .empty-state h2 { font-family: 'Fraunces', serif; font-size: 1.6rem; font-style: italic; color: #fff; }
                 .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 10px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; }
 
-                /* ── Grid ── */
                 .clinics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 
-                /* ── Card ── */
                 .clinic-card {
                     background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
                     border-radius: 20px; padding: 24px; backdrop-filter: blur(10px);
                     display: flex; flex-direction: column; gap: 12px;
-                    transition: border-color 0.2s, transform 0.2s;
-                    overflow: hidden;
+                    transition: border-color 0.2s, transform 0.2s; overflow: hidden;
                 }
                 .clinic-card:hover { border-color: rgba(107,202,255,0.25); transform: translateY(-3px); }
                 .clinic-card.inactive { opacity: 0.55; }
@@ -464,7 +460,7 @@ export default function Clinics() {
                 .clinic-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
                 .clinic-logo { width: 52px; height: 52px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; overflow: hidden; flex-shrink: 0; min-width: 52px; }
                 .clinic-logo img { width: 100%; height: 100%; object-fit: cover; }
-                .clinic-badges { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 4px;max-width: calc(100% - 68px); overflow: hidden; }
+                .clinic-badges { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 4px; max-width: calc(100% - 68px); overflow: hidden; }
                 .badge { font-size: 0.7rem; font-weight: 700; border-radius: 6px; padding: 3px 8px; border: 1px solid; }
                 .badge-distance { background: rgba(107,202,255,0.12); color: #6bcaff; border-color: rgba(107,202,255,0.3); }
                 .badge-24h { background: rgba(255,217,61,0.12); color: #ffd93d; border-color: rgba(255,217,61,0.25); }
@@ -500,8 +496,7 @@ export default function Clinics() {
                 .review-pet { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
                 .review-comment { font-size: 0.82rem; color: rgba(255,255,255,0.6); font-style: italic; line-height: 1.4; margin-top: 2px; }
 
-                /* ── Acciones card ── */
-                .clinic-card-actions { display: flex; gap: 8px; margin-top: 4px; }
+                .clinic-card-actions { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
                 .btn-turno {
                     flex: 1; padding: 11px;
                     background: rgba(76,175,80,0.10); border: 1.5px solid rgba(76,175,80,0.25);
@@ -511,6 +506,14 @@ export default function Clinics() {
                 }
                 .btn-turno:hover:not(:disabled) { background: rgba(76,175,80,0.18); }
                 .btn-turno:disabled { opacity: 0.4; cursor: not-allowed; }
+                .btn-perfil {
+                    padding: 11px 16px;
+                    background: rgba(107,202,255,0.08); border: 1.5px solid rgba(107,202,255,0.2);
+                    color: #6bcaff; border-radius: 12px;
+                    font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700;
+                    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+                }
+                .btn-perfil:hover { background: rgba(107,202,255,0.15); }
                 .btn-join {
                     padding: 11px 16px;
                     background: rgba(255,217,61,0.10); border: 1.5px solid rgba(255,217,61,0.25);
@@ -521,69 +524,33 @@ export default function Clinics() {
                 .btn-join:hover:not(:disabled) { background: rgba(255,217,61,0.18); }
                 .btn-join:disabled { opacity: 0.4; cursor: not-allowed; }
 
-                /* ══════════════════════════════
-                RESPONSIVE — TABLET (≤900px)
-                ══════════════════════════════ */
                 @media (max-width: 900px) {
                     .clinics-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
                 }
 
-                /* ══════════════════════════════
-                RESPONSIVE — MOBILE (≤600px)
-                ══════════════════════════════ */
                 @media (max-width: 600px) {
                     .clinics-inner { padding: 16px 14px; }
-
-                /* Header — botón compacto, no full width */
-                .clinics-header { flex-direction: column; align-items: flex-start; margin-bottom: 16px; }
-                .clinics-title { font-size: 1.5rem; }
-                .clinics-header .btn-primary {
-                    align-self: flex-start;
-                    padding: 10px 18px;
-                    font-size: 0.88rem;
-                }
-
-                /* Search */
-                .search-bar { flex-direction: row; gap: 8px; }
-                .filter-24h { padding: 13px 14px; font-size: 0.82rem; }
-
-                /* Grid: 1 columna */
-                .clinics-grid { grid-template-columns: 1fr; gap: 14px; }
-
-                /* Card */
-                .clinic-card { padding: 18px 16px; border-radius: 16px; gap: 10px; }
-
-                /* Badges — en fila, con wrap para que no se salgan */
-                .clinic-badges {
-                    flex-direction: row; align-items: center;
-                    flex-wrap: wrap; gap: 4px;
-                    max-width: 55%;
-                    }
+                    .clinics-header { flex-direction: column; align-items: flex-start; margin-bottom: 16px; }
+                    .clinics-title { font-size: 1.5rem; }
+                    .clinics-header .btn-primary { align-self: flex-start; padding: 10px 18px; font-size: 0.88rem; }
+                    .search-bar { flex-direction: row; gap: 8px; }
+                    .filter-24h { padding: 13px 14px; font-size: 0.82rem; }
+                    .clinics-grid { grid-template-columns: 1fr; gap: 14px; }
+                    .clinic-card { padding: 18px 16px; border-radius: 16px; gap: 10px; }
+                    .clinic-badges { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 4px; max-width: 55%; }
                     .badge { white-space: nowrap; }
-
-                /* Specialties — scroll horizontal, tags no se achican */
-                .clinic-specialties {
-                    flex-wrap: nowrap; overflow-x: auto;
-                    padding-bottom: 6px;
-                    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+                    .clinic-specialties { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+                    .clinic-specialties::-webkit-scrollbar { display: none; }
+                    .specialty-tag { flex-shrink: 0; }
+                    .clinic-card-actions { flex-direction: column; gap: 8px; }
+                    .btn-turno { flex: none; width: 100%; padding: 12px; }
+                    .btn-perfil { width: 100%; padding: 12px; text-align: center; }
+                    .btn-join { width: 100%; padding: 12px; text-align: center; }
+                    .empty-state { padding: 48px 16px; }
+                    .empty-emoji { font-size: 3.5rem; }
+                    .empty-state h2 { font-size: 1.3rem; }
                 }
-                .clinic-specialties::-webkit-scrollbar { display: none; }
-                .specialty-tag { flex-shrink: 0; }
 
-                /* Acciones: columna */
-                .clinic-card-actions { flex-direction: column; gap: 8px; }
-                .btn-turno { flex: none; width: 100%; padding: 12px; }
-                .btn-join { width: 100%; padding: 12px; text-align: center; }
-
-                /* Empty state */
-                .empty-state { padding: 48px 16px; }
-                .empty-emoji { font-size: 3.5rem; }
-                .empty-state h2 { font-size: 1.3rem; }
-            }
-
-                /* ══════════════════════════════
-                RESPONSIVE — MOBILE XS (≤380px)
-                ══════════════════════════════ */
                 @media (max-width: 380px) {
                     .clinics-inner { padding: 12px 10px; }
                     .clinics-title { font-size: 1.3rem; }
