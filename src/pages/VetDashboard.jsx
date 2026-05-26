@@ -5,11 +5,11 @@ import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const STATUS_LABEL = {
-    pending: { label: "Pendiente", color: "#ffd93d" },
+    pending:   { label: "Pendiente",  color: "#ffd93d" },
     confirmed: { label: "Confirmado", color: "#6bcaff" },
-    cancelled: { label: "Cancelado", color: "#ff6b6b" },
-    completed: { label: "Realizado", color: "#6bffb8" },
-    no_show: { label: "Ausente", color: "#ff9500" },
+    cancelled: { label: "Cancelado",  color: "#ff6b6b" },
+    completed: { label: "Realizado",  color: "#6bffb8" },
+    no_show:   { label: "Ausente",    color: "#ff9500" },
 };
 
 const EMPTY_VISIT = {
@@ -27,6 +27,8 @@ const SPECIES_ICON = {
     dog: "🐶", cat: "🐱", rabbit: "🐰", bird: "🦜",
     hamster: "🐹", reptile: "🦎", fish: "🐠", other: "🐾",
 };
+
+const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
 export default function ClinicDashboard() {
     const { user } = useAuth();
@@ -60,6 +62,15 @@ export default function ClinicDashboard() {
     const [photoCaption, setPhotoCaption] = useState("");
     const fileInputRef = useRef(null);
 
+    // ── Agenda state ──
+    const [schedule, setSchedule] = useState(null);
+    const [scheduleLoading, setScheduleLoading] = useState(false);
+    const [scheduleSaving, setScheduleSaving] = useState(false);
+    const [scheduleError, setScheduleError] = useState("");
+    const [scheduleSuccess, setScheduleSuccess] = useState("");
+    const [externalForm, setExternalForm] = useState({ requested_date: "", appointment_type: "control", external_label: "" });
+    const [externalSaving, setExternalSaving] = useState(false);
+
     useEffect(() => {
         fetchAll();
         const onResize = () => setIsMobile(window.innerWidth <= 700);
@@ -67,9 +78,9 @@ export default function ClinicDashboard() {
         return () => window.removeEventListener('resize', onResize);
     }, []);
 
-    // Cargar fotos cuando se entra al tab
     useEffect(() => {
         if (tab === "fotos") fetchPhotos();
+        if (tab === "mi-agenda") fetchSchedule();
     }, [tab]);
 
     const fetchAll = async () => {
@@ -98,40 +109,69 @@ export default function ClinicDashboard() {
         finally { setPhotosLoading(false); }
     };
 
+    const fetchSchedule = async () => {
+        setScheduleLoading(true);
+        try {
+            const res = await api.get("/clinic-schedule/me/");
+            setSchedule(res.data);
+        } catch {
+            setSchedule({
+                working_days: [], day_hours: {},
+                duration_control: 30, duration_vaccine: 20,
+                duration_surgery: 90, duration_other: 30,
+                interval_minutes: 10, cancel_limit_hours: 4,
+            });
+        } finally { setScheduleLoading(false); }
+    };
+
+    const saveSchedule = async () => {
+        setScheduleSaving(true); setScheduleError("");
+        try {
+            await api.post("/clinic-schedule/configurar/", schedule);
+            setScheduleSuccess("Agenda guardada correctamente.");
+            setTimeout(() => setScheduleSuccess(""), 3000);
+            await fetchSchedule();
+        } catch (err) {
+            setScheduleError(err.response?.data ? Object.values(err.response.data).flat().join(" ") : "Error al guardar.");
+        } finally { setScheduleSaving(false); }
+    };
+
+    const handleExternalSubmit = async (e) => {
+        e.preventDefault();
+        if (!externalForm.requested_date || !externalForm.external_label) {
+            setScheduleError("Fecha y descripción son obligatorias."); return;
+        }
+        setExternalSaving(true); setScheduleError("");
+        try {
+            await api.post("/clinic-schedule/turno-externo/", externalForm);
+            setScheduleSuccess("Turno externo agregado.");
+            setTimeout(() => setScheduleSuccess(""), 3000);
+            setExternalForm({ requested_date: "", appointment_type: "control", external_label: "" });
+            await fetchAll();
+        } catch (err) {
+            setScheduleError(err.response?.data?.error || "Error al guardar.");
+        } finally { setExternalSaving(false); }
+    };
+
     const handlePhotoUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
-        if (file.size > 3 * 1024 * 1024) {
-            setPhotoError("La foto no puede superar los 3MB.");
-            return;
-        }
-        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-            setPhotoError("Solo se permiten imágenes JPG, PNG o WebP.");
-            return;
-        }
-
-        setPhotoError("");
-        setPhotoUploading(true);
+        if (file.size > 3 * 1024 * 1024) { setPhotoError("La foto no puede superar los 3MB."); return; }
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { setPhotoError("Solo se permiten imágenes JPG, PNG o WebP."); return; }
+        setPhotoError(""); setPhotoUploading(true);
         const formData = new FormData();
         formData.append("image", file);
         if (photoCaption) formData.append("caption", photoCaption);
-
         try {
-            await api.post("/clinic-photos/upload/", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            await api.post("/clinic-photos/upload/", formData, { headers: { "Content-Type": "multipart/form-data" } });
             setPhotoCaption("");
             if (fileInputRef.current) fileInputRef.current.value = "";
             await fetchPhotos();
             setSuccess("Foto subida exitosamente.");
             setTimeout(() => setSuccess(""), 3000);
         } catch (err) {
-            const msg = err.response?.data?.image?.[0] || err.response?.data?.error || "Error al subir la foto.";
-            setPhotoError(msg);
-        } finally {
-            setPhotoUploading(false);
-        }
+            setPhotoError(err.response?.data?.image?.[0] || err.response?.data?.error || "Error al subir la foto.");
+        } finally { setPhotoUploading(false); }
     };
 
     const handlePhotoDelete = async (id) => {
@@ -139,8 +179,7 @@ export default function ClinicDashboard() {
         try {
             await api.delete(`/clinic-photos/${id}/delete/`);
             await fetchPhotos();
-            setSuccess("Foto eliminada.");
-            setTimeout(() => setSuccess(""), 3000);
+            setSuccess("Foto eliminada."); setTimeout(() => setSuccess(""), 3000);
         } catch (e) { console.error(e); }
     };
 
@@ -204,15 +243,15 @@ export default function ClinicDashboard() {
         finally { setSaving(false); }
     };
 
-    const filtered = filter === "all" ? appointments : appointments.filter(a => a.status === filter);
-    const pending = appointments.filter(a => a.status === "pending").length;
+    const filtered  = filter === "all" ? appointments : appointments.filter(a => a.status === filter);
+    const pending   = appointments.filter(a => a.status === "pending").length;
     const confirmed = appointments.filter(a => a.status === "confirmed").length;
     const completed = appointments.filter(a => a.status === "completed").length;
-    const noShow = appointments.filter(a => a.status === "no_show").length;
+    const noShow    = appointments.filter(a => a.status === "no_show").length;
 
-    const formatDate = (d) => { if (!d) return "—"; return new Date(d).toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }); };
+    const formatDate      = (d) => { if (!d) return "—"; return new Date(d).toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }); };
     const formatDateShort = (d) => { if (!d) return "—"; return new Date(d).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric" }); };
-    const formatTime = (d) => { if (!d) return ""; return new Date(d).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }); };
+    const formatTime      = (d) => { if (!d) return ""; return new Date(d).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }); };
 
     const agendaTurnos = appointments
         .filter(a => { const d = new Date(a.requested_date); return d.getFullYear() === agendaDate.getFullYear() && d.getMonth() === agendaDate.getMonth() && d.getDate() === agendaDate.getDate(); })
@@ -220,8 +259,8 @@ export default function ClinicDashboard() {
         .sort((a, b) => new Date(a.requested_date) - new Date(b.requested_date));
 
     const agendaLabel = agendaDate.toLocaleDateString("es-AR", { weekday: "long", day: "2-digit", month: "long" });
-    const isToday = new Date().toDateString() === agendaDate.toDateString();
-    const petVisits = selectedPet ? visits.filter(v => v.pet === selectedPet.id) : visits;
+    const isToday     = new Date().toDateString() === agendaDate.toDateString();
+    const petVisits   = selectedPet ? visits.filter(v => v.pet === selectedPet.id) : visits;
     const petVaccines = selectedPet ? vaccines.filter(v => v.pet === selectedPet.id) : vaccines;
 
     const TABS_DESKTOP = [
@@ -230,6 +269,7 @@ export default function ClinicDashboard() {
         { id: "historial", label: "📋 Historial" },
         { id: "vacunas",   label: "💉 Vacunas" },
         { id: "fotos",     label: "📷 Fotos" },
+        { id: "mi-agenda", label: "🗓 Mi Agenda" },
     ];
     const TABS_MOBILE = [
         { id: "turnos",    label: "📅 Turnos" },
@@ -238,6 +278,7 @@ export default function ClinicDashboard() {
         { id: "historial", label: "📋 Historial" },
         { id: "vacunas",   label: "💉 Vacunas" },
         { id: "fotos",     label: "📷 Fotos" },
+        { id: "mi-agenda", label: "⚙️ Mi Agenda" },
     ];
     const TABS = isMobile ? TABS_MOBILE : TABS_DESKTOP;
 
@@ -277,8 +318,8 @@ export default function ClinicDashboard() {
                                 }}>
                                 <div className="agenda-item-time">{formatTime(appt.requested_date)}</div>
                                 <div className="agenda-item-info">
-                                    <div className="agenda-item-pet">{appt.pet_name || "—"}</div>
-                                    <div className="agenda-item-owner">{appt.owner_name || "—"}</div>
+                                    <div className="agenda-item-pet">{appt.is_external ? `📞 ${appt.external_label}` : (appt.pet_name || "—")}</div>
+                                    <div className="agenda-item-owner">{appt.is_external ? "Turno externo" : (appt.owner_name || "—")}</div>
                                     <div className="agenda-item-reason">{appt.reason || "Consulta"}</div>
                                 </div>
                                 <span className="agenda-item-badge" style={{ color: status.color, background: `${status.color}18` }}>{status.label}</span>
@@ -303,13 +344,7 @@ export default function ClinicDashboard() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                         {success && <div className="success-toast">✅ {success}</div>}
-                        <a href="/clinic/estadisticas" style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 8,
-                            background: 'rgba(76,175,80,0.12)', border: '1px solid rgba(76,175,80,0.35)',
-                            color: '#4CAF50', borderRadius: 12, padding: '10px 20px',
-                            fontFamily: "'Nunito', sans-serif", fontWeight: 700, fontSize: '0.9rem',
-                            textDecoration: 'none',
-                        }}>
+                        <a href="/clinic/estadisticas" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(76,175,80,0.12)', border: '1px solid rgba(76,175,80,0.35)', color: '#4CAF50', borderRadius: 12, padding: '10px 20px', fontFamily: "'Nunito', sans-serif", fontWeight: 700, fontSize: '0.9rem', textDecoration: 'none' }}>
                             📊 Estadísticas
                         </a>
                     </div>
@@ -358,17 +393,24 @@ export default function ClinicDashboard() {
                                                     </div>
                                                     <div className="appt-info">
                                                         <div className="appt-top">
-                                                            <h3 className="appt-reason">{appt.reason || "Consulta"}</h3>
+                                                            <h3 className="appt-reason">
+                                                                {appt.is_external ? `📞 ${appt.external_label}` : (appt.reason || "Consulta")}
+                                                            </h3>
                                                             <span className="appt-status-badge" style={{ color: status.color, background: `${status.color}18`, borderColor: `${status.color}30` }}>{status.label}</span>
+                                                            {appt.appointment_type_display && !appt.is_external && (
+                                                                <span className="appt-type-badge">{appt.appointment_type_display}</span>
+                                                            )}
+                                                            {appt.is_external && <span className="appt-external-badge">Externo</span>}
                                                         </div>
                                                         <div className="appt-meta">
-                                                            {appt.pet_name && <span>🐾 {appt.pet_name}</span>}
-                                                            {appt.owner_name && <span>👤 {appt.owner_name}</span>}
+                                                            {!appt.is_external && appt.pet_name && <span>🐾 {appt.pet_name}</span>}
+                                                            {!appt.is_external && appt.owner_name && <span>👤 {appt.owner_name}</span>}
                                                             <span>📆 {formatDate(appt.requested_date)}</span>
                                                         </div>
                                                         <div className="appt-actions">
                                                             {appt.status === "pending" && (<><button className="btn-confirm" onClick={() => handleConfirm(appt.id)}>✅ Confirmar</button><button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button></>)}
-                                                            {appt.status === "confirmed" && (<><button className="btn-visit" onClick={() => openVisitModal(appt)}>📋 Cargar visita</button><button className="btn-noshow" onClick={() => handleNoShow(appt.id)}>❌ Ausente</button><button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button></>)}
+                                                            {appt.status === "confirmed" && !appt.is_external && (<><button className="btn-visit" onClick={() => openVisitModal(appt)}>📋 Cargar visita</button><button className="btn-noshow" onClick={() => handleNoShow(appt.id)}>❌ Ausente</button><button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button></>)}
+                                                            {appt.status === "confirmed" && appt.is_external && (<><button className="btn-cancel-sm" onClick={() => handleCancel(appt.id)}>✕ Cancelar</button></>)}
                                                             {appt.status === "completed" && <span className="done-label">✅ Visita registrada</span>}
                                                             {appt.status === "cancelled" && <span className="cancelled-label">✕ Cancelado</span>}
                                                             {appt.status === "no_show" && <span className="noshow-label">❌ Ausente</span>}
@@ -444,9 +486,7 @@ export default function ClinicDashboard() {
                                     <p>{selectedPet.species_display} · {selectedPet.breed || "Sin raza"} · {selectedPet.sex === "male" ? "Macho" : "Hembra"}</p>
                                     <p>👤 {selectedPet.owner_name || "—"}
                                         {selectedPet.owner_phone && (
-                                            <a href={`https://wa.me/${selectedPet.owner_phone.replace(/\D/g, '')}`}
-                                                target="_blank" rel="noopener noreferrer"
-                                                style={{ marginLeft: 10, color: '#25D366', fontWeight: 700, textDecoration: 'none', fontSize: '0.8rem' }}>
+                                            <a href={`https://wa.me/${selectedPet.owner_phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 10, color: '#25D366', fontWeight: 700, textDecoration: 'none', fontSize: '0.8rem' }}>
                                                 📱 {selectedPet.owner_phone}
                                             </a>
                                         )}
@@ -555,74 +595,185 @@ export default function ClinicDashboard() {
                         <div className="photos-header">
                             <div>
                                 <h2 className="photos-title">📷 Fotos del local</h2>
-                                <p className="photos-subtitle">
-                                    {photos.length}/5 fotos — Se muestran en tu perfil público
-                                </p>
+                                <p className="photos-subtitle">{photos.length}/5 fotos — Se muestran en tu perfil público</p>
                             </div>
                         </div>
-
-                        {/* Upload box */}
                         {photos.length < 5 && (
                             <div className="photo-upload-box">
                                 <div className="form-group" style={{ marginBottom: 10 }}>
                                     <label>Descripción (opcional)</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Ej: Sala de espera, Consultorio..."
-                                        value={photoCaption}
-                                        onChange={e => setPhotoCaption(e.target.value)}
-                                        maxLength={100}
-                                    />
+                                    <input type="text" placeholder="Ej: Sala de espera, Consultorio..." value={photoCaption} onChange={e => setPhotoCaption(e.target.value)} maxLength={100} />
                                 </div>
                                 {photoError && <div className="form-error">⚠️ {photoError}</div>}
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    onChange={handlePhotoUpload}
-                                    style={{ display: 'none' }}
-                                />
-                                <button
-                                    className="btn-upload-photo"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    disabled={photoUploading}
-                                >
+                                <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoUpload} style={{ display: 'none' }} />
+                                <button className="btn-upload-photo" onClick={() => fileInputRef.current?.click()} disabled={photoUploading}>
                                     {photoUploading ? "⏳ Subiendo..." : "📤 Subir foto"}
                                 </button>
                                 <p className="photos-hint">JPG, PNG o WebP · Máximo 3MB por foto</p>
                             </div>
                         )}
-
-                        {photos.length >= 5 && (
-                            <div className="photos-limit-notice">
-                                ✅ Llegaste al límite de 5 fotos. Eliminá una para subir otra.
-                            </div>
-                        )}
-
-                        {/* Grid de fotos */}
+                        {photos.length >= 5 && <div className="photos-limit-notice">✅ Llegaste al límite de 5 fotos. Eliminá una para subir otra.</div>}
                         {photosLoading ? (
                             <div className="loading-state"><span className="paw-spin">🐾</span><p>Cargando fotos...</p></div>
                         ) : photos.length === 0 ? (
-                            <div className="empty-state">
-                                <span>📷</span>
-                                <p>Todavía no subiste fotos de tu local.</p>
-                                <p style={{ fontSize: '0.8rem' }}>Las fotos aparecen en tu perfil público y generan más confianza.</p>
-                            </div>
+                            <div className="empty-state"><span>📷</span><p>Todavía no subiste fotos de tu local.</p><p style={{ fontSize: '0.8rem' }}>Las fotos aparecen en tu perfil público y generan más confianza.</p></div>
                         ) : (
                             <div className="photos-grid">
                                 {photos.map(photo => (
                                     <div key={photo.id} className="photo-card">
                                         <img src={photo.image} alt={photo.caption || "Foto del local"} />
                                         {photo.caption && <p className="photo-caption">{photo.caption}</p>}
-                                        <button
-                                            className="btn-delete-photo"
-                                            onClick={() => handlePhotoDelete(photo.id)}
-                                        >
-                                            🗑 Eliminar
-                                        </button>
+                                        <button className="btn-delete-photo" onClick={() => handlePhotoDelete(photo.id)}>🗑 Eliminar</button>
                                     </div>
                                 ))}
                             </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ══ TAB MI AGENDA ══ */}
+                {tab === "mi-agenda" && (
+                    <div className="schedule-section">
+                        <div className="photos-header">
+                            <div>
+                                <h2 className="photos-title">🗓 Mi Agenda</h2>
+                                <p className="photos-subtitle">Configurá tus horarios para que los clientes puedan sacar turno online</p>
+                            </div>
+                        </div>
+
+                        {scheduleError && <div className="form-error">⚠️ {scheduleError}</div>}
+                        {scheduleSuccess && <div className="success-toast">✅ {scheduleSuccess}</div>}
+
+                        {scheduleLoading ? (
+                            <div className="loading-state"><span className="paw-spin">🐾</span><p>Cargando agenda...</p></div>
+                        ) : (
+                            <>
+                                {/* Días */}
+                                <div className="schedule-card">
+                                    <h3 className="schedule-card-title">📅 Días de atención</h3>
+                                    <div className="days-grid">
+                                        {DAYS.map((day, i) => {
+                                            const isActive = schedule?.working_days?.includes(i);
+                                            return (
+                                                <button key={i} type="button"
+                                                    className={`day-btn ${isActive ? 'active' : ''}`}
+                                                    onClick={() => {
+                                                        const days = schedule?.working_days || [];
+                                                        const newDays = isActive ? days.filter(d => d !== i) : [...days, i].sort();
+                                                        setSchedule(prev => ({ ...prev, working_days: newDays }));
+                                                    }}>
+                                                    {day}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Horarios por día */}
+                                {(schedule?.working_days || []).length > 0 && (
+                                    <div className="schedule-card">
+                                        <h3 className="schedule-card-title">🕐 Horarios por día</h3>
+                                        {(schedule?.working_days || []).sort().map(dayIdx => (
+                                            <div key={dayIdx} className="day-hours-row">
+                                                <span className="day-hours-label">{DAYS[dayIdx]}</span>
+                                                <div className="day-hours-inputs">
+                                                    <input type="time"
+                                                        value={schedule?.day_hours?.[dayIdx]?.open || "09:00"}
+                                                        onChange={e => setSchedule(prev => ({ ...prev, day_hours: { ...prev.day_hours, [dayIdx]: { ...prev.day_hours?.[dayIdx], open: e.target.value } } }))}
+                                                    />
+                                                    <span style={{ color: 'rgba(255,255,255,0.4)' }}>a</span>
+                                                    <input type="time"
+                                                        value={schedule?.day_hours?.[dayIdx]?.close || "18:00"}
+                                                        onChange={e => setSchedule(prev => ({ ...prev, day_hours: { ...prev.day_hours, [dayIdx]: { ...prev.day_hours?.[dayIdx], close: e.target.value } } }))}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Duración por tipo */}
+                                <div className="schedule-card">
+                                    <h3 className="schedule-card-title">⏱ Duración por tipo de turno</h3>
+                                    {[
+                                        { key: 'duration_control', label: '🩺 Control general' },
+                                        { key: 'duration_vaccine', label: '💉 Vacunación' },
+                                        { key: 'duration_surgery', label: '🔪 Cirugía' },
+                                        { key: 'duration_other',   label: '📋 Otro' },
+                                    ].map(({ key, label }) => (
+                                        <div key={key} className="duration-row">
+                                            <span className="duration-label">{label}</span>
+                                            <select value={schedule?.[key] || 30}
+                                                onChange={e => setSchedule(prev => ({ ...prev, [key]: parseInt(e.target.value) }))}>
+                                                {[10,15,20,30,45,60,90,120].map(m => <option key={m} value={m}>{m} minutos</option>)}
+                                            </select>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Config adicional */}
+                                <div className="schedule-card">
+                                    <h3 className="schedule-card-title">⚙️ Configuración adicional</h3>
+                                    <div className="duration-row">
+                                        <span className="duration-label">Intervalo entre turnos</span>
+                                        <select value={schedule?.interval_minutes ?? 10}
+                                            onChange={e => setSchedule(prev => ({ ...prev, interval_minutes: parseInt(e.target.value) }))}>
+                                            <option value={0}>Sin intervalo</option>
+                                            <option value={10}>10 minutos</option>
+                                            <option value={15}>15 minutos</option>
+                                            <option value={20}>20 minutos</option>
+                                        </select>
+                                    </div>
+                                    <div className="duration-row">
+                                        <span className="duration-label">Límite para cancelar</span>
+                                        <select value={schedule?.cancel_limit_hours ?? 4}
+                                            onChange={e => setSchedule(prev => ({ ...prev, cancel_limit_hours: parseInt(e.target.value) }))}>
+                                            <option value={2}>2 horas antes</option>
+                                            <option value={4}>4 horas antes</option>
+                                            <option value={8}>8 horas antes</option>
+                                            <option value={24}>24 horas antes</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button className="btn-save-schedule" disabled={scheduleSaving} onClick={saveSchedule}>
+                                    {scheduleSaving ? "Guardando..." : "💾 Guardar agenda"}
+                                </button>
+
+                                {/* Turno externo */}
+                                <div className="schedule-card">
+                                    <h3 className="schedule-card-title">📞 Agregar turno externo</h3>
+                                    <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>
+                                        Para turnos tomados por teléfono o WhatsApp. Bloquea ese horario en la agenda online.
+                                    </p>
+                                    <form onSubmit={handleExternalSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                        <div className="form-group">
+                                            <label>Fecha y hora *</label>
+                                            <input type="datetime-local" value={externalForm.requested_date}
+                                                onChange={e => setExternalForm({ ...externalForm, requested_date: e.target.value })} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Tipo</label>
+                                            <select value={externalForm.appointment_type}
+                                                onChange={e => setExternalForm({ ...externalForm, appointment_type: e.target.value })}>
+                                                <option value="control">🩺 Control general</option>
+                                                <option value="vaccine">💉 Vacunación</option>
+                                                <option value="surgery">🔪 Cirugía</option>
+                                                <option value="other">📋 Otro</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Descripción *</label>
+                                            <input type="text" placeholder="Ej: Juan Pérez - por teléfono"
+                                                value={externalForm.external_label}
+                                                onChange={e => setExternalForm({ ...externalForm, external_label: e.target.value })} />
+                                        </div>
+                                        <button type="submit" className="btn-primary" disabled={externalSaving}>
+                                            {externalSaving ? "Agregando..." : "➕ Agregar turno externo"}
+                                        </button>
+                                    </form>
+                                </div>
+                            </>
                         )}
                     </div>
                 )}
@@ -729,7 +880,7 @@ export default function ClinicDashboard() {
                 .stat-num { font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1; }
                 .stat-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 600; margin-top: 2px; }
 
-                .filters { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+                .filters { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
                 .filters::-webkit-scrollbar { display: none; }
                 .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
                 .filter-btn.active { background: rgba(76,175,80,0.12); border-color: rgba(76,175,80,0.35); color: #4CAF50; }
@@ -749,6 +900,8 @@ export default function ClinicDashboard() {
                 .appt-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
                 .appt-reason { font-size: 0.98rem; font-weight: 900; color: #fff; }
                 .appt-status-badge { font-size: 0.7rem; font-weight: 700; border-radius: 6px; padding: 3px 9px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+                .appt-type-badge { font-size: 0.7rem; font-weight: 700; border-radius: 6px; padding: 3px 8px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.10); white-space: nowrap; flex-shrink: 0; }
+                .appt-external-badge { font-size: 0.7rem; font-weight: 700; border-radius: 6px; padding: 3px 8px; background: rgba(255,152,0,0.12); color: #FF9800; border: 1px solid rgba(255,152,0,0.25); white-space: nowrap; flex-shrink: 0; }
                 .appt-meta { display: flex; gap: 10px; flex-wrap: wrap; }
                 .appt-meta span { font-size: 0.78rem; color: rgba(255,255,255,0.45); }
                 .appt-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
@@ -843,7 +996,7 @@ export default function ClinicDashboard() {
                 .nextdose-badge { background: rgba(107,255,184,0.1); color: #6bffb8; border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
                 .overdue-badge { background: rgba(255,149,0,0.12); color: #ff9500; border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
 
-                /* ── Fotos ── */
+                /* Fotos */
                 .photos-section { display: flex; flex-direction: column; gap: 20px; }
                 .photos-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
                 .photos-title { font-family: 'Fraunces', serif; font-size: 1.4rem; font-style: italic; color: #fff; }
@@ -861,6 +1014,27 @@ export default function ClinicDashboard() {
                 .btn-delete-photo { background: rgba(255,107,107,0.08); border: none; border-top: 1px solid rgba(255,255,255,0.06); color: rgba(255,107,107,0.7); padding: 10px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s; width: 100%; }
                 .btn-delete-photo:hover { background: rgba(255,107,107,0.15); }
 
+                /* Mi Agenda */
+                .schedule-section { display: flex; flex-direction: column; gap: 16px; }
+                .schedule-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+                .schedule-card-title { font-size: 0.95rem; font-weight: 900; color: rgba(255,255,255,0.7); }
+                .days-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+                .day-btn { background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.4); border-radius: 10px; padding: 8px 14px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+                .day-btn.active { background: rgba(76,175,80,0.15); border-color: rgba(76,175,80,0.4); color: #4CAF50; }
+                .day-hours-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+                .day-hours-row:last-child { border-bottom: none; }
+                .day-hours-label { font-size: 0.88rem; font-weight: 700; color: rgba(255,255,255,0.6); min-width: 90px; }
+                .day-hours-inputs { display: flex; align-items: center; gap: 8px; }
+                .day-hours-inputs input { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 8px; color: #fff; padding: 7px 10px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; outline: none; width: 110px; }
+                .duration-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+                .duration-row:last-child { border-bottom: none; }
+                .duration-label { font-size: 0.88rem; color: rgba(255,255,255,0.6); }
+                .duration-row select { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 8px; color: #fff; padding: 7px 10px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; outline: none; cursor: pointer; }
+                .duration-row select option { background: #1a1a2e; }
+                .btn-save-schedule { background: linear-gradient(135deg, #4CAF50, #66BB6A); border: none; color: #fff; border-radius: 12px; padding: 13px 24px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 16px rgba(76,175,80,0.3); transition: opacity 0.15s; }
+                .btn-save-schedule:disabled { opacity: 0.6; cursor: not-allowed; }
+
+                /* Modales */
                 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
                 .modal { background: #1e1e35; border: 1px solid rgba(255,255,255,0.10); border-radius: 24px; padding: 28px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.3s cubic-bezier(.22,.68,0,1.2) both; }
                 @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
@@ -874,8 +1048,9 @@ export default function ClinicDashboard() {
                 .form-row { display: flex; gap: 12px; }
                 .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
                 .form-group label { font-size: 0.76rem; font-weight: 700; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.06em; }
-                .form-group input, .form-group textarea { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; width: 100%; }
-                .form-group input:focus, .form-group textarea:focus { border-color: #6bffb8; box-shadow: 0 0 0 3px rgba(107,255,184,0.10); }
+                .form-group input, .form-group textarea, .form-group select { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; width: 100%; }
+                .form-group select option { background: #1a1a2e; }
+                .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #6bffb8; box-shadow: 0 0 0 3px rgba(107,255,184,0.10); }
                 .form-group textarea { resize: vertical; }
                 .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
                 .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; }
@@ -887,7 +1062,6 @@ export default function ClinicDashboard() {
                     .stat-icon { font-size: 1.5rem; }
                     .stat-num { font-size: 1.4rem; }
                 }
-
                 @media (max-width: 700px) {
                     .vet-inner { padding: 16px 14px; }
                     .vet-title { font-size: 1.4rem; }
@@ -916,6 +1090,10 @@ export default function ClinicDashboard() {
                     .btn-add-vaccine { width: 100%; text-align: center; }
                     .photos-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
                     .photo-card img { height: 120px; }
+                    .days-grid { gap: 6px; }
+                    .day-btn { padding: 7px 10px; font-size: 0.82rem; }
+                    .day-hours-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+                    .duration-row { flex-direction: column; align-items: flex-start; gap: 6px; }
                     .modal-overlay { padding: 0; align-items: flex-end; }
                     .modal { border-radius: 24px 24px 0 0; padding: 24px 16px; max-height: 92vh; border-bottom: none; }
                     .modal-header h2 { font-size: 1.15rem; }
@@ -923,7 +1101,6 @@ export default function ClinicDashboard() {
                     .form-actions { flex-direction: column-reverse; gap: 8px; }
                     .form-actions .btn-ghost, .form-actions .btn-primary { width: 100%; text-align: center; padding: 13px; }
                 }
-
                 @media (max-width: 380px) {
                     .vet-inner { padding: 12px 10px; }
                     .vet-title { font-size: 1.2rem; }
