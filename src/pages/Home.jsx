@@ -11,6 +11,13 @@ const DARK = '#0f1923'
 const DARK2 = '#162032'
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 
+const PROVINCIAS = [
+    'Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes',
+    'Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones',
+    'Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe',
+    'Santiago del Estero','Tierra del Fuego','Tucumán'
+]
+
 const veterinariasDestacadas = [
     { nombre: 'Clínica Vida Animal', localidad: 'Palermo, CABA', especialidad: 'Clínica general · Cirugía', img: 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=800&q=80', destacada: true },
     { nombre: 'VetSur 24hs', localidad: 'Lomas de Zamora, GBA', especialidad: 'Urgencias · Guardia permanente', img: 'https://images.unsplash.com/photo-1612531385446-f7e6d131e1d0?w=800&q=80', destacada: true },
@@ -25,6 +32,8 @@ const curiosidades = [
 
 export default function Home() {
     const { user } = useAuth()
+
+    // ── Form publicar mascota ──
     const [fotoMascota, setFotoMascota] = useState(null)
     const [fotoPreview, setFotoPreview] = useState(null)
     const [descripcionMascota, setDescripcionMascota] = useState('')
@@ -33,18 +42,33 @@ export default function Home() {
     const [enviando, setEnviando] = useState(false)
     const [reporteEnviado, setReporteEnviado] = useState(false)
     const [errorEnvio, setErrorEnvio] = useState('')
+    const [reportType, setReportType] = useState('found')
+    const [province, setProvince] = useState('')       // provincia del form
+    const [locality, setLocality] = useState('')       // localidad del form
     const fileRef = useRef()
+
+    // ── Listado y filtros ──
     const [lostPets, setLostPets] = useState([])
     const [cargandoMuro, setCargandoMuro] = useState(true)
     const [reportados, setReportados] = useState({})
-    const [reportType, setReportType] = useState('found')
     const [selectedPet, setSelectedPet] = useState(null)
+    const [filterProvince, setFilterProvince] = useState('')  // filtro provincia
+    const [filterLocality, setFilterLocality] = useState('')  // filtro localidad
 
     useEffect(() => { fetchLostPets() }, [])
 
-    const fetchLostPets = async () => {
-        try { const res = await api.get('/lost-pets/'); setLostPets(res.data) }
-        catch (e) { console.error('Error cargando mascotas perdidas', e) }
+    // Fetch con filtros opcionales
+    const fetchLostPets = async (prov = '', loc = '') => {
+        setCargandoMuro(true)
+        try {
+            let url = '/lost-pets/'
+            const params = []
+            if (prov) params.push(`province=${encodeURIComponent(prov)}`)
+            if (loc)  params.push(`locality=${encodeURIComponent(loc)}`)
+            if (params.length) url += '?' + params.join('&')
+            const res = await api.get(url)
+            setLostPets(res.data)
+        } catch (e) { console.error('Error cargando mascotas perdidas', e) }
         finally { setCargandoMuro(false) }
     }
 
@@ -58,16 +82,26 @@ export default function Home() {
 
     const handleReporte = async (e) => {
         e.preventDefault(); setErrorEnvio('')
-        if (!fotoMascota || !descripcionMascota.trim() || !contactValue.trim()) { setErrorEnvio('Por favor completá todos los campos.'); return }
+        if (!fotoMascota || !descripcionMascota.trim() || !contactValue.trim() || !province || !locality) {
+            setErrorEnvio('Por favor completá todos los campos incluyendo provincia y ciudad.'); return
+        }
         setEnviando(true)
         try {
             const formData = new FormData()
             formData.append('report_type', reportType)
-            formData.append('photo', fotoMascota); formData.append('description', descripcionMascota)
-            formData.append('contact_type', contactType); formData.append('contact_value', contactValue)
+            formData.append('photo', fotoMascota)
+            formData.append('description', descripcionMascota)
+            formData.append('contact_type', contactType)
+            formData.append('contact_value', contactValue)
+            formData.append('province', province)   // ← NUEVO
+            formData.append('locality', locality)   // ← NUEVO
             await api.post('/lost-pets/create/', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-            setReporteEnviado(true); setFotoMascota(null); setFotoPreview(null); setDescripcionMascota(''); setContactValue('')
-            fetchLostPets(); setTimeout(() => setReporteEnviado(false), 5000)
+            setReporteEnviado(true)
+            setFotoMascota(null); setFotoPreview(null)
+            setDescripcionMascota(''); setContactValue('')
+            setProvince(''); setLocality('')
+            fetchLostPets()
+            setTimeout(() => setReporteEnviado(false), 5000)
         } catch (e) { setErrorEnvio('Hubo un error al publicar. Intentá de nuevo.') }
         finally { setEnviando(false) }
     }
@@ -130,6 +164,8 @@ export default function Home() {
                     .lost-header-pad { padding: 20px 16px !important; }
                     .contact-row { flex-direction: column !important; }
                     .contact-row select { width: 100% !important; }
+                    .lost-filters { flex-direction: column !important; }
+                    .prov-loc-row { flex-direction: column !important; }
                 }
             `}</style>
 
@@ -176,35 +212,11 @@ export default function Home() {
                     ))}
                 </div>
 
+                {/* BANNER PUBLICITARIO */}
                 <div className="section-pad" style={{ padding: '10px 20px' }}>
-                    <a
-                        href="https://wa.me/541169345282"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ display: 'block', textDecoration: 'none' }}
-                    >
-                        <img
-                            src="/chicha_petshop_v2.png"
-                            alt="Chica Petshop — Todo lo que tu perro necesita"
-                            style={{
-                                width: '92%',
-                                borderRadius: 20,
-                                display: 'block',
-                                cursor: 'pointer',
-                                margin: '0 auto'
-                            }}
-                        />
-
-                        <p
-                            style={{
-                                fontSize: 11,
-                                color: 'rgba(255,255,255,0.2)',
-                                marginTop: 8,
-                                textAlign: 'right'
-                            }}
-                        >
-                            Publicidad · VetPaw Ads
-                        </p>
+                    <a href="https://wa.me/541169345282" target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
+                        <img src="/chicha_petshop_v2.png" alt="Chica Petshop — Todo lo que tu perro necesita" style={{ width: '92%', borderRadius: 20, display: 'block', cursor: 'pointer', margin: '0 auto' }} />
+                        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 8, textAlign: 'right' }}>Publicidad · VetPaw Ads</p>
                     </a>
                 </div>
 
@@ -303,9 +315,13 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* MASCOTAS PERDIDAS */}
+                {/* ══════════════════════════════════════
+                    MASCOTAS PERDIDAS
+                ══════════════════════════════════════ */}
                 <div className="section-pad" style={{ padding: '4px 40px 28px' }}>
                     <div style={{ background: DARK2, border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 24, overflow: 'hidden' }}>
+
+                        {/* Header */}
                         <div className="lost-header-pad" style={{ background: `linear-gradient(135deg, #1a0505 0%, #3d0a0a 50%, #1a0a05 100%)`, padding: '28px 32px', position: 'relative', overflow: 'hidden', borderBottom: '3px solid rgba(239,68,68,0.4)' }}>
                             <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'rgba(239,68,68,0.08)', borderRadius: '50%' }} />
                             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #ef4444, #f97316, #ef4444)' }} />
@@ -318,6 +334,7 @@ export default function Home() {
                             </div>
                         </div>
 
+                        {/* Formulario publicar */}
                         <div className="lost-form-pad" style={{ padding: '28px 32px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                             {reporteEnviado ? (
                                 <div style={{ background: 'rgba(76,175,80,0.1)', border: `1.5px solid rgba(76,175,80,0.3)`, borderRadius: 16, padding: '24px', textAlign: 'center' }}>
@@ -327,6 +344,8 @@ export default function Home() {
                                 </div>
                             ) : (
                                 <form onSubmit={handleReporte} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+                                    {/* Tipo de reporte */}
                                     <div>
                                         <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>¿Qué querés reportar? <span style={{ color: O1 }}>*</span></label>
                                         <div style={{ display: 'flex', gap: 10 }}>
@@ -334,6 +353,8 @@ export default function Home() {
                                             <button type="button" onClick={() => setReportType('lost')} style={{ flex: 1, padding: '12px', borderRadius: 12, border: `2px solid ${reportType === 'lost' ? '#ef4444' : 'rgba(255,255,255,0.1)'}`, background: reportType === 'lost' ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.04)', color: reportType === 'lost' ? '#ef4444' : 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: FONT, transition: 'all .2s' }}>😢 Perdí mi mascota</button>
                                         </div>
                                     </div>
+
+                                    {/* Foto */}
                                     <div>
                                         <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>Foto de la mascota <span style={{ color: O1 }}>*</span><span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 400, marginLeft: 8 }}>Solo JPG</span></label>
                                         {fotoPreview ? (
@@ -352,6 +373,8 @@ export default function Home() {
                                         )}
                                         <input ref={fileRef} type="file" accept=".jpg,.jpeg" onChange={handleFoto} style={{ display: 'none' }} />
                                     </div>
+
+                                    {/* Descripción */}
                                     <div>
                                         <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>{reportType === 'lost' ? '¿Dónde y cuándo la perdiste?' : '¿Dónde y cuándo la encontraste?'} <span style={{ color: O1 }}>*</span></label>
                                         <textarea value={descripcionMascota} onChange={e => setDescripcionMascota(e.target.value)}
@@ -360,6 +383,28 @@ export default function Home() {
                                             onFocus={e => e.target.style.borderColor = G1}
                                             onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                     </div>
+
+                                    {/* ── NUEVO: Provincia y localidad ── */}
+                                    <div className="prov-loc-row" style={{ display: 'flex', gap: 10 }}>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>Provincia <span style={{ color: O1 }}>*</span></label>
+                                            <select value={province} onChange={e => setProvince(e.target.value)}
+                                                style={{ width: '100%', padding: '12px 14px', border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 13, color: province ? '#fff' : 'rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.07)', outline: 'none', cursor: 'pointer', fontFamily: FONT }}>
+                                                <option value="" style={{ background: DARK2 }}>Seleccioná una provincia</option>
+                                                {PROVINCIAS.map(p => <option key={p} value={p} style={{ background: DARK2 }}>{p}</option>)}
+                                            </select>
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>Ciudad / Localidad <span style={{ color: O1 }}>*</span></label>
+                                            <input value={locality} onChange={e => setLocality(e.target.value)}
+                                                placeholder="Ej: Moreno, Palermo, Rosario..."
+                                                style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 13, color: '#fff', outline: 'none', background: 'rgba(255,255,255,0.05)', fontFamily: FONT, boxSizing: 'border-box' }}
+                                                onFocus={e => e.target.style.borderColor = G1}
+                                                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
+                                        </div>
+                                    </div>
+
+                                    {/* Contacto */}
                                     <div>
                                         <label style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 10, fontFamily: FONT }}>Datos de contacto <span style={{ color: O1 }}>*</span></label>
                                         <div className="contact-row" style={{ display: 'flex', gap: 10 }}>
@@ -373,7 +418,9 @@ export default function Home() {
                                                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                         </div>
                                     </div>
+
                                     {errorEnvio && <p style={{ color: '#f87171', fontSize: 12, margin: 0, fontWeight: 600 }}>{errorEnvio}</p>}
+
                                     <button type="submit" disabled={enviando} style={{ background: enviando ? 'rgba(255,255,255,0.1)' : reportType === 'lost' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : `linear-gradient(135deg, ${G1}, ${O1})`, color: '#fff', fontWeight: 800, fontSize: 14, padding: '15px', borderRadius: 14, border: 'none', cursor: enviando ? 'not-allowed' : 'pointer', boxShadow: enviando ? 'none' : '0 6px 24px rgba(76,175,80,0.3)', fontFamily: FONT, letterSpacing: 0.3 }}>
                                         {enviando ? 'Publicando...' : reportType === 'lost' ? '😢 Publicar mascota perdida' : '📍 Publicar mascota encontrada'}
                                     </button>
@@ -381,14 +428,66 @@ export default function Home() {
                             )}
                         </div>
 
+                        {/* ── NUEVO: Muro con filtros ── */}
                         <div className="lost-muro-pad" style={{ padding: '24px 32px' }}>
+
+                            {/* Filtros */}
+                            <div className="lost-filters" style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                                <div style={{ flex: 1, minWidth: 160 }}>
+                                    <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Filtrar por provincia</label>
+                                    <select value={filterProvince} onChange={e => { setFilterProvince(e.target.value); fetchLostPets(e.target.value, filterLocality) }}
+                                        style={{ width: '100%', padding: '10px 12px', border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: 10, fontSize: 13, color: filterProvince ? '#fff' : 'rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.06)', outline: 'none', cursor: 'pointer', fontFamily: FONT }}>
+                                        <option value="" style={{ background: DARK2 }}>Todas las provincias</option>
+                                        {PROVINCIAS.map(p => <option key={p} value={p} style={{ background: DARK2 }}>{p}</option>)}
+                                    </select>
+                                </div>
+                                <div style={{ flex: 1, minWidth: 160 }}>
+                                    <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Filtrar por ciudad</label>
+                                    <input value={filterLocality} onChange={e => setFilterLocality(e.target.value)}
+                                        placeholder="Ej: Moreno, Palermo..."
+                                        style={{ width: '100%', padding: '10px 12px', border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: 10, fontSize: 13, color: '#fff', outline: 'none', background: 'rgba(255,255,255,0.06)', fontFamily: FONT, boxSizing: 'border-box' }}
+                                        onFocus={e => e.target.style.borderColor = G1}
+                                        onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                                        onKeyDown={e => e.key === 'Enter' && fetchLostPets(filterProvince, filterLocality)} />
+                                </div>
+                                <button onClick={() => fetchLostPets(filterProvince, filterLocality)}
+                                    style={{ padding: '10px 20px', background: `linear-gradient(135deg, ${G1}, ${O1})`, border: 'none', borderRadius: 10, color: '#fff', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: FONT, whiteSpace: 'nowrap' }}>
+                                    🔍 Buscar
+                                </button>
+                                {(filterProvince || filterLocality) && (
+                                    <button onClick={() => { setFilterProvince(''); setFilterLocality(''); fetchLostPets('', '') }}
+                                        style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: FONT, whiteSpace: 'nowrap' }}>
+                                        ✕ Limpiar
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Título con contador y zona activa */}
                             <h3 style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 18, fontFamily: FONT }}>
                                 📋 Reportes activos <span style={{ color: G1 }}>({lostPets.length})</span>
+                                {(filterProvince || filterLocality) && (
+                                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500, marginLeft: 10 }}>
+                                        en {[filterLocality, filterProvince].filter(Boolean).join(', ')}
+                                    </span>
+                                )}
                             </h3>
+
+                            {/* Cards */}
                             {cargandoMuro ? (
                                 <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>Cargando reportes...</p>
                             ) : lostPets.length === 0 ? (
-                                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>No hay reportes activos por el momento.</p>
+                                <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                                    <div style={{ fontSize: 40, marginBottom: 10 }}>🔍</div>
+                                    <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>
+                                        {filterProvince || filterLocality ? 'No hay reportes en esa zona.' : 'No hay reportes activos por el momento.'}
+                                    </p>
+                                    {(filterProvince || filterLocality) && (
+                                        <button onClick={() => { setFilterProvince(''); setFilterLocality(''); fetchLostPets('', '') }}
+                                            style={{ marginTop: 12, padding: '8px 16px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: FONT }}>
+                                            Ver todos los reportes
+                                        </button>
+                                    )}
+                                </div>
                             ) : (
                                 <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
                                     {lostPets.map(pet => {
@@ -397,7 +496,8 @@ export default function Home() {
                                         const badgeBg = isLost ? 'rgba(239,68,68,0.15)' : 'rgba(76,175,80,0.15)'
                                         const badgeText = isLost ? '🔍 SE BUSCA' : '📍 ENCONTRADA'
                                         return (
-                                            <div key={pet.id} onClick={() => setSelectedPet(pet)} style={{ background: 'rgba(255,255,255,0.04)', border: `1.5px solid ${isLost ? 'rgba(239,68,68,0.2)' : 'rgba(76,175,80,0.2)'}`, borderRadius: 18, overflow: 'hidden', cursor: 'pointer', transition: 'transform .2s' }}
+                                            <div key={pet.id} onClick={() => setSelectedPet(pet)}
+                                                style={{ background: 'rgba(255,255,255,0.04)', border: `1.5px solid ${isLost ? 'rgba(239,68,68,0.2)' : 'rgba(76,175,80,0.2)'}`, borderRadius: 18, overflow: 'hidden', cursor: 'pointer', transition: 'transform .2s' }}
                                                 onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
                                                 onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
                                                 <div style={{ height: 180, overflow: 'hidden', position: 'relative' }}>
@@ -406,6 +506,14 @@ export default function Home() {
                                                     <div style={{ position: 'absolute', top: 10, right: 10, background: DARK, color: G2, fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 99, border: `1px solid rgba(76,175,80,0.3)` }}>{pet.days_left}d restantes</div>
                                                 </div>
                                                 <div style={{ padding: '14px 16px' }}>
+                                                    {/* Ubicación en la card */}
+                                                    {(pet.province || pet.locality) && (
+                                                        <div style={{ marginBottom: 8 }}>
+                                                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, padding: '3px 8px', fontWeight: 600 }}>
+                                                                📍 {[pet.locality, pet.province].filter(Boolean).join(', ')}
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                     <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.65, marginBottom: 12 }}>
                                                         {pet.description.length > 100 ? pet.description.slice(0, 100) + '...' : pet.description}
                                                     </p>
@@ -494,6 +602,14 @@ export default function Home() {
                             <button onClick={() => setSelectedPet(null)} style={{ position: 'absolute', bottom: 14, right: 14, background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
                         </div>
                         <div style={{ padding: '20px 24px 24px' }}>
+                            {/* Ubicación en el modal */}
+                            {(selectedPet.province || selectedPet.locality) && (
+                                <div style={{ marginBottom: 12 }}>
+                                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '5px 12px', fontWeight: 600 }}>
+                                        📍 {[selectedPet.locality, selectedPet.province].filter(Boolean).join(', ')}
+                                    </span>
+                                </div>
+                            )}
                             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, marginBottom: 20 }}>{selectedPet.description}</p>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                                 <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
