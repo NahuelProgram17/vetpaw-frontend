@@ -11,22 +11,22 @@ const DARK2 = '#162032'
 const CARD = '#1a2535'
 
 export default function AdminPanel() {
-    const { user } = useAuth()
+    const { user, loading: authLoading } = useAuth()
     const navigate = useNavigate()
     const [data, setData] = useState(null)
-    const [loading, setLoading] = useState(true)
+    const [dataLoading, setDataLoading] = useState(true)
     const [error, setError] = useState('')
     const [lastUpdate, setLastUpdate] = useState(null)
 
     useEffect(() => {
-    if (user === undefined) return  // todavía cargando
-    if (user === null) { navigate('/login'); return }
-    if (user.username !== 'jaime17') { navigate('/'); return }
-    fetchData()
-}, [user])
+        if (authLoading) return
+        if (!user) { navigate('/login'); return }
+        if (user.username !== 'jaime17') { navigate('/'); return }
+        fetchData()
+    }, [user, authLoading])
 
     const fetchData = async () => {
-        setLoading(true)
+        setDataLoading(true)
         try {
             const res = await api.get('/users/admin-panel/')
             setData(res.data)
@@ -34,11 +34,11 @@ export default function AdminPanel() {
         } catch (e) {
             setError('Error cargando datos.')
         } finally {
-            setLoading(false)
+            setDataLoading(false)
         }
     }
 
-    if (loading) return (
+    if (authLoading || dataLoading) return (
         <div style={{ minHeight: '100vh', background: DARK, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT }}>
             <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 48, marginBottom: 16 }}>🐾</div>
@@ -52,6 +52,8 @@ export default function AdminPanel() {
             <p style={{ color: '#ff6b6b' }}>{error}</p>
         </div>
     )
+
+    if (!data) return null
 
     const { global: g, new_users_by_day, appts_by_day, appts_by_status, top_clinics, last_users, security } = data
 
