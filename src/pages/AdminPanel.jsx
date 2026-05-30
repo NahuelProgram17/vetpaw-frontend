@@ -19,10 +19,11 @@ export default function AdminPanel() {
     const [lastUpdate, setLastUpdate] = useState(null)
 
     useEffect(() => {
-        if (!user) { navigate('/login'); return }
-        if (user.username !== 'jaime17') { navigate('/'); return }
-        fetchData()
-    }, [user])
+    if (user === undefined) return  // todavía cargando
+    if (user === null) { navigate('/login'); return }
+    if (user.username !== 'jaime17') { navigate('/'); return }
+    fetchData()
+}, [user])
 
     const fetchData = async () => {
         setLoading(true)
