@@ -129,9 +129,22 @@ export default function Dashboard() {
                         <p className="dash-greeting">¡Hola, {firstName}! 👋</p>
                         <h1 className="dash-title">Tu panel VetPaw</h1>
                     </div>
-                    <button className="btn-new-appt" onClick={() => navigate("/appointments/new")}>
-                        + Nuevo turno
-                    </button>
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                        {user?.username === 'jaime17' && (
+                            <a href="/admin-panel" style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 8,
+                                background: 'rgba(255,107,107,0.12)', border: '1px solid rgba(255,107,107,0.35)',
+                                color: '#ff6b6b', borderRadius: 12, padding: '12px 22px',
+                                fontFamily: "'Nunito', sans-serif", fontWeight: 700, fontSize: '0.95rem',
+                                textDecoration: 'none', whiteSpace: 'nowrap',
+                            }}>
+                                🔐 Panel Admin
+                            </a>
+                        )}
+                        <button className="btn-new-appt" onClick={() => navigate("/appointments/new")}>
+                            + Nuevo turno
+                        </button>
+                    </div>
                 </header>
 
                 {/* ── Stats ── */}
