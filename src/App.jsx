@@ -27,6 +27,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Estadisticas from './pages/Estadisticas';
 import ClinicProfile from './pages/ClinicProfile'
+import AdminPanel from './pages/AdminPanel'
 
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/tips" element={<Tips />} />
           <Route path="/clinic/estadisticas" element={<ProtectedRoute role="clinic"><Estadisticas /></ProtectedRoute>} />
+          <Route path="/admin-panel" element={<AdminPanel />} />
 
           <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
