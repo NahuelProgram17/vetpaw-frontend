@@ -563,6 +563,10 @@ export default function Home() {
                     <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
                         <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: '100px', width: 'auto' }} />
                         <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13, textAlign: 'center', maxWidth: 300, lineHeight: 1.6 }}>La app veterinaria de Argentina.<br />Tu mascota merece lo mejor.</p>
+                        <a href="https://wa.me/541125908891" target="_blank" rel="noopener noreferrer"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', color: '#25D366', borderRadius: 12, padding: '10px 20px', textDecoration: 'none', fontFamily: FONT, fontWeight: 700, fontSize: 13 }}>
+                            💬 11-2590-8891
+                        </a>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: 20, flexWrap: 'wrap', padding: '0 16px' }}>
                             {[{ l: 'Términos', to: '/terminos' }, { l: 'Privacidad', to: '/privacidad' }, { l: 'Sumar mi veterinaria', to: '/sumar-veterinaria' }, { l: 'Anunciar en VetPaw', to: '/anunciar' }, { l: 'Contacto', to: '/contacto' }, { l: 'Blog', to: '/blog' }].map(item => (
                                 <Link key={item.l} to={item.to} style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, cursor: 'pointer', fontWeight: 500, transition: 'color .2s', textDecoration: 'none' }}
