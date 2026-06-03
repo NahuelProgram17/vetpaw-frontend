@@ -246,7 +246,6 @@ export default function Dashboard() {
                     <section className="dash-card pets-section">
                         <div className="card-header">
                             <h2>🐾 Mis mascotas</h2>
-                            <button className="btn-link" onClick={() => navigate("/pets")}>Ver todas →</button>
                         </div>
                         {pets.length === 0 ? (
                             <div className="empty-state">
