@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getVisits, getPets, getVaccines } from "../services/api";
+import api from "../services/api";
 
 export default function MedicalHistory() {
     const [visits, setVisits] = useState([]);
@@ -8,6 +9,7 @@ export default function MedicalHistory() {
     const [loading, setLoading] = useState(true);
     const [selectedPet, setSelectedPet] = useState("all");
     const [section, setSection] = useState("visits");
+    const [clinicalPhotos, setClinicalPhotos] = useState([]);
 
     useEffect(() => {
         Promise.all([getVisits(), getPets(), getVaccines()])
@@ -19,6 +21,16 @@ export default function MedicalHistory() {
             .catch(console.error)
             .finally(() => setLoading(false));
     }, []);
+
+    useEffect(() => {
+        if (selectedPet !== "all") {
+            api.get(`/clinical-photos/list/?pet=${selectedPet}`)
+                .then(res => setClinicalPhotos(res.data))
+                .catch(console.error);
+        } else {
+            setClinicalPhotos([]);
+        }
+    }, [selectedPet]);
 
     const filteredVisits = selectedPet === "all"
         ? visits
@@ -83,6 +95,12 @@ export default function MedicalHistory() {
                         onClick={() => setSection("vaccines")}
                     >
                         💉 Libreta ({filteredVaccines.length})
+                    </button>
+                    <button
+                        className={`section-tab ${section === "photos" ? "active" : ""}`}
+                        onClick={() => setSection("photos")}
+                    >
+                        📷 Fotos ({clinicalPhotos.length})
                     </button>
                 </div>
 
@@ -262,7 +280,33 @@ export default function MedicalHistory() {
                         </div>
                     )
                 )}
-
+                
+                {/* ══ FOTOS CLÍNICAS ══ */}
+                {!loading && section === "photos" && (
+                    selectedPet === "all" ? (
+                        <div className="empty-state">
+                            <span>📷</span>
+                            <h2>Seleccioná una mascota</h2>
+                            <p>Elegí una mascota para ver sus fotos clínicas.</p>
+                        </div>
+                    ) : clinicalPhotos.length === 0 ? (
+                        <div className="empty-state">
+                            <span>📷</span>
+                            <h2>Sin fotos clínicas</h2>
+                            <p>La veterinaria aún no subió fotos para esta mascota.</p>
+                        </div>
+                    ) : (
+                        <div className="clinical-photos-grid">
+                            {clinicalPhotos.map(photo => (
+                                <div key={photo.id} className="clinical-photo-card">
+                                    <img src={photo.image_url} alt={photo.caption || "Foto clínica"} />
+                                    {photo.caption && <p className="clinical-photo-caption">{photo.caption}</p>}
+                                    <p className="clinical-photo-clinic">🏥 {photo.clinic_name}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )
+                )}
             </div>
 
             <style>{`
@@ -408,6 +452,12 @@ export default function MedicalHistory() {
                 .footer-value.danger  { color: #ff9500; }
                 .libreta-footer-powered { margin-left: auto; font-size: 0.72rem; color: rgba(255,255,255,0.25); font-style: italic; }
                 .libreta-footer-powered strong { color: rgba(107,202,255,0.5); }
+                
+                .clinical-photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+                .clinical-photo-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+                .clinical-photo-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
+                .clinical-photo-caption { font-size: 0.8rem; color: rgba(255,255,255,0.6); padding: 8px 12px 4px; font-weight: 700; }
+                .clinical-photo-clinic { font-size: 0.75rem; color: rgba(255,255,255,0.35); padding: 0 12px 10px; }
 
                 /* ══════════════════════════════
                 RESPONSIVE — MOBILE (≤600px)
