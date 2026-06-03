@@ -447,7 +447,7 @@ export default function ClinicDashboard() {
                         {/* Si hay una mascota seleccionada, mostrar su ficha completa */}
                         {selectedPetFicha ? (
                             <div className="pet-ficha">
-                                <button className="btn-back-patients" onClick={() => setSelectedPetFicha(null)}>← Volver a pacientes</button>
+                                <button className="btn-back-patients" onClick={() => setSelectedPetFicha(null)} style={{ background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', borderRadius: 10, padding: '9px 18px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', marginBottom: 16, fontFamily: "'Nunito', sans-serif", display: 'inline-flex', alignItems: 'center', gap: 6 }}>← Volver a pacientes</button>
 
                                 {/* Datos base */}
                                 <div className="pet-summary">
