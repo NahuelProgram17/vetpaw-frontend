@@ -568,50 +568,33 @@ export default function Messages() {
                 Lista y chat se alternan con mobileView
                 ══════════════════════════════ */
                 @media (max-width: 700px) {
-                    .messages-inner { padding: 12px 12px; gap: 12px; height: calc(100dvh - 56px); }
-
-                    /* Header mobile */
-                    .messages-title { font-size: 1.4rem; }
-                    .btn-new-conv { padding: 8px 14px; font-size: 0.82rem; }
-
-                    /* Layout: 1 columna, ambos paneles al 100% */
-                    .messages-layout {
-                        grid-template-columns: 1fr;
-                        grid-template-rows: 1fr;
-                    }
-
-                    /* Ocultar panel según vista activa */
+                    .messages-inner { padding: 8px 8px; gap: 8px; height: calc(100dvh - 56px); }
+                    .messages-title { font-size: 1.3rem; }
+                    .btn-new-conv { padding: 8px 12px; font-size: 0.82rem; }
+                    .messages-layout { grid-template-columns: 1fr; grid-template-rows: 1fr; }
                     .conv-list.mobile-hidden { display: none; }
                     .chat-area.mobile-hidden { display: none; }
-
-                    /* Conv list ocupa toda la altura disponible */
-                    .conv-list { border-radius: 14px; }
-
-                    /* Chat area ocupa toda la altura */
-                    .chat-area { border-radius: 14px; }
-
-                    /* Items de conversación más grandes (más fácil de tocar) */
-                    .conv-item { padding: 14px 14px; }
-                    .conv-avatar { width: 46px; height: 46px; font-size: 1.1rem; }
-                    .conv-name { font-size: 0.92rem; }
-                    .conv-last { max-width: calc(100vw - 140px); }
-
-                    /* Burbujas más anchas en mobile */
-                    .msg-bubble { max-width: 88%; }
-
-                    /* Input area más compacta */
-                    .chat-input-area { padding: 10px 12px; gap: 6px; }
-                    .chat-input { padding: 9px 12px; font-size: 0.88rem; }
-                    .btn-send { width: 42px; height: 42px; }
-
-                    /* Modal bottom sheet */
+                    .conv-list { border-radius: 12px; }
+                    .chat-area { border-radius: 12px; overflow: hidden; }
+                    .conv-item { padding: 14px 12px; }
+                    .conv-avatar { width: 44px; height: 44px; font-size: 1rem; }
+                    .conv-name { font-size: 0.9rem; }
+                    .conv-last { max-width: calc(100vw - 130px); }
+                    .msg-bubble { max-width: 82%; font-size: 0.85rem; }
+                    .msg-row.mine { align-items: flex-end; padding-right: 4px; }
+                    .msg-row.theirs { align-items: flex-start; padding-left: 4px; }
+                    .chat-messages { padding: 12px 8px; gap: 8px; }
+                    .chat-input-area { padding: 8px 10px; gap: 6px; }
+                    .chat-input { padding: 9px 10px; font-size: 0.86rem; }
+                    .btn-send { width: 40px; height: 40px; font-size: 1.1rem; flex-shrink: 0; }
+                    .input-row { display: flex; gap: 6px; align-items: center; }
+                    .quick-replies { gap: 5px; }
+                    .quick-reply-btn { padding: 5px 10px; font-size: 0.72rem; }
                     .modal-overlay { padding: 0; align-items: flex-end; }
-                    .modal { border-radius: 20px 20px 0 0; padding: 24px 18px; border-bottom: none; }
+                    .modal { border-radius: 20px 20px 0 0; padding: 20px 16px; border-bottom: none; }
                     .form-actions { flex-direction: column-reverse; gap: 8px; }
-                    .form-actions .btn-ghost,
-                    .form-actions .btn-primary-msg { width: 100%; text-align: center; padding: 12px; }
+                    .form-actions .btn-ghost, .form-actions .btn-primary-msg { width: 100%; text-align: center; padding: 12px; }
                 }
-
                 /* ══════════════════════════════
                 RESPONSIVE — MOBILE XS (≤380px)
                 ══════════════════════════════ */
