@@ -186,6 +186,7 @@
 /* ══ PACIENTES - BUSCADOR ══ */
 .patients-search-wrap {
     margin-bottom: 24px;
+    width: 100%;
 }
 
 .patients-search {
@@ -207,7 +208,7 @@
 }
 
 .patients-search::placeholder {
-    color: rgba(255,255,255,0.35);
+    color: rgba(255,255,255,0.4);
 }
 
 /* ══ FICHA COMPLETA ══ */
@@ -234,4 +235,38 @@
 .btn-back-patients:hover {
     background: rgba(255,255,255,0.08);
     color: #fff;
+}
+
+.pet-ficha .pet-summary {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.pet-ficha .summary-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.pet-ficha .summary-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pet-ficha .summary-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
 }
