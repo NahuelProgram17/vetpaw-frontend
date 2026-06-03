@@ -414,6 +414,12 @@ export default function Appointments() {
                                 </div>
                             )}
 
+                            {!editingAppt && form.clinic && form.pet && (
+                                <div className="consent-box">
+                                    <span className="consent-icon">🔒</span>
+                                    <p>Al confirmar este turno, el historial clínico de <strong>{pets.find(p => p.id === form.pet)?.name || "tu mascota"}</strong> será compartido con <strong>{clinics.find(c => c.id === form.clinic)?.name || "la clínica"}</strong> durante 9 meses.</p>
+                                </div>
+                            )}
                             <div className="form-actions">
                                 <button type="button" className="btn-ghost" onClick={closeModal}>Cancelar</button>
                                 <button type="submit" className="btn-primary" disabled={saving}>
@@ -584,6 +590,10 @@ export default function Appointments() {
                 .form-actions { display: flex; gap: 10px; margin-top: 8px; justify-content: flex-end; }
                 .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: border-color 0.2s; }
                 .btn-ghost:hover { border-color: rgba(255,255,255,0.25); }
+                .consent-box { background: rgba(76,175,80,0.08); border: 1px solid rgba(76,175,80,0.25); border-radius: 12px; padding: 12px 16px; display: flex; gap: 10px; align-items: flex-start; }
+                .consent-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+                .consent-box p { font-size: 0.82rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
+                .consent-box strong { color: #4CAF50; }
 
                 @media (max-width: 600px) {
                     .appts-inner { padding: 16px 14px; }

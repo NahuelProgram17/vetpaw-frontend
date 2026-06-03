@@ -15,12 +15,12 @@ const STATUS_LABEL = {
 const EMPTY_VISIT = {
     pet: "", clinic: "", date: "", reason: "",
     diagnosis: "", treatment: "", observations: "",
-    next_visit: "", vet_name: "", vet_lastname: "", vet_license: "",
+    next_visit: "", vet_name: "", vet_lastname: "", vet_license: "", vet_clinic_name: "",
 };
 
 const EMPTY_VACCINE = {
     pet: "", name: "", date_applied: "", next_dose: "",
-    batch: "", notes: "", vet_first_name: "", vet_last_name: "", vet_license: "",
+    batch: "", notes: "", vet_first_name: "", vet_last_name: "", vet_license: "", vet_clinic_name: "",
 };
 
 const SPECIES_ICON = {
@@ -225,7 +225,7 @@ export default function ClinicDashboard() {
         if (!visitForm.diagnosis) { setError("El diagnóstico es obligatorio."); return; }
         setSaving(true); setError("");
         try {
-            await createVisit({ pet: visitForm.pet, clinic: visitForm.clinic, date: visitForm.date, reason: visitForm.reason, diagnosis: visitForm.diagnosis, treatment: visitForm.treatment, observations: visitForm.observations, next_visit: visitForm.next_visit || null, vet_first_name: visitForm.vet_name, vet_last_name: visitForm.vet_lastname, vet_license: visitForm.vet_license });
+            await createVisit({ pet: visitForm.pet, clinic: visitForm.clinic, date: visitForm.date, reason: visitForm.reason, diagnosis: visitForm.diagnosis, treatment: visitForm.treatment, observations: visitForm.observations, next_visit: visitForm.next_visit || null, vet_first_name: visitForm.vet_name, vet_last_name: visitForm.vet_lastname, vet_license: visitForm.vet_license, vet_clinic_name: visitForm.vet_clinic_name });
             setShowVisitModal(false); setSuccess("Atención registrada."); setTimeout(() => setSuccess(""), 4000);
             await fetchAll(); setTab("historial");
         } catch (err) { const data = err.response?.data; setError(data ? Object.values(data).flat().join(" ") : "Error al guardar."); }
@@ -238,7 +238,7 @@ export default function ClinicDashboard() {
         if (!vaccineForm.name) { setError("El nombre de la vacuna es obligatorio."); return; }
         setSaving(true); setError("");
         try {
-            await api.post("/vaccines/", { pet: vaccineForm.pet, name: vaccineForm.name, date_applied: vaccineForm.date_applied, next_dose: vaccineForm.next_dose || null, batch: vaccineForm.batch, notes: vaccineForm.notes, vet_first_name: vaccineForm.vet_first_name, vet_last_name: vaccineForm.vet_last_name, vet_license: vaccineForm.vet_license });
+            await api.post("/vaccines/", { pet: vaccineForm.pet, name: vaccineForm.name, date_applied: vaccineForm.date_applied, next_dose: vaccineForm.next_dose || null, batch: vaccineForm.batch, notes: vaccineForm.notes, vet_first_name: vaccineForm.vet_first_name, vet_last_name: vaccineForm.vet_last_name, vet_license: vaccineForm.vet_license, vet_clinic_name: vaccineForm.vet_clinic_name });
             setShowVaccineModal(false); setSuccess("Vacuna registrada."); setTimeout(() => setSuccess(""), 4000);
             await fetchAll();
         } catch (err) { const data = err.response?.data; setError(data ? Object.values(data).flat().join(" ") : "Error al guardar."); }
@@ -908,6 +908,7 @@ export default function ClinicDashboard() {
                                     <div className="form-group"><label>Apellido *</label><input name="vet_lastname" placeholder="García" value={visitForm.vet_lastname} onChange={handleVisitChange} /></div>
                                 </div>
                                 <div className="form-group"><label>Matrícula *</label><input name="vet_license" placeholder="Mat. 12345" value={visitForm.vet_license} onChange={handleVisitChange} /></div>
+                                <div className="form-group"><label>Clínica</label><input name="vet_clinic_name" placeholder="Ej: Veterinaria San Martín" value={visitForm.vet_clinic_name} onChange={handleVisitChange} /></div>
                             </div>
                             <div className="form-section">
                                 <h3 className="section-title">📝 Datos de la consulta</h3>
@@ -941,6 +942,7 @@ export default function ClinicDashboard() {
                                     <div className="form-group"><label>Apellido *</label><input name="vet_last_name" placeholder="García" value={vaccineForm.vet_last_name} onChange={handleVaccineChange} /></div>
                                 </div>
                                 <div className="form-group"><label>Matrícula *</label><input name="vet_license" placeholder="Mat. 12345" value={vaccineForm.vet_license} onChange={handleVaccineChange} /></div>
+                                <div className="form-group"><label>Clínica</label><input name="vet_clinic_name" placeholder="Ej: Veterinaria San Martín" value={vaccineForm.vet_clinic_name} onChange={handleVaccineChange} /></div>
                             </div>
                             <div className="form-section">
                                 <h3 className="section-title">💉 Datos de la vacuna</h3>
