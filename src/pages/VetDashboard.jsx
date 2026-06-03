@@ -52,6 +52,8 @@ export default function ClinicDashboard() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [selectedPet, setSelectedPet] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedPetFicha, setSelectedPetFicha] = useState(null);
     const [highlightedAppt, setHighlightedAppt] = useState(null);
 
     // ── Fotos state ──
@@ -266,8 +268,6 @@ export default function ClinicDashboard() {
     const TABS_DESKTOP = [
         { id: "turnos",    label: "📅 Turnos" },
         { id: "pacientes", label: "🐾 Pacientes" },
-        { id: "historial", label: "📋 Historial" },
-        { id: "vacunas",   label: "💉 Vacunas" },
         { id: "fotos",     label: "📷 Fotos" },
         { id: "mi-agenda", label: "🗓 Mi Agenda" },
     ];
@@ -275,8 +275,6 @@ export default function ClinicDashboard() {
         { id: "turnos",    label: "📅 Turnos" },
         { id: "agenda",    label: "🗓 Agenda" },
         { id: "pacientes", label: "🐾 Pacientes" },
-        { id: "historial", label: "📋 Historial" },
-        { id: "vacunas",   label: "💉 Vacunas" },
         { id: "fotos",     label: "📷 Fotos" },
         { id: "mi-agenda", label: "⚙️ Mi Agenda" },
     ];
@@ -435,31 +433,147 @@ export default function ClinicDashboard() {
                 {/* ══ TAB PACIENTES ══ */}
                 {!loading && tab === "pacientes" && (
                     <div className="patients-section">
-                        {pets.length === 0 ? (
-                            <div className="empty-state"><span>🐾</span><p>No hay mascotas vinculadas a tu clínica todavía.</p></div>
-                        ) : (
-                            <div className="pets-grid">
-                                {pets.map(pet => (
-                                    <div key={pet.id} className="pet-card" onClick={() => { setSelectedPet(pet); setTab("historial"); }}>
-                                        <div className="pet-avatar">{pet.photo ? <img src={pet.photo} alt={pet.name} /> : <span>{SPECIES_ICON[pet.species] || "🐾"}</span>}</div>
-                                        <div className="pet-info">
-                                            <h3 className="pet-name">{pet.name}</h3>
-                                            <p className="pet-species">{pet.species_display}</p>
-                                            {pet.breed && <p className="pet-breed">{pet.breed}</p>}
-                                            <p className="pet-owner">👤 {pet.owner_name || "—"}</p>
-                                        </div>
-                                        <div className="pet-details">
-                                            {pet.weight && <span>⚖️ {pet.weight} kg</span>}
-                                            {pet.is_neutered && <span>✂️ Castrado/a</span>}
-                                            {pet.allergies && <span>⚠️ Alergias</span>}
-                                        </div>
-                                        <div className="pet-card-btns">
-                                            <button className="btn-view-history">Ver historial →</button>
-                                            <button className="btn-pdf" onClick={e => { e.stopPropagation(); handleDownloadPDF(pet.id, pet.name); }}>📄 PDF</button>
-                                        </div>
+                        {/* Buscador */}
+                        <div className="patients-search-wrap">
+                            <input
+                                className="patients-search"
+                                type="text"
+                                placeholder="🔍 Buscar por nombre de mascota o dueño..."
+                                value={searchQuery}
+                                onChange={e => { setSearchQuery(e.target.value); setSelectedPetFicha(null); }}
+                            />
+                        </div>
+
+                        {/* Si hay una mascota seleccionada, mostrar su ficha completa */}
+                        {selectedPetFicha ? (
+                            <div className="pet-ficha">
+                                <button className="btn-back-patients" onClick={() => setSelectedPetFicha(null)}>← Volver a pacientes</button>
+
+                                {/* Datos base */}
+                                <div className="pet-summary">
+                                    <div className="summary-avatar">
+                                        {selectedPetFicha.photo
+                                            ? <img src={selectedPetFicha.photo} alt={selectedPetFicha.name} />
+                                            : <span>{SPECIES_ICON[selectedPetFicha.species] || "🐾"}</span>}
                                     </div>
-                                ))}
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <h3>{selectedPetFicha.name}</h3>
+                                        <p>{selectedPetFicha.species_display} · {selectedPetFicha.breed || "Sin raza"} · {selectedPetFicha.sex === "male" ? "Macho" : "Hembra"}</p>
+                                        {selectedPetFicha.weight && <p>⚖️ {selectedPetFicha.weight} kg</p>}
+                                        {selectedPetFicha.is_neutered && <p>✂️ Castrado/a</p>}
+                                        {selectedPetFicha.allergies && <p>⚠️ Alergias: {selectedPetFicha.allergies}</p>}
+                                        {selectedPetFicha.notes && <p>📝 {selectedPetFicha.notes}</p>}
+                                        <p style={{ marginTop: 8 }}>👤 <strong>{selectedPetFicha.owner_name || "—"}</strong>
+                                            {selectedPetFicha.owner_phone && (
+                                                <a href={`https://wa.me/${selectedPetFicha.owner_phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer"
+                                                    style={{ marginLeft: 10, color: '#25D366', fontWeight: 700, textDecoration: 'none', fontSize: '0.85rem' }}>
+                                                    📱 {selectedPetFicha.owner_phone}
+                                                </a>
+                                            )}
+                                        </p>
+                                    </div>
+                                    <div className="summary-actions">
+                                        <button className="btn-visit" onClick={() => { setVisitForm({ ...EMPTY_VISIT, pet: selectedPetFicha.id, date: new Date().toISOString().slice(0, 16) }); setError(""); setShowVisitModal(true); }}>📋 + Registrar visita</button>
+                                        <button className="btn-add-vaccine" onClick={() => { setVaccineForm({ ...EMPTY_VACCINE, pet: selectedPetFicha.id }); setError(""); setShowVaccineModal(true); }}>💉 + Registrar vacuna</button>
+                                        <button className="btn-pdf" onClick={() => handleDownloadPDF(selectedPetFicha.id, selectedPetFicha.name)}>📄 PDF</button>
+                                    </div>
+                                </div>
+
+                                {/* Historial de visitas */}
+                                <h4 style={{ color: '#4CAF50', margin: '24px 0 12px', fontSize: '1rem', fontWeight: 700 }}>📋 Historial de visitas</h4>
+                                {visits.filter(v => v.pet === selectedPetFicha.id).length === 0 ? (
+                                    <div className="empty-state"><span>📋</span><p>Sin visitas registradas aún.</p></div>
+                                ) : (
+                                    <div className="visits-list">
+                                        {visits.filter(v => v.pet === selectedPetFicha.id).map(visit => (
+                                            <div key={visit.id} className="visit-card">
+                                                <div className="visit-date-box">
+                                                    <span className="visit-day">{new Date(visit.date).getDate()}</span>
+                                                    <span className="visit-month">{new Date(visit.date).toLocaleString("es-AR", { month: "short" })}</span>
+                                                    <span className="visit-year">{new Date(visit.date).getFullYear()}</span>
+                                                </div>
+                                                <div className="visit-info">
+                                                    <div className="visit-top">
+                                                        <h3 className="visit-reason">{visit.reason}</h3>
+                                                        <span className="visit-vet">🩺 Dr/a. {visit.vet_first_name} {visit.vet_last_name} · Mat. {visit.vet_license}{visit.vet_clinic_name ? ` · ${visit.vet_clinic_name}` : ""}</span>
+                                                    </div>
+                                                    {visit.diagnosis && <p className="visit-field"><span>Diagnóstico:</span> {visit.diagnosis}</p>}
+                                                    {visit.treatment && <p className="visit-field"><span>Tratamiento:</span> {visit.treatment}</p>}
+                                                    {visit.observations && <p className="visit-field"><span>Observaciones:</span> {visit.observations}</p>}
+                                                    {visit.next_visit && <p className="visit-next">📅 Próxima visita: {new Date(visit.next_visit).toLocaleDateString("es-AR")}</p>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Vacunas */}
+                                <h4 style={{ color: '#FF9800', margin: '24px 0 12px', fontSize: '1rem', fontWeight: 700 }}>💉 Vacunas</h4>
+                                {vaccines.filter(v => v.pet === selectedPetFicha.id).length === 0 ? (
+                                    <div className="empty-state"><span>💉</span><p>Sin vacunas registradas aún.</p></div>
+                                ) : (
+                                    <div className="vaccine-table-wrap">
+                                        <table className="vaccine-table">
+                                            <thead><tr>
+                                                <th>Vacuna</th><th>Fecha</th><th>Próx. dosis</th><th>Lote</th><th>Veterinario</th><th>Clínica</th><th>Notas</th>
+                                            </tr></thead>
+                                            <tbody>
+                                                {vaccines.filter(v => v.pet === selectedPetFicha.id).map(v => (
+                                                    <tr key={v.id}>
+                                                        <td>{v.name}</td>
+                                                        <td>{v.date_applied}</td>
+                                                        <td>{v.next_dose || "—"}</td>
+                                                        <td>{v.batch || "—"}</td>
+                                                        <td>{v.vet_first_name} {v.vet_last_name}{v.vet_license ? ` · Mat. ${v.vet_license}` : ""}</td>
+                                                        <td>{v.vet_clinic_name || "—"}</td>
+                                                        <td>{v.notes || "—"}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
                             </div>
+                        ) : (
+                            /* Lista de pacientes con buscador */
+                            pets.length === 0 ? (
+                                <div className="empty-state"><span>🐾</span><p>No hay mascotas vinculadas a tu clínica todavía.</p></div>
+                            ) : (
+                                <div className="pets-grid">
+                                    {pets
+                                        .filter(pet =>
+                                            pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                            (pet.owner_name && pet.owner_name.toLowerCase().includes(searchQuery.toLowerCase()))
+                                        )
+                                        .map(pet => (
+                                            <div key={pet.id} className="pet-card" onClick={() => setSelectedPetFicha(pet)}>
+                                                <div className="pet-avatar">{pet.photo ? <img src={pet.photo} alt={pet.name} /> : <span>{SPECIES_ICON[pet.species] || "🐾"}</span>}</div>
+                                                <div className="pet-info">
+                                                    <h3 className="pet-name">{pet.name}</h3>
+                                                    <p className="pet-species">{pet.species_display}</p>
+                                                    {pet.breed && <p className="pet-breed">{pet.breed}</p>}
+                                                    <p className="pet-owner">👤 {pet.owner_name || "—"}</p>
+                                                </div>
+                                                <div className="pet-details">
+                                                    {pet.weight && <span>⚖️ {pet.weight} kg</span>}
+                                                    {pet.is_neutered && <span>✂️ Castrado/a</span>}
+                                                    {pet.allergies && <span>⚠️ Alergias</span>}
+                                                </div>
+                                                <div className="pet-card-btns">
+                                                    <button className="btn-view-history">Ver ficha completa →</button>
+                                                    <button className="btn-pdf" onClick={e => { e.stopPropagation(); handleDownloadPDF(pet.id, pet.name); }}>📄 PDF</button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    }
+                                    {pets.filter(pet =>
+                                        pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                        (pet.owner_name && pet.owner_name.toLowerCase().includes(searchQuery.toLowerCase()))
+                                    ).length === 0 && (
+                                        <div className="empty-state"><span>🔍</span><p>No se encontraron resultados para "{searchQuery}".</p></div>
+                                    )}
+                                </div>
+                            )
                         )}
                     </div>
                 )}

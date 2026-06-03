@@ -182,3 +182,56 @@
     border-right-color: var(--border);
   }
 }
+
+/* ══ PACIENTES - BUSCADOR ══ */
+.patients-search-wrap {
+    margin-bottom: 24px;
+}
+
+.patients-search {
+    width: 100%;
+    padding: 12px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-size: 0.95rem;
+    font-family: 'Nunito', sans-serif;
+    outline: none;
+    transition: border 0.2s;
+    box-sizing: border-box;
+}
+
+.patients-search:focus {
+    border-color: rgba(76,175,80,0.5);
+}
+
+.patients-search::placeholder {
+    color: rgba(255,255,255,0.35);
+}
+
+/* ══ FICHA COMPLETA ══ */
+.pet-ficha {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-back-patients {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.6);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    align-self: flex-start;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    font-family: 'Nunito', sans-serif;
+}
+
+.btn-back-patients:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+}
