@@ -375,7 +375,7 @@ export default function Messages() {
                     max-width: 1100px; margin: 0 auto; padding: 32px 24px;
                     position: relative; z-index: 1;
                     display: flex; flex-direction: column; gap: 20px;
-                    height: calc(100vh - 56px);
+                    height: calc(100dvh - 56px);
                 }
 
                 /* ── Header ── */
@@ -568,7 +568,7 @@ export default function Messages() {
                 Lista y chat se alternan con mobileView
                 ══════════════════════════════ */
                 @media (max-width: 700px) {
-                    .messages-inner { padding: 12px 12px; gap: 12px; height: calc(100vh - 56px); }
+                    .messages-inner { padding: 12px 12px; gap: 12px; height: calc(100dvh - 56px); }
 
                     /* Header mobile */
                     .messages-title { font-size: 1.4rem; }
