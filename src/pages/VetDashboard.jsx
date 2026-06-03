@@ -1070,6 +1070,11 @@ export default function ClinicDashboard() {
                 .btn-pdf:hover { opacity: 0.9; }
 
                 .pet-selector { margin-bottom: 20px; }
+                .patients-section { display: flex; flex-direction: column; gap: 0; }
+                .patients-search-wrap { margin-bottom: 20px; width: 100%; }
+                .patients-search { width: 100%; padding: 12px 18px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.06); color: #fff; font-size: 0.95rem; font-family: 'Nunito', sans-serif; outline: none; transition: border-color 0.2s; box-sizing: border-box; display: block; }
+                .patients-search:focus { border-color: rgba(76,175,80,0.5); box-shadow: 0 0 0 3px rgba(76,175,80,0.1); }
+                .patients-search::placeholder { color: rgba(255,255,255,0.3); }
                 .selector-label { font-size: 0.8rem; color: rgba(255,255,255,0.45); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
                 .pet-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
                 .pet-chips::-webkit-scrollbar { display: none; }
