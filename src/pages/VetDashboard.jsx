@@ -578,67 +578,7 @@ export default function ClinicDashboard() {
                     </div>
                 )}
 
-                
-
-                {/* ══ TAB VACUNAS ══ */}
-                {!loading && tab === "vacunas" && (
-                    <div className="vaccines-section">
-                        <div className="pet-selector">
-                            <p className="selector-label">Seleccioná una mascota:</p>
-                            <div className="pet-chips">
-                                <button className={`pet-chip ${!selectedPet ? "active" : ""}`} onClick={() => setSelectedPet(null)}>Todas</button>
-                                {pets.map(pet => (
-                                    <button key={pet.id} className={`pet-chip ${selectedPet?.id === pet.id ? "active" : ""}`} onClick={() => setSelectedPet(pet)}>
-                                        {SPECIES_ICON[pet.species]} {pet.name}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        {selectedPet && (
-                            <div className="vaccines-header-row">
-                                <div className="pet-summary" style={{ flex: 1, marginBottom: 0 }}>
-                                    <div className="summary-avatar">{SPECIES_ICON[selectedPet.species] || "🐾"}</div>
-                                    <div><h3>{selectedPet.name}</h3><p>{selectedPet.species_display} · {selectedPet.owner_name || "—"}</p></div>
-                                </div>
-                                <button className="btn-add-vaccine" onClick={() => openVaccineModal(selectedPet)}>+ Registrar vacuna</button>
-                            </div>
-                        )}
-                        {petVaccines.length === 0 ? (
-                            <div className="empty-state">
-                                <span>💉</span><p>No hay vacunas registradas{selectedPet ? ` para ${selectedPet.name}` : ""}.</p>
-                                {selectedPet && <button className="btn-sm-vaccine" onClick={() => openVaccineModal(selectedPet)}>+ Registrar primera vacuna</button>}
-                            </div>
-                        ) : (
-                            <div className="vaccine-table-wrap">
-                                <table className="vaccine-table">
-                                    <thead><tr>
-                                        <th>Vacuna</th>{!selectedPet && <th>Mascota</th>}
-                                        <th>Fecha</th><th>Próx. dosis</th><th>Lote</th><th>Veterinario</th><th>Matrícula</th><th>Notas</th>
-                                    </tr></thead>
-                                    <tbody>
-                                        {petVaccines.map(v => {
-                                            const petObj = pets.find(p => p.id === v.pet);
-                                            const nextDate = v.next_dose ? new Date(v.next_dose) : null;
-                                            const isOverdue = nextDate && nextDate < new Date();
-                                            return (
-                                                <tr key={v.id}>
-                                                    <td className="vaccine-name">{v.name}</td>
-                                                    {!selectedPet && <td>{petObj ? `${SPECIES_ICON[petObj.species]} ${petObj.name}` : "—"}</td>}
-                                                    <td>{formatDateShort(v.date_applied)}</td>
-                                                    <td>{v.next_dose ? <span className={isOverdue ? "overdue-badge" : "nextdose-badge"}>{isOverdue ? "⚠️ " : "📅 "}{formatDateShort(v.next_dose)}</span> : "—"}</td>
-                                                    <td className="td-muted">{v.batch || "—"}</td>
-                                                    <td>Dr/a. {v.vet_first_name} {v.vet_last_name}</td>
-                                                    <td className="td-muted">{v.vet_license}</td>
-                                                    <td className="td-muted">{v.notes || "—"}</td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                )}
+            
 
                 {/* ══ TAB FOTOS ══ */}
                 {tab === "fotos" && (
