@@ -1076,7 +1076,8 @@ export default function ClinicDashboard() {
                 .pet-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 20px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
                 .pet-chip.active { background: rgba(107,255,184,0.12); border-color: rgba(107,255,184,0.35); color: #6bffb8; }
                 .pet-summary { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-                .summary-avatar { font-size: 2.5rem; flex-shrink: 0; }
+                .summary-avatar { font-size: 2.5rem; flex-shrink: 0; width: 80px; height: 80px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); }
+                .summary-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
                 .pet-summary h3 { font-size: 1.1rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
                 .pet-summary p { font-size: 0.8rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
                 .summary-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
