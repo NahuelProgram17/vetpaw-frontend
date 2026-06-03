@@ -578,70 +578,7 @@ export default function ClinicDashboard() {
                     </div>
                 )}
 
-                {/* ══ TAB HISTORIAL ══ */}
-                {!loading && tab === "historial" && (
-                    <div className="history-section">
-                        <div className="pet-selector">
-                            <p className="selector-label">Seleccioná una mascota:</p>
-                            <div className="pet-chips">
-                                <button className={`pet-chip ${!selectedPet ? "active" : ""}`} onClick={() => setSelectedPet(null)}>Todas</button>
-                                {pets.map(pet => (
-                                    <button key={pet.id} className={`pet-chip ${selectedPet?.id === pet.id ? "active" : ""}`} onClick={() => setSelectedPet(pet)}>
-                                        {SPECIES_ICON[pet.species]} {pet.name}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        {selectedPet && (
-                            <div className="pet-summary">
-                                <div className="summary-avatar">{SPECIES_ICON[selectedPet.species] || "🐾"}</div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <h3>{selectedPet.name}</h3>
-                                    <p>{selectedPet.species_display} · {selectedPet.breed || "Sin raza"} · {selectedPet.sex === "male" ? "Macho" : "Hembra"}</p>
-                                    <p>👤 {selectedPet.owner_name || "—"}
-                                        {selectedPet.owner_phone && (
-                                            <a href={`https://wa.me/${selectedPet.owner_phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 10, color: '#25D366', fontWeight: 700, textDecoration: 'none', fontSize: '0.8rem' }}>
-                                                📱 {selectedPet.owner_phone}
-                                            </a>
-                                        )}
-                                    </p>
-                                    {selectedPet.allergies && <p>⚠️ Alergias: {selectedPet.allergies}</p>}
-                                </div>
-                                <div className="summary-actions">
-                                    <button className="btn-visit" onClick={() => { setVisitForm({ ...EMPTY_VISIT, pet: selectedPet.id, clinic: "", date: new Date().toISOString().slice(0, 16) }); setError(""); setShowVisitModal(true); }}>📝 Observacion</button>
-                                    <button className="btn-pdf" onClick={() => handleDownloadPDF(selectedPet.id, selectedPet.name)}>📄 PDF</button>
-                                </div>
-                            </div>
-                        )}
-                        {petVisits.length === 0 ? (
-                            <div className="empty-state"><span>📋</span><p>No hay visitas registradas{selectedPet ? ` para ${selectedPet.name}` : ""}.</p></div>
-                        ) : (
-                            <div className="visits-list">
-                                {(showAllVisits ? petVisits : petVisits.slice(0, 5)).map(visit => (
-                                    <div key={visit.id} className="visit-card">
-                                        <div className="visit-date-box">
-                                            <span className="visit-day">{new Date(visit.date).getDate()}</span>
-                                            <span className="visit-month">{new Date(visit.date).toLocaleString("es-AR", { month: "short" })}</span>
-                                            <span className="visit-year">{new Date(visit.date).getFullYear()}</span>
-                                        </div>
-                                        <div className="visit-info">
-                                            <div className="visit-top"><h3 className="visit-reason">{visit.reason}</h3><span className="visit-vet">🩺 Dr/a. {visit.vet_first_name} {visit.vet_last_name} · Mat. {visit.vet_license}</span></div>
-                                            {visit.diagnosis && <p className="visit-field"><span>Diagnóstico:</span> {visit.diagnosis}</p>}
-                                            {visit.treatment && <p className="visit-field"><span>Tratamiento:</span> {visit.treatment}</p>}
-                                            {visit.observations && <p className="visit-field"><span>Observaciones:</span> {visit.observations}</p>}
-                                            {visit.next_visit && <p className="visit-next">📅 Próxima visita: {formatDate(visit.next_visit)}</p>}
-                                        </div>
-                                    </div>
-                                ))}
-                                {petVisits.length > 5 && (
-                                    <button className="btn-ghost" style={{ width: "100%" }} onClick={() => setShowAllVisits(!showAllVisits)}>
-                                        {showAllVisits ? "Ver menos ▲" : `Ver historial completo (${petVisits.length}) ▼`}
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                )}
+                
 
                 {/* ══ TAB VACUNAS ══ */}
                 {!loading && tab === "vacunas" && (
