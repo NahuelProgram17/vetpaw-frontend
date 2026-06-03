@@ -219,22 +219,28 @@
 }
 
 .btn-back-patients {
-    background: none;
-    border: 1px solid rgba(255,255,255,0.15);
-    color: rgba(255,255,255,0.6);
-    border-radius: 8px;
-    padding: 8px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7);
+    border-radius: 10px;
+    padding: 9px 18px;
     font-size: 0.85rem;
+    font-weight: 700;
     cursor: pointer;
     align-self: flex-start;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
     transition: all 0.2s;
     font-family: 'Nunito', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.02em;
 }
 
 .btn-back-patients:hover {
-    background: rgba(255,255,255,0.08);
-    color: #fff;
+    background: rgba(76,175,80,0.10);
+    border-color: rgba(76,175,80,0.35);
+    color: #4CAF50;
 }
 
 .pet-ficha .pet-summary {
