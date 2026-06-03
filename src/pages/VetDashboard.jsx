@@ -51,6 +51,11 @@ export default function ClinicDashboard() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [clinicalPhotos, setClinicalPhotos] = useState([]);
+    const [clinicalPhotoUploading, setClinicalPhotoUploading] = useState(false);
+    const [clinicalPhotoError, setClinicalPhotoError] = useState("");
+    const [clinicalPhotoCaption, setClinicalPhotoCaption] = useState("");
+    const clinicalFileInputRef = useRef(null);
     const [selectedPet, setSelectedPet] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedPetFicha, setSelectedPetFicha] = useState(null);
@@ -100,6 +105,43 @@ export default function ClinicDashboard() {
             setVaccines(vaccineData.data.results ?? vaccineData.data);
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
+    };
+
+    const fetchClinicalPhotos = async (petId) => {
+        try {
+            const res = await api.get(`/clinical-photos/list/?pet=${petId}`);
+            setClinicalPhotos(res.data);
+        } catch (e) { console.error(e); }
+    };
+
+    const handleClinicalPhotoUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { setClinicalPhotoError("La foto no puede superar los 5MB."); return; }
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { setClinicalPhotoError("Solo JPG, PNG o WebP."); return; }
+        setClinicalPhotoError(""); setClinicalPhotoUploading(true);
+        const formData = new FormData();
+        formData.append("image", file);
+        formData.append("pet", selectedPetFicha.id);
+        if (clinicalPhotoCaption) formData.append("caption", clinicalPhotoCaption);
+        try {
+            await api.post("/clinical-photos/upload/", formData, { headers: { "Content-Type": "multipart/form-data" } });
+            setClinicalPhotoCaption("");
+            if (clinicalFileInputRef.current) clinicalFileInputRef.current.value = "";
+            await fetchClinicalPhotos(selectedPetFicha.id);
+            setSuccess("Foto clínica subida."); setTimeout(() => setSuccess(""), 3000);
+        } catch (err) {
+            setClinicalPhotoError(err.response?.data?.error || "Error al subir la foto.");
+        } finally { setClinicalPhotoUploading(false); }
+    };
+
+    const handleClinicalPhotoDelete = async (id) => {
+        if (!confirm("¿Eliminás esta foto clínica?")) return;
+        try {
+            await api.delete(`/clinical-photos/${id}/delete/`);
+            await fetchClinicalPhotos(selectedPetFicha.id);
+            setSuccess("Foto eliminada."); setTimeout(() => setSuccess(""), 3000);
+        } catch (e) { console.error(e); }
     };
 
     const fetchPhotos = async () => {
@@ -227,7 +269,7 @@ export default function ClinicDashboard() {
         try {
             await createVisit({ pet: visitForm.pet, clinic: visitForm.clinic, date: visitForm.date, reason: visitForm.reason, diagnosis: visitForm.diagnosis, treatment: visitForm.treatment, observations: visitForm.observations, next_visit: visitForm.next_visit || null, vet_first_name: visitForm.vet_name, vet_last_name: visitForm.vet_lastname, vet_license: visitForm.vet_license, vet_clinic_name: visitForm.vet_clinic_name });
             setShowVisitModal(false); setSuccess("Atención registrada."); setTimeout(() => setSuccess(""), 4000);
-            await fetchAll(); setTab("historial");
+            await fetchAll(); setShowVisitModal(false);
         } catch (err) { const data = err.response?.data; setError(data ? Object.values(data).flat().join(" ") : "Error al guardar."); }
         finally { setSaving(false); }
     };
@@ -533,6 +575,37 @@ export default function ClinicDashboard() {
                                         </table>
                                     </div>
                                 )}
+                                {/* Fotos clínicas */}
+                                <h4 style={{ color: '#6bcaff', margin: '24px 0 12px', fontSize: '1rem', fontWeight: 700 }}>📷 Fotos clínicas</h4>
+                                <div className="clinical-photos-upload">
+                                    <input
+                                        type="text"
+                                        placeholder="Descripción (ej: Radiografía columna...)"
+                                        value={clinicalPhotoCaption}
+                                        onChange={e => setClinicalPhotoCaption(e.target.value)}
+                                        style={{ background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.10)', borderRadius: 10, color: '#fff', padding: '10px 14px', fontFamily: "'Nunito', sans-serif", fontSize: '0.9rem', outline: 'none', width: '100%', marginBottom: 8, boxSizing: 'border-box' }}
+                                    />
+                                    {clinicalPhotoError && <div className="form-error">⚠️ {clinicalPhotoError}</div>}
+                                    <input ref={clinicalFileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleClinicalPhotoUpload} style={{ display: 'none' }} />
+                                    <button className="btn-upload-clinical" onClick={() => clinicalFileInputRef.current?.click()} disabled={clinicalPhotoUploading}>
+                                        {clinicalPhotoUploading ? "⏳ Subiendo..." : "📤 Subir foto clínica"}
+                                    </button>
+                                    <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginTop: 6 }}>JPG, PNG o WebP · Máximo 5MB</p>
+                                </div>
+                                {clinicalPhotos.length === 0 ? (
+                                    <div className="empty-state"><span>📷</span><p>Sin fotos clínicas cargadas aún.</p></div>
+                                ) : (
+                                    <div className="clinical-photos-grid">
+                                        {clinicalPhotos.map(photo => (
+                                            <div key={photo.id} className="clinical-photo-card">
+                                                <img src={photo.image_url} alt={photo.caption || "Foto clínica"} />
+                                                {photo.caption && <p className="clinical-photo-caption">{photo.caption}</p>}
+                                                <p className="clinical-photo-clinic">🏥 {photo.clinic_name}</p>
+                                                <button className="btn-delete-clinical" onClick={() => handleClinicalPhotoDelete(photo.id)}>🗑 Eliminar</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             /* Lista de pacientes con buscador */
@@ -546,7 +619,7 @@ export default function ClinicDashboard() {
                                             (pet.owner_name && pet.owner_name.toLowerCase().includes(searchQuery.toLowerCase()))
                                         )
                                         .map(pet => (
-                                            <div key={pet.id} className="pet-card" onClick={() => setSelectedPetFicha(pet)}>
+                                            <div key={pet.id} className="pet-card" onClick={() => { setSelectedPetFicha(pet); fetchClinicalPhotos(pet.id); }}>
                                                 <div className="pet-avatar">{pet.photo ? <img src={pet.photo} alt={pet.name} /> : <span>{SPECIES_ICON[pet.species] || "🐾"}</span>}</div>
                                                 <div className="pet-info">
                                                     <h3 className="pet-name">{pet.name}</h3>
@@ -1055,6 +1128,17 @@ export default function ClinicDashboard() {
                 .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; }
                 .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 10px; padding: 11px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 16px rgba(76,175,80,0.3); }
                 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+                .clinical-photos-upload { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+                .btn-upload-clinical { background: rgba(107,202,255,0.12); border: 1px solid rgba(107,202,255,0.3); color: #6bcaff; border-radius: 10px; padding: 10px 18px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; width: fit-content; transition: opacity 0.15s; }
+                .btn-upload-clinical:disabled { opacity: 0.5; cursor: not-allowed; }
+                .clinical-photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+                .clinical-photo-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+                .clinical-photo-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
+                .clinical-photo-caption { font-size: 0.8rem; color: rgba(255,255,255,0.6); padding: 8px 12px 4px; font-weight: 700; }
+                .clinical-photo-clinic { font-size: 0.75rem; color: rgba(255,255,255,0.35); padding: 0 12px 8px; }
+                .btn-delete-clinical { background: rgba(255,107,107,0.08); border: none; border-top: 1px solid rgba(255,255,255,0.06); color: rgba(255,107,107,0.7); padding: 8px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s; }
+                .btn-delete-clinical:hover { background: rgba(255,107,107,0.15); }
 
                 @media (max-width: 800px) {
                     .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
