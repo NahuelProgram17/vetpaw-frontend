@@ -967,7 +967,7 @@ export default function ClinicDashboard() {
                 .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
                 .filter-btn.active { background: rgba(76,175,80,0.12); border-color: rgba(76,175,80,0.35); color: #4CAF50; }
 
-                .turnos-layout { display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start; }
+                .turnos-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
                 .turnos-main { display: flex; flex-direction: column; min-width: 0; }
 
                 .appts-list { display: flex; flex-direction: column; gap: 12px; }
