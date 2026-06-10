@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getAppointments, markNotificationsSeen, getUnreadCount } from '../services/api'
+import { getAppointments, markNotificationsSeen, getUnreadCount, getClinicNotifications, markClinicNotificationsSeen } from '../services/api'
 import InstallPWA from './InstallPWA'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
@@ -33,6 +33,9 @@ export default function Navbar() {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
     const notifRef = useRef(null)
+    const [clinicNotifications, setClinicNotifications] = useState([])
+    const [showClinicNotif, setShowClinicNotif] = useState(false)
+    const clinicNotifRef = useRef(null)
     const isStandalone = useIsStandalone()
     const isPWADesktop = isStandalone && !isMobile
 
@@ -56,7 +59,11 @@ export default function Navbar() {
         }
         if (user?.role === 'clinic') {
             fetchUnreadMessages()
-            const interval = setInterval(fetchUnreadMessages, 30000)
+            fetchClinicNotifications()
+            const interval = setInterval(() => {
+                fetchUnreadMessages()
+                fetchClinicNotifications()
+            }, 30000)
             return () => clearInterval(interval)
         }
     }, [user])
@@ -104,6 +111,23 @@ export default function Navbar() {
         } catch (e) { console.error(e) }
     }
 
+    const fetchClinicNotifications = async () => {
+        try {
+            const data = await getClinicNotifications()
+            const appts = data.results ?? data
+            setClinicNotifications(appts.filter(a => a.seen_by_clinic === false))
+        } catch (e) { console.error(e) }
+    }
+
+    const handleOpenClinicNotif = async () => {
+        setShowClinicNotif(!showClinicNotif)
+        if (!showClinicNotif && clinicNotifications.length > 0) {
+            try { await markClinicNotificationsSeen(); setClinicNotifications([]) }
+            catch (e) { console.error(e) }
+        }
+    }
+
+
     const handleOpenNotif = async () => {
         setShowNotif(!showNotif)
         if (!showNotif && notifications.length > 0) {
@@ -124,24 +148,24 @@ export default function Navbar() {
 
     // ── Links según rol ──
     const ownerLinks = [
-        { to: '/dashboard',    icon: '🏠', label: 'Mi panel' },
-        { to: '/pets',         icon: '🐾', label: 'Mascotas' },
+        { to: '/dashboard', icon: '🏠', label: 'Mi panel' },
+        { to: '/pets', icon: '🐾', label: 'Mascotas' },
         { to: '/appointments', icon: '📅', label: 'Turnos' },
-        { to: '/history',      icon: '📋', label: 'Historial' },
-        { to: '/clinics',      icon: '🏥', label: 'Veterinarias' },
-        { to: '/messages',     icon: '💬', label: 'Mensajes', badge: unreadMessages },
-        { to: '/profile',      icon: '👤', label: 'Mi perfil' },
+        { to: '/history', icon: '📋', label: 'Historial' },
+        { to: '/clinics', icon: '🏥', label: 'Veterinarias' },
+        { to: '/messages', icon: '💬', label: 'Mensajes', badge: unreadMessages },
+        { to: '/profile', icon: '👤', label: 'Mi perfil' },
     ]
 
     const clinicLinks = [
         { to: '/clinic/dashboard', icon: '🏠', label: 'Mi panel' },
-        { to: '/messages',         icon: '💬', label: 'Mensajes', badge: unreadMessages },
-        { to: '/profile',          icon: '👤', label: 'Mi perfil' },
+        { to: '/messages', icon: '💬', label: 'Mensajes', badge: unreadMessages },
+        { to: '/profile', icon: '👤', label: 'Mi perfil' },
     ]
 
     const guestLinks = [
         { to: '/clinics', icon: '🏥', label: 'Veterinarias' },
-        { to: '/login',   icon: '🔐', label: 'Ingresar' },
+        { to: '/login', icon: '🔐', label: 'Ingresar' },
     ]
 
     const sidebarLinks = !user ? guestLinks : user.role === 'clinic' ? clinicLinks : ownerLinks
@@ -484,6 +508,39 @@ export default function Navbar() {
                                     )}
                                 </Link>
                                 <Link to="/profile" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi perfil</Link>
+                                <div style={{ position: 'relative' }} ref={clinicNotifRef}>
+                                    <button onClick={handleOpenClinicNotif} style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', fontSize: 16 }}>
+                                        🔔
+                                        {clinicNotifications.length > 0 && (
+                                            <span style={{ position: 'absolute', top: 2, right: 2, background: O1, color: '#fff', fontSize: 9, fontWeight: 800, width: 15, height: 15, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                {clinicNotifications.length}
+                                            </span>
+                                        )}
+                                    </button>
+                                    {showClinicNotif && (
+                                        <div style={{ position: 'absolute', right: 0, top: 46, width: 300, background: '#0f1923', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, boxShadow: '0 16px 48px rgba(0,0,0,0.5)', overflow: 'hidden', zIndex: 300 }}>
+                                            <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                                                <p style={{ color: '#fff', fontWeight: 800, fontSize: 14, fontFamily: FONT }}>Nuevos turnos</p>
+                                            </div>
+                                            {clinicNotifications.length === 0 ? (
+                                                <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>No hay turnos nuevos</div>
+                                            ) : (
+                                                <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+                                                    {clinicNotifications.map(n => (
+                                                        <div key={n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                                            <p style={{ color: '#fff', fontSize: 14, fontWeight: 700, fontFamily: FONT }}>🐾 {n.pet_name || 'Mascota'} — {n.reason || 'Consulta'}</p>
+                                                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>👤 {n.owner_name || '—'}</p>
+                                                            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, marginTop: 2 }}>{new Date(n.requested_date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            <div style={{ padding: '10px 18px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                                                <Link to="/clinic/dashboard" onClick={() => setShowClinicNotif(false)} style={{ color: G1, fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: FONT }}>Ver todos los turnos →</Link>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                                 <InstallPWA />
                                 <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 4px' }}>|</span>
                                 <span style={{ ...linkStyle, color: G1, fontWeight: 700 }}>{user.first_name || user.username}</span>
