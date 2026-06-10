@@ -157,7 +157,16 @@ export default function ClinicDashboard() {
         setScheduleLoading(true);
         try {
             const res = await api.get("/clinic-schedule/me/");
-            setSchedule(res.data);
+            const data = res.data;
+            // Si day_hours está vacío, inicializarlo con defaults para cada día activo
+            if (!data.day_hours || Object.keys(data.day_hours).length === 0) {
+                const defaultHours = {};
+                (data.working_days || []).forEach(day => {
+                    defaultHours[String(day)] = { open: "09:00", close: "18:00" };
+                });
+                data.day_hours = defaultHours;
+            }
+            setSchedule(data);
         } catch {
             setSchedule({
                 working_days: [], day_hours: {},
