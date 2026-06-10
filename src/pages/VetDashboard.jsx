@@ -996,7 +996,7 @@ export default function ClinicDashboard() {
                 .noshow-label { font-size: 0.78rem; color: #ff9500; font-weight: 700; }
 
                 .agenda-panel { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; }
-                .agenda-desktop { position: sticky; top: 20px; }
+                .agenda-desktop { position: sticky; top: 20px; margin-top: -130px; }
                 .agenda-mobile-tab { display: flex; flex-direction: column; gap: 0; }
                 .agenda-mobile-tab .agenda-panel { border-radius: 16px; }
                 .agenda-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
