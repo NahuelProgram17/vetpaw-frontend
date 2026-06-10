@@ -76,11 +76,11 @@ export default function Dashboard() {
     };
 
     const STATUS_LABEL = {
-        pending:   { label: "Pendiente",     color: "pending"   },
+        pending: { label: "Pendiente", color: "pending" },
         confirmed: { label: "✅ Confirmado", color: "confirmed" },
-        cancelled: { label: "❌ Cancelado",  color: "cancelled" },
-        completed: { label: "✔ Realizado",  color: "completed" },
-        no_show:   { label: "⚠️ Ausente",   color: "no_show"   },
+        cancelled: { label: "❌ Cancelado", color: "cancelled" },
+        completed: { label: "✔ Realizado", color: "completed" },
+        no_show: { label: "⚠️ Ausente", color: "no_show" },
     };
 
     const handleMarkSeen = async () => {
@@ -246,6 +246,7 @@ export default function Dashboard() {
                     <section className="dash-card pets-section">
                         <div className="card-header">
                             <h2>🐾 Mis mascotas</h2>
+                            <button className="btn-link" onClick={() => navigate("/pets")}>Ver todas →</button>
                         </div>
                         {pets.length === 0 ? (
                             <div className="empty-state">
