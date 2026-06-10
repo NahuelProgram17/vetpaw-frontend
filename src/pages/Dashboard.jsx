@@ -436,12 +436,18 @@ export default function Dashboard() {
                     display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
                 }
                 .stat-card {
-                    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
                     border-radius: 16px; padding: 20px;
                     display: flex; align-items: center; gap: 14px;
-                    backdrop-filter: blur(10px); transition: border-color 0.2s, transform 0.2s;
+                    backdrop-filter: blur(10px);
                 }
-                .stat-card:hover { border-color: rgba(255,107,107,0.3); transform: translateY(-2px); }
+                .stat-card:nth-child(1) { background: rgba(107,255,184,0.06); border: 1px solid rgba(107,255,184,0.2); }
+                .stat-card:nth-child(2) { background: rgba(107,202,255,0.06); border: 1px solid rgba(107,202,255,0.2); }
+                .stat-card:nth-child(3) { background: rgba(255,149,0,0.06);   border: 1px solid rgba(255,149,0,0.2); }
+                .stat-card:nth-child(4) { background: rgba(180,107,255,0.06); border: 1px solid rgba(180,107,255,0.2); }
+                .stat-card:nth-child(1) .stat-num { color: #6bffb8; }
+                .stat-card:nth-child(2) .stat-num { color: #6bcaff; }
+                .stat-card:nth-child(3) .stat-num { color: #ff9500; }
+                .stat-card:nth-child(4) .stat-num { color: #b46bff; }
                 .stat-icon { font-size: 2rem; flex-shrink: 0; }
                 .stat-num { font-size: 1.8rem; font-weight: 900; color: #fff; line-height: 1; }
                 .stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 600; margin-top: 2px; }
