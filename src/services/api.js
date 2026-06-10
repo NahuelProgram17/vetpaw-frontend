@@ -112,6 +112,8 @@ export const updateAppointment = (id, appt) => api.put(`/appointments/${id}/`, a
 export const cancelAppointment = (id) => api.patch(`/appointments/${id}/cancel/`).then((r) => r.data);
 export const confirmAppointment = (id) => api.patch(`/appointments/${id}/confirm/`).then((r) => r.data);
 export const markNotificationsSeen = () => api.post("/appointments/mark_seen/").then((r) => r.data);
+export const getClinicNotifications = () => api.get("/appointments/?seen_by_clinic=false").then((r) => r.data);
+export const markClinicNotificationsSeen = () => api.post("/appointments/mark_seen_clinic/").then((r) => r.data);
 export const markNoShow = (id) => api.patch(`/appointments/${id}/mark_no_show/`).then((r) => r.data);
 
 // ── Clinics ───────────────────────────────────────────
