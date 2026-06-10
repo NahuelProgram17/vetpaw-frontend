@@ -445,7 +445,7 @@ export default function Dashboard() {
                 .stat-card:nth-child(3) { background: rgba(255,149,0,0.06);   border: 1px solid rgba(255,149,0,0.2); }
                 .stat-card:nth-child(4) { background: rgba(180,107,255,0.06); border: 1px solid rgba(180,107,255,0.2); }
                 .stat-card:nth-child(1) .stat-num { color: #6bffb8; }
-                .stat-card:nth-child(2) .stat-num { color: #6bcaff; }
+                .stat-card:nth-child(2) .stat-num { color: #ffd93d; }
                 .stat-card:nth-child(3) .stat-num { color: #ff9500; }
                 .stat-card:nth-child(4) .stat-num { color: #b46bff; }
                 .stat-icon { font-size: 2rem; flex-shrink: 0; }
