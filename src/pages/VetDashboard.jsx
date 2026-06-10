@@ -5,11 +5,11 @@ import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const STATUS_LABEL = {
-    pending:   { label: "Pendiente",  color: "#ffd93d" },
+    pending: { label: "Pendiente", color: "#ffd93d" },
     confirmed: { label: "Confirmado", color: "#6bcaff" },
-    cancelled: { label: "Cancelado",  color: "#ff6b6b" },
-    completed: { label: "Realizado",  color: "#6bffb8" },
-    no_show:   { label: "Ausente",    color: "#ff9500" },
+    cancelled: { label: "Cancelado", color: "#ff6b6b" },
+    completed: { label: "Realizado", color: "#6bffb8" },
+    no_show: { label: "Ausente", color: "#ff9500" },
 };
 
 const EMPTY_VISIT = {
@@ -171,7 +171,14 @@ export default function ClinicDashboard() {
     const saveSchedule = async () => {
         setScheduleSaving(true); setScheduleError("");
         try {
-            await api.post("/clinic-schedule/configurar/", schedule);
+            // Convertir claves de day_hours a strings
+            const scheduleToSend = {
+                ...schedule,
+                day_hours: Object.fromEntries(
+                    Object.entries(schedule.day_hours || {}).map(([k, v]) => [String(k), v])
+                )
+            };
+            await api.post("/clinic-schedule/configurar/", scheduleToSend);
             setScheduleSuccess("Agenda guardada correctamente.");
             setTimeout(() => setScheduleSuccess(""), 3000);
             await fetchSchedule();
@@ -287,15 +294,15 @@ export default function ClinicDashboard() {
         finally { setSaving(false); }
     };
 
-    const filtered  = filter === "all" ? appointments : appointments.filter(a => a.status === filter);
-    const pending   = appointments.filter(a => a.status === "pending").length;
+    const filtered = filter === "all" ? appointments : appointments.filter(a => a.status === filter);
+    const pending = appointments.filter(a => a.status === "pending").length;
     const confirmed = appointments.filter(a => a.status === "confirmed").length;
     const completed = appointments.filter(a => a.status === "completed").length;
-    const noShow    = appointments.filter(a => a.status === "no_show").length;
+    const noShow = appointments.filter(a => a.status === "no_show").length;
 
-    const formatDate      = (d) => { if (!d) return "—"; return new Date(d).toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }); };
+    const formatDate = (d) => { if (!d) return "—"; return new Date(d).toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }); };
     const formatDateShort = (d) => { if (!d) return "—"; return new Date(d).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric" }); };
-    const formatTime      = (d) => { if (!d) return ""; return new Date(d).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }); };
+    const formatTime = (d) => { if (!d) return ""; return new Date(d).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }); };
 
     const agendaTurnos = appointments
         .filter(a => { const d = new Date(a.requested_date); return d.getFullYear() === agendaDate.getFullYear() && d.getMonth() === agendaDate.getMonth() && d.getDate() === agendaDate.getDate(); })
@@ -303,21 +310,21 @@ export default function ClinicDashboard() {
         .sort((a, b) => new Date(a.requested_date) - new Date(b.requested_date));
 
     const agendaLabel = agendaDate.toLocaleDateString("es-AR", { weekday: "long", day: "2-digit", month: "long" });
-    const isToday     = new Date().toDateString() === agendaDate.toDateString();
-    const petVisits   = selectedPet ? visits.filter(v => v.pet === selectedPet.id) : visits;
+    const isToday = new Date().toDateString() === agendaDate.toDateString();
+    const petVisits = selectedPet ? visits.filter(v => v.pet === selectedPet.id) : visits;
     const petVaccines = selectedPet ? vaccines.filter(v => v.pet === selectedPet.id) : vaccines;
 
     const TABS_DESKTOP = [
-        { id: "turnos",    label: "📅 Turnos" },
+        { id: "turnos", label: "📅 Turnos" },
         { id: "pacientes", label: "🐾 Pacientes" },
-        { id: "fotos",     label: "📷 Fotos" },
+        { id: "fotos", label: "📷 Fotos" },
         { id: "mi-agenda", label: "🗓 Mi Agenda" },
     ];
     const TABS_MOBILE = [
-        { id: "turnos",    label: "📅 Turnos" },
-        { id: "agenda",    label: "🗓 Agenda" },
+        { id: "turnos", label: "📅 Turnos" },
+        { id: "agenda", label: "🗓 Agenda" },
         { id: "pacientes", label: "🐾 Pacientes" },
-        { id: "fotos",     label: "📷 Fotos" },
+        { id: "fotos", label: "📷 Fotos" },
         { id: "mi-agenda", label: "⚙️ Mi Agenda" },
     ];
     const TABS = isMobile ? TABS_MOBILE : TABS_DESKTOP;
@@ -643,15 +650,15 @@ export default function ClinicDashboard() {
                                         pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                         (pet.owner_name && pet.owner_name.toLowerCase().includes(searchQuery.toLowerCase()))
                                     ).length === 0 && (
-                                        <div className="empty-state"><span>🔍</span><p>No se encontraron resultados para "{searchQuery}".</p></div>
-                                    )}
+                                            <div className="empty-state"><span>🔍</span><p>No se encontraron resultados para "{searchQuery}".</p></div>
+                                        )}
                                 </div>
                             )
                         )}
                     </div>
                 )}
 
-            
+
 
                 {/* ══ TAB FOTOS ══ */}
                 {tab === "fotos" && (
@@ -763,13 +770,13 @@ export default function ClinicDashboard() {
                                         { key: 'duration_control', label: '🩺 Control general' },
                                         { key: 'duration_vaccine', label: '💉 Vacunación' },
                                         { key: 'duration_surgery', label: '🔪 Cirugía' },
-                                        { key: 'duration_other',   label: '📋 Otro' },
+                                        { key: 'duration_other', label: '📋 Otro' },
                                     ].map(({ key, label }) => (
                                         <div key={key} className="duration-row">
                                             <span className="duration-label">{label}</span>
                                             <select value={schedule?.[key] || 30}
                                                 onChange={e => setSchedule(prev => ({ ...prev, [key]: parseInt(e.target.value) }))}>
-                                                {[10,15,20,30,45,60,90,120].map(m => <option key={m} value={m}>{m} minutos</option>)}
+                                                {[10, 15, 20, 30, 45, 60, 90, 120].map(m => <option key={m} value={m}>{m} minutos</option>)}
                                             </select>
                                         </div>
                                     ))}
