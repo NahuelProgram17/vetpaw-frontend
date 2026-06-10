@@ -937,7 +937,7 @@ export default function ClinicDashboard() {
                 .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.08; pointer-events: none; }
                 .b1 { width: 500px; height: 500px; background: #6bffb8; top: -100px; left: -100px; }
                 .b2 { width: 400px; height: 400px; background: #6bcaff; bottom: -100px; right: -100px; }
-                .vet-inner { max-width: 960px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; overflow-x: hidden; }
+                .vet-inner { max-width: 1200px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; overflow-x: hidden; }
 
                 .vet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
                 .vet-greeting { font-size: 0.9rem; color: rgba(255,255,255,0.45); font-weight: 600; margin-bottom: 4px; }
