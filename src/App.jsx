@@ -28,6 +28,7 @@ import ResetPassword from './pages/ResetPassword';
 import Estadisticas from './pages/Estadisticas';
 import ClinicProfile from './pages/ClinicProfile'
 import AdminPanel from './pages/AdminPanel'
+import LostPets from './pages/LostPets'
 
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
           <Route path="/register/owner" element={<Register />} />
           <Route path="/register/clinic" element={<RegisterClinic />} />
           <Route path="/clinics" element={<Clinics />} />
+          <Route path="/mascotas-perdidas" element={<LostPets />} />
           <Route path="/clinicas/:slug" element={<ClinicProfile />} />
 
           <Route path="/dashboard" element={<ProtectedRoute role="owner"><Dashboard /></ProtectedRoute>} />
@@ -72,4 +74,4 @@ function App() {
   )
 }
 
-export default App
+export default App
