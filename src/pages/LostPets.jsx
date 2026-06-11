@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useState, useRef, useEffect } from 'react'
 import api from '../services/api'
@@ -129,7 +129,7 @@ export default function LostPets() {
 
             <div style={{ minHeight: '100vh', background: DARK, fontFamily: FONT, color: '#fff' }}>
 
-                {/* ── HERO BANNER ── */}
+                {/* HERO */}
                 <div className="lp-hero" style={{
                     background: 'linear-gradient(135deg, #0a1a0a 0%, #1a2a0a 40%, #0a1520 100%)',
                     padding: '48px 40px 40px',
@@ -140,12 +140,12 @@ export default function LostPets() {
                     <div style={{ position: 'absolute', bottom: -60, left: 200, width: 300, height: 300, background: 'radial-gradient(circle, rgba(255,152,0,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
                     <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 32, flexWrap: 'wrap' }}>
                         <div style={{ flex: 1, minWidth: 280 }}>
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', color: '#f87171', fontSize: 11, fontWeight: 800, padding: '5px 14px', borderRadius: 99, marginBottom: 18, letterSpacing: 1, textTransform: 'uppercase' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,152,0,0.15)', border: '1px solid rgba(255,152,0,0.4)', color: O1, fontSize: 11, fontWeight: 800, padding: '5px 14px', borderRadius: 99, marginBottom: 18, letterSpacing: 1, textTransform: 'uppercase' }}>
                                 🐾 Alerta activa
                             </div>
                             <h1 className="lp-hero-title" style={{ fontSize: 40, fontWeight: 900, lineHeight: 1.1, marginBottom: 14, letterSpacing: -1 }}>
                                 Mascotas{' '}
-                                <span style={{ color: '#ef4444' }}>Perdidas</span>
+                                <span style={{ color: O1 }}>Perdidas</span>
                                 {' '}o{' '}
                                 <span style={{ color: G1 }}>Encontradas</span>
                             </h1>
@@ -154,8 +154,8 @@ export default function LostPets() {
                             </p>
                         </div>
                         <div style={{ display: 'flex', gap: 12, flexShrink: 0, flexWrap: 'wrap' }}>
-                            <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 14, padding: '16px 24px', textAlign: 'center' }}>
-                                <div style={{ fontSize: 28, fontWeight: 900, color: '#ef4444' }}>{lostPets.filter(p => p.report_type === 'lost').length}</div>
+                            <div style={{ background: 'rgba(255,152,0,0.1)', border: '1px solid rgba(255,152,0,0.25)', borderRadius: 14, padding: '16px 24px', textAlign: 'center' }}>
+                                <div style={{ fontSize: 28, fontWeight: 900, color: O1 }}>{lostPets.filter(p => p.report_type === 'lost').length}</div>
                                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>Se buscan</div>
                             </div>
                             <div style={{ background: 'rgba(76,175,80,0.1)', border: '1px solid rgba(76,175,80,0.25)', borderRadius: 14, padding: '16px 24px', textAlign: 'center' }}>
@@ -166,20 +166,16 @@ export default function LostPets() {
                     </div>
                 </div>
 
-                {/* ── FILTROS ── */}
+                {/* FILTROS */}
                 <div className="lp-section" style={{ padding: '20px 40px', background: DARK2, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                     <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                        <select
-                            className="lp-filter-sel"
-                            value={filterProvince}
+                        <select className="lp-filter-sel" value={filterProvince}
                             onChange={e => { setFilterProvince(e.target.value); fetchLostPets(e.target.value, filterStatus) }}
                             style={{ ...inp, width: 'auto', minWidth: 200, cursor: 'pointer' }}>
                             <option value="" style={{ background: DARK2 }}>📍 Todas las provincias</option>
                             {PROVINCIAS.map(p => <option key={p} value={p} style={{ background: DARK2 }}>{p}</option>)}
                         </select>
-                        <select
-                            className="lp-filter-sel"
-                            value={filterStatus}
+                        <select className="lp-filter-sel" value={filterStatus}
                             onChange={e => { setFilterStatus(e.target.value); fetchLostPets(filterProvince, e.target.value) }}
                             style={{ ...inp, width: 'auto', minWidth: 180, cursor: 'pointer' }}>
                             <option value="" style={{ background: DARK2 }}>🔍 Mostrar todos</option>
@@ -198,7 +194,7 @@ export default function LostPets() {
                     </div>
                 </div>
 
-                {/* ── GRID DE MASCOTAS ── */}
+                {/* GRID */}
                 <div className="lp-section" style={{ padding: '32px 40px', maxWidth: 1140, margin: '0 auto' }}>
                     {cargandoMuro ? (
                         <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>Cargando reportes...</div>
@@ -213,37 +209,22 @@ export default function LostPets() {
                                 {visiblePets.map((pet, idx) => {
                                     const isLost = pet.report_type === 'lost'
                                     return (
-                                        <div key={pet.id} className="lp-card"
-                                            onClick={() => setSelectedPet(pet)}
-                                            style={{
-                                                background: DARK2, borderRadius: 16, overflow: 'hidden',
-                                                border: `1.5px solid ${isLost ? 'rgba(239,68,68,0.2)' : 'rgba(76,175,80,0.2)'}`,
-                                                cursor: 'pointer',
-                                                animation: `cardIn 0.3s ease both`,
-                                                animationDelay: `${idx * 0.04}s`,
-                                            }}>
-                                            {/* Foto */}
+                                        <div key={pet.id} className="lp-card" onClick={() => setSelectedPet(pet)}
+                                            style={{ background: DARK2, borderRadius: 16, overflow: 'hidden', border: `1.5px solid ${isLost ? 'rgba(255,152,0,0.2)' : 'rgba(76,175,80,0.2)'}`, cursor: 'pointer', animation: `cardIn 0.3s ease both`, animationDelay: `${idx * 0.04}s` }}>
                                             <div style={{ height: 160, position: 'relative', overflow: 'hidden' }}>
                                                 {pet.photo_url ? (
-                                                    <img src={pet.photo_url} alt="Mascota" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', filter: isLost ? 'grayscale(30%)' : 'none' }} />
+                                                    <img src={pet.photo_url} alt="Mascota" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }} />
                                                 ) : (
                                                     <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🐾</div>
                                                 )}
                                                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.6))' }} />
-                                                <div style={{
-                                                    position: 'absolute', top: 8, left: 8,
-                                                    background: isLost ? '#ef4444' : G1,
-                                                    color: '#fff', fontSize: 9, fontWeight: 900,
-                                                    letterSpacing: 1, padding: '3px 8px', borderRadius: 4,
-                                                    textTransform: 'uppercase',
-                                                }}>
+                                                <div style={{ position: 'absolute', top: 8, left: 8, background: isLost ? O1 : G1, color: '#fff', fontSize: 9, fontWeight: 900, letterSpacing: 1, padding: '3px 8px', borderRadius: 4, textTransform: 'uppercase' }}>
                                                     {isLost ? 'PERDIDA' : 'ENCONTRADA'}
                                                 </div>
                                             </div>
-                                            {/* Info */}
                                             <div style={{ padding: '12px 14px' }}>
                                                 {(pet.locality || pet.province) && (
-                                                    <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                    <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>
                                                         📍 {[pet.locality, pet.province].filter(Boolean).join(', ')}
                                                     </p>
                                                 )}
@@ -251,15 +232,9 @@ export default function LostPets() {
                                                     {pet.description?.length > 80 ? pet.description.slice(0, 80) + '...' : pet.description}
                                                 </p>
                                                 {pet.contact_type === 'email' ? (
-                                                    <a href={`mailto:${pet.contact_value}`} onClick={e => e.stopPropagation()}
-                                                        style={{ display: 'block', textAlign: 'center', background: 'rgba(107,202,255,0.1)', border: '1px solid rgba(107,202,255,0.25)', color: '#6bcaff', fontSize: 11, fontWeight: 700, padding: '7px', borderRadius: 8, textDecoration: 'none' }}>
-                                                        ✉️ Contactar
-                                                    </a>
+                                                    <a href={`mailto:${pet.contact_value}`} onClick={e => e.stopPropagation()} style={{ display: 'block', textAlign: 'center', background: 'rgba(107,202,255,0.1)', border: '1px solid rgba(107,202,255,0.25)', color: '#6bcaff', fontSize: 11, fontWeight: 700, padding: '7px', borderRadius: 8, textDecoration: 'none' }}>✉️ Contactar</a>
                                                 ) : (
-                                                    <a href={`https://wa.me/54${pet.contact_value?.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-                                                        style={{ display: 'block', textAlign: 'center', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.25)', color: '#25D366', fontSize: 11, fontWeight: 700, padding: '7px', borderRadius: 8, textDecoration: 'none' }}>
-                                                        💬 Contactar
-                                                    </a>
+                                                    <a href={`https://wa.me/54${pet.contact_value?.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ display: 'block', textAlign: 'center', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.25)', color: '#25D366', fontSize: 11, fontWeight: 700, padding: '7px', borderRadius: 8, textDecoration: 'none' }}>💬 Contactar</a>
                                                 )}
                                             </div>
                                         </div>
@@ -268,8 +243,7 @@ export default function LostPets() {
                             </div>
                             {visibleCount < lostPets.length && (
                                 <div style={{ textAlign: 'center', marginTop: 28 }}>
-                                    <button onClick={() => setVisibleCount(v => v + 10)}
-                                        style={{ padding: '12px 28px', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.12)', borderRadius: 12, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: FONT }}>
+                                    <button onClick={() => setVisibleCount(v => v + 10)} style={{ padding: '12px 28px', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.12)', borderRadius: 12, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: FONT }}>
                                         Cargar más publicaciones ↓
                                     </button>
                                 </div>
@@ -278,11 +252,9 @@ export default function LostPets() {
                     )}
                 </div>
 
-                {/* ── FORMULARIO ── */}
+                {/* FORMULARIO */}
                 <div className="lp-section" style={{ padding: '0 40px 60px', maxWidth: 1140, margin: '0 auto' }}>
                     <div style={{ background: DARK2, border: '1.5px solid rgba(255,255,255,0.08)', borderRadius: 20, overflow: 'hidden' }}>
-
-                        {/* Header formulario */}
                         <div style={{ padding: '24px 32px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 14 }}>
                             <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(76,175,80,0.12)', border: '1px solid rgba(76,175,80,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>🐾</div>
                             <div>
@@ -293,7 +265,6 @@ export default function LostPets() {
 
                         <div className="lp-form-inner" style={{ padding: '28px 32px' }}>
                             {!user ? (
-                                /* Bloque login */
                                 <div style={{ background: 'linear-gradient(135deg, rgba(76,175,80,0.08), rgba(255,152,0,0.08))', border: '1.5px solid rgba(76,175,80,0.2)', borderRadius: 16, padding: '36px', textAlign: 'center' }}>
                                     <div style={{ fontSize: 44, marginBottom: 14 }}>🔒</div>
                                     <h3 style={{ fontSize: 18, fontWeight: 900, color: '#fff', fontFamily: FONT, marginBottom: 10 }}>Necesitás una cuenta para publicar</h3>
@@ -301,12 +272,8 @@ export default function LostPets() {
                                         Crear tu cuenta es gratis y lleva menos de un minuto. Podés seguir viendo los reportes sin registrarte.
                                     </p>
                                     <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                                        <Link to="/register" style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, color: '#fff', fontWeight: 800, fontSize: 14, padding: '13px 26px', borderRadius: 12, textDecoration: 'none', fontFamily: FONT }}>
-                                            Registrarme gratis
-                                        </Link>
-                                        <Link to="/login" style={{ background: 'rgba(255,255,255,0.06)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '13px 26px', borderRadius: 12, textDecoration: 'none', border: '1.5px solid rgba(255,255,255,0.15)', fontFamily: FONT }}>
-                                            Ingresar
-                                        </Link>
+                                        <Link to="/register" style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, color: '#fff', fontWeight: 800, fontSize: 14, padding: '13px 26px', borderRadius: 12, textDecoration: 'none', fontFamily: FONT }}>Registrarme gratis</Link>
+                                        <Link to="/login" style={{ background: 'rgba(255,255,255,0.06)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '13px 26px', borderRadius: 12, textDecoration: 'none', border: '1.5px solid rgba(255,255,255,0.15)', fontFamily: FONT }}>Ingresar</Link>
                                     </div>
                                 </div>
                             ) : reporteEnviado ? (
@@ -317,10 +284,9 @@ export default function LostPets() {
                                 </div>
                             ) : (
                                 <form onSubmit={handleReporte}>
-                                    {/* Selector tipo */}
                                     <div className="lp-form-row" style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
                                         <button type="button" onClick={() => setReportType('lost')}
-                                            style={{ flex: 1, padding: '16px', borderRadius: 14, border: `2px solid ${reportType === 'lost' ? '#ef4444' : 'rgba(255,255,255,0.1)'}`, background: reportType === 'lost' ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.03)', color: reportType === 'lost' ? '#ef4444' : 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 14, cursor: 'pointer', fontFamily: FONT, transition: 'all .2s' }}>
+                                            style={{ flex: 1, padding: '16px', borderRadius: 14, border: `2px solid ${reportType === 'lost' ? O1 : 'rgba(255,255,255,0.1)'}`, background: reportType === 'lost' ? 'rgba(255,152,0,0.1)' : 'rgba(255,255,255,0.03)', color: reportType === 'lost' ? O1 : 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 14, cursor: 'pointer', fontFamily: FONT, transition: 'all .2s' }}>
                                             🔍 Busco a mi mascota
                                             <div style={{ fontSize: 11, fontWeight: 400, marginTop: 4, opacity: 0.7 }}>Mi mascota se perdió</div>
                                         </button>
@@ -331,18 +297,13 @@ export default function LostPets() {
                                         </button>
                                     </div>
 
-                                    {/* Grid de campos */}
                                     <div className="lp-form-row" style={{ display: 'flex', gap: 20 }}>
-                                        {/* Columna izquierda — foto */}
                                         <div style={{ flex: '0 0 200px' }}>
-                                            <label style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8 }}>
-                                                Foto de la mascota <span style={{ color: O1 }}>*</span>
-                                            </label>
+                                            <label style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8 }}>Foto de la mascota <span style={{ color: O1 }}>*</span></label>
                                             {fotoPreview ? (
                                                 <div style={{ position: 'relative' }}>
                                                     <img src={fotoPreview} alt="Preview" style={{ width: '100%', height: 160, objectFit: 'cover', borderRadius: 12, border: `2px solid ${G1}` }} />
-                                                    <button type="button" onClick={() => { setFotoPreview(null); setFotoMascota(null) }}
-                                                        style={{ position: 'absolute', top: -8, right: -8, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: 12, fontWeight: 900 }}>✕</button>
+                                                    <button type="button" onClick={() => { setFotoPreview(null); setFotoMascota(null) }} style={{ position: 'absolute', top: -8, right: -8, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: 12, fontWeight: 900 }}>✕</button>
                                                 </div>
                                             ) : (
                                                 <div onClick={() => fileRef.current.click()}
@@ -357,21 +318,18 @@ export default function LostPets() {
                                             <input ref={fileRef} type="file" accept=".jpg,.jpeg,.png" onChange={handleFoto} style={{ display: 'none' }} />
                                         </div>
 
-                                        {/* Columna derecha — datos */}
                                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
                                             <div>
                                                 <label style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8 }}>
                                                     {reportType === 'lost' ? '¿Dónde y cuándo la perdiste?' : '¿Dónde y cuándo la encontraste?'} <span style={{ color: O1 }}>*</span>
                                                 </label>
-                                                <textarea value={descripcionMascota} onChange={e => setDescripcionMascota(e.target.value)}
-                                                    maxLength={500}
+                                                <textarea value={descripcionMascota} onChange={e => setDescripcionMascota(e.target.value)} maxLength={500}
                                                     placeholder="Contanos más detalles: lugar, fecha, hora, cómo estaba, si tenía collar, rasgos distintivos, etc."
                                                     rows={4} style={{ ...inp, resize: 'none' }}
                                                     onFocus={e => e.target.style.borderColor = G1}
                                                     onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                                 <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', textAlign: 'right', marginTop: 4 }}>{descripcionMascota.length}/500</p>
                                             </div>
-
                                             <div style={{ display: 'flex', gap: 12 }}>
                                                 <div style={{ flex: 1 }}>
                                                     <label style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8 }}>Provincia <span style={{ color: O1 }}>*</span></label>
@@ -384,18 +342,15 @@ export default function LostPets() {
                                                 </div>
                                                 <div style={{ flex: 1 }}>
                                                     <label style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8 }}>Ciudad / Localidad <span style={{ color: O1 }}>*</span></label>
-                                                    <input value={locality} onChange={e => setLocality(e.target.value)} placeholder="Ej: Moreno, Palermo..."
-                                                        style={inp}
+                                                    <input value={locality} onChange={e => setLocality(e.target.value)} placeholder="Ej: Moreno, Palermo..." style={inp}
                                                         onFocus={e => e.target.style.borderColor = G1}
                                                         onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                                 </div>
                                             </div>
-
                                             <div>
                                                 <label style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8 }}>Datos de contacto <span style={{ color: O1 }}>*</span></label>
                                                 <div style={{ display: 'flex', gap: 10 }}>
-                                                    <select value={contactType} onChange={e => setContactType(e.target.value)}
-                                                        style={{ ...inp, width: 'auto', minWidth: 140, cursor: 'pointer' }}>
+                                                    <select value={contactType} onChange={e => setContactType(e.target.value)} style={{ ...inp, width: 'auto', minWidth: 140, cursor: 'pointer' }}>
                                                         <option value="phone" style={{ background: DARK2 }}>📱 WhatsApp</option>
                                                         <option value="home_phone" style={{ background: DARK2 }}>📞 Teléfono</option>
                                                         <option value="email" style={{ background: DARK2 }}>✉️ Email</option>
@@ -410,14 +365,12 @@ export default function LostPets() {
                                         </div>
                                     </div>
 
-                                    {errorEnvio && (
-                                        <p style={{ color: '#f87171', fontSize: 12, marginTop: 16, fontWeight: 600 }}>{errorEnvio}</p>
-                                    )}
+                                    {errorEnvio && <p style={{ color: '#f87171', fontSize: 12, marginTop: 16, fontWeight: 600 }}>{errorEnvio}</p>}
 
                                     <button type="submit" disabled={enviando}
                                         style={{
                                             width: '100%', marginTop: 20, padding: '16px',
-                                            background: enviando ? 'rgba(255,255,255,0.08)' : reportType === 'lost' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : `linear-gradient(135deg, ${G1}, ${O1})`,
+                                            background: enviando ? 'rgba(255,255,255,0.08)' : `linear-gradient(135deg, ${G1}, ${O1})`,
                                             color: '#fff', fontWeight: 800, fontSize: 15, borderRadius: 14,
                                             border: 'none', cursor: enviando ? 'not-allowed' : 'pointer',
                                             fontFamily: FONT, letterSpacing: 0.3,
@@ -433,12 +386,10 @@ export default function LostPets() {
                 </div>
             </div>
 
-            {/* ── MODAL ── */}
+            {/* MODAL */}
             {selectedPet && (
-                <div onClick={() => setSelectedPet(null)}
-                    style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-                    <div onClick={e => e.stopPropagation()}
-                        style={{ background: '#162032', borderRadius: 24, overflow: 'hidden', maxWidth: 480, width: '100%', border: `2px solid ${selectedPet.report_type === 'lost' ? 'rgba(239,68,68,0.4)' : 'rgba(76,175,80,0.4)'}`, boxShadow: '0 32px 80px rgba(0,0,0,0.6)', animation: 'cardIn 0.3s cubic-bezier(.22,.68,0,1.2) both' }}>
+                <div onClick={() => setSelectedPet(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                    <div onClick={e => e.stopPropagation()} style={{ background: '#162032', borderRadius: 24, overflow: 'hidden', maxWidth: 480, width: '100%', border: `2px solid ${selectedPet.report_type === 'lost' ? 'rgba(255,152,0,0.4)' : 'rgba(76,175,80,0.4)'}`, boxShadow: '0 32px 80px rgba(0,0,0,0.6)', animation: 'cardIn 0.3s cubic-bezier(.22,.68,0,1.2) both' }}>
                         <div style={{ position: 'relative', height: 280 }}>
                             {selectedPet.photo_url ? (
                                 <img src={selectedPet.photo_url} alt="Mascota" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }} />
@@ -446,7 +397,7 @@ export default function LostPets() {
                                 <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 64 }}>🐾</div>
                             )}
                             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.7))' }} />
-                            <div style={{ position: 'absolute', top: 14, left: 14, background: selectedPet.report_type === 'lost' ? 'rgba(239,68,68,0.9)' : 'rgba(76,175,80,0.9)', color: '#fff', fontSize: 11, fontWeight: 900, letterSpacing: 2, padding: '6px 14px', borderRadius: 6, textTransform: 'uppercase' }}>
+                            <div style={{ position: 'absolute', top: 14, left: 14, background: selectedPet.report_type === 'lost' ? O1 : G1, color: '#fff', fontSize: 11, fontWeight: 900, letterSpacing: 2, padding: '6px 14px', borderRadius: 6, textTransform: 'uppercase' }}>
                                 {selectedPet.report_type === 'lost' ? '🔍 SE BUSCA' : '📍 ENCONTRADA'}
                             </div>
                             {selectedPet.days_left && (
