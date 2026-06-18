@@ -7,27 +7,29 @@ const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 //  1) Subí la imagen del banner a la carpeta /public
 //  2) Agregá un objeto acá abajo:
 //       image: ruta de la imagen (siempre con "/" adelante)
-//       link : WhatsApp  -> https://wa.me/54XXXXXXXXXX
-//              Instagram -> https://instagram.com/usuario_del_local
+//       link : (OPCIONAL) WhatsApp  -> https://wa.me/54XXXXXXXXXX
+//                          Instagram -> https://instagram.com/usuario
+//              👉 Si NO ponés "link" (o lo dejás vacío), la imagen
+//                 se muestra pero NO es clickeable (ideal para demos).
 //       alt  : nombre/descripción del local (accesibilidad + SEO)
 // ─────────────────────────────────────────────────────────────
 const ADS = [
     {
         id: 'chicha',
         image: '/chicha_petshop_v2.png',
-        link: 'https://wa.me/541169345282',
+        link: 'https://wa.me/541169345282',   // ← real, clickeable
         alt: 'Chicha Petshop — Todo lo que tu perro necesita',
     },
     {
         id: 'peluqueria-canina',
         image: '/peluqueria_canina.png',
-        link: 'https://wa.me/541134567890',
+        // sin link → demo, no clickeable
         alt: 'Peluquería y Spa Canino de Lujo',
     },
     {
         id: 'luna-y-sol',
         image: '/lunaysol.png',
-        link: 'https://wa.me/541134567890',
+        // sin link → demo, no clickeable
         alt: 'Luna & Sol Pet Boutique',
     },
 ]
@@ -52,7 +54,6 @@ export default function AdCarousel() {
     }, [n, paused])
 
     if (n === 0) return null
-    const ad = ADS[i]
 
     // Swipe en mobile
     const onTouchStart = (e) => { touchX.current = e.touches[0].clientX }
@@ -69,29 +70,41 @@ export default function AdCarousel() {
         width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.25)',
         background: 'rgba(0,0,0,0.45)', color: '#fff', fontSize: 26, lineHeight: 1, cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)',
-        zIndex: 2, paddingBottom: 4, transition: 'background .2s',
+        zIndex: 3, paddingBottom: 4, transition: 'background .2s',
     })
+
+    // Cada slide: clickeable (<a>) si tiene link, o estático (<div>) si no
+    const Slide = ({ ad }) => {
+        const img = <img src={ad.image} alt={ad.alt} style={{ width: '100%', display: 'block' }} />
+        if (ad.link) {
+            return (
+                <a href={ad.link} target="_blank" rel="noopener noreferrer"
+                    style={{ flex: '0 0 100%', display: 'block', textDecoration: 'none', cursor: 'pointer' }}>
+                    {img}
+                </a>
+            )
+        }
+        return <div style={{ flex: '0 0 100%', display: 'block' }}>{img}</div>
+    }
 
     return (
         <div className="section-pad" style={{ padding: '10px 20px' }}>
-            <style>{`@keyframes adFade { from { opacity: 0 } to { opacity: 1 } }`}</style>
-
             <div
                 onMouseEnter={() => setPaused(true)}
                 onMouseLeave={() => setPaused(false)}
                 onTouchStart={onTouchStart}
                 onTouchEnd={onTouchEnd}
-                style={{ position: 'relative', width: '92%', margin: '0 auto' }}
+                style={{ position: 'relative', width: '92%', margin: '0 auto', overflow: 'hidden', borderRadius: 20 }}
             >
-                {/* Imagen clickeable → link del local */}
-                <a href={ad.link} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
-                    <img
-                        key={ad.id}
-                        src={ad.image}
-                        alt={ad.alt}
-                        style={{ width: '100%', borderRadius: 20, display: 'block', cursor: 'pointer', animation: 'adFade .5s ease' }}
-                    />
-                </a>
+                {/* Riel que se desliza */}
+                <div style={{
+                    display: 'flex',
+                    transform: `translateX(-${i * 100}%)`,
+                    transition: 'transform .6s cubic-bezier(.45,.05,.25,1)',
+                    alignItems: 'flex-start',
+                }}>
+                    {ADS.map(ad => <Slide key={ad.id} ad={ad} />)}
+                </div>
 
                 {/* Flechas (solo si hay más de una publicidad) */}
                 {n > 1 && (
@@ -109,7 +122,7 @@ export default function AdCarousel() {
 
                 {/* Puntitos indicadores */}
                 {n > 1 && (
-                    <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 8, zIndex: 2 }}>
+                    <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 8, zIndex: 3 }}>
                         {ADS.map((a, idx) => (
                             <button key={a.id} onClick={() => go(idx)} aria-label={`Ver publicidad ${idx + 1}`}
                                 style={{
