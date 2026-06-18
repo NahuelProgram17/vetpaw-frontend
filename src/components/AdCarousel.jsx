@@ -18,13 +18,18 @@ const ADS = [
         link: 'https://wa.me/541169345282',
         alt: 'Chicha Petshop — Todo lo que tu perro necesita',
     },
-    // Ejemplo para sumar otro local (descomentá y editá):
-    // {
-    //     id: 'peluqueria-lucas',
-    //     image: '/peluqueria_lucas.png',
-    //     link: 'https://instagram.com/peluqueria_lucas',
-    //     alt: 'Peluquería Canina Lucas',
-    // },
+    {
+        id: 'peluqueria-canina',
+        image: '/peluqueria_canina.png',
+        link: 'https://wa.me/541134567890',
+        alt: 'Peluquería y Spa Canino de Lujo',
+    },
+    {
+        id: 'luna-y-sol',
+        image: '/lunaysol.png',
+        link: 'https://wa.me/541134567890',
+        alt: 'Luna & Sol Pet Boutique',
+    },
 ]
 
 const ROTATE_MS = 5000  // cada cuánto rota (milisegundos)
