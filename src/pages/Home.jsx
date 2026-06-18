@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import AdCarousel from '../components/AdCarousel'
 
 const G1 = '#4CAF50'
 const G2 = '#66BB6A'
@@ -130,13 +131,8 @@ export default function Home() {
                     ))}
                 </div>
 
-                {/* BANNER PUBLICITARIO */}
-                <div className="section-pad" style={{ padding: '10px 20px' }}>
-                    <a href="https://wa.me/541169345282" target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
-                        <img src="/chicha_petshop_v2.png" alt="Chica Petshop — Todo lo que tu perro necesita" style={{ width: '92%', borderRadius: 20, display: 'block', cursor: 'pointer', margin: '0 auto' }} />
-                        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 8, textAlign: 'right' }}>Publicidad · VetPaw Ads</p>
-                    </a>
-                </div>
+                {/* BANNER PUBLICITARIO (carrusel) */}
+                <AdCarousel />
 
                 {/* FEATURES */}
                 <div className="section-pad" style={{ padding: '4px 40px 28px' }}>
