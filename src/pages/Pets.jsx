@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getPets, createPet, updatePet, deletePet } from '../services/api';
+import { getPets, createPet, updatePet, deletePet, createTreatment, deleteTreatment } from '../services/api';
+
+const TREATMENT_TYPES = [
+    { value: 'deworming', label: 'Desparasitación', emoji: '🪱' },
+    { value: 'flea', label: 'Pastilla antipulgas', emoji: '🦟' },
+    { value: 'pipette', label: 'Pipeta', emoji: '💧' },
+];
+const treatmentMeta = (t) => TREATMENT_TYPES.find((x) => x.value === t) || { label: t, emoji: '💊' };
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const fmtDate = (d) => {
+    if (!d) return '';
+    const [y, m, day] = d.split('-');
+    return `${day}/${m}/${y}`;
+};
 
 const SPECIES_EMOJI = {
     dog: '🐶',
@@ -50,6 +63,13 @@ export default function Pets() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+    // ── Tratamientos preventivos ──
+    const [treatmentPetId, setTreatmentPetId] = useState(null);
+    const [tForm, setTForm] = useState({ treatment_type: 'deworming', date_applied: todayISO(), product: '' });
+    const [tSaving, setTSaving] = useState(false);
+    const [tError, setTError] = useState('');
+    const treatmentPet = pets.find((p) => p.id === treatmentPetId) || null;
 
     useEffect(() => {
         fetchPets();
@@ -149,6 +169,47 @@ export default function Pets() {
             await deletePet(id);
             setPets(pets.filter((p) => p.id !== id));
             setDeleteConfirm(null);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const openTreatments = (pet) => {
+        setTreatmentPetId(pet.id);
+        setTForm({ treatment_type: 'deworming', date_applied: todayISO(), product: '' });
+        setTError('');
+    };
+    const closeTreatments = () => setTreatmentPetId(null);
+
+    const handleAddTreatment = async (e) => {
+        e.preventDefault();
+        setTError('');
+        if (!tForm.date_applied) {
+            setTError('Elegí la fecha de aplicación.');
+            return;
+        }
+        setTSaving(true);
+        try {
+            await createTreatment({
+                pet: treatmentPetId,
+                treatment_type: tForm.treatment_type,
+                date_applied: tForm.date_applied,
+                product: tForm.product.trim(),
+            });
+            await fetchPets();
+            setTForm({ treatment_type: tForm.treatment_type, date_applied: todayISO(), product: '' });
+        } catch (e) {
+            console.error(e);
+            setTError('No se pudo guardar. Intentá de nuevo.');
+        } finally {
+            setTSaving(false);
+        }
+    };
+
+    const handleDeleteTreatment = async (id) => {
+        try {
+            await deleteTreatment(id);
+            await fetchPets();
         } catch (e) {
             console.error(e);
         }
@@ -286,6 +347,13 @@ export default function Pets() {
                                         {pet.vaccines.length > 1 ? 's' : ''}
                                     </div>
                                 )}
+                                <button
+                                    className="btn-outline"
+                                    onClick={() => openTreatments(pet)}
+                                >
+                                    💊 Antiparasitarios
+                                    {pet.treatments && pet.treatments.length > 0 ? ` (${pet.treatments.length})` : ''}
+                                </button>
                                 <button
                                     className="btn-outline"
                                     onClick={() => navigate(`/appointments/new?pet=${pet.id}`)}
@@ -535,6 +603,89 @@ export default function Pets() {
                 </div>
             )}
 
+            {treatmentPet && (
+                <div className="modal-overlay" onClick={closeTreatments}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Antiparasitarios — {treatmentPet.name}</h2>
+                            <button className="modal-close" onClick={closeTreatments}>✕</button>
+                        </div>
+
+                        {tError && <div className="form-error">{tError}</div>}
+
+                        {/* Cargar nueva aplicación */}
+                        <form className="pet-form" onSubmit={handleAddTreatment}>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Producto</label>
+                                    <select
+                                        value={tForm.treatment_type}
+                                        onChange={(e) => setTForm({ ...tForm, treatment_type: e.target.value })}
+                                    >
+                                        {TREATMENT_TYPES.map((t) => (
+                                            <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Fecha</label>
+                                    <input
+                                        type="date"
+                                        value={tForm.date_applied}
+                                        max={todayISO()}
+                                        onChange={(e) => setTForm({ ...tForm, date_applied: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="form-group full">
+                                <label>Marca / nota (opcional)</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej: Drontal, NexGard, etc."
+                                    value={tForm.product}
+                                    onChange={(e) => setTForm({ ...tForm, product: e.target.value })}
+                                />
+                            </div>
+                            <button type="submit" className="btn-primary" disabled={tSaving}>
+                                {tSaving ? 'Guardando...' : '➕ Registrar aplicación'}
+                            </button>
+                        </form>
+
+                        {/* Historial agrupado por tipo */}
+                        <div className="treatment-history">
+                            {TREATMENT_TYPES.map((type) => {
+                                const items = (treatmentPet.treatments || [])
+                                    .filter((t) => t.treatment_type === type.value);
+                                return (
+                                    <div key={type.value} className="treatment-group">
+                                        <h4>{type.emoji} {type.label} <span>({items.length})</span></h4>
+                                        {items.length === 0 ? (
+                                            <p className="treatment-empty">Sin registros todavía.</p>
+                                        ) : (
+                                            <ul className="treatment-list">
+                                                {items.map((t) => (
+                                                    <li key={t.id}>
+                                                        <div>
+                                                            <strong>{fmtDate(t.date_applied)}</strong>
+                                                            {t.product && <span className="treatment-prod"> · {t.product}</span>}
+                                                        </div>
+                                                        <button
+                                                            className="treatment-del"
+                                                            title="Eliminar"
+                                                            onClick={() => handleDeleteTreatment(t.id)}
+                                                        >🗑️</button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -633,6 +784,28 @@ export default function Pets() {
                     border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; color: #ffd93d;
                 }
                 .pet-vaccines { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+
+                /* ── Historial de antiparasitarios ── */
+                .treatment-history { margin-top: 22px; display: flex; flex-direction: column; gap: 16px; }
+                .treatment-group h4 {
+                    font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700;
+                    color: #fff; margin-bottom: 8px;
+                }
+                .treatment-group h4 span { color: #66BB6A; font-weight: 700; }
+                .treatment-empty { font-size: 0.82rem; color: rgba(255,255,255,0.35); padding: 4px 0 2px; }
+                .treatment-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+                .treatment-list li {
+                    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+                    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; color: rgba(255,255,255,0.85);
+                }
+                .treatment-prod { color: rgba(255,255,255,0.5); }
+                .treatment-del {
+                    background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3);
+                    border-radius: 8px; padding: 4px 8px; cursor: pointer; font-size: 0.85rem;
+                    transition: background 0.2s; flex-shrink: 0;
+                }
+                .treatment-del:hover { background: rgba(255,107,107,0.25); }
                 .btn-outline {
                     background: linear-gradient(135deg, #4CAF50, #FF9800); border: none;
                     color: #fff; border-radius: 10px; padding: 10px;

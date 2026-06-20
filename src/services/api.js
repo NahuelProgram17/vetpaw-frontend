@@ -127,6 +127,10 @@ export const createVisit = (visit) => api.post("/visits/", visit).then((r) => r.
 // ── Vaccines ──────────────────────────────────────────
 export const getVaccines = () => api.get("/vaccines/").then((r) => r.data);
 
+// ── Tratamientos preventivos (desparasitaria, pulgas, pipeta) ──
+export const createTreatment = (data) => api.post("/treatments/", data).then((r) => r.data);
+export const deleteTreatment = (id) => api.delete(`/treatments/${id}/`);
+
 // ── Messages ──────────────────────────────────────────
 export const getConversations  = () => api.get('/messages/conversations/').then(r => r.data)
 export const getMessages       = () => api.get('/messages/').then(r => r.data)
