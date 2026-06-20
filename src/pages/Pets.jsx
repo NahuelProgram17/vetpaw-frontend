@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { getPets, createPet, updatePet, deletePet, createTreatment, deleteTreatment } from '../services/api';
 
 const TREATMENT_TYPES = [
-    { value: 'deworming', label: 'Desparasitación', emoji: '🪱' },
-    { value: 'flea', label: 'Pastilla antipulgas', emoji: '🦟' },
-    { value: 'pipette', label: 'Pipeta', emoji: '💧' },
+    { value: 'deworming', label: 'Desparasitación' },
+    { value: 'flea', label: 'Pastilla antipulgas' },
+    { value: 'pipette', label: 'Pipeta' },
 ];
 const treatmentMeta = (t) => TREATMENT_TYPES.find((x) => x.value === t) || { label: t, emoji: '💊' };
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -623,7 +623,7 @@ export default function Pets() {
                                         onChange={(e) => setTForm({ ...tForm, treatment_type: e.target.value })}
                                     >
                                         {TREATMENT_TYPES.map((t) => (
-                                            <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>
+                                            <option key={t.value} value={t.value}>{t.label}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -658,7 +658,7 @@ export default function Pets() {
                                     .filter((t) => t.treatment_type === type.value);
                                 return (
                                     <div key={type.value} className="treatment-group">
-                                        <h4>{type.emoji} {type.label} <span>({items.length})</span></h4>
+                                        <h4>{type.label} <span>({items.length})</span></h4>
                                         {items.length === 0 ? (
                                             <p className="treatment-empty">Sin registros todavía.</p>
                                         ) : (
