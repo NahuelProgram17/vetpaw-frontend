@@ -216,6 +216,9 @@ export default function AdsManager() {
                                     <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 9px', borderRadius: 6, background: ad.is_live ? 'rgba(107,255,184,0.15)' : 'rgba(255,255,255,0.06)', color: ad.is_live ? '#6bffb8' : 'rgba(255,255,255,0.4)', border: `1px solid ${ad.is_live ? 'rgba(107,255,184,0.3)' : 'rgba(255,255,255,0.1)'}` }}>
                                         {ad.is_live ? '🟢 EN VIVO' : '⚪ NO VISIBLE'}
                                     </span>
+                                    <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 9px', borderRadius: 6, background: 'rgba(107,202,255,0.12)', color: '#6bcaff', border: '1px solid rgba(107,202,255,0.3)' }}>
+                                        👆 {ad.clicks ?? 0} click{(ad.clicks ?? 0) === 1 ? '' : 's'}
+                                    </span>
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
