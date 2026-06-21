@@ -1,47 +1,29 @@
 import { useState, useEffect, useRef } from 'react'
+import { getActiveAds } from '../services/api'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
-
-// ─────────────────────────────────────────────────────────────
-//  PUBLICIDADES — editá SOLO este array para sumar/sacar locales
-//  1) Subí la imagen del banner a la carpeta /public
-//  2) Agregá un objeto acá abajo:
-//       image: ruta de la imagen (siempre con "/" adelante)
-//       link : (OPCIONAL) WhatsApp  -> https://wa.me/54XXXXXXXXXX
-//                          Instagram -> https://instagram.com/usuario
-//              👉 Si NO ponés "link" (o lo dejás vacío), la imagen
-//                 se muestra pero NO es clickeable (ideal para demos).
-//       alt  : nombre/descripción del local (accesibilidad + SEO)
-// ─────────────────────────────────────────────────────────────
-const ADS = [
-    {
-        id: 'chicha',
-        image: '/chicha_petshop_v2.png',
-        link: 'https://wa.me/541169345282',   // ← real, clickeable
-        alt: 'Chicha Petshop — Todo lo que tu perro necesita',
-    },
-    {
-        id: 'peluqueria-canina',
-        image: '/peluqueria_canina.png',
-        // sin link → demo, no clickeable
-        alt: 'Peluquería y Spa Canino de Lujo',
-    },
-    {
-        id: 'luna-y-sol',
-        image: '/lunaysol.png',
-        // sin link → demo, no clickeable
-        alt: 'Luna & Sol Pet Boutique',
-    },
-]
-
 const ROTATE_MS = 5000  // cada cuánto rota (milisegundos)
 
 export default function AdCarousel() {
+    const [ads, setAds] = useState([])
     const [i, setI] = useState(0)
     const [paused, setPaused] = useState(false)
     const touchX = useRef(null)
-    const n = ADS.length
 
+    // Traer los anuncios vigentes desde el backend
+    useEffect(() => {
+        let alive = true
+        getActiveAds()
+            .then((data) => {
+                if (!alive) return
+                const list = Array.isArray(data) ? data : (data.results || [])
+                setAds(list)
+            })
+            .catch((e) => console.error('Error cargando anuncios', e))
+        return () => { alive = false }
+    }, [])
+
+    const n = ads.length
     const go = (idx) => setI((idx + n) % n)
     const next = () => go(i + 1)
     const prev = () => go(i - 1)
@@ -52,6 +34,11 @@ export default function AdCarousel() {
         const t = setInterval(() => setI(p => (p + 1) % n), ROTATE_MS)
         return () => clearInterval(t)
     }, [n, paused])
+
+    // Si el índice quedó fuera de rango tras recargar, lo reseteo
+    useEffect(() => {
+        if (i >= n && n > 0) setI(0)
+    }, [n, i])
 
     if (n === 0) return null
 
@@ -75,7 +62,7 @@ export default function AdCarousel() {
 
     // Cada slide: clickeable (<a>) si tiene link, o estático (<div>) si no
     const Slide = ({ ad }) => {
-        const img = <img src={ad.image} alt={ad.alt} style={{ width: '100%', display: 'block' }} />
+        const img = <img src={ad.image_url} alt={ad.name} style={{ width: '100%', display: 'block' }} />
         if (ad.link) {
             return (
                 <a href={ad.link} target="_blank" rel="noopener noreferrer"
@@ -103,7 +90,7 @@ export default function AdCarousel() {
                     transition: 'transform .6s cubic-bezier(.45,.05,.25,1)',
                     alignItems: 'flex-start',
                 }}>
-                    {ADS.map(ad => <Slide key={ad.id} ad={ad} />)}
+                    {ads.map(ad => <Slide key={ad.id} ad={ad} />)}
                 </div>
 
                 {/* Flechas (solo si hay más de una publicidad) */}
@@ -123,7 +110,7 @@ export default function AdCarousel() {
                 {/* Puntitos indicadores */}
                 {n > 1 && (
                     <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 8, zIndex: 3 }}>
-                        {ADS.map((a, idx) => (
+                        {ads.map((a, idx) => (
                             <button key={a.id} onClick={() => go(idx)} aria-label={`Ver publicidad ${idx + 1}`}
                                 style={{
                                     width: idx === i ? 22 : 8, height: 8, borderRadius: 99, border: 'none',
