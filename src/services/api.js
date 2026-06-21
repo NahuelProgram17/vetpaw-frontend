@@ -105,6 +105,32 @@ return api.patch(`/pets/${id}/`, formData, {
 
 export const deletePet = (id) => api.delete(`/pets/${id}/`);
 
+// ── Anuncios / publicidades ───────────────────────────
+export const getActiveAds = () => api.get("/ads/active/").then((r) => r.data);
+export const getAds = () => api.get("/ads/").then((r) => r.data);
+
+const buildAdForm = (adData) => {
+    const formData = new FormData();
+    Object.entries(adData).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== "") {
+            formData.append(key, value);
+        }
+    });
+    return formData;
+};
+
+export const createAd = (adData) =>
+    api.post("/ads/", buildAdForm(adData), {
+        headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data);
+
+export const updateAd = (id, adData) =>
+    api.patch(`/ads/${id}/`, buildAdForm(adData), {
+        headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data);
+
+export const deleteAd = (id) => api.delete(`/ads/${id}/`);
+
 // ── Appointments ──────────────────────────────────────
 export const getAppointments = () => api.get("/appointments/").then((r) => r.data);
 export const createAppointment = (appt) => api.post("/appointments/", appt).then((r) => r.data);

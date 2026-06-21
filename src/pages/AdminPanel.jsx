@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
+import AdsManager from '../components/AdsManager'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const G1 = '#4CAF50'
@@ -17,6 +18,7 @@ export default function AdminPanel() {
     const [dataLoading, setDataLoading] = useState(true)
     const [error, setError] = useState('')
     const [lastUpdate, setLastUpdate] = useState(null)
+    const [tab, setTab] = useState('dashboard')
 
     useEffect(() => {
         if (authLoading) return
@@ -116,6 +118,19 @@ export default function AdminPanel() {
                     </button>
                 </div>
 
+                {/* Pestañas */}
+                <div style={{ display: 'flex', gap: 10, marginBottom: 28, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                    {[{ k: 'dashboard', l: '📊 Dashboard' }, { k: 'ads', l: '📢 Anuncios' }].map(t => (
+                        <button key={t.k} onClick={() => setTab(t.k)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: FONT, fontWeight: 800, fontSize: 14, padding: '10px 4px', color: tab === t.k ? '#fff' : 'rgba(255,255,255,0.4)', borderBottom: `3px solid ${tab === t.k ? G1 : 'transparent'}`, marginBottom: -1 }}>
+                            {t.l}
+                        </button>
+                    ))}
+                </div>
+
+                {tab === 'ads' && <AdsManager />}
+
+                {tab === 'dashboard' && (<>
                 {/* Stats globales */}
                 <SectionTitle>📊 Métricas globales</SectionTitle>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14, marginBottom: 32 }}>
@@ -224,6 +239,7 @@ export default function AdminPanel() {
                         />
                     </div>
                 )}
+                </>)}
 
             </div>
         </div>
