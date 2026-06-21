@@ -109,6 +109,9 @@ export const deletePet = (id) => api.delete(`/pets/${id}/`);
 export const getActiveAds = () => api.get("/ads/active/").then((r) => r.data);
 export const getAds = () => api.get("/ads/").then((r) => r.data);
 
+// Registra un click de un anuncio (sin bloquear: si falla, no pasa nada)
+export const registerAdClick = (id) => api.post(`/ads/${id}/click/`).catch(() => {});
+
 const buildAdForm = (adData) => {
     const formData = new FormData();
     Object.entries(adData).forEach(([key, value]) => {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { getActiveAds } from '../services/api'
+import { getActiveAds, registerAdClick } from '../services/api'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const ROTATE_MS = 5000  // cada cuánto rota (milisegundos)
@@ -66,6 +66,7 @@ export default function AdCarousel() {
         if (ad.link) {
             return (
                 <a href={ad.link} target="_blank" rel="noopener noreferrer"
+                    onClick={() => registerAdClick(ad.id)}
                     style={{ flex: '0 0 100%', display: 'block', textDecoration: 'none', cursor: 'pointer' }}>
                     {img}
                 </a>
