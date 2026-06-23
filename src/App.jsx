@@ -22,6 +22,7 @@ import Contacto from './pages/Contacto'
 import SumarVeterinaria from './pages/SumarVeterinaria'
 import AnunciarVetPaw from './pages/AnunciarVetPaw'
 import Blog from './pages/Blog'
+import BlogPost from './pages/BlogPost'
 import ScrollToTop from './components/ScrollToTop';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -68,6 +69,7 @@ function App() {
           <Route path="/sumar-veterinaria" element={<SumarVeterinaria />} />
           <Route path="/anunciar" element={<AnunciarVetPaw />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
