@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
 import AdsManager from '../components/AdsManager'
+import BlogManager from '../components/BlogManager'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const G1 = '#4CAF50'
@@ -120,7 +121,7 @@ export default function AdminPanel() {
 
                 {/* Pestañas */}
                 <div style={{ display: 'flex', gap: 10, marginBottom: 28, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                    {[{ k: 'dashboard', l: '📊 Dashboard' }, { k: 'ads', l: '📢 Anuncios' }].map(t => (
+                    {[{ k: 'dashboard', l: '📊 Dashboard' }, { k: 'ads', l: '📢 Anuncios' }, { k: 'blog', l: '📝 Blog' }].map(t => (
                         <button key={t.k} onClick={() => setTab(t.k)}
                             style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: FONT, fontWeight: 800, fontSize: 14, padding: '10px 4px', color: tab === t.k ? '#fff' : 'rgba(255,255,255,0.4)', borderBottom: `3px solid ${tab === t.k ? G1 : 'transparent'}`, marginBottom: -1 }}>
                             {t.l}
@@ -129,6 +130,8 @@ export default function AdminPanel() {
                 </div>
 
                 {tab === 'ads' && <AdsManager />}
+
+                {tab === 'blog' && <BlogManager />}
 
                 {tab === 'dashboard' && (<>
                 {/* Stats globales */}

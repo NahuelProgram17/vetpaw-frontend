@@ -134,6 +134,20 @@ export const updateAd = (id, adData) =>
 
 export const deleteAd = (id) => api.delete(`/ads/${id}/`);
 
+// ── Blog ──────────────────────────────────────────────
+export const getPublishedPosts = () => api.get("/blog/published/").then((r) => r.data);
+export const getPostBySlug = (slug) => api.get(`/blog/post/${slug}/`).then((r) => r.data);
+export const getPosts = () => api.get("/posts/").then((r) => r.data); // admin: todas
+export const createPost = (postData) =>
+    api.post("/posts/", buildAdForm(postData), {
+        headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data);
+export const updatePost = (id, postData) =>
+    api.patch(`/posts/${id}/`, buildAdForm(postData), {
+        headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data);
+export const deletePost = (id) => api.delete(`/posts/${id}/`);
+
 // ── Appointments ──────────────────────────────────────
 export const getAppointments = () => api.get("/appointments/").then((r) => r.data);
 export const createAppointment = (appt) => api.post("/appointments/", appt).then((r) => r.data);
