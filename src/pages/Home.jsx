@@ -30,10 +30,10 @@ const tipsHome = [
         cta: 'Llevar el control', link: '/pets', gated: true,
     },
     {
-        icon: '✈️', accent: '#FF9800', accent2: '#FFB74D',
-        title: '¿Vas a viajar con tu mascota?',
-        text: 'Conocé los pasos del trámite oficial para salir del país con tu perro o gato, sin sorpresas.',
-        cta: 'Ver la guía', link: '/blog', gated: false,
+        icon: '🐶', accent: '#FF9800', accent2: '#FFB74D',
+        title: 'Cargá tu primera mascota',
+        text: 'Armá su ficha con foto, peso y datos. Tené todo de tu mascota en un solo lugar.',
+        cta: 'Crear ficha', link: '/pets', gated: true,
     },
 ]
 
@@ -149,24 +149,25 @@ export default function Home() {
                 {/* BANNER PUBLICITARIO (carrusel) */}
                 <AdCarousel />
 
-                {/* FEATURES */}
+                {/* CÓMO FUNCIONA (acceso) */}
                 <div className="section-pad" style={{ padding: '4px 40px 28px' }}>
-                    <h2 style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: 2 }}>¿Qué podés hacer?</h2>
-                    <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
-                        {[
-                            { bg: 'rgba(76,175,80,0.08)', border: 'rgba(76,175,80,0.25)', iconBg: 'rgba(76,175,80,0.15)', icon: '📋', title: 'Expediente digital', text: 'Vacunas, alergias y toda la historia clínica en un lugar seguro.', accent: G1 },
-                            { bg: 'rgba(255,152,0,0.08)', border: 'rgba(255,152,0,0.25)', iconBg: 'rgba(255,152,0,0.15)', icon: '📅', title: 'Turnos online', text: 'Pedí turno con tu veterinaria sin llamar, en cualquier momento.', accent: O1 },
-                            { bg: 'rgba(107,202,255,0.08)', border: 'rgba(107,202,255,0.2)', iconBg: 'rgba(107,202,255,0.12)', icon: '🔒', title: 'Vos controlás todo', text: 'Solo las veterinarias que elegís pueden ver el historial.', accent: '#6bcaff' },
-                        ].map((f, i) => (
-                            <div key={i} style={{ background: f.bg, border: `1.5px solid ${f.border}`, borderRadius: 20, padding: 22, transition: 'transform .2s, box-shadow .2s' }}
-                                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = `0 12px 32px ${f.border}` }}
-                                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                                <div style={{ width: 44, height: 44, borderRadius: 12, background: f.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 14 }}>{f.icon}</div>
-                                <h3 style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 6, fontFamily: FONT }}>{f.title}</h3>
-                                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, fontWeight: 400 }}>{f.text}</p>
+                    <Link to="/como-funciona" style={{ textDecoration: 'none', display: 'block' }}>
+                        <div style={{ background: 'linear-gradient(135deg, rgba(76,175,80,0.1), rgba(255,152,0,0.1))', borderRadius: 20, padding: '24px 28px', border: '1.5px solid rgba(76,175,80,0.25)', transition: 'transform .2s, border-color .2s', cursor: 'pointer' }}
+                            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(76,175,80,0.5)' }}
+                            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(76,175,80,0.25)' }}>
+                            <div className="senasa-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                                    <div style={{ width: 56, height: 56, borderRadius: 16, flexShrink: 0, background: 'rgba(76,175,80,0.12)', border: '1.5px solid rgba(76,175,80,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 }}>💡</div>
+                                    <div>
+                                        <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: G2, textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Conocé VetPaw</span>
+                                        <h3 style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 4, fontFamily: FONT }}>¿Cómo funciona VetPaw?</h3>
+                                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>Mirá todo lo que podés hacer, seas dueño de una mascota o una veterinaria.</p>
+                                    </div>
+                                </div>
+                                <div className="senasa-btn" style={{ flexShrink: 0, marginLeft: 20, background: `linear-gradient(135deg, ${G1}, ${O1})`, color: '#fff', fontWeight: 800, fontSize: 12, padding: '10px 18px', borderRadius: 10, whiteSpace: 'nowrap', fontFamily: FONT }}>Ver cómo funciona →</div>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    </Link>
                 </div>
 
                 {/* SENASA */}
