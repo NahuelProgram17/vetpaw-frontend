@@ -10,8 +10,8 @@ const O1 = "#FF9800";
 const O2 = "#FFB74D";
 const BLUE = "#6bcaff";
 const PURPLE = "#a78bfa";
-const CARD = "#131c28";
-const CARD2 = "#0e1620";
+const CARD = "#16212f";
+const CARD2 = "#1b2a3d";
 const BORDER = "rgba(255,255,255,0.08)";
 const MUTED = "rgba(255,255,255,0.45)";
 const MUTED2 = "rgba(255,255,255,0.6)";
@@ -107,10 +107,10 @@ export default function MedicalHistory() {
 
     const card = { background: CARD, border: `1.5px solid ${BORDER}`, borderRadius: 18 };
 
-    if (loading) return <div style={{ minHeight: "100vh", background: "#0a0e14", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: FONT }}>Cargando historial… 🐾</div>;
+    if (loading) return <div style={{ minHeight: "100vh", background: "#0a121d", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: FONT }}>Cargando historial… 🐾</div>;
 
     if (!pets.length) return (
-        <div style={{ minHeight: "100vh", background: "#0a0e14", fontFamily: FONT, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ minHeight: "100vh", background: "#0a121d", fontFamily: FONT, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ textAlign: "center", maxWidth: 420 }}>
                 <div style={{ fontSize: 54, marginBottom: 16 }}>🐾</div>
                 <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10 }}>Todavía no tenés mascotas</h2>
@@ -134,13 +134,14 @@ export default function MedicalHistory() {
             {btn && <div style={{ marginTop: 14 }}>{btn}</div>}
         </div>
     );
+    const GRAD = `linear-gradient(135deg, ${G1}, ${O1})`;
     const ghostBtn = (txt, onClick, to) => to
-        ? <Link to={to} style={{ display: "block", textAlign: "center", background: CARD2, border: `1px solid ${BORDER}`, color: MUTED2, fontSize: 12.5, fontWeight: 700, padding: "9px 0", borderRadius: 10, textDecoration: "none" }}>{txt}</Link>
-        : <button onClick={onClick} style={{ width: "100%", background: CARD2, border: `1px solid ${BORDER}`, color: MUTED2, fontSize: 12.5, fontWeight: 700, padding: "9px 0", borderRadius: 10, cursor: "pointer", fontFamily: FONT }}>{txt}</button>;
+        ? <Link to={to} style={{ display: "block", textAlign: "center", background: GRAD, border: "none", color: "#fff", fontSize: 12.5, fontWeight: 800, padding: "10px 0", borderRadius: 10, textDecoration: "none" }}>{txt}</Link>
+        : <button onClick={onClick} style={{ width: "100%", background: GRAD, border: "none", color: "#fff", fontSize: 12.5, fontWeight: 800, padding: "10px 0", borderRadius: 10, cursor: "pointer", fontFamily: FONT }}>{txt}</button>;
     const fillBtn = (txt, to) => <Link to={to} style={{ display: "block", textAlign: "center", background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontSize: 12.5, fontWeight: 800, padding: "9px 0", borderRadius: 10, textDecoration: "none" }}>{txt}</Link>;
 
     return (
-        <div style={{ minHeight: "100vh", background: "#0a0e14", fontFamily: FONT, color: "#fff", padding: "26px 22px 56px" }}>
+        <div style={{ minHeight: "100vh", background: "#0a121d", fontFamily: FONT, color: "#fff", padding: "26px 22px 56px" }}>
             <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
             <style>{`
                 .mh-wrap { max-width: 1240px; margin: 0 auto; }
@@ -386,8 +387,8 @@ export default function MedicalHistory() {
                     </div>
                     <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                         <Link to="/appointments/new" style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontWeight: 800, fontSize: 13, padding: "12px 22px", borderRadius: 12, textDecoration: "none" }}>📅 Sacar turno</Link>
-                        <Link to="/pets" style={{ background: `linear-gradient(135deg, ${G1}, ${G2})`, color: "#fff", fontWeight: 800, fontSize: 13, padding: "12px 22px", borderRadius: 12, textDecoration: "none" }}>💊 Antiparasitarios</Link>
-                        <Link to="/blog" style={{ background: CARD2, border: `1px solid ${BORDER}`, color: "#fff", fontWeight: 800, fontSize: 13, padding: "12px 22px", borderRadius: 12, textDecoration: "none" }}>📖 Ver consejos de salud</Link>
+                        <Link to="/pets" style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontWeight: 800, fontSize: 13, padding: "12px 22px", borderRadius: 12, textDecoration: "none" }}>💊 Antiparasitarios</Link>
+                        <Link to="/blog" style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontWeight: 800, fontSize: 13, padding: "12px 22px", borderRadius: 12, textDecoration: "none" }}>📖 Ver consejos de salud</Link>
                     </div>
                 </div>
 
