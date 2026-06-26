@@ -16,10 +16,25 @@ const veterinariasDestacadas = [
     { nombre: 'Centro Veterinario del Norte', localidad: 'San Isidro, GBA', especialidad: 'Dermatología · Odontología', img: 'https://images.unsplash.com/photo-1559000357-f6b52ddfbe37?w=800&q=80', destacada: false },
 ]
 
-const curiosidades = [
-    { tag: 'Perros', tagColor: O1, img: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80', title: 'El olfato canino es 40 veces más poderoso que el humano', text: 'Tienen 300 millones de receptores olfativos. Por eso los usan en detección médica.' },
-    { tag: 'Gatos', tagColor: G1, img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800&q=80', title: 'Los gatos ronronean tanto de felicidad como de estrés', text: 'La frecuencia del ronroneo (25-150 Hz) ayuda a regenerar tejidos óseos.' },
-    { tag: 'Conejos', tagColor: '#6bcaff', img: 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=800&q=80', title: 'Los conejos no pueden vomitar', text: 'Su digestión es unidireccional. Una mala dieta puede ser fatal en pocas horas.' },
+const tipsHome = [
+    {
+        icon: '🐾', accent: '#ef4444', accent2: '#f97316',
+        title: '¿Se perdió tu mascota?',
+        text: 'Publicá su foto gratis y que la vea toda la comunidad de tu zona. Cuanto antes, mejor.',
+        cta: 'Publicar ahora', link: '/mascotas-perdidas', gated: false,
+    },
+    {
+        icon: '💊', accent: '#4CAF50', accent2: '#66BB6A',
+        title: '¿Cuándo fue la última pipeta?',
+        text: 'Llevá el control de desparasitaciones, pulgas y pipetas. No se te pasa ninguna.',
+        cta: 'Llevar el control', link: '/pets', gated: true,
+    },
+    {
+        icon: '✈️', accent: '#FF9800', accent2: '#FFB74D',
+        title: '¿Vas a viajar con tu mascota?',
+        text: 'Conocé los pasos del trámite oficial para salir del país con tu perro o gato, sin sorpresas.',
+        cta: 'Ver la guía', link: '/blog', gated: false,
+    },
 ]
 
 export default function Home() {
@@ -204,28 +219,35 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* SABIAS QUE */}
+                {/* TIPS QUE LLEVAN A FUNCIONES */}
                 <div className="section-pad" style={{ padding: '4px 40px 28px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-                        <h2 style={{ fontSize: 18, fontWeight: 800, color: '#fff', fontFamily: FONT }}>💡 Sabías que...</h2>
+                        <h2 style={{ fontSize: 18, fontWeight: 800, color: '#fff', fontFamily: FONT }}>💡 Tips para tu mascota</h2>
                         <Link to="/tips" style={{ fontSize: 13, color: G2, fontWeight: 700, textDecoration: 'none' }}>Ver más →</Link>
                     </div>
                     <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
-                        {curiosidades.map((c, i) => (
-                            <div key={i} style={{ background: DARK2, border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 20, overflow: 'hidden', cursor: 'pointer', transition: 'transform .2s, border-color .2s' }}
-                                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = c.tagColor }}
-                                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)' }}>
-                                <div style={{ height: 180, overflow: 'hidden', position: 'relative' }}>
-                                    <img src={c.img} alt={c.tag} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.5))' }} />
-                                    <div style={{ position: 'absolute', bottom: 10, left: 10, background: c.tagColor, color: '#fff', fontSize: 10, fontWeight: 800, padding: '4px 12px', borderRadius: 99 }}>{c.tag}</div>
-                                </div>
-                                <div style={{ padding: '14px 16px' }}>
-                                    <h4 style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1.4, marginBottom: 6, fontFamily: FONT }}>{c.title}</h4>
-                                    <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.65 }}>{c.text}</p>
-                                </div>
-                            </div>
-                        ))}
+                        {tipsHome.map((t, i) => {
+                            const destino = t.gated && !user ? '/register' : t.link
+                            return (
+                                <Link key={i} to={destino} style={{ textDecoration: 'none' }}>
+                                    <div style={{ background: DARK2, border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 20, overflow: 'hidden', cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform .2s, border-color .2s' }}
+                                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = t.accent }}
+                                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)' }}>
+                                        {/* Cabecera con degradé + ícono */}
+                                        <div style={{ height: 92, background: `linear-gradient(135deg, ${t.accent}, ${t.accent2})`, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                                            <span style={{ fontSize: 44, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))' }}>{t.icon}</span>
+                                        </div>
+                                        <div style={{ padding: '16px 18px 18px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                                            <h4 style={{ fontSize: 14, fontWeight: 800, color: '#fff', lineHeight: 1.4, marginBottom: 8, fontFamily: FONT }}>{t.title}</h4>
+                                            <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, marginBottom: 16, flex: 1 }}>{t.text}</p>
+                                            <span style={{ alignSelf: 'flex-start', background: `linear-gradient(135deg, ${t.accent}, ${t.accent2})`, color: '#fff', fontSize: 13, fontWeight: 800, padding: '10px 18px', borderRadius: 12, fontFamily: FONT }}>
+                                                {t.cta} →
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            )
+                        })}
                     </div>
                 </div>
 
