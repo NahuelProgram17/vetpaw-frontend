@@ -314,27 +314,24 @@ export default function MedicalHistory() {
                         <div id="mh-libreta" style={{ ...card, padding: 20 }}>
                             <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16 }}>📖 Libreta sanitaria</h2>
                             {vaccines.length ? (
-                                <div style={{ overflowX: "auto" }}>
-                                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
-                                        <thead>
-                                            <tr style={{ color: MUTED, textAlign: "left", fontSize: 10.5, textTransform: "uppercase" }}>
-                                                <th style={{ padding: "8px 8px" }}>Vacuna</th>
-                                                <th style={{ padding: "8px 8px" }}>Fecha</th>
-                                                <th style={{ padding: "8px 8px" }}>Próx. dosis</th>
-                                                <th style={{ padding: "8px 8px" }}>Veterinario</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {vaccines.map((v) => (
-                                                <tr key={v.id} style={{ borderTop: `1px solid ${BORDER}` }}>
-                                                    <td style={{ padding: "11px 8px", fontWeight: 700 }}>{v.name}</td>
-                                                    <td style={{ padding: "11px 8px", color: MUTED2 }}>{fmtShort(v.date_applied)}</td>
-                                                    <td style={{ padding: "11px 8px" }}>{v.next_dose ? <span style={{ color: G2, background: "rgba(76,175,80,0.12)", padding: "3px 9px", borderRadius: 8, fontSize: 11.5 }}>{fmtShort(v.next_dose)}</span> : <span style={{ color: MUTED }}>—</span>}</td>
-                                                    <td style={{ padding: "11px 8px", color: MUTED2 }}>{v.vet_first_name ? `${v.vet_first_name} ${v.vet_last_name}` : (v.clinic_name || "—")}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                <div>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                        {vaccines.map((v) => (
+                                            <div key={v.id} style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "13px 15px" }}>
+                                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
+                                                    <span style={{ fontSize: 14, fontWeight: 800 }}>💉 {v.name}</span>
+                                                    {v.next_dose
+                                                        ? <span style={{ color: G2, background: "rgba(76,175,80,0.12)", padding: "3px 10px", borderRadius: 8, fontSize: 11.5, fontWeight: 700, whiteSpace: "nowrap" }}>Próx: {fmtShort(v.next_dose)}</span>
+                                                        : <span style={{ color: MUTED, fontSize: 11.5 }}>Sin próxima dosis</span>}
+                                                </div>
+                                                <div style={{ display: "flex", gap: 18, flexWrap: "wrap", fontSize: 11.5, color: MUTED }}>
+                                                    <span>📅 Aplicada: <span style={{ color: MUTED2 }}>{fmtShort(v.date_applied)}</span></span>
+                                                    <span>🩺 <span style={{ color: MUTED2 }}>{v.vet_first_name ? `${v.vet_first_name} ${v.vet_last_name}` : (v.clinic_name || "—")}</span></span>
+                                                    {v.batch && <span>🏷️ Lote: <span style={{ color: MUTED2 }}>{v.batch}</span></span>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                     <p style={{ fontSize: 11.5, color: MUTED, marginTop: 14 }}>🐾 {vaccines.length} {vaccines.length === 1 ? "vacuna registrada" : "vacunas registradas"} en total</p>
                                 </div>
                             ) : <EmptyState icon="💉" text="La libreta está vacía. En la primera visita, tu veterinaria carga las vacunas validadas con su matrícula." />}
