@@ -63,6 +63,7 @@ export default function Pets() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState(null);
+    const [openMenuId, setOpenMenuId] = useState(null);
 
     // ── Tratamientos preventivos ──
     const [treatmentPetId, setTreatmentPetId] = useState(null);
@@ -74,6 +75,15 @@ export default function Pets() {
     useEffect(() => {
         fetchPets();
     }, []);
+
+    useEffect(() => {
+        if (openMenuId === null) return;
+        const onDocClick = (e) => {
+            if (!e.target.closest('.pet-menu-wrap')) setOpenMenuId(null);
+        };
+        document.addEventListener('mousedown', onDocClick);
+        return () => document.removeEventListener('mousedown', onDocClick);
+    }, [openMenuId]);
 
     const fetchPets = async () => {
         try {
@@ -268,98 +278,152 @@ export default function Pets() {
                 )}
 
                 {!loading && pets.length > 0 && (
-                    <div className="pets-grid">
+                    <div className="pets-list">
                         {pets.map((pet) => (
-                            <div key={pet.id} className="pet-card">
-                                <div className="pet-card-top">
-                                    <div className="pet-avatar-lg">
-                                        {pet.photo ? (
-                                            <img
-                                                src={pet.photo}
-                                                alt={pet.name}
-                                                className="pet-photo"
-                                            />
-                                        ) : (
-                                            petEmoji(pet.species)
+                            <div key={pet.id} className="pet-row">
+                                <div className="pet-photo-side">
+                                    {pet.photo ? (
+                                        <img
+                                            src={pet.photo}
+                                            alt={pet.name}
+                                            className="pet-row-photo"
+                                        />
+                                    ) : (
+                                        <div className="pet-row-photo placeholder">
+                                            <span className="pet-row-emoji">{petEmoji(pet.species)}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="pet-info-side">
+                                    {/* Header: nombre + Activo + menú "..." */}
+                                    <div className="pet-info-header">
+                                        <div className="pet-info-headleft">
+                                            <h3 className="pet-row-name">{pet.name}</h3>
+                                            <span className="pet-active-badge">✓ Activo</span>
+                                        </div>
+                                        <div className="pet-menu-wrap">
+                                            <button
+                                                className="pet-menu-btn"
+                                                onClick={() => setOpenMenuId(openMenuId === pet.id ? null : pet.id)}
+                                                title="Más opciones"
+                                                aria-label="Más opciones"
+                                            >
+                                                •••
+                                            </button>
+                                            {openMenuId === pet.id && (
+                                                <div className="pet-menu">
+                                                    <button
+                                                        className="pet-menu-item"
+                                                        onClick={() => { setOpenMenuId(null); openEdit(pet); }}
+                                                    >
+                                                        ✏️ Editar
+                                                    </button>
+                                                    <button
+                                                        className="pet-menu-item danger"
+                                                        onClick={() => { setOpenMenuId(null); setDeleteConfirm(pet.id); }}
+                                                    >
+                                                        🗑️ Eliminar
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Especie · sexo */}
+                                    <p className="pet-row-meta">
+                                        <span style={{ textTransform: 'capitalize' }}>
+                                            {pet.species_display || pet.species || '—'}
+                                        </span>
+                                        {pet.sex && (
+                                            <>
+                                                <span className="pet-row-dot">·</span>
+                                                <span>{pet.sex === 'male' ? '♂ Macho' : '♀ Hembra'}</span>
+                                            </>
                                         )}
+                                    </p>
+
+                                    {/* Fila de stats: edad / peso / color */}
+                                    <div className="pet-stats-row">
+                                        <div className="pet-stat-box">
+                                            <span className="pet-stat-icon">🎂</span>
+                                            <div className="pet-stat-text">
+                                                <div className="pet-stat-value">{calcAge(pet.birth_date) || '—'}</div>
+                                                <div className="pet-stat-label">Edad</div>
+                                            </div>
+                                        </div>
+                                        <div className="pet-stat-box">
+                                            <span className="pet-stat-icon">⚖️</span>
+                                            <div className="pet-stat-text">
+                                                <div className="pet-stat-value">{pet.weight ? `${pet.weight} kg` : '—'}</div>
+                                                <div className="pet-stat-label">Peso</div>
+                                            </div>
+                                        </div>
+                                        <div className="pet-stat-box">
+                                            <span className="pet-stat-icon">🎨</span>
+                                            <div className="pet-stat-text">
+                                                <div className="pet-stat-value" style={{ textTransform: 'capitalize' }}>{pet.color || '—'}</div>
+                                                <div className="pet-stat-label">Color</div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="pet-card-actions-row">
+
+                                    {/* Chips reales: alimentación, hábitat, convivencia */}
+                                    {(pet.feeding || pet.habitat || pet.lives_with_animals) && (
+                                        <div className="pet-chips-row">
+                                            {pet.feeding && (
+                                                <span className="pet-chip">
+                                                    🥣 {pet.feeding === 'balanced' ? 'Balanceada' : pet.feeding === 'homemade' ? 'Casera' : 'Mixta'}
+                                                </span>
+                                            )}
+                                            {pet.habitat && (
+                                                <span className="pet-chip">
+                                                    🏠 {pet.habitat === 'apartment' ? 'Departamento' : pet.habitat === 'house' ? 'Casa con patio' : 'Campo'}
+                                                </span>
+                                            )}
+                                            {pet.lives_with_animals && (
+                                                <span className="pet-chip">🐾 Convive con otros animales</span>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Alergias (si hay) */}
+                                    {pet.allergies && (
+                                        <div className="pet-alert">⚠️ Alergias: {pet.allergies}</div>
+                                    )}
+
+                                    {/* Línea de vacunas */}
+                                    <div className="pet-vaccines-line">
+                                        <span className="pet-vac-ico">🛡️</span>
+                                        {pet.vaccines && pet.vaccines.length > 0
+                                            ? `${pet.vaccines.length} vacuna${pet.vaccines.length > 1 ? 's' : ''} registrada${pet.vaccines.length > 1 ? 's' : ''}`
+                                            : 'Sin vacunas registradas'}
+                                    </div>
+
+                                    {/* 3 botones de acción */}
+                                    <div className="pet-actions-row">
                                         <button
-                                            className="btn-icon"
-                                            onClick={() => openEdit(pet)}
-                                            title="Editar"
+                                            className="pet-btn pet-btn-ghost"
+                                            onClick={() => navigate('/history')}
                                         >
-                                            ✏️
+                                            📋 Ver historial
                                         </button>
                                         <button
-                                            className="btn-icon danger"
-                                            onClick={() => setDeleteConfirm(pet.id)}
-                                            title="Eliminar"
+                                            className="pet-btn pet-btn-grad"
+                                            onClick={() => navigate(`/appointments/new?pet=${pet.id}`)}
                                         >
-                                            🗑️
+                                            📅 Sacar turno
+                                        </button>
+                                        <button
+                                            className="pet-btn pet-btn-grad"
+                                            onClick={() => openTreatments(pet)}
+                                        >
+                                            🛡️ Antiparasitarios
+                                            {pet.treatments && pet.treatments.length > 0 ? ` (${pet.treatments.length})` : ''}
                                         </button>
                                     </div>
                                 </div>
-                                <h3 className="pet-card-name">{pet.name}</h3>
-                                <p className="pet-card-species">
-                                    {pet.species_display || pet.species}
-                                </p>
-                                <div className="pet-card-info">
-                                    {pet.breed && <span className="pet-tag">🦴 {pet.breed}</span>}
-                                    {pet.sex && (
-                                        <span className="pet-tag">
-                                            {pet.sex === 'male' ? '♂ Macho' : '♀ Hembra'}
-                                        </span>
-                                    )}
-                                    {pet.birth_date && (
-                                        <span className="pet-tag">
-                                            🎂 {calcAge(pet.birth_date)}
-                                        </span>
-                                    )}
-                                    {pet.weight && (
-                                        <span className="pet-tag">⚖️ {pet.weight} kg</span>
-                                    )}
-                                    {pet.color && <span className="pet-tag">🎨 {pet.color}</span>}
-                                    {pet.is_neutered && (
-                                        <span className="pet-tag neutered">✂️ Castrado/a</span>
-                                    )}
-                                </div>
-                                {pet.allergies && (
-                                    <div className="pet-alert">⚠️ Alergias: {pet.allergies}</div>
-                                )}
-                                {pet.feeding && (
-                                    <div className="pet-tag">
-                                        🥣 {pet.feeding === 'balanced' ? 'Balanceada' : pet.feeding === 'homemade' ? 'Casera' : 'Mixta'}
-                                    </div>
-                                )}
-                                {pet.habitat && (
-                                    <div className="pet-tag">
-                                        🏠 {pet.habitat === 'apartment' ? 'Departamento' : pet.habitat === 'house' ? 'Casa con patio' : 'Campo'}
-                                    </div>
-                                )}
-                                {pet.lives_with_animals && (
-                                    <div className="pet-tag">🐾 Convive con otros animales</div>
-                                )}
-                                {pet.vaccines && pet.vaccines.length > 0 && (
-                                    <div className="pet-vaccines">
-                                        💉 {pet.vaccines.length} vacuna
-                                        {pet.vaccines.length > 1 ? 's' : ''} registrada
-                                        {pet.vaccines.length > 1 ? 's' : ''}
-                                    </div>
-                                )}
-                                <button
-                                    className="btn-outline"
-                                    onClick={() => openTreatments(pet)}
-                                >
-                                    💊 Antiparasitarios
-                                    {pet.treatments && pet.treatments.length > 0 ? ` (${pet.treatments.length})` : ''}
-                                </button>
-                                <button
-                                    className="btn-outline"
-                                    onClick={() => navigate(`/appointments/new?pet=${pet.id}`)}
-                                >
-                                    📅 Sacar turno
-                                </button>
+
                                 {deleteConfirm === pet.id && (
                                     <div className="delete-confirm">
                                         <p>
@@ -383,6 +447,16 @@ export default function Pets() {
                                 )}
                             </div>
                         ))}
+
+                        {/* Tarjeta punteada: agregar otra mascota */}
+                        <button className="add-pet-cta" onClick={openNew}>
+                            <span className="add-pet-plus">+</span>
+                            <div className="add-pet-texts">
+                                <div className="add-pet-title">Agregar otra mascota</div>
+                                <div className="add-pet-sub">Registrá a otro miembro de tu familia peluda.</div>
+                            </div>
+                            <span className="add-pet-cta-btn">+ Agregar mascota</span>
+                        </button>
                     </div>
                 )}
             </div>
@@ -740,50 +814,269 @@ export default function Pets() {
                 .empty-state h2 { font-family: 'Fraunces', serif; font-size: 1.6rem; font-style: italic; color: #fff; }
                 .empty-state p { color: rgba(255,255,255,0.45); max-width: 340px; line-height: 1.6; }
 
-                /* ── Grid de mascotas ── */
-                .pets-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                /* ── Lista de mascotas (panel ancho apilado) ── */
+                .pets-list {
+                    display: flex;
+                    flex-direction: column;
                     gap: 20px;
                 }
 
-                /* ── Card ── */
-                .pet-card {
-                    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 20px; padding: 24px; backdrop-filter: blur(10px);
+                /* ── Card ancha (panel) ── */
+                .pet-row {
+                    background: #16212f;
+                    border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 20px;
+                    padding: 24px;
+                    display: flex;
+                    gap: 24px;
+                    position: relative;
+                    color: #fff;
+                    font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif;
                     transition: border-color 0.2s, transform 0.2s;
-                    position: relative; display: flex; flex-direction: column; gap: 10px;
                 }
-                .pet-card:hover { border-color: rgba(255,107,107,0.25); transform: translateY(-3px); }
-                .pet-card-top { display: flex; flex-direction: column; gap: 10px; }
-                .pet-card-actions-row { display: flex; justify-content: flex-end; gap: 6px; }
-                .pet-avatar-lg { font-size: 5rem; line-height: 1; }
-                .pet-photo {
-                    width: 100%; height: 260px; border-radius: 14px;
-                    object-fit: cover; object-position: center top;
-                    border: 2px solid rgba(255,107,107,0.3); margin-bottom: 4px;
+                .pet-row:hover { border-color: rgba(76,175,80,0.25); }
+
+                .pet-photo-side {
+                    flex-shrink: 0;
+                    width: 280px;
                 }
-                .btn-icon {
-                    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);
-                    border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 1rem;
-                    transition: background 0.2s; min-width: 36px; min-height: 36px;
+                .pet-row-photo {
+                    width: 280px; height: 280px;
+                    border-radius: 16px;
+                    object-fit: cover;
+                    background: #1b2a3d;
+                    border: 1px solid rgba(255,255,255,0.06);
+                }
+                .pet-row-photo.placeholder {
                     display: flex; align-items: center; justify-content: center;
                 }
-                .btn-icon:hover { background: rgba(255,255,255,0.12); }
-                .btn-icon.danger:hover { background: rgba(255,107,107,0.15); }
-                .pet-card-name { font-size: 1.3rem; font-weight: 900; color: #fff; }
-                .pet-card-species { font-size: 0.8rem; color: rgba(255,255,255,0.4); text-transform: capitalize; margin-top: -6px; }
-                .pet-card-info { display: flex; flex-wrap: wrap; gap: 6px; }
-                .pet-tag {
-                    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 8px; padding: 3px 10px; font-size: 0.78rem; color: rgba(255,255,255,0.6);
+                .pet-row-emoji { font-size: 5.5rem; line-height: 1; }
+
+                .pet-info-side {
+                    flex: 1;
+                    min-width: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
                 }
-                .pet-tag.neutered { background: rgba(107,202,255,0.1); color: #6bcaff; border-color: rgba(107,202,255,0.2); }
+
+                /* Header: nombre + activo + menú */
+                .pet-info-header {
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: space-between;
+                    gap: 12px;
+                }
+                .pet-info-headleft {
+                    display: flex; align-items: center; gap: 12px;
+                    flex-wrap: wrap;
+                }
+                .pet-row-name {
+                    font-family: 'Plus Jakarta Sans', sans-serif;
+                    font-size: 2rem; font-weight: 800; color: #fff;
+                    letter-spacing: -0.5px; line-height: 1.1;
+                }
+                .pet-active-badge {
+                    background: rgba(76,175,80,0.15);
+                    color: #66BB6A;
+                    border: 1px solid rgba(76,175,80,0.3);
+                    border-radius: 999px;
+                    padding: 4px 12px;
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    white-space: nowrap;
+                }
+
+                /* Menú "..." */
+                .pet-menu-wrap { position: relative; flex-shrink: 0; }
+                .pet-menu-btn {
+                    background: #1b2a3d;
+                    border: 1px solid rgba(255,255,255,0.08);
+                    color: rgba(255,255,255,0.7);
+                    border-radius: 10px;
+                    width: 40px; height: 40px;
+                    cursor: pointer;
+                    font-size: 1.1rem; font-weight: 700;
+                    display: flex; align-items: center; justify-content: center;
+                    transition: background 0.2s, color 0.2s;
+                }
+                .pet-menu-btn:hover { background: #213348; color: #fff; }
+                .pet-menu {
+                    position: absolute;
+                    top: calc(100% + 6px);
+                    right: 0;
+                    background: #1b2a3d;
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 12px;
+                    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+                    min-width: 160px;
+                    overflow: hidden;
+                    z-index: 10;
+                    display: flex; flex-direction: column;
+                }
+                .pet-menu-item {
+                    background: transparent; border: none;
+                    color: rgba(255,255,255,0.85);
+                    text-align: left;
+                    padding: 11px 14px;
+                    cursor: pointer;
+                    font-family: 'Plus Jakarta Sans', sans-serif;
+                    font-size: 0.9rem; font-weight: 600;
+                    transition: background 0.15s;
+                }
+                .pet-menu-item:hover { background: rgba(255,255,255,0.06); }
+                .pet-menu-item.danger { color: #ff8888; }
+                .pet-menu-item.danger:hover { background: rgba(255,107,107,0.12); }
+
+                /* Especie · sexo */
+                .pet-row-meta {
+                    font-size: 0.95rem;
+                    color: rgba(255,255,255,0.6);
+                    display: flex; align-items: center; gap: 6px;
+                    flex-wrap: wrap;
+                }
+                .pet-row-dot { opacity: 0.5; }
+
+                /* Stat boxes (edad/peso/color) */
+                .pet-stats-row {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 10px;
+                }
+                .pet-stat-box {
+                    background: #1b2a3d;
+                    border: 1px solid rgba(255,255,255,0.06);
+                    border-radius: 14px;
+                    padding: 14px 16px;
+                    display: flex; align-items: center; gap: 12px;
+                    min-width: 0;
+                }
+                .pet-stat-icon {
+                    font-size: 1.4rem; flex-shrink: 0;
+                    width: 32px; height: 32px;
+                    display: flex; align-items: center; justify-content: center;
+                }
+                .pet-stat-text { min-width: 0; overflow: hidden; }
+                .pet-stat-value {
+                    font-size: 1rem; font-weight: 700; color: #fff;
+                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+                }
+                .pet-stat-label {
+                    font-size: 0.75rem; color: rgba(255,255,255,0.45);
+                    margin-top: 2px;
+                }
+
+                /* Chips (alimentación, hábitat, convivencia) */
+                .pet-chips-row {
+                    display: flex; flex-wrap: wrap; gap: 8px;
+                }
+                .pet-chip {
+                    background: #1b2a3d;
+                    border: 1px solid rgba(255,255,255,0.06);
+                    border-radius: 999px;
+                    padding: 7px 14px;
+                    font-size: 0.85rem;
+                    color: rgba(255,255,255,0.75);
+                    display: inline-flex; align-items: center; gap: 6px;
+                }
+
+                /* Alerta de alergias */
                 .pet-alert {
-                    background: rgba(255,217,61,0.1); border: 1px solid rgba(255,217,61,0.2);
-                    border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; color: #ffd93d;
+                    background: rgba(255,217,61,0.08);
+                    border: 1px solid rgba(255,217,61,0.25);
+                    border-radius: 10px;
+                    padding: 8px 12px;
+                    font-size: 0.85rem;
+                    color: #ffd93d;
                 }
-                .pet-vaccines { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+
+                /* Línea de vacunas */
+                .pet-vaccines-line {
+                    display: flex; align-items: center; gap: 8px;
+                    font-size: 0.9rem;
+                    color: rgba(255,255,255,0.65);
+                }
+                .pet-vac-ico { font-size: 1rem; }
+
+                /* Botones de acción */
+                .pet-actions-row {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    gap: 10px;
+                    margin-top: 4px;
+                }
+                .pet-btn {
+                    border-radius: 12px;
+                    padding: 13px 16px;
+                    font-family: 'Plus Jakarta Sans', sans-serif;
+                    font-size: 0.9rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+                    text-align: center;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .pet-btn-ghost {
+                    background: transparent;
+                    border: 1.5px solid rgba(102,187,106,0.5);
+                    color: #66BB6A;
+                }
+                .pet-btn-ghost:hover { background: rgba(76,175,80,0.08); border-color: #66BB6A; }
+                .pet-btn-grad {
+                    background: linear-gradient(135deg, #4CAF50, #FF9800);
+                    border: none;
+                    color: #fff;
+                    box-shadow: 0 4px 14px rgba(76,175,80,0.25);
+                }
+                .pet-btn-grad:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(76,175,80,0.35); }
+
+                /* Tarjeta punteada "Agregar otra mascota" */
+                .add-pet-cta {
+                    background: transparent;
+                    border: 1.5px dashed rgba(102,187,106,0.35);
+                    border-radius: 20px;
+                    padding: 22px 24px;
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    cursor: pointer;
+                    color: #fff;
+                    font-family: 'Plus Jakarta Sans', sans-serif;
+                    text-align: left;
+                    transition: border-color 0.2s, background 0.2s;
+                    width: 100%;
+                }
+                .add-pet-cta:hover {
+                    border-color: rgba(102,187,106,0.7);
+                    background: rgba(76,175,80,0.04);
+                }
+                .add-pet-plus {
+                    width: 56px; height: 56px;
+                    border-radius: 50%;
+                    background: rgba(76,175,80,0.12);
+                    border: 1.5px solid rgba(102,187,106,0.4);
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.8rem; font-weight: 300;
+                    color: #66BB6A;
+                    flex-shrink: 0;
+                }
+                .add-pet-texts { flex: 1; min-width: 0; }
+                .add-pet-title { font-size: 1.05rem; font-weight: 700; color: #fff; }
+                .add-pet-sub { font-size: 0.88rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
+                .add-pet-cta-btn {
+                    background: transparent;
+                    border: 1.5px solid rgba(102,187,106,0.5);
+                    color: #66BB6A;
+                    border-radius: 12px;
+                    padding: 11px 18px;
+                    font-weight: 700;
+                    font-size: 0.9rem;
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                }
+                .add-pet-cta:hover .add-pet-cta-btn { background: rgba(76,175,80,0.08); }
 
                 /* ── Historial de antiparasitarios ── */
                 .treatment-history { margin-top: 22px; display: flex; flex-direction: column; gap: 16px; }
@@ -927,10 +1220,14 @@ export default function Pets() {
                 .btn-ghost:hover { border-color: rgba(255,255,255,0.25); }
 
                 /* ══════════════════════════════
-                RESPONSIVE — TABLET (≤768px)
+                RESPONSIVE — TABLET (≤900px)
                 ══════════════════════════════ */
-                @media (max-width: 768px) {
-                    .pets-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+                @media (max-width: 900px) {
+                    .pet-row { flex-direction: column; gap: 18px; }
+                    .pet-photo-side { width: 100%; }
+                    .pet-row-photo { width: 100%; height: 260px; }
+                    .pet-actions-row { grid-template-columns: 1fr; }
+                    .add-pet-cta { flex-wrap: wrap; }
                 }
 
                 /* ══════════════════════════════
@@ -944,14 +1241,23 @@ export default function Pets() {
                     .pets-title { font-size: 1.5rem; }
                     .pets-header .btn-primary { width: 100%; text-align: center; }
 
-                    /* Grid: 1 columna en mobile */
-                    .pets-grid { grid-template-columns: 1fr; gap: 14px; }
+                    /* Lista */
+                    .pets-list { gap: 14px; }
 
                     /* Card */
-                    .pet-card { padding: 18px 16px; border-radius: 16px; }
-                    .pet-photo { height: 200px; }
-                    .pet-avatar-lg { font-size: 4rem; }
-                    .pet-card-name { font-size: 1.15rem; }
+                    .pet-row { padding: 18px 16px; border-radius: 16px; gap: 14px; }
+                    .pet-row-photo { height: 220px; }
+                    .pet-row-name { font-size: 1.5rem; }
+                    .pet-row-emoji { font-size: 4rem; }
+                    .pet-stats-row { gap: 8px; }
+                    .pet-stat-box { padding: 10px 12px; gap: 8px; }
+                    .pet-stat-icon { font-size: 1.2rem; width: 26px; height: 26px; }
+                    .pet-stat-value { font-size: 0.88rem; }
+                    .pet-stat-label { font-size: 0.7rem; }
+
+                    /* Add CTA */
+                    .add-pet-cta { padding: 18px 16px; gap: 14px; }
+                    .add-pet-cta-btn { width: 100%; text-align: center; }
 
                     /* Empty state */
                     .empty-state { padding: 48px 16px; }
@@ -978,8 +1284,10 @@ export default function Pets() {
                 ══════════════════════════════ */
                 @media (max-width: 380px) {
                     .pets-inner { padding: 12px 10px; }
-                    .pet-card { padding: 14px 12px; }
+                    .pet-row { padding: 14px 12px; }
+                    .pet-row-name { font-size: 1.3rem; }
                     .pets-title { font-size: 1.3rem; }
+                    .pet-stats-row { grid-template-columns: 1fr; }
                 }
             `}</style>
         </div>
