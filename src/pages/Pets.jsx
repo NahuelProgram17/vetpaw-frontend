@@ -252,9 +252,6 @@ export default function Pets() {
                                 : `Tenés ${pets.length} mascota${pets.length > 1 ? 's' : ''} registrada${pets.length > 1 ? 's' : ''}.`}
                         </p>
                     </div>
-                    <button className="btn-primary" onClick={openNew}>
-                        + Agregar mascota
-                    </button>
                 </header>
 
                 {loading && (
@@ -775,7 +772,7 @@ export default function Pets() {
 
                 .pets-inner {
                     max-width: 1100px; margin: 0 auto;
-                    padding: 32px 24px; position: relative; z-index: 1;
+                    padding: 90px 24px 32px; position: relative; z-index: 1;
                 }
 
                 /* ── Header ── */
@@ -818,17 +815,17 @@ export default function Pets() {
                 .pets-list {
                     display: flex;
                     flex-direction: column;
-                    gap: 20px;
+                    gap: 16px;
                 }
 
                 /* ── Card ancha (panel) ── */
                 .pet-row {
                     background: #16212f;
                     border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 20px;
-                    padding: 24px;
+                    border-radius: 18px;
+                    padding: 18px;
                     display: flex;
-                    gap: 24px;
+                    gap: 18px;
                     position: relative;
                     color: #fff;
                     font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif;
@@ -838,11 +835,11 @@ export default function Pets() {
 
                 .pet-photo-side {
                     flex-shrink: 0;
-                    width: 280px;
+                    width: 220px;
                 }
                 .pet-row-photo {
-                    width: 280px; height: 280px;
-                    border-radius: 16px;
+                    width: 220px; height: 220px;
+                    border-radius: 14px;
                     object-fit: cover;
                     background: #1b2a3d;
                     border: 1px solid rgba(255,255,255,0.06);
@@ -850,14 +847,14 @@ export default function Pets() {
                 .pet-row-photo.placeholder {
                     display: flex; align-items: center; justify-content: center;
                 }
-                .pet-row-emoji { font-size: 5.5rem; line-height: 1; }
+                .pet-row-emoji { font-size: 4.5rem; line-height: 1; }
 
                 .pet-info-side {
                     flex: 1;
                     min-width: 0;
                     display: flex;
                     flex-direction: column;
-                    gap: 14px;
+                    gap: 10px;
                 }
 
                 /* Header: nombre + activo + menú */
@@ -865,15 +862,15 @@ export default function Pets() {
                     display: flex;
                     align-items: flex-start;
                     justify-content: space-between;
-                    gap: 12px;
+                    gap: 10px;
                 }
                 .pet-info-headleft {
-                    display: flex; align-items: center; gap: 12px;
+                    display: flex; align-items: center; gap: 10px;
                     flex-wrap: wrap;
                 }
                 .pet-row-name {
                     font-family: 'Plus Jakarta Sans', sans-serif;
-                    font-size: 2rem; font-weight: 800; color: #fff;
+                    font-size: 1.6rem; font-weight: 800; color: #fff;
                     letter-spacing: -0.5px; line-height: 1.1;
                 }
                 .pet-active-badge {
@@ -881,8 +878,8 @@ export default function Pets() {
                     color: #66BB6A;
                     border: 1px solid rgba(76,175,80,0.3);
                     border-radius: 999px;
-                    padding: 4px 12px;
-                    font-size: 0.78rem;
+                    padding: 3px 10px;
+                    font-size: 0.72rem;
                     font-weight: 700;
                     white-space: nowrap;
                 }
@@ -893,10 +890,10 @@ export default function Pets() {
                     background: #1b2a3d;
                     border: 1px solid rgba(255,255,255,0.08);
                     color: rgba(255,255,255,0.7);
-                    border-radius: 10px;
-                    width: 40px; height: 40px;
+                    border-radius: 9px;
+                    width: 34px; height: 34px;
                     cursor: pointer;
-                    font-size: 1.1rem; font-weight: 700;
+                    font-size: 1rem; font-weight: 700;
                     display: flex; align-items: center; justify-content: center;
                     transition: background 0.2s, color 0.2s;
                 }
@@ -909,7 +906,7 @@ export default function Pets() {
                     border: 1px solid rgba(255,255,255,0.1);
                     border-radius: 12px;
                     box-shadow: 0 12px 32px rgba(0,0,0,0.4);
-                    min-width: 160px;
+                    min-width: 150px;
                     overflow: hidden;
                     z-index: 10;
                     display: flex; flex-direction: column;
@@ -918,10 +915,10 @@ export default function Pets() {
                     background: transparent; border: none;
                     color: rgba(255,255,255,0.85);
                     text-align: left;
-                    padding: 11px 14px;
+                    padding: 10px 13px;
                     cursor: pointer;
                     font-family: 'Plus Jakarta Sans', sans-serif;
-                    font-size: 0.9rem; font-weight: 600;
+                    font-size: 0.86rem; font-weight: 600;
                     transition: background 0.15s;
                 }
                 .pet-menu-item:hover { background: rgba(255,255,255,0.06); }
@@ -930,7 +927,7 @@ export default function Pets() {
 
                 /* Especie · sexo */
                 .pet-row-meta {
-                    font-size: 0.95rem;
+                    font-size: 0.88rem;
                     color: rgba(255,255,255,0.6);
                     display: flex; align-items: center; gap: 6px;
                     flex-wrap: wrap;
@@ -941,41 +938,41 @@ export default function Pets() {
                 .pet-stats-row {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
-                    gap: 10px;
+                    gap: 8px;
                 }
                 .pet-stat-box {
                     background: #1b2a3d;
                     border: 1px solid rgba(255,255,255,0.06);
-                    border-radius: 14px;
-                    padding: 14px 16px;
-                    display: flex; align-items: center; gap: 12px;
+                    border-radius: 12px;
+                    padding: 10px 12px;
+                    display: flex; align-items: center; gap: 10px;
                     min-width: 0;
                 }
                 .pet-stat-icon {
-                    font-size: 1.4rem; flex-shrink: 0;
-                    width: 32px; height: 32px;
+                    font-size: 1.15rem; flex-shrink: 0;
+                    width: 26px; height: 26px;
                     display: flex; align-items: center; justify-content: center;
                 }
                 .pet-stat-text { min-width: 0; overflow: hidden; }
                 .pet-stat-value {
-                    font-size: 1rem; font-weight: 700; color: #fff;
+                    font-size: 0.92rem; font-weight: 700; color: #fff;
                     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
                 }
                 .pet-stat-label {
-                    font-size: 0.75rem; color: rgba(255,255,255,0.45);
-                    margin-top: 2px;
+                    font-size: 0.7rem; color: rgba(255,255,255,0.45);
+                    margin-top: 1px;
                 }
 
                 /* Chips (alimentación, hábitat, convivencia) */
                 .pet-chips-row {
-                    display: flex; flex-wrap: wrap; gap: 8px;
+                    display: flex; flex-wrap: wrap; gap: 7px;
                 }
                 .pet-chip {
                     background: #1b2a3d;
                     border: 1px solid rgba(255,255,255,0.06);
                     border-radius: 999px;
-                    padding: 7px 14px;
-                    font-size: 0.85rem;
+                    padding: 6px 12px;
+                    font-size: 0.8rem;
                     color: rgba(255,255,255,0.75);
                     display: inline-flex; align-items: center; gap: 6px;
                 }
@@ -985,31 +982,31 @@ export default function Pets() {
                     background: rgba(255,217,61,0.08);
                     border: 1px solid rgba(255,217,61,0.25);
                     border-radius: 10px;
-                    padding: 8px 12px;
-                    font-size: 0.85rem;
+                    padding: 7px 11px;
+                    font-size: 0.82rem;
                     color: #ffd93d;
                 }
 
                 /* Línea de vacunas */
                 .pet-vaccines-line {
-                    display: flex; align-items: center; gap: 8px;
-                    font-size: 0.9rem;
+                    display: flex; align-items: center; gap: 7px;
+                    font-size: 0.85rem;
                     color: rgba(255,255,255,0.65);
                 }
-                .pet-vac-ico { font-size: 1rem; }
+                .pet-vac-ico { font-size: 0.95rem; }
 
                 /* Botones de acción */
                 .pet-actions-row {
                     display: grid;
                     grid-template-columns: 1fr 1fr 1fr;
-                    gap: 10px;
-                    margin-top: 4px;
+                    gap: 9px;
+                    margin-top: 2px;
                 }
                 .pet-btn {
-                    border-radius: 12px;
-                    padding: 13px 16px;
+                    border-radius: 11px;
+                    padding: 10px 14px;
                     font-family: 'Plus Jakarta Sans', sans-serif;
-                    font-size: 0.9rem;
+                    font-size: 0.85rem;
                     font-weight: 700;
                     cursor: pointer;
                     transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
@@ -1036,11 +1033,11 @@ export default function Pets() {
                 .add-pet-cta {
                     background: transparent;
                     border: 1.5px dashed rgba(102,187,106,0.35);
-                    border-radius: 20px;
-                    padding: 22px 24px;
+                    border-radius: 18px;
+                    padding: 18px 20px;
                     display: flex;
                     align-items: center;
-                    gap: 20px;
+                    gap: 16px;
                     cursor: pointer;
                     color: #fff;
                     font-family: 'Plus Jakarta Sans', sans-serif;
@@ -1053,26 +1050,26 @@ export default function Pets() {
                     background: rgba(76,175,80,0.04);
                 }
                 .add-pet-plus {
-                    width: 56px; height: 56px;
+                    width: 48px; height: 48px;
                     border-radius: 50%;
                     background: rgba(76,175,80,0.12);
                     border: 1.5px solid rgba(102,187,106,0.4);
                     display: flex; align-items: center; justify-content: center;
-                    font-size: 1.8rem; font-weight: 300;
+                    font-size: 1.6rem; font-weight: 300;
                     color: #66BB6A;
                     flex-shrink: 0;
                 }
                 .add-pet-texts { flex: 1; min-width: 0; }
-                .add-pet-title { font-size: 1.05rem; font-weight: 700; color: #fff; }
-                .add-pet-sub { font-size: 0.88rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
+                .add-pet-title { font-size: 0.98rem; font-weight: 700; color: #fff; }
+                .add-pet-sub { font-size: 0.84rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
                 .add-pet-cta-btn {
                     background: transparent;
                     border: 1.5px solid rgba(102,187,106,0.5);
                     color: #66BB6A;
-                    border-radius: 12px;
-                    padding: 11px 18px;
+                    border-radius: 11px;
+                    padding: 9px 16px;
                     font-weight: 700;
-                    font-size: 0.9rem;
+                    font-size: 0.85rem;
                     white-space: nowrap;
                     flex-shrink: 0;
                 }
@@ -1223,9 +1220,9 @@ export default function Pets() {
                 RESPONSIVE — TABLET (≤900px)
                 ══════════════════════════════ */
                 @media (max-width: 900px) {
-                    .pet-row { flex-direction: column; gap: 18px; }
+                    .pet-row { flex-direction: column; gap: 14px; }
                     .pet-photo-side { width: 100%; }
-                    .pet-row-photo { width: 100%; height: 260px; }
+                    .pet-row-photo { width: 100%; height: 220px; }
                     .pet-actions-row { grid-template-columns: 1fr; }
                     .add-pet-cta { flex-wrap: wrap; }
                 }
@@ -1234,7 +1231,7 @@ export default function Pets() {
                 RESPONSIVE — MOBILE (≤600px)
                 ══════════════════════════════ */
                 @media (max-width: 600px) {
-                    .pets-inner { padding: 16px 14px; }
+                    .pets-inner { padding: 76px 14px 24px; }
 
                     /* Header */
                     .pets-header { flex-direction: column; align-items: flex-start; margin-bottom: 20px; }
@@ -1245,18 +1242,18 @@ export default function Pets() {
                     .pets-list { gap: 14px; }
 
                     /* Card */
-                    .pet-row { padding: 18px 16px; border-radius: 16px; gap: 14px; }
-                    .pet-row-photo { height: 220px; }
-                    .pet-row-name { font-size: 1.5rem; }
-                    .pet-row-emoji { font-size: 4rem; }
-                    .pet-stats-row { gap: 8px; }
-                    .pet-stat-box { padding: 10px 12px; gap: 8px; }
-                    .pet-stat-icon { font-size: 1.2rem; width: 26px; height: 26px; }
-                    .pet-stat-value { font-size: 0.88rem; }
-                    .pet-stat-label { font-size: 0.7rem; }
+                    .pet-row { padding: 16px 14px; border-radius: 16px; gap: 12px; }
+                    .pet-row-photo { height: 200px; }
+                    .pet-row-name { font-size: 1.35rem; }
+                    .pet-row-emoji { font-size: 3.6rem; }
+                    .pet-stats-row { gap: 7px; }
+                    .pet-stat-box { padding: 9px 11px; gap: 8px; }
+                    .pet-stat-icon { font-size: 1.05rem; width: 24px; height: 24px; }
+                    .pet-stat-value { font-size: 0.85rem; }
+                    .pet-stat-label { font-size: 0.68rem; }
 
                     /* Add CTA */
-                    .add-pet-cta { padding: 18px 16px; gap: 14px; }
+                    .add-pet-cta { padding: 16px 14px; gap: 12px; }
                     .add-pet-cta-btn { width: 100%; text-align: center; }
 
                     /* Empty state */
@@ -1283,7 +1280,7 @@ export default function Pets() {
                 RESPONSIVE — MOBILE XS (≤380px)
                 ══════════════════════════════ */
                 @media (max-width: 380px) {
-                    .pets-inner { padding: 12px 10px; }
+                    .pets-inner { padding: 72px 10px 24px; }
                     .pet-row { padding: 14px 12px; }
                     .pet-row-name { font-size: 1.3rem; }
                     .pets-title { font-size: 1.3rem; }
