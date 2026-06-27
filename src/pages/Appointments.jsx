@@ -189,6 +189,24 @@ export default function Appointments() {
     const filtered  = filter === "all" ? appointments : appointments.filter(a => a.status === filter);
     const upcoming  = appointments.filter(a => new Date(a.requested_date) >= new Date() && a.status !== "cancelled");
     const past      = appointments.filter(a => new Date(a.requested_date) < new Date() || a.status === "cancelled");
+    const cConfirmed = appointments.filter(a => a.status === "confirmed").length;
+    const cCompleted = appointments.filter(a => a.status === "completed").length;
+    const cCancelled = appointments.filter(a => a.status === "cancelled").length;
+    const cPending   = appointments.filter(a => a.status === "pending").length;
+    const nextAppt   = upcoming.slice().sort((a, b) => new Date(a.requested_date) - new Date(b.requested_date))[0] || null;
+    const nextDays   = nextAppt ? Math.round((new Date(nextAppt.requested_date).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000) : null;
+    const ringSegs = [
+        { label: "Confirmados", val: cConfirmed, color: "#4CAF50" },
+        { label: "Realizados",  val: cCompleted, color: "#6bcaff" },
+        { label: "Cancelados",  val: cCancelled, color: "#ff6b6b" },
+        { label: "Pendientes",  val: cPending,   color: "#9aa4b2" },
+    ];
+    const ringTotal = ringSegs.reduce((a, s) => a + s.val, 0) || 1;
+    let _acc = 0;
+    const ringCss = "conic-gradient(" + ringSegs.map(s => {
+        const a = (_acc / ringTotal) * 360; _acc += s.val; const b = (_acc / ringTotal) * 360;
+        return s.color + " " + a + "deg " + b + "deg";
+    }).join(", ") + ")";
 
     return (
         <div className="appts-page">
@@ -198,16 +216,35 @@ export default function Appointments() {
                 <header className="appts-header">
                     <div>
                         <h1 className="appts-title">📅 Mis turnos</h1>
-                        <p className="appts-subtitle">
-                            {appointments.length === 0
-                                ? "No tenés turnos registrados."
-                                : `${upcoming.length} próximo${upcoming.length !== 1 ? "s" : ""} · ${past.length} pasado${past.length !== 1 ? "s" : ""}`}
-                        </p>
+                        <p className="appts-subtitle">Gestioná y seguí tus citas veterinarias</p>
                     </div>
                     <button className="btn-primary" onClick={openNew}>+ Nuevo turno</button>
                 </header>
 
                 {reviewSuccess && <div className="review-toast">⭐ {reviewSuccess}</div>}
+
+                {appointments.length > 0 && (
+                    <div className="appts-stats">
+                        {[
+                            { ic: "📅", c: "#4CAF50", val: upcoming.length, t: "Próximos", s: "Turnos futuros" },
+                            { ic: "🕐", c: "#6bcaff", val: past.length, t: "Pasados", s: "Turnos anteriores" },
+                            { ic: "✅", c: "#4CAF50", val: cConfirmed, t: "Confirmados", s: "Turnos confirmados" },
+                            { ic: "✖️", c: "#ff6b6b", val: cCancelled, t: "Cancelados", s: "Turnos cancelados" },
+                        ].map((x, i) => (
+                            <div key={i} className="appt-scard" style={{ display: "flex", alignItems: "center", gap: 13 }}>
+                                <div style={{ width: 46, height: 46, borderRadius: 12, background: `${x.c}22`, border: `1px solid ${x.c}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 21, flexShrink: 0 }}>{x.ic}</div>
+                                <div>
+                                    <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{x.val}</div>
+                                    <div style={{ fontSize: 13, fontWeight: 800, marginTop: 3 }}>{x.t}</div>
+                                    <div style={{ fontSize: 10.5, color: "rgba(255,255,255,0.4)" }}>{x.s}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <div className="appts-layout">
+                  <div className="appts-main">
 
                 {appointments.length > 0 && (
                     <div className="filters">
@@ -318,6 +355,57 @@ export default function Appointments() {
                 {!loading && filtered.length === 0 && appointments.length > 0 && (
                     <div className="empty-state"><span className="empty-emoji">🔍</span><p>No hay turnos con ese filtro.</p></div>
                 )}
+                  </div>{/* /appts-main */}
+
+                  <aside className="appts-side">
+                    {/* Próximo recordatorio */}
+                    <div className="appt-scard" style={{ border: "1.5px solid rgba(76,175,80,0.3)", background: "linear-gradient(135deg, rgba(76,175,80,0.09), rgba(255,152,0,0.05))" }}>
+                        <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 12 }}>🔔 Próximo recordatorio</div>
+                        {nextAppt ? (
+                            <div>
+                                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>Tu próximo turno es en</p>
+                                <div style={{ fontSize: 22, fontWeight: 900, color: "#4CAF50", margin: "2px 0 12px" }}>{nextDays === 0 ? "hoy" : nextDays === 1 ? "1 día" : `${nextDays} días`}</div>
+                                <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 8 }}>{nextAppt.reason || "Control"}</div>
+                                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", marginBottom: 3 }}>📅 {new Date(nextAppt.requested_date).toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })} • {formatTime(nextAppt.requested_date)}</p>
+                                {nextAppt.clinic_name && <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", marginBottom: 14 }}>🏥 {nextAppt.clinic_name}</p>}
+                                <button onClick={() => openEdit(nextAppt)} style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff", fontWeight: 700, fontSize: 13, padding: "10px 0", borderRadius: 10, cursor: "pointer" }}>Ver detalle del turno</button>
+                            </div>
+                        ) : <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.45)" }}>No tenés turnos próximos.</p>}
+                    </div>
+
+                    {/* Estado de tus turnos */}
+                    <div className="appt-scard">
+                        <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 14 }}>📊 Estado de tus turnos</div>
+                        {appointments.length ? (
+                            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                                <div style={{ width: 92, height: 92, borderRadius: "50%", background: ringCss, position: "relative", flexShrink: 0 }}>
+                                    <div style={{ position: "absolute", inset: 13, borderRadius: "50%", background: "#16212f", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>📅</div>
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    {ringSegs.map((sg, i) => (
+                                        <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11.5, marginBottom: 6 }}>
+                                            <span style={{ width: 9, height: 9, borderRadius: "50%", background: sg.color, flexShrink: 0 }} />
+                                            <span style={{ flex: 1, color: "rgba(255,255,255,0.7)" }}>{sg.label}</span>
+                                            <span style={{ fontWeight: 800 }}>{sg.val}</span>
+                                            <span style={{ color: "rgba(255,255,255,0.4)", width: 32, textAlign: "right" }}>{Math.round((sg.val / ringTotal) * 100)}%</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.45)" }}>Todavía no hay turnos.</p>}
+                    </div>
+
+                    {/* Consejos */}
+                    <div className="appt-scard">
+                        <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 14 }}>💡 Consejos antes de la consulta</div>
+                        {["No alimentes a tu mascota 6 horas antes de estudios que lo requieran.", "Llevá su libreta sanitaria y estudios previos (si los tiene).", "Llegá 10 minutos antes para completar la recepción."].map((t, i) => (
+                            <div key={i} style={{ display: "flex", gap: 9, fontSize: 12, color: "rgba(255,255,255,0.65)", marginBottom: 11, lineHeight: 1.5 }}>
+                                <span style={{ color: "#4CAF50", flexShrink: 0 }}>✓</span><span>{t}</span>
+                            </div>
+                        ))}
+                    </div>
+                  </aside>
+                </div>{/* /appts-layout */}
             </div>
 
             {/* ── Modal turno ── */}
@@ -483,6 +571,12 @@ export default function Appointments() {
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+                .appts-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin-bottom: 20px; }
+                .appts-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+                .appts-side { display: flex; flex-direction: column; gap: 16px; }
+                .appt-scard { background: #16212f; border: 1.5px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px; color: #fff; }
+                @media (max-width: 1000px) { .appts-layout { grid-template-columns: 1fr; } .appts-stats { grid-template-columns: repeat(2, 1fr); } }
+                @media (max-width: 520px) { .appts-stats { grid-template-columns: 1fr; } }
 
                 .appts-page { min-height: 100vh; background: #1a1a2e; font-family: 'Nunito', sans-serif; position: relative; overflow-x: hidden; padding-bottom: 60px; }
                 .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.08; pointer-events: none; }
