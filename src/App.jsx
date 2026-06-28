@@ -31,6 +31,7 @@ import Estadisticas from './pages/Estadisticas';
 import ClinicProfile from './pages/ClinicProfile'
 import AdminPanel from './pages/AdminPanel'
 import LostPets from './pages/LostPets'
+import Configuracion from './pages/Configuracion'
 
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
           <Route path="/history" element={<ProtectedRoute role="owner"><MedicalHistory /></ProtectedRoute>} />
           <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/configuracion" element={<ProtectedRoute><Configuracion /></ProtectedRoute>} />
           <Route path="/tips" element={<Tips />} />
           <Route path="/clinic/estadisticas" element={<ProtectedRoute role="clinic"><Estadisticas /></ProtectedRoute>} />
           <Route path="/admin-panel" element={<AdminPanel />} />
@@ -78,4 +80,4 @@ function App() {
   )
 }
 
-export default App
+export default App
