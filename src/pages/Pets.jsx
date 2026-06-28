@@ -50,6 +50,7 @@ const EMPTY_FORM = {
     feeding: '',
     habitat: '',
     lives_with_animals: false,
+    temperament: '',
 };
 
 export default function Pets() {
@@ -67,7 +68,7 @@ export default function Pets() {
 
     // ── Tratamientos preventivos ──
     const [treatmentPetId, setTreatmentPetId] = useState(null);
-    const [tForm, setTForm] = useState({ treatment_type: 'deworming', date_applied: todayISO(), product: '' });
+    const [tForm, setTForm] = useState({ treatment_type: 'deworming', date_applied: todayISO(), next_dose: '', product: '' });
     const [tSaving, setTSaving] = useState(false);
     const [tError, setTError] = useState('');
     const treatmentPet = pets.find((p) => p.id === treatmentPetId) || null;
@@ -122,6 +123,7 @@ export default function Pets() {
             feeding: pet.feeding || '',
             habitat: pet.habitat || '',
             lives_with_animals: pet.lives_with_animals || false,
+            temperament: pet.temperament || '',
         });
         setPhotoPreview(pet.photo || null);
         setError('');
@@ -186,7 +188,7 @@ export default function Pets() {
 
     const openTreatments = (pet) => {
         setTreatmentPetId(pet.id);
-        setTForm({ treatment_type: 'deworming', date_applied: todayISO(), product: '' });
+        setTForm({ treatment_type: 'deworming', date_applied: todayISO(), next_dose: '', product: '' });
         setTError('');
     };
     const closeTreatments = () => setTreatmentPetId(null);
@@ -200,14 +202,16 @@ export default function Pets() {
         }
         setTSaving(true);
         try {
-            await createTreatment({
+            const payload = {
                 pet: treatmentPetId,
                 treatment_type: tForm.treatment_type,
                 date_applied: tForm.date_applied,
                 product: tForm.product.trim(),
-            });
+            };
+            if (tForm.next_dose) payload.next_dose = tForm.next_dose;
+            await createTreatment(payload);
             await fetchPets();
-            setTForm({ treatment_type: tForm.treatment_type, date_applied: todayISO(), product: '' });
+            setTForm({ treatment_type: tForm.treatment_type, date_applied: todayISO(), next_dose: '', product: '' });
         } catch (e) {
             console.error(e);
             setTError('No se pudo guardar. Intentá de nuevo.');
@@ -365,8 +369,8 @@ export default function Pets() {
                                         </div>
                                     </div>
 
-                                    {/* Chips reales: alimentación, hábitat, convivencia */}
-                                    {(pet.feeding || pet.habitat || pet.lives_with_animals) && (
+                                    {/* Chips reales: alimentación, hábitat, convivencia, carácter */}
+                                    {(pet.feeding || pet.habitat || pet.lives_with_animals || pet.temperament) && (
                                         <div className="pet-chips-row">
                                             {pet.feeding && (
                                                 <span className="pet-chip">
@@ -380,6 +384,11 @@ export default function Pets() {
                                             )}
                                             {pet.lives_with_animals && (
                                                 <span className="pet-chip">🐾 Convive con otros animales</span>
+                                            )}
+                                            {pet.temperament && (
+                                                <span className="pet-chip">
+                                                    {pet.temperament === 'friendly' ? '😊' : pet.temperament === 'shy' ? '🙈' : pet.temperament === 'nervous' ? '😰' : pet.temperament === 'protective' ? '🛡️' : '🎾'} {pet.temperament_display || pet.temperament}
+                                                </span>
                                             )}
                                         </div>
                                     )}
@@ -401,7 +410,7 @@ export default function Pets() {
                                     <div className="pet-actions-row">
                                         <button
                                             className="pet-btn pet-btn-ghost"
-                                            onClick={() => navigate('/history')}
+                                            onClick={() => navigate(`/history?pet=${pet.id}`)}
                                         >
                                             📋 Ver historial
                                         </button>
@@ -601,6 +610,22 @@ export default function Pets() {
                             </div>
 
                             <div className="form-group full">
+                                <label>Carácter</label>
+                                <select
+                                    name="temperament"
+                                    value={form.temperament}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">— Seleccioná —</option>
+                                    <option value="friendly">😊 Amigable</option>
+                                    <option value="shy">🙈 Tímido</option>
+                                    <option value="nervous">😰 Nervioso</option>
+                                    <option value="protective">🛡️ Protector</option>
+                                    <option value="playful">🎾 Juguetón</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group full">
                                 <label>Alergias</label>
                                 <input
                                     name="allergies"
@@ -707,6 +732,18 @@ export default function Pets() {
                                         onChange={(e) => setTForm({ ...tForm, date_applied: e.target.value })}
                                     />
                                 </div>
+                            </div>
+                            <div className="form-group full">
+                                <label>Próxima dosis (opcional)</label>
+                                <input
+                                    type="date"
+                                    value={tForm.next_dose}
+                                    min={tForm.date_applied || todayISO()}
+                                    onChange={(e) => setTForm({ ...tForm, next_dose: e.target.value })}
+                                />
+                                <small style={{ display: 'block', marginTop: 4, fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)' }}>
+                                    Si la cargás, te aparecerá un recordatorio en Mi Panel.
+                                </small>
                             </div>
                             <div className="form-group full">
                                 <label>Marca / nota (opcional)</label>

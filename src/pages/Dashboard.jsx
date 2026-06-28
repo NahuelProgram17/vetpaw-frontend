@@ -125,11 +125,16 @@ export default function Dashboard() {
         return { kind: "ok", count: vaccines.length };
     })();
 
-    // Último antiparasitario - sin inventar próximo
+    // Antiparasitarios: priorizar PRÓXIMO si hay next_dose futuro; sino mostrar último
     const allTreatments = pets.flatMap(p => (p.treatments || []).map(t => ({ ...t, pet_name: p.name })));
     const lastTreatment = allTreatments
         .filter(t => t.date_applied)
         .sort((a, b) => new Date(b.date_applied) - new Date(a.date_applied))[0] || null;
+    // Próximo antiparasitario: el next_dose futuro más cercano
+    const nextTreatment = allTreatments
+        .filter(t => t.next_dose && new Date(t.next_dose) >= now)
+        .sort((a, b) => new Date(a.next_dose) - new Date(b.next_dose))[0] || null;
+    const daysToNextTreatment = nextTreatment ? daysUntil(nextTreatment.next_dose) : null;
 
     // Actividad reciente - mix de appts + vacs + treatments
     const recentActivity = (() => {
@@ -443,19 +448,24 @@ export default function Dashboard() {
                                 {vaccineStatus.kind === "ok" && <span style={{ width: 28, height: 28, borderRadius: "50%", background: G2, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", fontWeight: 800, flexShrink: 0 }}>✓</span>}
                             </div>
 
-                            {/* Último antiparasitario (sin inventar próximo) */}
+                            {/* Antiparasitario: muestra PRÓXIMO si hay next_dose futuro, sino ÚLTIMO aplicado */}
                             <div style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 12, display: "flex", alignItems: "center", gap: 12 }}>
-                                <div style={{ width: 38, height: 38, borderRadius: "50%", background: lastTreatment ? "rgba(255,152,0,0.15)" : "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", flexShrink: 0 }}>🛡️</div>
+                                <div style={{ width: 38, height: 38, borderRadius: "50%", background: nextTreatment ? "rgba(76,175,80,0.15)" : lastTreatment ? "rgba(255,152,0,0.15)" : "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", flexShrink: 0 }}>🛡️</div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <p style={{ fontSize: "0.88rem", fontWeight: 700, color: TEXT, margin: 0 }}>
-                                        {lastTreatment ? "Último antiparasitario" : "Sin antiparasitarios"}
+                                        {nextTreatment
+                                            ? (daysToNextTreatment === 0 ? "Antiparasitario hoy" : daysToNextTreatment === 1 ? "Antiparasitario mañana" : `Próximo antiparasitario en ${daysToNextTreatment} días`)
+                                            : lastTreatment ? "Último antiparasitario" : "Sin antiparasitarios"}
                                     </p>
                                     <p style={{ fontSize: "0.74rem", color: MUTED, margin: 0, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                        {lastTreatment
-                                            ? `${relTime(lastTreatment.date_applied)} · ${lastTreatment.product || lastTreatment.treatment_type_display || "Aplicado"}`
-                                            : "Cargá el próximo desde Mascotas"}
+                                        {nextTreatment
+                                            ? `${nextTreatment.product || nextTreatment.treatment_type_display || "Aplicación"} · ${nextTreatment.pet_name}`
+                                            : lastTreatment
+                                                ? `${relTime(lastTreatment.date_applied)} · ${lastTreatment.product || lastTreatment.treatment_type_display || "Aplicado"}`
+                                                : "Cargá el próximo desde Mascotas"}
                                     </p>
                                 </div>
+                                {nextTreatment && daysToNextTreatment <= 7 && <span style={{ width: 28, height: 28, borderRadius: "50%", background: O2, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", fontWeight: 800, flexShrink: 0 }}>!</span>}
                             </div>
 
                             <button onClick={() => navigate("/pets")} style={{ ...linkSt(G2), textAlign: "left", padding: "4px 0", marginTop: 2 }}>Gestionar desde Mascotas →</button>
