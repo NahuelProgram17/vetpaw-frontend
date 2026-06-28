@@ -132,12 +132,14 @@ export default function Navbar() {
         { to: '/mascotas-perdidas', icon: '🐾', label: 'Mascotas perdidas' },
         { to: '/messages',     icon: '💬', label: 'Mensajes', badge: unreadMessages },
         { to: '/profile',      icon: '👤', label: 'Mi perfil' },
+        { to: '/configuracion', icon: '⚙️', label: 'Configuración' },
     ]
 
     const clinicLinks = [
         { to: '/clinic/dashboard', icon: '🏠', label: 'Mi panel' },
         { to: '/messages',         icon: '💬', label: 'Mensajes', badge: unreadMessages },
         { to: '/profile',          icon: '👤', label: 'Mi perfil' },
+        { to: '/configuracion',    icon: '⚙️', label: 'Configuración' },
     ]
 
     const guestLinks = [
@@ -487,6 +489,7 @@ export default function Navbar() {
                                     )}
                                 </Link>
                                 <Link to="/profile" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi perfil</Link>
+                                <Link to="/configuracion" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>⚙️ Configuración</Link>
                                 <InstallPWA />
                                 <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 4px' }}>|</span>
                                 <span style={{ ...linkStyle, color: G1, fontWeight: 700 }}>{user.first_name || user.username}</span>
@@ -513,6 +516,7 @@ export default function Navbar() {
                                     )}
                                 </Link>
                                 <Link to="/profile" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi perfil</Link>
+                                <Link to="/configuracion" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>⚙️ Configuración</Link>
                                 <InstallPWA />
                                 <div style={{ position: 'relative' }} ref={notifRef}>
                                     <button onClick={handleOpenNotif} style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', fontSize: 16 }}>
