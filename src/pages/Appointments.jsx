@@ -578,11 +578,12 @@ export default function Appointments() {
                 @media (max-width: 1000px) { .appts-layout { grid-template-columns: 1fr; } .appts-stats { grid-template-columns: repeat(2, 1fr); } }
                 @media (max-width: 520px) { .appts-stats { grid-template-columns: 1fr; } }
 
-                .appts-page { min-height: 100vh; background: #1a1a2e; font-family: 'Nunito', sans-serif; position: relative; overflow-x: hidden; padding-bottom: 60px; }
+                .appts-page { min-height: 100vh; background: #1a1a2e; font-family: 'Nunito', sans-serif; position: relative; overflow-x: hidden; padding-bottom: 60px; width: 100%; max-width: 100vw; box-sizing: border-box; }
+                .appts-page * { box-sizing: border-box; }
                 .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.08; pointer-events: none; }
                 .b1 { width: 500px; height: 500px; background: #ffd93d; top: -100px; left: -100px; }
                 .b2 { width: 400px; height: 400px; background: #ff6b6b; bottom: -100px; right: -100px; }
-                .appts-inner { max-width: 860px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
+                .appts-inner { max-width: 860px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; width: 100%; box-sizing: border-box; }
 
                 .appts-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
                 .appts-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
@@ -716,14 +717,18 @@ export default function Appointments() {
                     .star-btn { font-size: 2.8rem; }
                     .slots-grid { gap: 6px; }
                     .slot-btn { padding: 7px 11px; font-size: 0.82rem; }
+                    .appt-scard { padding: 16px 14px; max-width: 100%; box-sizing: border-box; }
+                    .appt-scard div, .appt-scard p, .appt-scard span { word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
+                    .appt-scard p { white-space: normal !important; }
                 }
 
                 @media (max-width: 380px) {
                     .appts-inner { padding: 12px 10px; }
                     .appts-title { font-size: 1.3rem; }
                     .appt-card { padding: 14px 12px; }
+                    .appt-scard { padding: 14px 12px; }
                 }
             `}</style>
         </div>
     );
-}
+}
