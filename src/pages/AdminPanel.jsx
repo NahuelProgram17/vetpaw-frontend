@@ -58,7 +58,7 @@ export default function AdminPanel() {
 
     if (!data) return null
 
-    const { global: g, new_users_by_day, appts_by_day, appts_by_status, top_clinics, last_users, security } = data
+    const { global: g, new_users_by_day, appts_by_day, appts_by_status, top_clinics, last_users, security, pending_clinics = [] } = data
 
     const StatCard = ({ icon, label, value, sub, color = G1 }) => (
         <div style={{ background: CARD, border: `1px solid rgba(255,255,255,0.07)`, borderRadius: 16, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -103,6 +103,26 @@ export default function AdminPanel() {
     const maxAppts = Math.max(...appts_by_day.map(d => d.count), 1)
     const maxUsers = Math.max(...new_users_by_day.map(d => d.count), 1)
 
+    const handleApprove = async (userId, name) => {
+        if (!window.confirm(`¿Aprobar la clínica "${name}"? Va a poder iniciar sesión inmediatamente.`)) return
+        try {
+            await api.post(`/users/admin/approve-clinic/${userId}/`)
+            await fetchData()
+        } catch {
+            alert('No se pudo aprobar. Intentá de nuevo.')
+        }
+    }
+
+    const handleReject = async (userId, name) => {
+        if (!window.confirm(`¿Rechazar y ELIMINAR la solicitud de "${name}"? Esta acción no se puede deshacer.`)) return
+        try {
+            await api.post(`/users/admin/reject-clinic/${userId}/`)
+            await fetchData()
+        } catch {
+            alert('No se pudo rechazar. Intentá de nuevo.')
+        }
+    }
+
     return (
         <div style={{ minHeight: '100vh', background: DARK, fontFamily: FONT, paddingBottom: 60 }}>
             <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
@@ -120,11 +140,19 @@ export default function AdminPanel() {
                 </div>
 
                 {/* Pestañas */}
-                <div style={{ display: 'flex', gap: 10, marginBottom: 28, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                    {[{ k: 'dashboard', l: '📊 Dashboard' }, { k: 'ads', l: '📢 Anuncios' }, { k: 'blog', l: '📝 Blog' }].map(t => (
+                <div style={{ display: 'flex', gap: 10, marginBottom: 28, borderBottom: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
+                    {[
+                        { k: 'dashboard', l: '📊 Dashboard' },
+                        { k: 'pending',   l: `🏥 Pendientes${pending_clinics.length > 0 ? ` (${pending_clinics.length})` : ''}` },
+                        { k: 'ads',       l: '📢 Anuncios' },
+                        { k: 'blog',      l: '📝 Blog' },
+                    ].map(t => (
                         <button key={t.k} onClick={() => setTab(t.k)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: FONT, fontWeight: 800, fontSize: 14, padding: '10px 4px', color: tab === t.k ? '#fff' : 'rgba(255,255,255,0.4)', borderBottom: `3px solid ${tab === t.k ? G1 : 'transparent'}`, marginBottom: -1 }}>
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: FONT, fontWeight: 800, fontSize: 14, padding: '10px 4px', color: tab === t.k ? '#fff' : 'rgba(255,255,255,0.4)', borderBottom: `3px solid ${tab === t.k ? G1 : 'transparent'}`, marginBottom: -1, position: 'relative' }}>
                             {t.l}
+                            {t.k === 'pending' && pending_clinics.length > 0 && tab !== 'pending' && (
+                                <span style={{ position: 'absolute', top: 4, right: -6, width: 8, height: 8, borderRadius: '50%', background: '#ff6b6b' }} />
+                            )}
                         </button>
                     ))}
                 </div>
@@ -132,6 +160,46 @@ export default function AdminPanel() {
                 {tab === 'ads' && <AdsManager />}
 
                 {tab === 'blog' && <BlogManager />}
+
+                {tab === 'pending' && (<>
+                    <SectionTitle>🏥 Veterinarias pendientes de aprobación</SectionTitle>
+                    {pending_clinics.length === 0 ? (
+                        <div style={{ background: CARD, border: `1px solid rgba(255,255,255,0.07)`, borderRadius: 16, padding: '40px 24px', textAlign: 'center' }}>
+                            <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+                            <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.7)', fontWeight: 700, marginBottom: 6 }}>No hay solicitudes pendientes</p>
+                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Cuando una clínica se registre te va a aparecer acá para aprobarla o rechazarla.</p>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'grid', gap: 14 }}>
+                            {pending_clinics.map(c => (
+                                <div key={c.user_id} style={{ background: CARD, border: `1px solid rgba(255,217,61,0.25)`, borderRadius: 16, padding: 20 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+                                        <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                                <span style={{ fontSize: 11, fontWeight: 800, color: '#ffd93d', background: 'rgba(255,217,61,0.12)', padding: '3px 10px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Pendiente</span>
+                                                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{c.date_joined}</span>
+                                            </div>
+                                            <h3 style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 4 }}>{c.clinic_name}</h3>
+                                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>👤 {c.username} · ✉️ {c.email}</p>
+                                            {c.clinic_phone && <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>📞 {c.clinic_phone}</p>}
+                                            {c.clinic_address && <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>📍 {c.clinic_address}, {c.clinic_locality}, {c.clinic_province}</p>}
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                        <button onClick={() => handleReject(c.user_id, c.clinic_name)}
+                                            style={{ background: 'transparent', border: '1.5px solid rgba(255,107,107,0.4)', color: '#ff6b6b', borderRadius: 10, padding: '9px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: FONT }}>
+                                            ✕ Rechazar
+                                        </button>
+                                        <button onClick={() => handleApprove(c.user_id, c.clinic_name)}
+                                            style={{ background: `linear-gradient(135deg, ${G1}, #66BB6A)`, border: 'none', color: '#fff', borderRadius: 10, padding: '9px 22px', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: FONT, boxShadow: '0 4px 14px rgba(76,175,80,0.25)' }}>
+                                            ✓ Aprobar
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </>)}
 
                 {tab === 'dashboard' && (<>
                 {/* Stats globales */}
@@ -247,4 +315,4 @@ export default function AdminPanel() {
             </div>
         </div>
     )
-}
+}

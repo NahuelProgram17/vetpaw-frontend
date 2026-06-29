@@ -173,7 +173,7 @@ export default function Profile() {
                                 </label>
                             </div>
                             <div style={{ flex: 1 }}>
-                                <h1 style={{ fontSize: 26, fontWeight: 900, marginBottom: 4 }}>{fullName} {profile?.email_verified && <span title="Email verificado" style={{ fontSize: 14, color: G1 }}>✓</span>}</h1>
+                                <h1 style={{ fontSize: 26, fontWeight: 900, marginBottom: 4 }}>{fullName}</h1>
                                 <p style={{ color: MUTED2, fontSize: 14, marginBottom: 12 }}>🐾 {roleLabel}</p>
                                 <div style={{ display: "flex", gap: 16, flexWrap: "wrap", fontSize: 12.5, color: MUTED2 }}>
                                     <span>✉️ {profile?.email}</span>

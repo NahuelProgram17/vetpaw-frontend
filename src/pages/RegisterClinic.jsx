@@ -270,12 +270,14 @@ export default function RegisterClinic() {
                 {step === 2 && (
                     <div className="success-screen">
                         <div className="success-emoji">🏥</div>
-                        <h2 className="success-title">¡Clínica registrada!</h2>
+                        <h2 className="success-title">¡Solicitud enviada!</h2>
                         <p className="success-msg">
-                            Tu clínica fue registrada con éxito. Ya podés iniciar sesión y empezar a recibir turnos
+                            Tu clínica fue registrada y está <strong style={{ color: '#ffd93d' }}>pendiente de aprobación</strong> por nuestro equipo. Vamos a revisar tu solicitud y darte acceso a la plataforma a la brevedad.
+                            <br /><br />
+                            Te avisaremos por mail cuando esté lista.
                         </p>
                         <button className="auth-btn" onClick={() => navigate("/login")}>
-                            Ir al login →
+                            Ir al inicio →
                         </button>
                     </div>
                 )}
@@ -352,4 +354,4 @@ export default function RegisterClinic() {
     `}</style>
         </div>
     );
-}
+}

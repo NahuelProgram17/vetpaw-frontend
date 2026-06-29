@@ -9,9 +9,6 @@ export default function Login() {
     const [form, setForm] = useState({ username: "", password: "" });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [showResend, setShowResend] = useState(false);
-    const [resendMsg, setResendMsg] = useState("");
-    const [resendEmail, setResendEmail] = useState("");
 
     const handleChange = (e) =>
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -29,26 +26,10 @@ export default function Login() {
             }
         } catch (err) {
             const data = err.response?.data;
-            const msg = data?.email?.[0] || data?.detail || "Credenciales incorrectas. Intentá de nuevo.";
+            const msg = data?.detail || "Credenciales incorrectas. Intentá de nuevo.";
             setError(msg);
-            if (data?.email?.[0]?.includes('verificar')) {
-                setShowResend(true);
-            }
         } finally {
             setLoading(false);
-        }
-    };
-    const handleResend = async (e) => {
-        e.preventDefault();
-        try {
-            await fetch("http://localhost:8000/api/users/resend-verification/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: resendEmail }),
-            });
-            setResendMsg("Email reenviado. Revisá tu casilla 📬");
-        } catch {
-            setResendMsg("Hubo un error. Intentá de nuevo.");
         }
     };
     return (
@@ -69,23 +50,6 @@ export default function Login() {
                 {error && (
                     <div className="auth-error">
                         <span>⚠️</span> {error}
-                    </div>
-                )}
-
-                {showResend && (
-                    <div className="resend-box">
-                        <p>¿No recibiste el email?</p>
-                        <form onSubmit={handleResend} className="resend-form">
-                            <input
-                                type="email"
-                                placeholder="Tu email"
-                                value={resendEmail}
-                                onChange={(e) => setResendEmail(e.target.value)}
-                                required
-                            />
-                            <button type="submit">Reenviar 📬</button>
-                        </form>
-                        {resendMsg && <p className="resend-msg">{resendMsg}</p>}
                     </div>
                 )}
 

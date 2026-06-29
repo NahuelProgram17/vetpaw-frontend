@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 const STEPS = ["Cuenta", "Personal", "Listo 🎉"];
 
 export default function Register() {
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const [step, setStep] = useState(0);
     const [form, setForm] = useState({
@@ -55,7 +57,14 @@ export default function Register() {
         setLoading(true);
         try {
             await registerUser(form);
-            setStep(2);
+            // Auto-login después del registro exitoso (sin verificación de mail)
+            try {
+                await login(form.username, form.password);
+                navigate("/dashboard");
+            } catch {
+                // Si el auto-login falla por algún motivo, mostramos paso de éxito y mandamos al login
+                setStep(2);
+            }
         } catch (err) {
             const data = err.response?.data;
             const msg = data
@@ -230,13 +239,13 @@ export default function Register() {
                     </div>
                 )}
 
-                {/* ── Step 2: Éxito ── */}
+                {/* ── Step 2: Éxito (fallback si auto-login falla) ── */}
                 {step === 2 && (
                     <div className="success-screen">
                         <div className="success-emoji">🐾</div>
                         <h2 className="success-title">¡Bienvenido/a a VetPaw!</h2>
                         <p className="success-msg">
-                            Tu cuenta fue creada con éxito. Te enviamos un email de verificación — revisá tu casilla y hacé clic en el link para activar tu cuenta.
+                            Tu cuenta fue creada con éxito. Ya podés iniciar sesión y empezar a cuidar a tus mascotas 🐾
                         </p>
                         <button className="auth-btn" onClick={() => navigate("/login")}>
                             Ir al login →
@@ -388,4 +397,4 @@ export default function Register() {
     `}</style>
         </div>
     );
-}
+}
