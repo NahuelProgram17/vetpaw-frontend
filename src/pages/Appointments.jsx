@@ -695,7 +695,7 @@ export default function Appointments() {
                     .appts-header { flex-direction: column; align-items: flex-start; margin-bottom: 16px; }
                     .appts-title { font-size: 1.5rem; }
                     .appts-header .btn-primary { width: 100%; text-align: center; }
-                    .filters { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+                    .filters { flex-wrap: wrap; gap: 6px; padding-bottom: 4px; }
                     .filters::-webkit-scrollbar { display: none; }
                     .filter-btn { flex-shrink: 0; padding: 6px 12px; font-size: 0.8rem; }
                     .appt-card { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 14px; border-radius: 16px; }
@@ -704,6 +704,8 @@ export default function Appointments() {
                     .appt-day { font-size: 1.3rem; }
                     .appt-month { font-size: 0.72rem; }
                     .appt-time { font-size: 0.72rem; margin-top: 0; margin-left: auto; }
+                    .appt-scard p { white-space: normal !important; }
+                    .appt-card *, .appt-scard *, .appts-inner * { min-width: 0; max-width: 100%; }
                     .appt-info { width: 100%; }
                     .appt-actions { flex-direction: row; width: 100%; justify-content: flex-end; }
                     .empty-state { padding: 48px 16px; }
@@ -731,4 +733,4 @@ export default function Appointments() {
             `}</style>
         </div>
     );
-}
+}
