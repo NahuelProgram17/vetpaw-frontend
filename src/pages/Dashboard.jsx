@@ -568,6 +568,7 @@ export default function Dashboard() {
                     .dash-stats { grid-template-columns: 1fr 1fr !important; }
                     .dash-grid-3 { grid-template-columns: 1fr !important; }
                     .dash-grid-2 { grid-template-columns: 1fr !important; }
+                    .dash-grid-2 > div, .dash-grid-3 > div, .dash-grid-2 *, .dash-grid-3 * { min-width: 0; overflow-wrap: break-word; word-wrap: break-word; }
                     .dash-header h1 { font-size: 1.6rem !important; }
                 }
                 @media (max-width: 380px) {
