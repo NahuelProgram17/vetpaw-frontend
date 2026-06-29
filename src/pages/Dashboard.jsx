@@ -211,7 +211,7 @@ export default function Dashboard() {
     const linkSt = (color) => ({ background: "transparent", border: "none", color, fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: FONT, whiteSpace: "nowrap" });
 
     return (
-        <div style={{ minHeight: "100vh", background: BG, fontFamily: FONT, color: TEXT, paddingBottom: 140, position: "relative" }}>
+        <div style={{ minHeight: "100vh", background: BG, fontFamily: FONT, color: TEXT, paddingBottom: 200, position: "relative" }}>
             <div className="dash-inner" style={{ maxWidth: 1200, margin: "0 auto", padding: "90px 24px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
 
                 {/* ────────── Header ────────── */}
