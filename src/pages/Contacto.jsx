@@ -35,8 +35,23 @@ export default function Contacto() {
     return (
         <div style={{ minHeight: '100vh', background: '#0f1923', fontFamily: FONT, color: '#fff' }}>
             <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+            <style>{`
+                @media (max-width: 600px) {
+                    .ct-header { padding: 32px 16px 28px !important; }
+                    .ct-header h1 { font-size: 26px !important; }
+                    .ct-header img { height: 60px !important; }
+                    .ct-body { padding: 28px 14px 60px !important; }
+                    .ct-info-grid { grid-template-columns: 1fr !important; margin-bottom: 28px !important; }
+                    .ct-form-card { padding: 22px !important; }
+                    .ct-form-row { grid-template-columns: 1fr !important; }
+                }
+                @media (max-width: 380px) {
+                    .ct-header h1 { font-size: 22px !important; }
+                    .ct-form-card { padding: 18px !important; }
+                }
+            `}</style>
 
-            <div style={{ background: 'linear-gradient(135deg, #0a1520, #162032)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '48px 40px 40px', textAlign: 'center' }}>
+            <div className="ct-header" style={{ background: 'linear-gradient(135deg, #0a1520, #162032)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '48px 40px 40px', textAlign: 'center' }}>
                 <Link to="/" style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, textDecoration: 'none', display: 'inline-block', marginBottom: 24 }}>← Volver al inicio</Link>
                 <div style={{ marginBottom: 16 }}>
                     <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 80, width: 'auto' }} />
@@ -49,10 +64,10 @@ export default function Contacto() {
                 </p>
             </div>
 
-            <div style={{ maxWidth: 680, margin: '0 auto', padding: '48px 40px 80px' }}>
+            <div className="ct-body" style={{ maxWidth: 680, margin: '0 auto', padding: '48px 40px 80px' }}>
 
                 {/* Info de contacto */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 40 }}>
+                <div className="ct-info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 40 }}>
                     {[
                         { icon: '✉️', label: 'Email', value: 'vetpawapp@gmail.com' },
                         { icon: '📍', label: 'País', value: 'Argentina' },
@@ -76,7 +91,7 @@ export default function Contacto() {
                         </Link>
                     </div>
                 ) : (
-                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '36px' }}>
+                    <div className="ct-form-card" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '36px' }}>
                         <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 24 }}>Envianos un mensaje</h2>
 
                         {error && (
@@ -86,7 +101,7 @@ export default function Contacto() {
                         )}
 
                         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                            <div className="ct-form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                 <div>
                                     <label style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 8 }}>Nombre *</label>
                                     <input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Tu nombre"

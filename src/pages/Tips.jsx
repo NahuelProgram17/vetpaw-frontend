@@ -69,11 +69,27 @@ export default function Tips() {
 
     return (
         <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg, #080808 0%, #0b1a0b 35%, #0f0a00 100%)', fontFamily: "'Nunito', sans-serif" }}>
+            <style>{`
+                @media (max-width: 600px) {
+                    .tips-header { padding: 32px 16px 32px !important; }
+                    .tips-header h1 { font-size: 34px !important; }
+                    .tips-header img { height: 110px !important; }
+                    .tips-header p { font-size: 14px !important; }
+                    .tips-filters { padding: 0 14px 28px !important; }
+                    .tips-grid-wrap { padding: 0 14px 80px !important; }
+                    .tips-section h2 { font-size: 24px !important; }
+                }
+                @media (max-width: 380px) {
+                    .tips-header h1 { font-size: 28px !important; }
+                    .tips-header img { height: 90px !important; }
+                    .tips-section h2 { font-size: 21px !important; }
+                }
+            `}</style>
 
             <div style={{ height: 4, background: 'linear-gradient(90deg, #ff6b35 0%, #ffd93d 25%, #4ade80 50%, #6bcaff 75%, #c084fc 100%)' }} />
 
             {/* HEADER */}
-            <div style={{ padding: '52px 40px 48px', position: 'relative', overflow: 'hidden', textAlign: 'center' }}>
+            <div className="tips-header" style={{ padding: '52px 40px 48px', position: 'relative', overflow: 'hidden', textAlign: 'center' }}>
                 <div style={{ position: 'absolute', top: -120, right: -120, width: 400, height: 400, background: 'radial-gradient(circle, rgba(255,107,53,0.15) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
                 <div style={{ position: 'absolute', bottom: -80, left: -60, width: 300, height: 300, background: 'radial-gradient(circle, rgba(74,222,128,0.1) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
 
@@ -101,7 +117,7 @@ export default function Tips() {
             </div>
 
             {/* FILTROS EN CHIPS */}
-            <div style={{ padding: '0 40px 40px', maxWidth: 1100, margin: '0 auto' }}>
+            <div className="tips-filters" style={{ padding: '0 40px 40px', maxWidth: 1100, margin: '0 auto' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
                     {categorias.map(cat => {
                         const activo = categoriaActiva === cat
@@ -125,7 +141,7 @@ export default function Tips() {
             </div>
 
             {/* CONTENIDO */}
-            <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px 100px' }}>
+            <div className="tips-grid-wrap" style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px 100px' }}>
 
                 {mostrarEmerg && (
                     <Seccion badge="🚨 Primeros auxilios" badgeColor="#ff6b6b" badgeBg="rgba(255,107,107,0.12)" badgeBorder="rgba(255,107,107,0.3)" titulo="Guías de emergencia" subtitulo="Leé esto antes de que lo necesites. En una emergencia, cada segundo cuenta.">
@@ -164,7 +180,7 @@ export default function Tips() {
 
 function Seccion({ badge, badgeColor, badgeBg, badgeBorder, titulo, subtitulo, children }) {
     return (
-        <div style={{ marginBottom: 80 }}>
+        <div className="tips-section" style={{ marginBottom: 80 }}>
             <div style={{ textAlign: 'center', marginBottom: 40 }}>
                 <span style={{ display: 'inline-block', background: badgeBg, border: `1px solid ${badgeBorder}`, color: badgeColor, fontSize: 12, fontWeight: 900, letterSpacing: 2, padding: '8px 20px', borderRadius: 99, textTransform: 'uppercase', marginBottom: 16 }}>{badge}</span>
                 <h2 style={{ fontSize: 34, fontWeight: 900, color: '#fff', marginBottom: 10, letterSpacing: -1 }}>{titulo}</h2>

@@ -44,7 +44,7 @@ export default function AnunciarVetPaw() {
         <div style={{ minHeight: '100vh', background: '#0f1923', fontFamily: FONT, color: '#fff' }}>
             <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-            <div style={{ background: 'linear-gradient(135deg, #0a1520, #162032)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '48px 40px 40px', textAlign: 'center' }}>
+            <div style={{ background: 'linear-gradient(135deg, #0a1520, #162032)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: 'clamp(28px, 6vw, 48px) clamp(14px, 5vw, 40px) clamp(28px, 5vw, 40px)', textAlign: 'center' }}>
                 <Link to="/" style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, textDecoration: 'none', display: 'inline-block', marginBottom: 24 }}>← Volver al inicio</Link>
                 <div style={{ marginBottom: 16 }}>
                     <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 80, width: 'auto' }} />
@@ -57,7 +57,7 @@ export default function AnunciarVetPaw() {
                 </p>
             </div>
 
-            <div style={{ maxWidth: 780, margin: '0 auto', padding: '48px 40px 80px' }}>
+            <div style={{ maxWidth: 780, margin: '0 auto', padding: 'clamp(28px, 6vw, 48px) clamp(14px, 5vw, 40px) clamp(48px, 8vw, 80px)' }}>
 
                 {/* Stats */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 40 }}>

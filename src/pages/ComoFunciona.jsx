@@ -56,9 +56,24 @@ export default function ComoFunciona() {
     return (
         <div style={{ minHeight: '100vh', background: '#0f1923', fontFamily: FONT, color: '#fff' }}>
             <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+            <style>{`
+                @media (max-width: 600px) {
+                    .cf-header { padding: 32px 16px 28px !important; }
+                    .cf-header h1 { font-size: 26px !important; }
+                    .cf-header img { height: 60px !important; }
+                    .cf-tabs-wrap { padding: 20px 14px 0 !important; }
+                    .cf-tabs-row { gap: 8px !important; }
+                    .cf-tabs-row button { font-size: 13px !important; padding: 12px 10px !important; }
+                    .cf-content { padding: 24px 14px 60px !important; }
+                }
+                @media (max-width: 380px) {
+                    .cf-header h1 { font-size: 22px !important; }
+                    .cf-tabs-row button { font-size: 12px !important; padding: 10px 8px !important; }
+                }
+            `}</style>
 
             {/* Header */}
-            <div style={{ background: 'linear-gradient(135deg, #0a1520, #162032)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '48px 24px 40px', textAlign: 'center' }}>
+            <div className="cf-header" style={{ background: 'linear-gradient(135deg, #0a1520, #162032)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '48px 24px 40px', textAlign: 'center' }}>
                 <Link to="/" style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, textDecoration: 'none', display: 'inline-block', marginBottom: 24 }}>← Volver al inicio</Link>
                 <div style={{ marginBottom: 16 }}>
                     <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 80, width: 'auto' }} />
@@ -72,15 +87,15 @@ export default function ComoFunciona() {
             </div>
 
             {/* Selector de público */}
-            <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px 0' }}>
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <div className="cf-tabs-wrap" style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px 0' }}>
+                <div className="cf-tabs-row" style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
                     {tabBtn('dueno', '🐾 Soy dueño')}
                     {tabBtn('clinica', '🏥 Soy veterinaria')}
                 </div>
             </div>
 
             {/* Contenido */}
-            <div style={{ maxWidth: 900, margin: '0 auto', padding: '36px 24px 80px' }}>
+            <div className="cf-content" style={{ maxWidth: 900, margin: '0 auto', padding: '36px 24px 80px' }}>
 
                 {tab === 'dueno' && (
                     <div>

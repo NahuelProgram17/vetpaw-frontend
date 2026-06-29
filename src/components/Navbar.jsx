@@ -450,8 +450,18 @@ export default function Navbar() {
     return (
         <>
             <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+            <style>{`
+                @media (max-width: 480px) {
+                    .vp-nav-main { padding: 0 16px !important; }
+                    .vp-nav-logo { height: 48px !important; }
+                }
+                @media (max-width: 360px) {
+                    .vp-nav-main { padding: 0 12px !important; }
+                    .vp-nav-logo { height: 42px !important; }
+                }
+            `}</style>
 
-            <nav style={{
+            <nav className="vp-nav-main" style={{
                 background: '#0a1520',
                 borderBottom: '1px solid rgba(255,255,255,0.06)',
                 padding: '0 28px', height: 68,
@@ -460,7 +470,7 @@ export default function Navbar() {
                 backdropFilter: 'blur(12px)',
             }}>
                 <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
-                    <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 58, width: 'auto' }} />
+                    <img src="/logo_vetpaw.png" alt="VetPaw" className="vp-nav-logo" style={{ height: 58, width: 'auto' }} />
                 </Link>
 
                 {!isMobile && (
@@ -641,8 +651,9 @@ export default function Navbar() {
                             <button onClick={() => setMenuOpen(false)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'rgba(255,255,255,0.6)', width: 34, height: 34, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
                         </div>
                         <div style={{ padding: '8px 20px', flex: 1 }}>
-                            {drawerLinks.map(({ to, label, badge }) => (
+                            {drawerLinks.map(({ to, icon, label, badge }) => (
                                 <Link key={to} to={to} style={drawerLink} onClick={() => setMenuOpen(false)}>
+                                    {icon && <span style={{ marginRight: 12, fontSize: 18 }}>{icon}</span>}
                                     <span style={{ flex: 1 }}>{label}</span>
                                     {badge > 0 && (
                                         <span style={{ background: O1, color: '#fff', fontSize: 10, fontWeight: 800, borderRadius: 10, padding: '2px 7px' }}>{badge}</span>

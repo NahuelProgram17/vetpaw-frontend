@@ -73,7 +73,9 @@ export default function Home() {
                 @media (max-width: 768px) {
                     .hero-inner { padding: 40px 20px !important; }
                     .hero-title { font-size: 30px !important; letter-spacing: -0.5px !important; }
+                    .hero-title br { display: none !important; }
                     .hero-sub { font-size: 14px !important; }
+                    .hero-sub br { display: none !important; }
                     .hero-btns { flex-direction: column !important; gap: 10px !important; }
                     .hero-btns a { text-align: center !important; }
                     .stats-grid { grid-template-columns: repeat(2,1fr) !important; }
@@ -89,6 +91,9 @@ export default function Home() {
                     .grid-2 { grid-template-columns: 1fr !important; }
                     .senasa-inner { flex-direction: column !important; gap: 14px !important; }
                     .senasa-btn { width: 100% !important; text-align: center !important; margin-left: 0 !important; }
+                    .lost-teaser-inner { flex-direction: column !important; gap: 16px !important; align-items: stretch !important; }
+                    .lost-teaser-inner > div:first-child { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+                    .lost-teaser-btn { width: 100% !important; text-align: center !important; }
                     .banner-anun-inner { flex-direction: column !important; text-align: center !important; }
                     .banner-anun-stats { justify-content: center !important; }
                     .banner-anun-right { margin-left: 0 !important; margin-top: 16px !important; }
@@ -100,6 +105,15 @@ export default function Home() {
                     .contact-row select { width: 100% !important; }
                     .lost-filters { flex-direction: column !important; }
                     .prov-loc-row { flex-direction: column !important; }
+                }
+                @media (max-width: 400px) {
+                    .hero-inner { padding: 32px 16px !important; }
+                    .hero-title { font-size: 26px !important; }
+                    .stats-grid { grid-template-columns: 1fr !important; }
+                    .stats-grid > div { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+                    .stats-grid > div:last-child { border-bottom: none !important; }
+                    .section-pad { padding: 12px !important; }
+                    .footer-pad { padding: 20px 14px !important; }
                 }
             `}</style>
 
