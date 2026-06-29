@@ -626,11 +626,11 @@ export default function Navbar() {
             {isMobile && (
                 <>
                     {menuOpen && (
-                        <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 150, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)' }} />
+                        <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 250, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)' }} />
                     )}
                     <div style={{
                         position: 'fixed', top: 0, right: 0, bottom: 0,
-                        width: 280, zIndex: 160,
+                        width: 280, zIndex: 260,
                         background: '#0a1520',
                         borderLeft: '1px solid rgba(255,255,255,0.08)',
                         transform: menuOpen ? 'translateX(0)' : 'translateX(100%)',
