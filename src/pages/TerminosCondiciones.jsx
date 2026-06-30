@@ -18,7 +18,7 @@ export default function TerminosCondiciones() {
                 <h1 style={{ fontSize: 36, fontWeight: 900, marginBottom: 12, background: `linear-gradient(135deg, ${G1}, ${O1})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     Términos y Condiciones
                 </h1>
-                <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14 }}>Última actualización: 17 de mayo de 2026</p>
+                <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14 }}>Última actualización: 30 de junio de 2026</p>
             </div>
 
             {/* Contenido */}
@@ -33,7 +33,7 @@ export default function TerminosCondiciones() {
                 {[
                     {
                         num: '1.', titulo: 'Datos del titular',
-                        contenido: `VetPaw es un emprendimiento unipersonal operado bajo nombre de fantasía por:\n\n• Titular: Nahuel Pedreyra\n• DNI: 34.320.396\n• CUIL: 23-34320396-9\n• Correo electrónico: vetpawapp@gmail.com\n• País: Argentina`
+                        contenido: `VetPaw es un emprendimiento unipersonal operado bajo nombre de fantasía por:\n\n• Titular: Nahuel Pedreyra\n• Correo electrónico: vetpawapp@gmail.com\n• País: Argentina`
                     },
                     {
                         num: '2.', titulo: 'Descripción del servicio',
@@ -52,27 +52,31 @@ export default function TerminosCondiciones() {
                         contenido: `Al subir fotos, descripciones u otro contenido a VetPaw, otorgás una licencia no exclusiva para mostrar ese contenido en la plataforma. Sos responsable del contenido que publicás.\n\nVetPaw puede eliminar contenido que considere inapropiado, sin necesidad de notificación previa.`
                     },
                     {
-                        num: '6.', titulo: 'Responsabilidad médica',
-                        contenido: `VetPaw NO brinda servicios veterinarios ni asesoramiento médico para animales. La información de la plataforma es de carácter informativo y educativo.\n\nSiempre consultá con un veterinario matriculado ante cualquier problema de salud de tu mascota. VetPaw no se responsabiliza por decisiones tomadas en base a la información de la plataforma.`
+                        num: '6.', titulo: 'Responsabilidad médica y profesional',
+                        contenido: `VetPaw NO brinda servicios veterinarios ni asesoramiento médico para animales. La información de la plataforma es de carácter informativo y educativo.\n\nSiempre consultá con un veterinario matriculado ante cualquier problema de salud de tu mascota. VetPaw no se responsabiliza por decisiones tomadas en base a la información de la plataforma.\n\nLas veterinarias y profesionales que utilizan VetPaw son responsables exclusivos de:\n• Mantener su matrícula profesional vigente\n• La atención brindada a los pacientes\n• Los diagnósticos emitidos y tratamientos prescritos\n• El cumplimiento de las normativas sanitarias correspondientes\n\nVetPaw únicamente facilita la conexión entre dueños y profesionales, sin intervenir en la relación clínica.`
                     },
                     {
-                        num: '7.', titulo: 'Publicidad en VetPaw',
+                        num: '7.', titulo: 'Mascotas perdidas y encontradas',
+                        contenido: `VetPaw ofrece una sección para publicar avisos de mascotas perdidas o encontradas, con el único fin de ayudar a la comunidad. Sin embargo:\n\n• VetPaw NO verifica la veracidad de los avisos publicados\n• Los usuarios son responsables de la información que comparten\n• VetPaw NO garantiza la recuperación de mascotas perdidas ni el éxito de los contactos\n• Recomendamos verificar la identidad de la otra parte antes de coordinar encuentros\n• Nunca entregues dinero por adelantado en concepto de recompensa\n• Ante sospechas de estafa o suplantación de identidad, denunciá el caso a las autoridades correspondientes`
+                    },
+                    {
+                        num: '8.', titulo: 'Publicidad en VetPaw',
                         contenido: `VetPaw puede mostrar publicidad de terceros en la plataforma. Los anunciantes son responsables del contenido de sus avisos. VetPaw no garantiza ni avala los productos o servicios anunciados por terceros.`
                     },
                     {
-                        num: '8.', titulo: 'Modificaciones al servicio',
+                        num: '9.', titulo: 'Modificaciones al servicio',
                         contenido: `VetPaw puede modificar, suspender o discontinuar cualquier aspecto del servicio en cualquier momento. También podemos actualizar estos Términos y Condiciones. Te notificaremos de cambios importantes a través de la plataforma o por correo electrónico.`
                     },
                     {
-                        num: '9.', titulo: 'Limitación de responsabilidad',
+                        num: '10.', titulo: 'Limitación de responsabilidad',
                         contenido: `En la máxima medida permitida por la ley argentina, VetPaw no será responsable por daños indirectos, incidentales o consecuentes derivados del uso o imposibilidad de uso de la plataforma.`
                     },
                     {
-                        num: '10.', titulo: 'Ley aplicable',
+                        num: '11.', titulo: 'Ley aplicable',
                         contenido: `Estos Términos se rigen por las leyes de la República Argentina. Cualquier disputa será sometida a la jurisdicción de los tribunales ordinarios de la provincia de Buenos Aires.`
                     },
                     {
-                        num: '11.', titulo: 'Contacto',
+                        num: '12.', titulo: 'Contacto',
                         contenido: `Para consultas sobre estos Términos y Condiciones podés contactarnos en:\n• Email: vetpawapp@gmail.com`
                     },
                 ].map((s, i) => (

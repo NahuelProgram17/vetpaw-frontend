@@ -18,7 +18,7 @@ export default function Privacidad() {
                 <h1 style={{ fontSize: 36, fontWeight: 900, marginBottom: 12, background: `linear-gradient(135deg, ${G1}, ${O1})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     Política de Privacidad
                 </h1>
-                <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14 }}>Última actualización: 17 de mayo de 2026</p>
+                <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14 }}>Última actualización: 30 de junio de 2026</p>
             </div>
 
             {/* Contenido */}
@@ -33,7 +33,7 @@ export default function Privacidad() {
                 {[
                     {
                         num: '1.', titulo: 'Responsable del tratamiento de datos',
-                        contenido: `• Titular: Nahuel Pedreyra\n• DNI: 34.320.396\n• CUIL: 23-34320396-9\n• Email: vetpawapp@gmail.com\n• País: Argentina`
+                        contenido: `• Titular: Nahuel Pedreyra\n• Email: vetpawapp@gmail.com\n• País: Argentina`
                     },
                     {
                         num: '2.', titulo: 'Datos que recopilamos',
