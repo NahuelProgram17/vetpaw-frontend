@@ -361,7 +361,10 @@ export default function ClinicDashboard() {
                 } catch (e) { console.error(e); }
             }}>📄 Descargar agenda</button>
             {agendaTurnos.length === 0 ? (
-                <div className="agenda-empty"><span>📭</span><p>Sin turnos este día</p></div>
+                <div className="agenda-empty">
+                    <CalendarSmileIllustration />
+                    <p>Sin turnos este día</p>
+                </div>
             ) : (
                 <div className="agenda-list">
                     {agendaTurnos.map(appt => {
@@ -430,10 +433,38 @@ export default function ClinicDashboard() {
                 {!loading && tab === "turnos" && (
                     <>
                         <div className="vet-stats">
-                            <div className="vet-stat"><span className="stat-icon">⏳</span><div><p className="stat-num">{pending}</p><p className="stat-label">Pendientes</p></div></div>
-                            <div className="vet-stat"><span className="stat-icon">✅</span><div><p className="stat-num">{confirmed}</p><p className="stat-label">Confirmados</p></div></div>
-                            <div className="vet-stat"><span className="stat-icon">📋</span><div><p className="stat-num">{completed}</p><p className="stat-label">Realizados</p></div></div>
-                            <div className="vet-stat"><span className="stat-icon">❌</span><div><p className="stat-num">{noShow}</p><p className="stat-label">Ausentes</p></div></div>
+                            <div className="vet-stat stat-pending">
+                                <div className="stat-icon-wrap"><span className="stat-icon">📅</span></div>
+                                <div className="stat-content">
+                                    <p className="stat-num">{pending}</p>
+                                    <p className="stat-label">Pendientes</p>
+                                </div>
+                                <div className="stat-deco" aria-hidden="true">📅</div>
+                            </div>
+                            <div className="vet-stat stat-confirmed">
+                                <div className="stat-icon-wrap"><span className="stat-icon">✅</span></div>
+                                <div className="stat-content">
+                                    <p className="stat-num">{confirmed}</p>
+                                    <p className="stat-label">Confirmados</p>
+                                </div>
+                                <div className="stat-deco" aria-hidden="true">✅</div>
+                            </div>
+                            <div className="vet-stat stat-completed">
+                                <div className="stat-icon-wrap"><span className="stat-icon">📋</span></div>
+                                <div className="stat-content">
+                                    <p className="stat-num">{completed}</p>
+                                    <p className="stat-label">Realizados</p>
+                                </div>
+                                <div className="stat-deco" aria-hidden="true">📋</div>
+                            </div>
+                            <div className="vet-stat stat-noshow">
+                                <div className="stat-icon-wrap"><span className="stat-icon">❌</span></div>
+                                <div className="stat-content">
+                                    <p className="stat-num">{noShow}</p>
+                                    <p className="stat-label">Ausentes</p>
+                                </div>
+                                <div className="stat-deco" aria-hidden="true">👤</div>
+                            </div>
                         </div>
                         <div className="filters">
                             {["pending", "confirmed", "completed", "cancelled", "no_show", "all"].map(f => (
@@ -445,7 +476,10 @@ export default function ClinicDashboard() {
                         <div className="turnos-layout">
                             <div className="turnos-main">
                                 {filtered.length === 0 ? (
-                                    <div className="empty-state"><span>📭</span><p>No hay turnos {filter !== "all" ? `con estado "${STATUS_LABEL[filter]?.label}"` : ""}.</p></div>
+                                    <div className="empty-state empty-turnos">
+                                        <CalendarIllustration />
+                                        <p>No hay turnos {filter !== "all" ? `con estado "${STATUS_LABEL[filter]?.label}".` : "registrados."}</p>
+                                    </div>
                                 ) : (
                                     <div className="appts-list">
                                         {filtered.map(appt => {
@@ -1143,16 +1177,95 @@ export default function ClinicDashboard() {
                 .feature-title { color: #fff; font-size: 0.92rem; font-weight: 800; margin-bottom: 3px; }
                 .feature-sub { color: rgba(255,255,255,0.5); font-size: 0.78rem; line-height: 1.35; }
 
-                .vet-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
-                .vet-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px; min-width: 0; overflow: hidden; }
-                .stat-icon { font-size: 1.8rem; flex-shrink: 0; }
-                .stat-num { font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1; }
-                .stat-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 600; margin-top: 2px; }
+                .vet-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px; }
+                .vet-stat {
+                    position: relative;
+                    background: linear-gradient(135deg, rgba(15,26,42,0.85), rgba(15,26,42,0.55));
+                    border: 1px solid rgba(255,255,255,0.06);
+                    border-radius: 18px;
+                    padding: 22px 24px;
+                    display: flex; align-items: center; gap: 16px;
+                    min-width: 0; overflow: hidden;
+                    transition: all 0.2s;
+                }
+                .vet-stat:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.10); }
+                .vet-stat::before {
+                    content: ''; position: absolute;
+                    inset: 0; pointer-events: none;
+                    background: radial-gradient(ellipse 60% 100% at 0% 50%, var(--glow, transparent), transparent 70%);
+                    opacity: 0.55;
+                    border-radius: 18px;
+                }
+                .vet-stat .stat-deco {
+                    position: absolute; right: -8px; bottom: -14px;
+                    font-size: 5rem; opacity: 0.06;
+                    pointer-events: none;
+                }
+                .stat-pending { --glow: rgba(76,175,80,0.18); border-color: rgba(76,175,80,0.22); }
+                .stat-confirmed { --glow: rgba(76,175,80,0.32); border-color: rgba(76,175,80,0.35); box-shadow: 0 0 32px rgba(76,175,80,0.10); }
+                .stat-completed { --glow: rgba(107,202,255,0.22); border-color: rgba(107,202,255,0.28); }
+                .stat-noshow { --glow: rgba(255,107,107,0.22); border-color: rgba(255,107,107,0.28); }
 
-                .filters { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+                .stat-icon-wrap {
+                    width: 56px; height: 56px; border-radius: 16px;
+                    display: flex; align-items: center; justify-content: center;
+                    flex-shrink: 0; position: relative; z-index: 1;
+                }
+                .stat-pending .stat-icon-wrap { background: rgba(76,175,80,0.12); border: 1px solid rgba(76,175,80,0.30); box-shadow: inset 0 0 14px rgba(76,175,80,0.10); }
+                .stat-confirmed .stat-icon-wrap { background: rgba(76,175,80,0.20); border: 1px solid rgba(76,175,80,0.45); box-shadow: inset 0 0 16px rgba(76,175,80,0.18), 0 0 18px rgba(76,175,80,0.20); }
+                .stat-completed .stat-icon-wrap { background: rgba(107,202,255,0.14); border: 1px solid rgba(107,202,255,0.35); box-shadow: inset 0 0 14px rgba(107,202,255,0.15); }
+                .stat-noshow .stat-icon-wrap { background: rgba(255,107,107,0.14); border: 1px solid rgba(255,107,107,0.35); box-shadow: inset 0 0 14px rgba(255,107,107,0.15); }
+
+                .stat-icon { font-size: 1.6rem; flex-shrink: 0; }
+                .stat-content { position: relative; z-index: 1; }
+                .stat-num { font-size: 2.4rem; font-weight: 900; color: #fff; line-height: 1; }
+                .stat-label { font-size: 0.85rem; font-weight: 800; margin-top: 4px; }
+                .stat-pending .stat-label { color: #66BB6A; }
+                .stat-confirmed .stat-label { color: #4CAF50; }
+                .stat-completed .stat-label { color: #6bcaff; }
+                .stat-noshow .stat-label { color: #ff6b6b; }
+
+                /* ─── Filtros como pills ─── */
+                .filters { display: flex; gap: 10px; margin-bottom: 22px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; flex-wrap: wrap; }
                 .filters::-webkit-scrollbar { display: none; }
-                .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 7px 14px; font-family: 'Nunito', sans-serif; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
-                .filter-btn.active { background: rgba(76,175,80,0.12); border-color: rgba(76,175,80,0.35); color: #4CAF50; }
+                .filter-btn {
+                    background: transparent;
+                    border: 1.5px solid rgba(255,255,255,0.10);
+                    color: rgba(255,255,255,0.55);
+                    border-radius: 100px;
+                    padding: 10px 22px;
+                    font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700;
+                    cursor: pointer; transition: all 0.2s;
+                    white-space: nowrap; flex-shrink: 0;
+                }
+                .filter-btn:hover { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.20); }
+                .filter-btn.active {
+                    background: rgba(76,175,80,0.10);
+                    border-color: rgba(76,175,80,0.50);
+                    color: #66BB6A;
+                    box-shadow: 0 0 16px rgba(76,175,80,0.15);
+                }
+
+                /* ─── Empty state turnos (con SVG) ─── */
+                .empty-turnos {
+                    background: rgba(15,26,42,0.45);
+                    border: 1px solid rgba(255,255,255,0.05);
+                    border-radius: 20px;
+                    padding: 60px 24px;
+                }
+                .empty-turnos .cal-illu { width: 220px; height: auto; margin-bottom: 16px; }
+                .empty-turnos p { color: rgba(255,255,255,0.55); font-weight: 700; font-size: 0.95rem; }
+
+                /* ─── Sidebar Hoy rediseñada ─── */
+                .btn-agenda-pdf {
+                    background: linear-gradient(135deg, #ff5252, #ff3b3b) !important;
+                    color: #fff !important;
+                    box-shadow: 0 6px 20px rgba(255,82,82,0.32) !important;
+                }
+                .btn-agenda-pdf:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,82,82,0.42) !important; }
+
+                .agenda-empty { text-align: center; padding: 18px 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+                .agenda-empty .cal-smile { width: 140px; height: auto; }
 
                 .turnos-layout { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: stretch; }
                 .turnos-main { display: flex; flex-direction: column; min-width: 0; }
@@ -1363,11 +1476,14 @@ export default function ClinicDashboard() {
                     .vet-features { grid-template-columns: 1fr; }
                     .feature-item { padding: 12px; }
                     .tab-btn { font-size: 0.78rem; padding: 8px 10px; }
-                    .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
-                    .vet-stat { padding: 10px 12px; border-radius: 12px; gap: 8px; }
-                    .stat-icon { font-size: 1.3rem; }
-                    .stat-num { font-size: 1.2rem; }
-                    .stat-label { font-size: 0.66rem; }
+                    .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+                    .vet-stat { padding: 14px 16px; border-radius: 14px; gap: 10px; }
+                    .stat-icon-wrap { width: 42px; height: 42px; border-radius: 12px; }
+                    .stat-icon { font-size: 1.2rem; }
+                    .stat-num { font-size: 1.6rem; }
+                    .stat-label { font-size: 0.72rem; }
+                    .vet-stat .stat-deco { font-size: 3.5rem; }
+                    .filter-btn { padding: 8px 16px; font-size: 0.8rem; }
                     .turnos-layout { grid-template-columns: 1fr; gap: 0; }
                     .appt-card { padding: 12px; border-radius: 14px; gap: 10px; }
                     .appt-date-box { min-width: 42px; padding: 6px 8px; }
@@ -1488,6 +1604,92 @@ function StarsBackground() {
                 <path d="M 500 580 L 502 578 L 504 580 L 502 582 Z" fill="#6bcaff" opacity="0.6" />
                 <path d="M 850 720 L 852 718 L 854 720 L 852 722 Z" fill="#FFB74D" opacity="0.7" />
                 <path d="M 300 750 L 302 748 L 304 750 L 302 752 Z" fill="#a78bfa" opacity="0.6" />
+            </g>
+        </svg>
+    );
+}
+
+// ── Calendario sonriente con hojitas (empty state grande) ──
+function CalendarIllustration() {
+    return (
+        <svg className="cal-illu" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="calBody" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3a4d6b" />
+                    <stop offset="100%" stopColor="#26334a" />
+                </linearGradient>
+                <radialGradient id="calGlow" cx="0.5" cy="0.5" r="0.5">
+                    <stop offset="0%" stopColor="rgba(76,175,80,0.3)" />
+                    <stop offset="100%" stopColor="rgba(76,175,80,0)" />
+                </radialGradient>
+            </defs>
+            {/* glow detrás */}
+            <ellipse cx="110" cy="120" rx="110" ry="60" fill="url(#calGlow)" />
+            {/* hojitas izquierda */}
+            <g opacity="0.7" fill="#4CAF50">
+                <ellipse cx="58" cy="158" rx="9" ry="5" transform="rotate(-30 58 158)" />
+                <ellipse cx="42" cy="170" rx="8" ry="4" transform="rotate(-45 42 170)" />
+                <ellipse cx="70" cy="174" rx="7" ry="4" transform="rotate(15 70 174)" />
+            </g>
+            {/* hojita derecha */}
+            <g opacity="0.7" fill="#4CAF50">
+                <ellipse cx="178" cy="174" rx="8" ry="4" transform="rotate(35 178 174)" />
+            </g>
+            {/* cuerpo calendario */}
+            <rect x="70" y="60" width="100" height="92" rx="10" fill="url(#calBody)" stroke="rgba(255,255,255,0.10)" strokeWidth="1" />
+            {/* franja superior */}
+            <rect x="70" y="60" width="100" height="22" rx="10" fill="#1b2840" />
+            <rect x="70" y="74" width="100" height="8" fill="#1b2840" />
+            {/* anillas */}
+            <rect x="84" y="50" width="6" height="18" rx="2" fill="#5a6b8a" />
+            <rect x="150" y="50" width="6" height="18" rx="2" fill="#5a6b8a" />
+            {/* contenido */}
+            <rect x="80" y="92" width="36" height="22" rx="4" fill="rgba(255,255,255,0.08)" />
+            <rect x="124" y="92" width="36" height="22" rx="4" fill="rgba(255,255,255,0.08)" />
+            <rect x="80" y="120" width="36" height="22" rx="4" fill="rgba(255,255,255,0.08)" />
+            <rect x="124" y="120" width="36" height="22" rx="4" fill="rgba(255,255,255,0.08)" />
+            {/* círculo verde con check (día con turno) */}
+            <circle cx="142" cy="131" r="14" fill="#4CAF50" />
+            <path d="M 137 131 L 141 135 L 148 127" stroke="#fff" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            {/* estrellitas decorativas */}
+            <g fill="#FFB74D" opacity="0.85">
+                <path d="M 50 70 L 51 67 L 52 70 L 55 71 L 52 72 L 51 75 L 50 72 L 47 71 Z" />
+                <path d="M 192 90 L 193 87 L 194 90 L 197 91 L 194 92 L 193 95 L 192 92 L 189 91 Z" />
+            </g>
+            <g fill="#a78bfa" opacity="0.75">
+                <path d="M 195 55 L 196 53 L 197 55 L 199 56 L 197 57 L 196 59 L 195 57 L 193 56 Z" />
+                <path d="M 38 110 L 39 108 L 40 110 L 42 111 L 40 112 L 39 114 L 38 112 L 36 111 Z" />
+            </g>
+        </svg>
+    );
+}
+
+// ── Calendario sonriente chico (para sidebar derecha "Hoy") ──
+function CalendarSmileIllustration() {
+    return (
+        <svg className="cal-smile" viewBox="0 0 140 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            {/* cuerpo */}
+            <rect x="32" y="30" width="76" height="68" rx="8" fill="#3a4d6b" stroke="rgba(255,255,255,0.10)" strokeWidth="1" />
+            <rect x="32" y="30" width="76" height="16" rx="8" fill="#1b2840" />
+            <rect x="32" y="40" width="76" height="6" fill="#1b2840" />
+            {/* anillas */}
+            <rect x="44" y="22" width="5" height="14" rx="2" fill="#5a6b8a" />
+            <rect x="91" y="22" width="5" height="14" rx="2" fill="#5a6b8a" />
+            {/* ojos */}
+            <circle cx="56" cy="64" r="3.5" fill="#fff" />
+            <circle cx="84" cy="64" r="3.5" fill="#fff" />
+            {/* sonrisa */}
+            <path d="M 56 78 Q 70 88 84 78" stroke="#fff" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+            {/* estrellitas */}
+            <g fill="#FFB74D" opacity="0.75">
+                <path d="M 22 28 L 23 25 L 24 28 L 27 29 L 24 30 L 23 33 L 22 30 L 19 29 Z" />
+                <path d="M 118 40 L 119 37 L 120 40 L 123 41 L 120 42 L 119 45 L 118 42 L 115 41 Z" />
+            </g>
+            <g fill="#4CAF50" opacity="0.7">
+                <path d="M 18 90 L 19 87 L 20 90 L 23 91 L 20 92 L 19 95 L 18 92 L 15 91 Z" />
+            </g>
+            <g fill="#a78bfa" opacity="0.75">
+                <path d="M 122 95 L 123 92 L 124 95 L 127 96 L 124 97 L 123 100 L 122 97 L 119 96 Z" />
             </g>
         </svg>
     );
