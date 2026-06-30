@@ -324,17 +324,17 @@ export default function ClinicDashboard() {
     const petVaccines = selectedPet ? vaccines.filter(v => v.pet === selectedPet.id) : vaccines;
 
     const TABS_DESKTOP = [
-        { id: "turnos", label: "📅 Turnos" },
-        { id: "pacientes", label: "🐾 Pacientes" },
-        { id: "fotos", label: "📷 Fotos" },
-        { id: "mi-agenda", label: "🗓 Mi Agenda" },
+        { id: "turnos", icon: "📅", label: "Turnos" },
+        { id: "pacientes", icon: "🐾", label: "Pacientes" },
+        { id: "fotos", icon: "📷", label: "Fotos" },
+        { id: "mi-agenda", icon: "🗓", label: "Mi Agenda" },
     ];
     const TABS_MOBILE = [
-        { id: "turnos", label: "📅 Turnos" },
-        { id: "agenda", label: "🗓 Agenda" },
-        { id: "pacientes", label: "🐾 Pacientes" },
-        { id: "fotos", label: "📷 Fotos" },
-        { id: "mi-agenda", label: "⚙️ Mi Agenda" },
+        { id: "turnos", icon: "📅", label: "Turnos" },
+        { id: "agenda", icon: "🗓", label: "Agenda" },
+        { id: "pacientes", icon: "🐾", label: "Pacientes" },
+        { id: "fotos", icon: "📷", label: "Fotos" },
+        { id: "mi-agenda", icon: "⚙️", label: "Mi Agenda" },
     ];
     const TABS = isMobile ? TABS_MOBILE : TABS_DESKTOP;
 
@@ -390,18 +390,27 @@ export default function ClinicDashboard() {
 
     return (
         <div className="vet-page">
-            <div className="blob b1" /><div className="blob b2" />
+            <StarsBackground />
+            <div className="blob b1" /><div className="blob b2" /><div className="blob b3" />
             <div className="vet-inner">
 
                 <header className="vet-header">
-                    <div>
-                        <p className="vet-greeting">🏥 Panel de clínica</p>
-                        <h1 className="vet-title">Bienvenido/a, {user?.username}</h1>
+                    <div className="vet-header-bg" aria-hidden="true">
+                        <DogIllustration />
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    <div className="vet-header-left">
+                        <p className="vet-eyebrow"><span>🏥</span> Panel de clínica</p>
+                        <h1 className="vet-title">¡Bienvenido, <span className="vet-name">{user?.username}</span> <span className="vet-wave">👋</span></h1>
+                        <p className="vet-subtitle">Gestioná tus turnos, pacientes y agenda desde aquí.</p>
+                    </div>
+                    <div className="vet-header-right">
                         {success && <div className="success-toast">✅ {success}</div>}
-                        <a href="/clinic/estadisticas" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(76,175,80,0.12)', border: '1px solid rgba(76,175,80,0.35)', color: '#4CAF50', borderRadius: 12, padding: '10px 20px', fontFamily: "'Nunito', sans-serif", fontWeight: 700, fontSize: '0.9rem', textDecoration: 'none' }}>
-                            📊 Estadísticas
+                        <a href="/clinic/estadisticas" className="vet-stats-link">
+                            <span className="vet-stats-icon">📊</span>
+                            <div className="vet-stats-text">
+                                <span className="vet-stats-title">Estadísticas</span>
+                                <span className="vet-stats-sub">Ver reportes y métricas</span>
+                            </div>
                         </a>
                     </div>
                 </header>
@@ -409,7 +418,8 @@ export default function ClinicDashboard() {
                 <div className="tabs">
                     {TABS.map(t => (
                         <button key={t.id} className={`tab-btn ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
-                            {t.label}
+                            <span className="tab-icon">{t.icon}</span>
+                            <span>{t.label}</span>
                         </button>
                     ))}
                 </div>
@@ -858,9 +868,40 @@ export default function ClinicDashboard() {
                     </div>
                 )}
 
-            </div>
+                {!loading && (
+                    <div className="vet-features">
+                        <div className="feature-item">
+                            <span className="feature-icon feature-icon-green">📅</span>
+                            <div className="feature-text">
+                                <span className="feature-title">Agenda inteligente</span>
+                                <span className="feature-sub">Organizá tus turnos de forma eficiente</span>
+                            </div>
+                        </div>
+                        <div className="feature-item">
+                            <span className="feature-icon feature-icon-orange">📩</span>
+                            <div className="feature-text">
+                                <span className="feature-title">Recordatorios automáticos</span>
+                                <span className="feature-sub">Recordá vacunas y turnos importantes</span>
+                            </div>
+                        </div>
+                        <div className="feature-item">
+                            <span className="feature-icon feature-icon-blue">☁️</span>
+                            <div className="feature-text">
+                                <span className="feature-title">Reportes y estadísticas</span>
+                                <span className="feature-sub">Descargá reportes en PDF</span>
+                            </div>
+                        </div>
+                        <div className="feature-item">
+                            <span className="feature-icon feature-icon-violet">💬</span>
+                            <div className="feature-text">
+                                <span className="feature-title">Soporte prioritario</span>
+                                <span className="feature-sub">Estamos para ayudarte</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
-            {/* ── Modal visita ── */}
+            </div>
             {showVisitModal && (
                 <div className="modal-overlay" onClick={() => setShowVisitModal(false)}>
                     <div className="modal" onClick={e => e.stopPropagation()}>
@@ -933,28 +974,174 @@ export default function ClinicDashboard() {
                 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-                .vet-page { min-height: 100vh; background: #1a1a2e; font-family: 'Nunito', sans-serif; position: relative; overflow-x: clip; padding-bottom: 60px; }
-                .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.08; pointer-events: none; }
-                .b1 { width: 500px; height: 500px; background: #6bffb8; top: -100px; left: -100px; }
-                .b2 { width: 400px; height: 400px; background: #6bcaff; bottom: -100px; right: -100px; }
-                .vet-inner { max-width: 1200px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; overflow-x: hidden; }
+                .vet-page {
+                    min-height: 100vh;
+                    background:
+                        radial-gradient(ellipse 1200px 600px at 20% 0%, rgba(76,175,80,0.10), transparent 50%),
+                        radial-gradient(ellipse 1000px 700px at 90% 30%, rgba(255,152,0,0.08), transparent 55%),
+                        radial-gradient(ellipse 900px 800px at 10% 90%, rgba(167,139,250,0.07), transparent 55%),
+                        radial-gradient(ellipse 800px 600px at 95% 95%, rgba(107,202,255,0.07), transparent 55%),
+                        #050a13;
+                    font-family: 'Nunito', sans-serif;
+                    position: relative;
+                    overflow-x: clip;
+                    padding-bottom: 60px;
+                }
+                .stars-bg {
+                    position: fixed; inset: 0; width: 100%; height: 100%;
+                    pointer-events: none; z-index: 0;
+                }
+                .star-twinkle circle, .star-twinkle path { animation: twinkle 3.5s ease-in-out infinite; }
+                @keyframes twinkle { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+                .blob { position: fixed; border-radius: 50%; filter: blur(110px); opacity: 0.08; pointer-events: none; z-index: 0; }
+                .b1 { width: 500px; height: 500px; background: #4CAF50; top: -120px; left: -120px; }
+                .b2 { width: 400px; height: 400px; background: #FF9800; bottom: -100px; right: -100px; }
+                .b3 { width: 360px; height: 360px; background: #a78bfa; top: 40%; right: -150px; }
+                .vet-inner { max-width: 1400px; margin: 0 auto; padding: 36px 24px; position: relative; z-index: 1; overflow-x: hidden; }
 
-                .vet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-                .vet-greeting { font-size: 0.9rem; color: rgba(255,255,255,0.45); font-weight: 600; margin-bottom: 4px; }
-                .vet-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
+                /* ─── Header rediseñado ─── */
+                .vet-header {
+                    position: relative;
+                    display: grid;
+                    grid-template-columns: 1fr 300px;
+                    gap: 24px;
+                    align-items: flex-start;
+                    margin-bottom: 32px;
+                    padding: 14px 8px 22px;
+                    border-bottom: 1px solid rgba(255,255,255,0.06);
+                }
+                .vet-header-bg {
+                    position: absolute; right: 280px; top: 0;
+                    width: 420px; height: 280px;
+                    pointer-events: none; z-index: 0;
+                    opacity: 0.9;
+                }
+                .dog-svg { width: 100%; height: 100%; }
+                .vet-header-left { position: relative; z-index: 1; min-width: 0; }
+                .vet-eyebrow {
+                    display: inline-flex; align-items: center; gap: 8px;
+                    color: rgba(255,255,255,0.55); font-size: 0.85rem; font-weight: 700;
+                    margin-bottom: 12px;
+                }
+                .vet-eyebrow span { font-size: 1rem; }
+                .vet-title {
+                    font-family: 'Nunito', sans-serif;
+                    font-size: 2.4rem; font-weight: 800; color: #fff;
+                    letter-spacing: -0.8px; line-height: 1.15; margin-bottom: 10px;
+                }
+                .vet-name {
+                    color: #4CAF50;
+                    text-shadow: 0 0 30px rgba(76,175,80,0.45);
+                }
+                .vet-wave {
+                    display: inline-block;
+                    animation: wave 1.8s ease-in-out infinite;
+                    transform-origin: 70% 70%;
+                }
+                @keyframes wave { 0%, 100% { transform: rotate(0deg); } 20% { transform: rotate(15deg); } 40% { transform: rotate(-8deg); } 60% { transform: rotate(12deg); } 80% { transform: rotate(-4deg); } }
+                .vet-subtitle { color: rgba(255,255,255,0.55); font-size: 0.98rem; line-height: 1.5; }
+
+                .vet-header-right { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
                 .success-toast { background: rgba(107,255,184,0.12); border: 1px solid rgba(107,255,184,0.3); color: #6bffb8; padding: 10px 16px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; }
+                .vet-stats-link {
+                    display: flex; align-items: center; gap: 14px;
+                    background: rgba(15,26,42,0.7);
+                    border: 1px solid rgba(76,175,80,0.30);
+                    color: #fff; padding: 14px 18px; border-radius: 16px;
+                    text-decoration: none; transition: all 0.2s;
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 4px 24px rgba(0,0,0,0.20);
+                }
+                .vet-stats-link:hover {
+                    border-color: rgba(76,175,80,0.55);
+                    box-shadow: 0 0 28px rgba(76,175,80,0.18);
+                    transform: translateY(-2px);
+                }
+                .vet-stats-icon {
+                    width: 36px; height: 36px;
+                    border-radius: 10px;
+                    background: linear-gradient(135deg, rgba(76,175,80,0.25), rgba(76,175,80,0.10));
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.2rem; flex-shrink: 0;
+                }
+                .vet-stats-text { display: flex; flex-direction: column; line-height: 1.2; }
+                .vet-stats-title { color: #66BB6A; font-size: 1rem; font-weight: 800; }
+                .vet-stats-sub { color: rgba(255,255,255,0.55); font-size: 0.78rem; font-weight: 600; }
 
-                .tabs { display: flex; gap: 2px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+                /* ─── Tabs rediseñadas ─── */
+                .tabs {
+                    display: flex; gap: 8px; margin-bottom: 26px;
+                    border-bottom: 1px solid rgba(255,255,255,0.06);
+                    overflow-x: auto; scrollbar-width: none;
+                    -webkit-overflow-scrolling: touch;
+                }
                 .tabs::-webkit-scrollbar { display: none; }
-                .tab-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: rgba(255,255,255,0.4); font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700; padding: 10px 14px; cursor: pointer; transition: all 0.2s; margin-bottom: -1px; white-space: nowrap; flex-shrink: 0; }
-                .tab-btn:hover { color: rgba(255,255,255,0.7); }
-                .tab-btn.active { color: #4CAF50; border-bottom-color: #4CAF50; }
+                .tab-btn {
+                    background: transparent; border: none;
+                    border-bottom: 3px solid transparent;
+                    color: rgba(255,255,255,0.45);
+                    font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700;
+                    padding: 12px 18px;
+                    display: inline-flex; align-items: center; gap: 8px;
+                    cursor: pointer; transition: all 0.2s;
+                    margin-bottom: -1px; white-space: nowrap; flex-shrink: 0;
+                    position: relative;
+                }
+                .tab-icon { font-size: 1rem; }
+                .tab-btn:hover { color: rgba(255,255,255,0.85); }
+                .tab-btn.active {
+                    color: #66BB6A;
+                    border-bottom-color: #4CAF50;
+                    text-shadow: 0 0 12px rgba(76,175,80,0.4);
+                }
+                .tab-btn.active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -1px; left: 10%; right: 10%; height: 3px;
+                    background: #4CAF50;
+                    box-shadow: 0 0 12px rgba(76,175,80,0.7);
+                    border-radius: 3px 3px 0 0;
+                }
 
                 .loading-state, .empty-state { text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
                 .paw-spin { font-size: 3rem; animation: spin 1s linear infinite; display: block; }
                 @keyframes spin { to { transform: rotate(360deg); } }
                 .loading-state p, .empty-state p { color: rgba(255,255,255,0.4); }
                 .empty-state span { font-size: 3rem; }
+
+                /* ─── Footer de features ─── */
+                .vet-features {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 16px;
+                    margin-top: 40px;
+                    padding-top: 28px;
+                    border-top: 1px solid rgba(255,255,255,0.06);
+                }
+                .feature-item {
+                    display: flex; align-items: center; gap: 14px;
+                    background: rgba(15,26,42,0.5);
+                    border: 1px solid rgba(255,255,255,0.05);
+                    border-radius: 14px;
+                    padding: 16px;
+                    transition: all 0.2s;
+                }
+                .feature-item:hover {
+                    background: rgba(15,26,42,0.75);
+                    border-color: rgba(255,255,255,0.10);
+                }
+                .feature-icon {
+                    width: 44px; height: 44px; border-radius: 12px;
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.3rem; flex-shrink: 0;
+                }
+                .feature-icon-green { background: rgba(76,175,80,0.15); color: #66BB6A; box-shadow: inset 0 0 12px rgba(76,175,80,0.15); }
+                .feature-icon-orange { background: rgba(255,152,0,0.15); color: #FFB74D; box-shadow: inset 0 0 12px rgba(255,152,0,0.15); }
+                .feature-icon-blue { background: rgba(107,202,255,0.15); color: #6bcaff; box-shadow: inset 0 0 12px rgba(107,202,255,0.15); }
+                .feature-icon-violet { background: rgba(167,139,250,0.15); color: #a78bfa; box-shadow: inset 0 0 12px rgba(167,139,250,0.15); }
+                .feature-text { display: flex; flex-direction: column; min-width: 0; }
+                .feature-title { color: #fff; font-size: 0.92rem; font-weight: 800; margin-bottom: 3px; }
+                .feature-sub { color: rgba(255,255,255,0.5); font-size: 0.78rem; line-height: 1.35; }
 
                 .vet-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
                 .vet-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px; min-width: 0; overflow: hidden; }
@@ -1156,15 +1343,25 @@ export default function ClinicDashboard() {
                 .btn-delete-clinical { background: rgba(255,107,107,0.08); border: none; border-top: 1px solid rgba(255,255,255,0.06); color: rgba(255,107,107,0.7); padding: 8px; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s; }
                 .btn-delete-clinical:hover { background: rgba(255,107,107,0.15); }
 
+                @media (max-width: 1100px) {
+                    .vet-header { grid-template-columns: 1fr; }
+                    .vet-header-bg { display: none; }
+                    .vet-header-right { align-items: stretch; }
+                    .vet-features { grid-template-columns: repeat(2, 1fr); }
+                }
                 @media (max-width: 800px) {
                     .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
                     .stat-icon { font-size: 1.5rem; }
                     .stat-num { font-size: 1.4rem; }
+                    .vet-title { font-size: 1.9rem; }
+                    .vet-features { gap: 12px; }
                 }
                 @media (max-width: 700px) {
                     .vet-inner { padding: 16px 14px; }
-                    .vet-title { font-size: 1.4rem; }
-                    .vet-header { margin-bottom: 16px; }
+                    .vet-title { font-size: 1.55rem; }
+                    .vet-header { margin-bottom: 16px; padding: 8px 4px 16px; }
+                    .vet-features { grid-template-columns: 1fr; }
+                    .feature-item { padding: 12px; }
                     .tab-btn { font-size: 0.78rem; padding: 8px 10px; }
                     .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
                     .vet-stat { padding: 10px 12px; border-radius: 12px; gap: 8px; }
@@ -1209,5 +1406,89 @@ export default function ClinicDashboard() {
                 }
             `}</style>
         </div>
+    );
+}
+// ── Ilustración SVG del perro al fondo del header ──
+function DogIllustration() {
+    return (
+        <svg className="dog-svg" viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="dogLine" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#4CAF50" stopOpacity="0.55" />
+                    <stop offset="100%" stopColor="#66BB6A" stopOpacity="0.25" />
+                </linearGradient>
+            </defs>
+            <g fill="none" stroke="url(#dogLine)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                {/* cuerpo */}
+                <path d="M 120 200 Q 130 130 200 130 Q 280 130 290 200 L 290 230 L 120 230 Z" />
+                {/* cabeza */}
+                <ellipse cx="160" cy="105" rx="50" ry="42" />
+                {/* orejas */}
+                <path d="M 130 80 Q 115 50 125 95" />
+                <path d="M 190 80 Q 205 50 195 95" />
+                {/* hocico */}
+                <path d="M 140 120 Q 145 135 165 132" />
+                <circle cx="142" cy="115" r="2" fill="#4CAF50" stroke="none" />
+                <circle cx="178" cy="115" r="2" fill="#4CAF50" stroke="none" />
+                <path d="M 158 132 Q 162 138 168 132" />
+                {/* patas */}
+                <line x1="150" y1="230" x2="150" y2="255" />
+                <line x1="180" y1="230" x2="180" y2="255" />
+                <line x1="240" y1="230" x2="240" y2="255" />
+                <line x1="270" y1="230" x2="270" y2="255" />
+                {/* cola */}
+                <path d="M 290 200 Q 320 180 315 150" />
+                {/* arbolitos atrás */}
+                <path d="M 80 230 L 80 200 M 70 215 L 80 200 L 90 215 M 75 220 L 85 220" opacity="0.6" />
+                <path d="M 340 230 L 340 195 M 328 212 L 340 195 L 352 212 M 333 218 L 347 218" opacity="0.6" />
+                <path d="M 360 230 L 360 205 M 352 218 L 360 205 L 368 218" opacity="0.5" />
+                {/* estrellitas decorativas */}
+                <circle cx="80" cy="60" r="1.2" fill="#FFB74D" stroke="none" />
+                <circle cx="380" cy="50" r="1.2" fill="#66BB6A" stroke="none" />
+                <circle cx="350" cy="120" r="1.5" fill="#6bcaff" stroke="none" />
+                <circle cx="50" cy="130" r="1.2" fill="#FFB74D" stroke="none" />
+                <circle cx="395" cy="180" r="1.5" fill="#a78bfa" stroke="none" />
+            </g>
+        </svg>
+    );
+}
+
+// ── Fondo con partículas/estrellas ──
+function StarsBackground() {
+    return (
+        <svg className="stars-bg" viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+            {/* partículas verdes */}
+            <circle cx="80" cy="120" r="1.4" fill="#4CAF50" opacity="0.7" />
+            <circle cx="1280" cy="80" r="1.6" fill="#66BB6A" opacity="0.6" />
+            <circle cx="450" cy="200" r="1" fill="#4CAF50" opacity="0.5" />
+            <circle cx="900" cy="280" r="1.4" fill="#66BB6A" opacity="0.7" />
+            <circle cx="60" cy="500" r="1.2" fill="#4CAF50" opacity="0.55" />
+            <circle cx="1340" cy="620" r="1.4" fill="#66BB6A" opacity="0.65" />
+            <circle cx="700" cy="780" r="1.2" fill="#4CAF50" opacity="0.5" />
+            {/* partículas naranjas */}
+            <circle cx="200" cy="40" r="1.3" fill="#FFB74D" opacity="0.7" />
+            <circle cx="1100" cy="160" r="1.5" fill="#FF9800" opacity="0.6" />
+            <circle cx="320" cy="850" r="1.4" fill="#FFB74D" opacity="0.65" />
+            <circle cx="1380" cy="420" r="1.2" fill="#FF9800" opacity="0.55" />
+            <circle cx="40" cy="380" r="1.1" fill="#FFB74D" opacity="0.5" />
+            {/* partículas azules */}
+            <circle cx="600" cy="60" r="1.3" fill="#6bcaff" opacity="0.6" />
+            <circle cx="780" cy="500" r="1.1" fill="#6bcaff" opacity="0.5" />
+            <circle cx="1180" cy="780" r="1.5" fill="#6bcaff" opacity="0.7" />
+            <circle cx="20" cy="700" r="1.2" fill="#6bcaff" opacity="0.55" />
+            {/* partículas violetas */}
+            <circle cx="380" cy="650" r="1.4" fill="#a78bfa" opacity="0.6" />
+            <circle cx="950" cy="120" r="1.2" fill="#a78bfa" opacity="0.55" />
+            <circle cx="1050" cy="700" r="1.5" fill="#a78bfa" opacity="0.65" />
+            <circle cx="220" cy="320" r="1.1" fill="#a78bfa" opacity="0.5" />
+            {/* estrellas con brillo */}
+            <g className="star-twinkle">
+                <path d="M 150 250 L 152 248 L 154 250 L 152 252 Z" fill="#FFB74D" opacity="0.7" />
+                <path d="M 1200 350 L 1202 348 L 1204 350 L 1202 352 Z" fill="#66BB6A" opacity="0.7" />
+                <path d="M 500 580 L 502 578 L 504 580 L 502 582 Z" fill="#6bcaff" opacity="0.6" />
+                <path d="M 850 720 L 852 718 L 854 720 L 852 722 Z" fill="#FFB74D" opacity="0.7" />
+                <path d="M 300 750 L 302 748 L 304 750 L 302 752 Z" fill="#a78bfa" opacity="0.6" />
+            </g>
+        </svg>
     );
 }
