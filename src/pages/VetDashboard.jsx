@@ -158,6 +158,7 @@ export default function ClinicDashboard() {
   const [clinicalPhotoCaption, setClinicalPhotoCaption] = useState("");
   const [clinicalPhotoUploading, setClinicalPhotoUploading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [clinicProfile, setClinicProfile] = useState(null);
   const [highlightedAppt, setHighlightedAppt] = useState(null);
   const fileInputRef = useRef(null);
   const clinicalFileInputRef = useRef(null);
@@ -173,9 +174,40 @@ export default function ClinicDashboard() {
   }, []);
 
   useEffect(() => {
+    if (user?.id) fetchClinicProfile();
+  }, [user?.id]);
+
+  useEffect(() => {
     if (tab === "fotos") fetchPhotos();
     if (tab === "mi-agenda") fetchSchedule();
   }, [tab]);
+
+  const fetchClinicProfile = async () => {
+    try {
+      const { data } = await api.get("/clinics/");
+      const clinics = asArray(data);
+      const mine = clinics.find((clinic) => String(clinic.owner) === String(user?.id));
+      setClinicProfile(mine || null);
+    } catch (error) {
+      console.error(error);
+      setClinicProfile(null);
+    }
+  };
+
+  const handleShareClinicProfile = async () => {
+    if (!clinicProfile?.slug) {
+      showMessage("error", "Todavía no encontramos el link público de tu veterinaria.");
+      return;
+    }
+    const publicUrl = `${window.location.origin}/clinicas/${clinicProfile.slug}`;
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      showMessage("success", "Link del perfil copiado. Ya podés compartirlo por WhatsApp o Instagram.");
+    } catch (error) {
+      console.error(error);
+      window.prompt("Copiá el link del perfil de tu veterinaria:", publicUrl);
+    }
+  };
 
   const fetchAll = async () => {
     setLoading(true);
@@ -584,10 +616,16 @@ export default function ClinicDashboard() {
             <h1>¡Bienvenido/a, <span>{user?.username || "clínica"}</span>! <em>👋</em></h1>
             <p>Gestioná tus turnos, pacientes y agenda desde acá.</p>
           </div>
-          <Link to="/clinic/estadisticas" className="vp-stats-link">
-            <strong>📊 Estadísticas</strong>
-            <small>Ver reportes y métricas</small>
-          </Link>
+          <div className="vp-hero-actions">
+            <button type="button" className="vp-share-link" onClick={handleShareClinicProfile}>
+              <strong>🔗 Compartir perfil</strong>
+              <small>{clinicProfile?.slug ? "Copiar link público" : "Buscando link público"}</small>
+            </button>
+            <Link to="/clinic/estadisticas" className="vp-stats-link">
+              <strong>📊 Estadísticas</strong>
+              <small>Ver reportes y métricas</small>
+            </Link>
+          </div>
         </header>
 
         <nav className="vp-tabs" aria-label="Secciones del panel veterinario">
@@ -976,7 +1014,7 @@ function FotosTab({ photos, photosLoading, photoUploading, photoCaption, setPhot
         </div>
       )}
 
-      <div className="vp-tip"><b>Tip</b><span>Las fotos de tu clínica ayudan a que más dueños te elijan. Mostrá tu espacio, tu equipo y lo que hace especial a tu veterinaria.</span></div>
+      <div className="vp-tip"><b>Tip</b><span>Las fotos de tu clínica aparecen en el perfil público y ayudan a que más dueños te elijan. Mostrá tu espacio, tu equipo y lo que hace especial a tu veterinaria.</span></div>
     </section>
   );
 }
@@ -1027,6 +1065,10 @@ function AgendaConfigTab({
           <h2>Mi Agenda</h2>
           <p>Configurá tus días, horarios y preferencias de turnos.</p>
         </div>
+      </div>
+
+      <div className="vp-agenda-note">
+        <strong>💡 Importante:</strong> los horarios configurados acá son los que verán los dueños cuando soliciten turno online.
       </div>
 
       <section className="vp-card soft">
@@ -1153,15 +1195,35 @@ function AppointmentCard({ appt, highlighted, handleConfirm, handleCancel, handl
   );
 }
 
+
+function getPetCompleteness(pet, petVisits, petVaccines) {
+  const checks = [
+    pet.name,
+    pet.species || pet.species_display,
+    pet.owner_name,
+    pet.birth_date,
+    pet.weight,
+    pet.color,
+    pet.breed,
+    pet.feeding || pet.habitat,
+    petVisits.length > 0 || petVaccines.length > 0,
+  ];
+  const done = checks.filter(Boolean).length;
+  const total = checks.length;
+  if (done >= 7) return { label: "Ficha completa", className: "ok", done, total };
+  return { label: `Faltan datos ${done}/${total}`, className: "warn", done, total };
+}
+
 function PetMainCard({ pet, visits, vaccines, onFile, onPdf, onVisit, onVaccine, detailed = false }) {
   const age = getAge(pet.birth_date);
   const petVisits = visits.filter((v) => v.pet === pet.id);
   const petVaccines = vaccines.filter((v) => v.pet === pet.id);
+  const completeness = getPetCompleteness(pet, petVisits, petVaccines);
   return (
     <article className={`vp-pet-card ${detailed ? "detailed" : ""}`}>
       <div className="vp-pet-photo">{pet.photo ? <img src={pet.photo} alt={pet.name} /> : <span>{SPECIES_ICON[pet.species] || "🐾"}</span>}</div>
       <div className="vp-pet-info">
-        <div className="vp-pet-title"><h3>{pet.name}</h3><span>● Activo</span></div>
+        <div className="vp-pet-title"><h3>{pet.name}</h3><span>● Activo</span><span className={`vp-completeness ${completeness.className}`}>{completeness.label}</span></div>
         <p>{pet.species_display || pet.species || "Mascota"}{pet.sex && ` · ${pet.sex === "male" ? "♂ Macho" : "♀ Hembra"}`}</p>
         {pet.breed && <p className="vp-muted">{pet.breed}</p>}
         {pet.owner_name && <p className="vp-muted">👤 {pet.owner_name}</p>}
@@ -1263,6 +1325,15 @@ const styles = `
 .vp-page-title{display:flex;gap:16px;align-items:center;margin:10px 0 20px}.title-icon{width:62px;height:62px;border-radius:16px;display:grid;place-items:center;background:rgba(69,167,255,.14);border:1px solid rgba(69,167,255,.25);font-size:1.7rem}.title-icon.violet{background:rgba(167,124,255,.13);border-color:rgba(167,124,255,.28)}.vp-page-title h2{font-size:2.35rem;margin:0}.vp-page-title p{color:var(--muted);margin:4px 0 0}.vp-upload-zone{text-align:center;padding:34px;margin-bottom:22px;border-style:dashed}.upload-icon{font-size:3.4rem;color:var(--green);margin-bottom:10px}.vp-upload-zone input,.vp-inline-form input,.vp-external-form input,.vp-external-form select,.vp-hour-row input,.vp-duration-list select,.vp-modal-form input,.vp-modal-form textarea{background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:12px;color:#fff;padding:11px 13px;font:inherit;outline:0}.vp-upload-zone input{display:block;max-width:560px;width:100%;margin:14px auto}.vp-upload-zone button{background:linear-gradient(135deg,#18c983,#4c91ff);color:#fff;border:0}.vp-upload-zone small{display:block;color:var(--muted);margin-top:9px}.vp-photo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}.vp-photo-grid.small{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}.vp-photo{overflow:hidden}.vp-photo img{width:100%;height:150px;object-fit:cover}.vp-photo div{padding:12px;display:flex;justify-content:space-between;gap:12px;align-items:center}.vp-photo button{background:rgba(255,77,104,.12);border:1px solid rgba(255,77,104,.25);color:#ff8a9d;border-radius:10px;padding:8px 10px}.vp-photo-placeholder{min-height:218px;color:var(--muted);display:grid;place-items:center;font:inherit}.vp-photo-placeholder span{display:block}.vp-tip{margin-top:20px;padding:18px;display:flex;gap:14px}.vp-tip b{color:var(--green)}.vp-tip span{color:var(--muted)}
 .vp-agenda-config{max-width:980px}.vp-card.soft{padding:18px;margin-bottom:12px}.vp-days{display:flex;gap:8px;flex-wrap:wrap}.vp-days button{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--muted);border-radius:10px;padding:10px 13px;font-weight:900}.vp-days button.active{background:rgba(85,214,107,.16);border-color:rgba(85,214,107,.42);color:var(--green)}.vp-hour-list,.vp-duration-list{display:grid;gap:10px}.vp-hour-row{display:grid;grid-template-columns:140px 54px 120px 54px 120px;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}.vp-hour-row span,.vp-duration-list span{color:var(--muted)}.vp-duration-list label{display:grid;grid-template-columns:1fr 160px;align-items:center;gap:12px}.vp-duration-list.two{grid-template-columns:1fr 1fr}.vp-save{width:100%;margin-top:14px;background:linear-gradient(135deg,#18c983,#55d66b);color:#fff;border:0}.vp-external-form{display:grid;gap:10px}.vp-external-form label,.vp-modal-form label{display:grid;gap:6px;color:var(--muted);font-weight:800}.vp-external-form button{background:linear-gradient(135deg,var(--green),var(--orange));border:0;color:#fff}.vp-inline-form{display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:14px}.vp-inline-form button{background:linear-gradient(135deg,#18c983,#4c91ff);border:0;color:#fff}
 .vp-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.62);display:grid;place-items:center;z-index:200;padding:20px}.vp-modal{width:min(720px,100%);max-height:88vh;overflow:auto;background:#071323;border:1px solid var(--line);border-radius:22px;box-shadow:0 28px 90px rgba(0,0,0,.55)}.vp-modal header{display:flex;justify-content:space-between;align-items:center;padding:18px;border-bottom:1px solid var(--line)}.vp-modal header h2{margin:0}.vp-modal header button{background:none;border:0;color:#fff;font-size:2rem;cursor:pointer}.vp-modal-form{padding:18px;display:grid;gap:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+
+/* Mejoras comerciales: compartir perfil, ficha completa y ayuda de agenda */
+.vp-hero-actions{display:flex;align-items:stretch;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.vp-share-link{background:rgba(69,167,255,.07);border:1px solid rgba(69,167,255,.28);color:#bfe1ff;border-radius:18px;padding:14px 18px;display:grid;gap:3px;min-width:190px;text-align:left;cursor:pointer;box-shadow:0 16px 50px rgba(0,0,0,.18)}
+.vp-share-link strong{font-size:1rem;color:#dff1ff}.vp-share-link small{font-size:.78rem;color:rgba(226,235,255,.58);font-weight:800}.vp-share-link:hover{border-color:rgba(69,167,255,.55);background:rgba(69,167,255,.12);transform:translateY(-1px)}
+.vp-completeness{font-size:.78rem!important;padding:5px 10px!important;border-radius:999px!important;white-space:nowrap}
+.vp-completeness.ok{color:#7cff93!important;background:rgba(85,214,107,.12)!important;border-color:rgba(85,214,107,.28)!important}.vp-completeness.warn{color:#ffd273!important;background:rgba(255,173,22,.12)!important;border-color:rgba(255,173,22,.28)!important}
+.vp-agenda-note{grid-column:1/-1;margin:-6px 0 2px;padding:14px 18px;border-radius:18px;background:linear-gradient(135deg,rgba(85,214,107,.10),rgba(69,167,255,.06));border:1px solid rgba(85,214,107,.22);color:rgba(226,235,255,.78);font-weight:800}.vp-agenda-note strong{color:#72e785}
+
 @media (max-width:1000px){.vp-hero{grid-template-columns:1fr}.vp-turnos-grid{grid-template-columns:1fr}.vp-metrics.turnos,.vp-metrics.patients{grid-template-columns:repeat(2,1fr)}.vp-pet-actions{grid-template-columns:1fr 1fr}.vp-photo-grid{grid-template-columns:repeat(2,1fr)}.vp-detail-grid{grid-template-columns:1fr}.vp-duration-list.two{grid-template-columns:1fr}}@media (max-width:680px){.vp-page{padding:24px 12px 60px}.vp-hero h1{font-size:2.1rem}.vp-tabs{overflow:auto;gap:16px}.vp-metrics.turnos,.vp-metrics.patients,.vp-search-row{grid-template-columns:1fr}.vp-pet-card{grid-template-columns:1fr}.vp-pet-photo{height:220px}.vp-pet-chips{grid-template-columns:1fr}.vp-pet-actions{grid-template-columns:1fr}.vp-hour-row{grid-template-columns:1fr 1fr}.vp-duration-list label{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
 
 /* Ajustes solicitados — VetDashboard fix */
@@ -1350,4 +1421,6 @@ const styles = `
   .vp-agenda-art{margin-top:12px;width:100%;height:90px;}
 }
 
+
+@media (max-width:680px){.vp-hero-actions{justify-content:flex-start}.vp-share-link,.vp-stats-link{width:100%}.vp-pet-title{align-items:flex-start;flex-wrap:wrap}.vp-completeness{font-size:.74rem!important}}
 `;
