@@ -981,6 +981,27 @@ function FotosTab({ photos, photosLoading, photoUploading, photoCaption, setPhot
   );
 }
 
+function AgendaCalendarArt() {
+  return (
+    <div className="vp-agenda-art" aria-hidden="true">
+      <svg viewBox="0 0 220 170" role="img">
+        <defs>
+          <linearGradient id="agendaArtGlow" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#55d66b" />
+            <stop offset="1" stopColor="#236cff" />
+          </linearGradient>
+        </defs>
+        <rect x="35" y="35" width="105" height="98" rx="16" />
+        <path d="M35 62h105" />
+        <path d="M62 22v28M112 22v28" />
+        <path d="M62 82h16M95 82h16M62 108h16M95 108h16" />
+        <circle cx="151" cy="96" r="44" />
+        <path d="M151 70v30l22 14" />
+      </svg>
+    </div>
+  );
+}
+
 function AgendaConfigTab({
   schedule,
   scheduleLoading,
@@ -1036,8 +1057,15 @@ function AgendaConfigTab({
         )}
       </section>
 
-      <section className="vp-card soft">
-        <h3 className="vp-section-title">⏱ Duración por tipo de turno</h3>
+      <section className="vp-card soft vp-agenda-side-card">
+        <div className="vp-side-card-head">
+          <div>
+            <h3 className="vp-section-title">⏱ Duración por tipo de turno</h3>
+            <p className="vp-muted small">Definí cuánto dura cada tipo de consulta.</p>
+          </div>
+          <AgendaCalendarArt />
+        </div>
+
         <div className="vp-duration-list">
           {[
             ["duration_control", "🩺 Control general"],
@@ -1048,9 +1076,9 @@ function AgendaConfigTab({
             <label key={key}><span>{label}</span><select value={schedule[key] || 30} onChange={(e) => setSchedule((prev) => ({ ...prev, [key]: Number(e.target.value) }))}>{[10, 15, 20, 30, 45, 60, 90, 120].map((m) => <option key={m} value={m}>{m} minutos</option>)}</select></label>
           ))}
         </div>
-      </section>
 
-      <section className="vp-card soft">
+        <div className="vp-side-divider" />
+
         <h3 className="vp-section-title">⚙️ Configuración adicional</h3>
         <div className="vp-duration-list two">
           <label><span>Intervalo entre turnos</span><select value={schedule.interval_minutes ?? 10} onChange={(e) => setSchedule((prev) => ({ ...prev, interval_minutes: Number(e.target.value) }))}><option value={0}>Sin intervalo</option><option value={10}>10 minutos</option><option value={15}>15 minutos</option><option value={20}>20 minutos</option></select></label>
@@ -1252,10 +1280,9 @@ const styles = `
 .vp-agenda-config>.vp-page-title{grid-column:1/-1;margin-bottom:2px;}
 .vp-agenda-config>.vp-card.soft{margin-bottom:0;}
 .vp-agenda-config>.vp-card.soft:nth-of-type(1){grid-column:1/-1;}
-.vp-agenda-config>.vp-card.soft:nth-of-type(2){grid-column:1/2;}
-.vp-agenda-config>.vp-card.soft:nth-of-type(3){grid-column:2/3;}
-.vp-agenda-config>.vp-card.soft:nth-of-type(4){grid-column:2/3;}
-.vp-agenda-config>.vp-card.soft:nth-of-type(5){grid-column:1/-1;}
+.vp-agenda-config>.vp-card.soft:nth-of-type(2){grid-column:1/2;align-self:stretch;}
+.vp-agenda-config>.vp-card.soft:nth-of-type(3){grid-column:2/3;align-self:stretch;}
+.vp-agenda-config>.vp-card.soft:nth-of-type(4){grid-column:1/-1;}
 .vp-agenda-config .vp-card.soft{padding:24px;border-radius:22px;}
 .vp-days button{min-width:72px;}
 .vp-hour-row{grid-template-columns:minmax(105px,140px) 58px minmax(138px,160px) 58px minmax(138px,160px)!important;gap:12px;align-items:center;}
@@ -1300,6 +1327,27 @@ const styles = `
   .vp-duration-list label,.vp-duration-list.two label{grid-template-columns:1fr!important;}
   .vp-duration-list select,.vp-external-form select{width:100%;}
   .vp-photo-grid{grid-template-columns:1fr!important;}
+}
+
+/* Agenda compacta sin espacios vacíos */
+.vp-agenda-side-card{position:relative;overflow:hidden;min-height:100%;display:flex;flex-direction:column;}
+.vp-side-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px;}
+.vp-muted.small{font-size:.86rem;margin-top:-6px;}
+.vp-side-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(148,189,255,.24),transparent);margin:20px 0 18px;}
+.vp-agenda-art{width:145px;min-width:145px;height:112px;border-radius:22px;background:radial-gradient(circle at 35% 10%,rgba(85,214,107,.16),transparent 58%),rgba(255,255,255,.025);border:1px solid rgba(148,189,255,.12);display:grid;place-items:center;opacity:.9;}
+.vp-agenda-art svg{width:124px;height:94px;fill:none;stroke:url(#agendaArtGlow);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 16px rgba(69,167,255,.18));}
+.vp-agenda-config>.vp-card.soft:nth-of-type(2){min-height:100%;}
+.vp-agenda-config>.vp-card.soft:nth-of-type(3){min-height:100%;}
+.vp-agenda-config>.vp-card.soft:nth-of-type(4){margin-top:0;}
+.vp-hour-list{height:100%;}
+@media (max-width:1100px){
+  .vp-side-card-head{align-items:center;}
+  .vp-agenda-art{width:120px;min-width:120px;height:92px;}
+  .vp-agenda-art svg{width:100px;height:78px;}
+}
+@media (max-width:680px){
+  .vp-side-card-head{display:block;}
+  .vp-agenda-art{margin-top:12px;width:100%;height:90px;}
 }
 
 `;
