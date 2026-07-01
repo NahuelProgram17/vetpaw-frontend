@@ -221,7 +221,7 @@ export default function MedicalHistory() {
 .owner-icon-badge svg { width: 30px; height: 30px; display: block; }
 .owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
-.owner-gradient-title,
+ .owner-gradient-title,
 .dash-title-modern,
 .pets-title,
 .appts-title,
@@ -232,15 +232,14 @@ export default function MedicalHistory() {
     -webkit-background-clip: text !important;
     background-clip: text !important;
     color: transparent !important;
-    -webkit-text-stroke: 0.75px rgba(0, 0, 0, .92);
-    paint-order: stroke fill;
-    text-shadow:
-        -0.8px -0.8px 0 rgba(0,0,0,.78),
-         0.8px -0.8px 0 rgba(0,0,0,.78),
-        -0.8px  0.8px 0 rgba(0,0,0,.78),
-         0.8px  0.8px 0 rgba(0,0,0,.78),
-         0 5px 14px rgba(0,0,0,.42),
-         0 0 18px rgba(76,175,80,.12);
+    -webkit-text-fill-color: transparent !important;
+    filter:
+        drop-shadow(1px 0 0 rgba(0,0,0,.82))
+        drop-shadow(-1px 0 0 rgba(0,0,0,.82))
+        drop-shadow(0 1px 0 rgba(0,0,0,.82))
+        drop-shadow(0 -1px 0 rgba(0,0,0,.82))
+        drop-shadow(0 3px 5px rgba(0,0,0,.36));
+    text-shadow: none !important;
 }
 .paw-runner {
     font-size: 3rem;

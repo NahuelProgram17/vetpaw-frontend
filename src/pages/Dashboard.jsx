@@ -241,7 +241,11 @@ export default function Dashboard() {
     // ───────────── Estilos comunes
     const cardSt = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 18, padding: 22, color: TEXT, display: "flex", flexDirection: "column" };
     const cardHeader = { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 10 };
-    const cardTitle = { display: "flex", alignItems: "center", gap: 10, fontSize: "1.05rem", fontWeight: 900, fontFamily: FONT, margin: 0, background: `linear-gradient(135deg, ${G1}, ${O2})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", textShadow: "0 0 18px rgba(76,175,80,0.10)" };
+    const titleOutlineFilter = "drop-shadow(1px 0 0 rgba(0,0,0,.82)) drop-shadow(-1px 0 0 rgba(0,0,0,.82)) drop-shadow(0 1px 0 rgba(0,0,0,.82)) drop-shadow(0 -1px 0 rgba(0,0,0,.82)) drop-shadow(0 3px 5px rgba(0,0,0,.35))";
+    const cardTitle = { display: "flex", alignItems: "center", gap: 10, fontSize: "1.05rem", fontWeight: 900, fontFamily: FONT, margin: 0 };
+    const cardTitleIcon = { width: 28, height: 28, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", lineHeight: 1, flexShrink: 0, filter: "drop-shadow(0 2px 3px rgba(0,0,0,.72))" };
+    const cardTitleText = { background: `linear-gradient(135deg, ${G1}, ${O2})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", WebkitTextFillColor: "transparent", filter: titleOutlineFilter };
+    const SectionTitle = ({ icon, children }) => <h2 style={cardTitle}><span style={cardTitleIcon}>{icon}</span><span style={cardTitleText}>{children}</span></h2>;
     const linkSt = (color) => ({ background: "transparent", border: "none", color, fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: FONT, whiteSpace: "nowrap" });
 
     return (
@@ -340,7 +344,7 @@ export default function Dashboard() {
                     {/* ─── Mi mascota principal ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <h2 style={cardTitle}>🐕 Mi mascota principal</h2>
+                            <SectionTitle icon="🐕">Mi mascota principal</SectionTitle>
                             {pets.length > 1 && <button onClick={() => navigate("/pets")} style={linkSt(G2)}>Ver todas →</button>}
                         </div>
                         {!mainPet ? (
@@ -409,7 +413,7 @@ export default function Dashboard() {
                     {/* ─── Próximo turno ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <h2 style={cardTitle}>🗓️ Próximo turno</h2>
+                            <SectionTitle icon="🗓️">Próximo turno</SectionTitle>
                             {nextAppt && daysUntilNext !== null && (
                                 <span style={{ background: "rgba(255,152,0,0.15)", color: O2, border: `1px solid ${O2}50`, borderRadius: 999, padding: "3px 10px", fontSize: "0.72rem", fontWeight: 700, whiteSpace: "nowrap" }}>
                                     {daysUntilNext === 0 ? "Hoy" : daysUntilNext === 1 ? "Mañana" : `Faltan ${daysUntilNext} días`}
@@ -459,7 +463,7 @@ export default function Dashboard() {
                     {/* ─── Recordatorios ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <h2 style={cardTitle}>🔔 Recordatorios</h2>
+                            <SectionTitle icon="🔔">Recordatorios</SectionTitle>
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                             {/* Vacunas al día */}
@@ -513,7 +517,7 @@ export default function Dashboard() {
                     {/* ─── Clínicas disponibles ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <h2 style={cardTitle}>🏥 Clínicas disponibles</h2>
+                            <SectionTitle icon="🏥">Clínicas disponibles</SectionTitle>
                             <button onClick={() => navigate("/clinics")} style={linkSt(G2)}>Ver todas →</button>
                         </div>
                         {clinics.length === 0 ? (
@@ -540,7 +544,7 @@ export default function Dashboard() {
                     {/* ─── Actividad reciente (timeline mezclado) ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <h2 style={cardTitle}>📋 Actividad reciente</h2>
+                            <SectionTitle icon="📋">Actividad reciente</SectionTitle>
                         </div>
                         {recentActivity.length === 0 ? (
                             <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "30px 12px", textAlign: "center", gap: 10 }}>
@@ -667,7 +671,7 @@ export default function Dashboard() {
 .owner-icon-badge svg { width: 30px; height: 30px; display: block; }
 .owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
-.owner-gradient-title,
+ .owner-gradient-title,
 .dash-title-modern,
 .pets-title,
 .appts-title,
@@ -678,15 +682,14 @@ export default function Dashboard() {
     -webkit-background-clip: text !important;
     background-clip: text !important;
     color: transparent !important;
-    -webkit-text-stroke: 0.75px rgba(0, 0, 0, .92);
-    paint-order: stroke fill;
-    text-shadow:
-        -0.8px -0.8px 0 rgba(0,0,0,.78),
-         0.8px -0.8px 0 rgba(0,0,0,.78),
-        -0.8px  0.8px 0 rgba(0,0,0,.78),
-         0.8px  0.8px 0 rgba(0,0,0,.78),
-         0 5px 14px rgba(0,0,0,.42),
-         0 0 18px rgba(76,175,80,.12);
+    -webkit-text-fill-color: transparent !important;
+    filter:
+        drop-shadow(1px 0 0 rgba(0,0,0,.82))
+        drop-shadow(-1px 0 0 rgba(0,0,0,.82))
+        drop-shadow(0 1px 0 rgba(0,0,0,.82))
+        drop-shadow(0 -1px 0 rgba(0,0,0,.82))
+        drop-shadow(0 3px 5px rgba(0,0,0,.36));
+    text-shadow: none !important;
 }
 .paw-runner {
     font-size: 3rem;
