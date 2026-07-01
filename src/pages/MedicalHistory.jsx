@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getVisits, getPets, getAppointments } from "../services/api";
 import api from "../services/api";
 import ownerBg from "../assets/vetpaw-owner-bg.png";
+import VetPawLoader from '../components/VetPawLoader';
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif";
 const G1 = "#4CAF50";
@@ -108,34 +109,7 @@ export default function MedicalHistory() {
 
     const card = { background: CARD, border: `1.5px solid ${BORDER}`, borderRadius: 18 };
 
-    if (loading) return <div className="owner-cosmic-bg history-page" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", gap: 14, alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: FONT }}><span className="paw-runner">🐕</span><p style={{ color: MUTED, fontWeight: 700 }}>Cargando historial…</p><style>{`
-.owner-gradient-title,
-.dash-title-modern,
-.pets-title,
-.appts-title,
-.hero-title,
-.history-main-title,
-.history-title-main {
-    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 38%, #FFB300 72%, #FF9800 100%) !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    color: transparent !important;
-    text-shadow: 0 0 24px rgba(76,175,80,.12);
-}
-.paw-runner {
-    font-size: 3rem;
-    display: inline-block;
-    animation: pawRun 1.35s ease-in-out infinite;
-    transform-origin: center bottom;
-}
-@keyframes pawRun {
-    0% { transform: translateX(-22px) translateY(0) rotate(-7deg); opacity: .55; }
-    25% { transform: translateX(-8px) translateY(-5px) rotate(4deg); opacity: 1; }
-    50% { transform: translateX(10px) translateY(0) rotate(-3deg); opacity: 1; }
-    75% { transform: translateX(24px) translateY(-5px) rotate(5deg); opacity: .9; }
-    100% { transform: translateX(42px) translateY(0) rotate(-6deg); opacity: .55; }
-}
-`}</style></div>;
+    if (loading) return <VetPawLoader message="Cargando historial..." subText="Preparando la información de tu mascota" />;
 
     if (!pets.length) return (
         <div className="owner-cosmic-bg history-page" style={{ minHeight: "100vh", fontFamily: FONT, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>

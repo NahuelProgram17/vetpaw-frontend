@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getPets, getAppointments } from "../services/api";
 import api from "../services/api";
+import VetPawLoader from '../components/VetPawLoader';
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif";
 const G1 = "#4CAF50";
@@ -114,7 +115,7 @@ export default function Profile() {
     const roleLabel = profile?.role === "clinic" ? "Veterinaria" : "Dueño/a de mascota";
     const card = { background: CARD, border: `1.5px solid ${BORDER}`, borderRadius: 18 };
 
-    if (loading) return <div style={{ minHeight: "100vh", background: "#0a121d", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: FONT }}>Cargando perfil… 🐾</div>;
+    if (loading) return <VetPawLoader message="Cargando perfil..." subText="Preparando tus datos" />;
 
     const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || profile?.username;
 
@@ -138,7 +139,7 @@ export default function Profile() {
         <div style={{ minHeight: "100vh", background: "#0a121d", fontFamily: FONT, color: "#fff", padding: "26px 22px 56px" }}>
             <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
             <style>{`
-                .pf-wrap { max-width: 1180px; margin: 0 auto; }
+                .pf-wrap { max-width: 1400px; margin: 0 auto; }
                 .pf-head { display: grid; grid-template-columns: 1fr 340px; gap: 18px; align-items: stretch; }
                 .pf-headinfo { display: flex; gap: 22px; align-items: center; }
                 .pf-stats { display: flex; gap: 22px; margin-top: 16px; flex-wrap: wrap; }

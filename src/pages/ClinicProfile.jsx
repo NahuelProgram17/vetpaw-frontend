@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import VetPawLoader from '../components/VetPawLoader';
 
 const SERVICE_LABELS = {
     dogs: '🐶 Perros', cats: '🐱 Gatos', rabbits: '🐰 Conejos',
@@ -37,18 +38,7 @@ export default function ClinicProfile() {
             .finally(() => setLoading(false));
     }, [slug]);
 
-    if (loading) return (
-        <div className="cp-page">
-            <div className="blob b1" /><div className="blob b2" />
-            <div className="cp-inner">
-                <div className="loading-state">
-                    <span className="paw-spin">🐾</span>
-                    <p>Cargando perfil...</p>
-                </div>
-            </div>
-            <style>{baseStyles}</style>
-        </div>
-    );
+    if (loading) return <VetPawLoader message="Cargando perfil..." subText="Preparando la veterinaria" />;
 
     if (notFound) return (
         <div className="cp-page">

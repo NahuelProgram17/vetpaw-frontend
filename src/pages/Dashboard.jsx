@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getPets, getAppointments, getClinics, getVaccines, markNotificationsSeen } from "../services/api";
 import ownerBg from "../assets/vetpaw-owner-bg.png";
+import VetPawLoader from '../components/VetPawLoader';
 
 // ───────────────────────── Tokens de diseño
 const BG = "#0a121d";
@@ -196,40 +197,7 @@ export default function Dashboard() {
 
     // ───────────── Loading
     if (loading) {
-        return (
-            <div style={{ minHeight: "100vh", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, fontFamily: FONT, color: MUTED }}>
-                <span className="paw-runner">🐕</span>
-                <p>Cargando tu espacio…</p>
-                <style>{`
-.owner-gradient-title,
-.dash-title-modern,
-.pets-title,
-.appts-title,
-.hero-title,
-.history-main-title,
-.history-title-main {
-    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 38%, #FFB300 72%, #FF9800 100%) !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    color: transparent !important;
-    text-shadow: 0 0 24px rgba(76,175,80,.12);
-}
-.paw-runner {
-    font-size: 3rem;
-    display: inline-block;
-    animation: pawRun 1.35s ease-in-out infinite;
-    transform-origin: center bottom;
-}
-@keyframes pawRun {
-    0% { transform: translateX(-22px) translateY(0) rotate(-7deg); opacity: .55; }
-    25% { transform: translateX(-8px) translateY(-5px) rotate(4deg); opacity: 1; }
-    50% { transform: translateX(10px) translateY(0) rotate(-3deg); opacity: 1; }
-    75% { transform: translateX(24px) translateY(-5px) rotate(5deg); opacity: .9; }
-    100% { transform: translateX(42px) translateY(0) rotate(-6deg); opacity: .55; }
-}
-`}</style>
-            </div>
-        );
+        return <VetPawLoader message="Cargando VetPaw..." subText="Preparando tu panel" />;
     }
 
     // ───────────── Estilos comunes

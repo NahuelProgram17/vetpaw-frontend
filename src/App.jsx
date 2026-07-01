@@ -25,6 +25,7 @@ import AnunciarVetPaw from './pages/AnunciarVetPaw'
 import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
 import ScrollToTop from './components/ScrollToTop';
+import { RouteChangeLoader } from './components/VetPawLoader';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Estadisticas from './pages/Estadisticas';
@@ -39,6 +40,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
       <ScrollToTop />
+        <RouteChangeLoader />
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />

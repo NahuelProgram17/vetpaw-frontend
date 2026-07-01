@@ -1,19 +1,12 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import VetPawLoader from './VetPawLoader'
 
 export default function ProtectedRoute({ children, role }) {
     const { user, loading } = useAuth()
 
     if (loading) {
-        return (
-            <div style={{
-                minHeight: '100vh', background: '#1a1a2e',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '3rem'
-            }}>
-                🐾
-            </div>
-        )
+        return <VetPawLoader message="Cargando VetPaw..." subText="Verificando tu sesión" />
     }
 
     if (!user) return <Navigate to="/login" replace />

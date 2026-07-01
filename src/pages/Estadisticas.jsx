@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import VetPawLoader from '../components/VetPawLoader';
 
 const GREEN = "#4CAF50";
 const ORANGE = "#FF9800";
@@ -501,16 +502,7 @@ export default function Estadisticas() {
     };
 
     if (loading) {
-        return (
-            <div className="stats-page stats-loading-page">
-                <StarsBackground />
-                <div className="loading-card">
-                    <span>🐾</span>
-                    <p>Cargando estadísticas...</p>
-                </div>
-                <style>{STYLES}</style>
-            </div>
-        );
+        return <VetPawLoader message="Cargando estadísticas..." subText="Preparando reportes y métricas" />;
     }
 
     return (
