@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPets, createPet, updatePet, deletePet, createTreatment, deleteTreatment } from '../services/api';
 import ownerBg from "../assets/vetpaw-owner-bg.png";
-import VetPawLoader from "../components/VetPawLoader";
 
 const TREATMENT_TYPES = [
     { value: 'deworming', label: 'Desparasitación' },
@@ -292,10 +291,6 @@ export default function Pets() {
         return `${years} año${years > 1 ? 's' : ''}`;
     };
 
-    if (loading) {
-        return <VetPawLoader message="Cargando mascotas..." subText="Buscando tus mascotas" />;
-    }
-
     return (
         <div className="pets-page">
             <div className="blob b1" />
@@ -311,6 +306,13 @@ export default function Pets() {
                         </p>
                     </div>
                 </header>
+
+                {loading && (
+                    <div className="loading-state">
+                        <span className="paw-runner">🐕</span>
+                        <p>Cargando mascotas...</p>
+                    </div>
+                )}
 
                 {!loading && pets.length === 0 && (
                     <div className="empty-state">
@@ -924,12 +926,21 @@ export default function Pets() {
 .appts-title,
 .hero-title,
 .history-main-title,
-.history-title-main {
+.history-title-main,
+.lp-main-title {
     background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 38%, #FFB300 72%, #FF9800 100%) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
     color: transparent !important;
-    text-shadow: 0 0 24px rgba(76,175,80,.12);
+
+    text-shadow:
+        0 3px 0 rgba(0, 0, 0, .95),
+        2px 2px 0 rgba(0, 0, 0, .88),
+        -2px 2px 0 rgba(0, 0, 0, .88),
+        2px -2px 0 rgba(0, 0, 0, .88),
+        -2px -2px 0 rgba(0, 0, 0, .88),
+        0 0 18px rgba(0, 0, 0, .75) !important;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .42));
 }
 .paw-runner {
     font-size: 3rem;

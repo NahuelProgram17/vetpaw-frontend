@@ -203,7 +203,7 @@ export default function Dashboard() {
     // ───────────── Estilos comunes
     const cardSt = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 18, padding: 22, color: TEXT, display: "flex", flexDirection: "column" };
     const cardHeader = { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 10 };
-    const cardTitle = { display: "flex", alignItems: "center", gap: 10, fontSize: "1.05rem", fontWeight: 900, fontFamily: FONT, margin: 0, background: `linear-gradient(135deg, ${G1}, ${O2})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", textShadow: "0 0 18px rgba(76,175,80,0.10)" };
+    const cardTitle = { display: "flex", alignItems: "center", gap: 10, fontSize: "1.05rem", fontWeight: 900, fontFamily: FONT, margin: 0, background: `linear-gradient(135deg, ${G1}, ${O2})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", textShadow: "0 3px 0 rgba(0,0,0,.95), 2px 2px 0 rgba(0,0,0,.88), -2px 2px 0 rgba(0,0,0,.88), 2px -2px 0 rgba(0,0,0,.88), -2px -2px 0 rgba(0,0,0,.88), 0 0 16px rgba(0,0,0,.7)", filter: "drop-shadow(0 8px 14px rgba(0,0,0,.35))" };
     const linkSt = (color) => ({ background: "transparent", border: "none", color, fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: FONT, whiteSpace: "nowrap" });
 
     return (
@@ -635,12 +635,21 @@ export default function Dashboard() {
 .appts-title,
 .hero-title,
 .history-main-title,
-.history-title-main {
+.history-title-main,
+.lp-main-title {
     background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 38%, #FFB300 72%, #FF9800 100%) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
     color: transparent !important;
-    text-shadow: 0 0 24px rgba(76,175,80,.12);
+
+    text-shadow:
+        0 3px 0 rgba(0, 0, 0, .95),
+        2px 2px 0 rgba(0, 0, 0, .88),
+        -2px 2px 0 rgba(0, 0, 0, .88),
+        2px -2px 0 rgba(0, 0, 0, .88),
+        -2px -2px 0 rgba(0, 0, 0, .88),
+        0 0 18px rgba(0, 0, 0, .75) !important;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .42));
 }
 .paw-runner {
     font-size: 3rem;
