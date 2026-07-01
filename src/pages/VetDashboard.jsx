@@ -924,11 +924,21 @@ function PacientesTab({
   );
 }
 
+function CameraOutlineIcon({ className = "" }) {
+  return (
+    <svg className={`vp-camera-svg ${className}`} viewBox="0 0 128 96" aria-hidden="true" focusable="false">
+      <path d="M34 22h13l7-10h20l7 10h13c10 0 18 8 18 18v30c0 10-8 18-18 18H34c-10 0-18-8-18-18V40c0-10 8-18 18-18Z" />
+      <circle cx="64" cy="56" r="19" />
+      <circle cx="94" cy="38" r="4" />
+    </svg>
+  );
+}
+
 function FotosTab({ photos, photosLoading, photoUploading, photoCaption, setPhotoCaption, fileInputRef, handlePhotoUpload, deletePhoto }) {
   return (
     <section className="vp-photos-page">
       <div className="vp-page-title">
-        <div className="title-icon">📷</div>
+        <div className="title-icon"><CameraOutlineIcon /></div>
         <div>
           <h2>Fotos del local</h2>
           <p>{photos.length}/5 fotos — Se muestran en tu perfil público</p>
@@ -937,7 +947,7 @@ function FotosTab({ photos, photosLoading, photoUploading, photoCaption, setPhot
 
       {photos.length < 5 && (
         <div className="vp-upload-zone">
-          <div className="upload-icon">☁️</div>
+          <CameraOutlineIcon className="upload-camera-icon" />
           <h3>Subí fotos de tu clínica</h3>
           <p>Mostrá tu espacio y generá confianza en tus clientes.</p>
           <input value={photoCaption} onChange={(e) => setPhotoCaption(e.target.value)} maxLength={100} placeholder="Descripción opcional: sala de espera, consultorio..." />
@@ -961,7 +971,7 @@ function FotosTab({ photos, photosLoading, photoUploading, photoCaption, setPhot
             </article>
           ))}
           {Array.from({ length: Math.max(0, 5 - photos.length) }).map((_, idx) => (
-            <button className="vp-photo-placeholder" key={idx} onClick={() => fileInputRef.current?.click()}>📷<span>Agregar foto</span></button>
+            <button className="vp-photo-placeholder" key={idx} onClick={() => fileInputRef.current?.click()}><CameraOutlineIcon /><span>Agregar foto</span></button>
           ))}
         </div>
       )}
@@ -1145,7 +1155,6 @@ function PetMainCard({ pet, visits, vaccines, onFile, onPdf, onVisit, onVaccine,
           <button className="outline violet" onClick={onVaccine}>🛡 Antiparasitarios</button>
         </div>
       </div>
-      {!detailed && <button className="vp-dot-menu" aria-label="Opciones">•••</button>}
     </article>
   );
 }
@@ -1227,4 +1236,70 @@ const styles = `
 .vp-agenda-config{max-width:980px}.vp-card.soft{padding:18px;margin-bottom:12px}.vp-days{display:flex;gap:8px;flex-wrap:wrap}.vp-days button{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--muted);border-radius:10px;padding:10px 13px;font-weight:900}.vp-days button.active{background:rgba(85,214,107,.16);border-color:rgba(85,214,107,.42);color:var(--green)}.vp-hour-list,.vp-duration-list{display:grid;gap:10px}.vp-hour-row{display:grid;grid-template-columns:140px 54px 120px 54px 120px;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}.vp-hour-row span,.vp-duration-list span{color:var(--muted)}.vp-duration-list label{display:grid;grid-template-columns:1fr 160px;align-items:center;gap:12px}.vp-duration-list.two{grid-template-columns:1fr 1fr}.vp-save{width:100%;margin-top:14px;background:linear-gradient(135deg,#18c983,#55d66b);color:#fff;border:0}.vp-external-form{display:grid;gap:10px}.vp-external-form label,.vp-modal-form label{display:grid;gap:6px;color:var(--muted);font-weight:800}.vp-external-form button{background:linear-gradient(135deg,var(--green),var(--orange));border:0;color:#fff}.vp-inline-form{display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:14px}.vp-inline-form button{background:linear-gradient(135deg,#18c983,#4c91ff);border:0;color:#fff}
 .vp-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.62);display:grid;place-items:center;z-index:200;padding:20px}.vp-modal{width:min(720px,100%);max-height:88vh;overflow:auto;background:#071323;border:1px solid var(--line);border-radius:22px;box-shadow:0 28px 90px rgba(0,0,0,.55)}.vp-modal header{display:flex;justify-content:space-between;align-items:center;padding:18px;border-bottom:1px solid var(--line)}.vp-modal header h2{margin:0}.vp-modal header button{background:none;border:0;color:#fff;font-size:2rem;cursor:pointer}.vp-modal-form{padding:18px;display:grid;gap:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
 @media (max-width:1000px){.vp-hero{grid-template-columns:1fr}.vp-turnos-grid{grid-template-columns:1fr}.vp-metrics.turnos,.vp-metrics.patients{grid-template-columns:repeat(2,1fr)}.vp-pet-actions{grid-template-columns:1fr 1fr}.vp-photo-grid{grid-template-columns:repeat(2,1fr)}.vp-detail-grid{grid-template-columns:1fr}.vp-duration-list.two{grid-template-columns:1fr}}@media (max-width:680px){.vp-page{padding:24px 12px 60px}.vp-hero h1{font-size:2.1rem}.vp-tabs{overflow:auto;gap:16px}.vp-metrics.turnos,.vp-metrics.patients,.vp-search-row{grid-template-columns:1fr}.vp-pet-card{grid-template-columns:1fr}.vp-pet-photo{height:220px}.vp-pet-chips{grid-template-columns:1fr}.vp-pet-actions{grid-template-columns:1fr}.vp-hour-row{grid-template-columns:1fr 1fr}.vp-duration-list label{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+
+/* Ajustes solicitados — VetDashboard fix */
+.vp-shell{max-width:min(1520px,calc(100vw - 64px));}
+.vp-dot-menu{display:none!important;}
+.vp-camera-svg{width:76px;height:58px;display:block;margin:0 auto 14px;fill:none;stroke:rgba(214,225,245,.72);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 18px rgba(69,167,255,.18));}
+.title-icon .vp-camera-svg{width:42px;height:34px;margin:0;stroke:rgba(117,190,255,.95);stroke-width:7;}
+.upload-camera-icon{width:92px;height:70px;margin-bottom:14px;stroke:rgba(105,210,255,.92);filter:drop-shadow(0 0 22px rgba(69,167,255,.25));}
+.vp-photo-placeholder{min-height:218px;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px;cursor:pointer;}
+.vp-photo-placeholder span{font-size:1.15rem;font-weight:800;color:rgba(226,235,255,.62);}
+.vp-photo-placeholder:hover .vp-camera-svg{stroke:#8fc8ff;}
+
+/* Agenda más ancha y menos larga */
+.vp-agenda-config{max-width:none!important;width:100%;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:18px;align-items:start;}
+.vp-agenda-config>.vp-page-title{grid-column:1/-1;margin-bottom:2px;}
+.vp-agenda-config>.vp-card.soft{margin-bottom:0;}
+.vp-agenda-config>.vp-card.soft:nth-of-type(1){grid-column:1/-1;}
+.vp-agenda-config>.vp-card.soft:nth-of-type(2){grid-column:1/2;}
+.vp-agenda-config>.vp-card.soft:nth-of-type(3){grid-column:2/3;}
+.vp-agenda-config>.vp-card.soft:nth-of-type(4){grid-column:2/3;}
+.vp-agenda-config>.vp-card.soft:nth-of-type(5){grid-column:1/-1;}
+.vp-agenda-config .vp-card.soft{padding:24px;border-radius:22px;}
+.vp-days button{min-width:72px;}
+.vp-hour-row{grid-template-columns:minmax(105px,140px) 58px minmax(138px,160px) 58px minmax(138px,160px)!important;gap:12px;align-items:center;}
+.vp-hour-row input{min-width:138px;width:100%;height:48px;padding:10px 14px!important;font-size:1rem;line-height:1.2;color:#fff;background-color:rgba(16,34,59,.96)!important;}
+.vp-hour-row input::-webkit-calendar-picker-indicator,
+.vp-external-form input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+.vp-modal-form input[type="date"]::-webkit-calendar-picker-indicator,
+.vp-modal-form input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(1.2);opacity:.8;margin-right:8px;cursor:pointer;}
+.vp-duration-list{gap:14px;}
+.vp-duration-list label{grid-template-columns:minmax(0,1fr) minmax(170px,210px)!important;gap:16px;}
+.vp-duration-list.two{display:grid;grid-template-columns:1fr!important;}
+.vp-duration-list.two label{grid-template-columns:minmax(0,1fr) minmax(190px,230px)!important;}
+.vp-duration-list select,
+.vp-external-form select,
+.vp-external-form input,
+.vp-modal-form input,
+.vp-modal-form textarea,
+.vp-upload-zone input{background-color:rgba(16,34,59,.96)!important;color:#fff!important;border-color:rgba(148,189,255,.22)!important;min-height:48px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vp-duration-list select,
+.vp-external-form select{min-width:170px;padding-right:38px!important;color-scheme:dark;}
+.vp-duration-list option,
+.vp-external-form option{background:#10223b!important;color:#f6f8ff!important;}
+.vp-save{min-height:54px;font-size:1rem;}
+.vp-external-form{grid-template-columns:1fr 260px;gap:14px;align-items:end;}
+.vp-external-form label:first-child{grid-column:1/2;}
+.vp-external-form label:nth-child(2){grid-column:2/3;}
+.vp-external-form label:nth-child(3){grid-column:1/2;}
+.vp-external-form button{grid-column:2/3;min-height:48px;align-self:end;}
+.vp-external-form input[type="datetime-local"]{padding-right:46px!important;}
+
+@media (max-width:1100px){
+  .vp-shell{max-width:calc(100vw - 28px);}
+  .vp-agenda-config{grid-template-columns:1fr;}
+  .vp-agenda-config>.vp-card.soft:nth-of-type(n){grid-column:1/-1;}
+  .vp-external-form{grid-template-columns:1fr;}
+  .vp-external-form label:first-child,.vp-external-form label:nth-child(2),.vp-external-form label:nth-child(3),.vp-external-form button{grid-column:1/-1;}
+}
+@media (max-width:680px){
+  .vp-shell{max-width:100%;}
+  .vp-hour-row{grid-template-columns:1fr!important;gap:8px;}
+  .vp-hour-row input{min-width:0;}
+  .vp-duration-list label,.vp-duration-list.two label{grid-template-columns:1fr!important;}
+  .vp-duration-list select,.vp-external-form select{width:100%;}
+  .vp-photo-grid{grid-template-columns:1fr!important;}
+}
+
 `;
