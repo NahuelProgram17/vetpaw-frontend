@@ -361,8 +361,8 @@ export default function ClinicDashboard() {
                 } catch (e) { console.error(e); }
             }}>📄 Descargar agenda</button>
             {agendaTurnos.length === 0 ? (
-                <div className="agenda-empty">
-                    <CalendarSmileIllustration />
+                <div className="agenda-empty-v2">
+                    <div className="agenda-empty-icon">📅</div>
                     <p>Sin turnos este día</p>
                 </div>
             ) : (
@@ -398,9 +398,6 @@ export default function ClinicDashboard() {
             <div className="vet-inner">
 
                 <header className="vet-header">
-                    <div className="vet-header-bg" aria-hidden="true">
-                        <DogIllustration />
-                    </div>
                     <div className="vet-header-left">
                         <p className="vet-eyebrow"><span>🏥</span> Panel de clínica</p>
                         <h1 className="vet-title">¡Bienvenido, <span className="vet-name">{user?.username}</span> <span className="vet-wave">👋</span></h1>
@@ -476,9 +473,10 @@ export default function ClinicDashboard() {
                         <div className="turnos-layout">
                             <div className="turnos-main">
                                 {filtered.length === 0 ? (
-                                    <div className="empty-state empty-turnos">
-                                        <CalendarIllustration />
-                                        <p>No hay turnos {filter !== "all" ? `con estado "${STATUS_LABEL[filter]?.label}".` : "registrados."}</p>
+                                    <div className="empty-state empty-turnos-v2">
+                                        <div className="empty-icon-big">📅</div>
+                                        <h3 className="empty-title">Sin turnos pendientes</h3>
+                                        <p>{filter !== "all" ? `No hay turnos con estado "${STATUS_LABEL[filter]?.label}".` : "Todavía no hay turnos registrados."}</p>
                                     </div>
                                 ) : (
                                     <div className="appts-list">
@@ -1005,6 +1003,7 @@ export default function ClinicDashboard() {
             )}
 
             <style>{`
+                /* VetDashboard v2.0 — rediseño con stats coloreadas + empty states limpios */
                 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1033,24 +1032,17 @@ export default function ClinicDashboard() {
                 .b3 { width: 360px; height: 360px; background: #a78bfa; top: 40%; right: -150px; }
                 .vet-inner { max-width: 1400px; margin: 0 auto; padding: 36px 24px; position: relative; z-index: 1; overflow-x: hidden; }
 
-                /* ─── Header rediseñado ─── */
+                /* ─── Header rediseñado (sin perro) ─── */
                 .vet-header {
                     position: relative;
                     display: grid;
-                    grid-template-columns: 1fr 300px;
+                    grid-template-columns: 1fr 320px;
                     gap: 24px;
                     align-items: flex-start;
                     margin-bottom: 32px;
-                    padding: 14px 8px 22px;
+                    padding: 14px 8px 26px;
                     border-bottom: 1px solid rgba(255,255,255,0.06);
                 }
-                .vet-header-bg {
-                    position: absolute; right: 280px; top: 0;
-                    width: 420px; height: 280px;
-                    pointer-events: none; z-index: 0;
-                    opacity: 0.9;
-                }
-                .dog-svg { width: 100%; height: 100%; }
                 .vet-header-left { position: relative; z-index: 1; min-width: 0; }
                 .vet-eyebrow {
                     display: inline-flex; align-items: center; gap: 8px;
@@ -1180,92 +1172,132 @@ export default function ClinicDashboard() {
                 .vet-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px; }
                 .vet-stat {
                     position: relative;
-                    background: linear-gradient(135deg, rgba(15,26,42,0.85), rgba(15,26,42,0.55));
-                    border: 1px solid rgba(255,255,255,0.06);
-                    border-radius: 18px;
-                    padding: 22px 24px;
-                    display: flex; align-items: center; gap: 16px;
+                    border-radius: 20px;
+                    padding: 24px 26px;
+                    display: flex; align-items: center; gap: 18px;
                     min-width: 0; overflow: hidden;
                     transition: all 0.2s;
+                    border: 2px solid;
                 }
-                .vet-stat:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.10); }
-                .vet-stat::before {
-                    content: ''; position: absolute;
-                    inset: 0; pointer-events: none;
-                    background: radial-gradient(ellipse 60% 100% at 0% 50%, var(--glow, transparent), transparent 70%);
-                    opacity: 0.55;
-                    border-radius: 18px;
-                }
+                .vet-stat:hover { transform: translateY(-3px); }
                 .vet-stat .stat-deco {
-                    position: absolute; right: -8px; bottom: -14px;
-                    font-size: 5rem; opacity: 0.06;
+                    position: absolute; right: -10px; bottom: -16px;
+                    font-size: 5.5rem; opacity: 0.08;
                     pointer-events: none;
                 }
-                .stat-pending { --glow: rgba(76,175,80,0.18); border-color: rgba(76,175,80,0.22); }
-                .stat-confirmed { --glow: rgba(76,175,80,0.32); border-color: rgba(76,175,80,0.35); box-shadow: 0 0 32px rgba(76,175,80,0.10); }
-                .stat-completed { --glow: rgba(107,202,255,0.22); border-color: rgba(107,202,255,0.28); }
-                .stat-noshow { --glow: rgba(255,107,107,0.22); border-color: rgba(255,107,107,0.28); }
+                .stat-pending {
+                    background: linear-gradient(135deg, rgba(76,175,80,0.12), rgba(76,175,80,0.04));
+                    border-color: rgba(76,175,80,0.35);
+                }
+                .stat-confirmed {
+                    background: linear-gradient(135deg, rgba(76,175,80,0.22), rgba(76,175,80,0.08));
+                    border-color: rgba(76,175,80,0.55);
+                    box-shadow: 0 0 40px rgba(76,175,80,0.15);
+                }
+                .stat-completed {
+                    background: linear-gradient(135deg, rgba(107,202,255,0.15), rgba(107,202,255,0.05));
+                    border-color: rgba(107,202,255,0.45);
+                }
+                .stat-noshow {
+                    background: linear-gradient(135deg, rgba(255,107,107,0.15), rgba(255,107,107,0.05));
+                    border-color: rgba(255,107,107,0.45);
+                }
 
                 .stat-icon-wrap {
-                    width: 56px; height: 56px; border-radius: 16px;
+                    width: 60px; height: 60px; border-radius: 16px;
                     display: flex; align-items: center; justify-content: center;
                     flex-shrink: 0; position: relative; z-index: 1;
+                    border: 2px solid;
                 }
-                .stat-pending .stat-icon-wrap { background: rgba(76,175,80,0.12); border: 1px solid rgba(76,175,80,0.30); box-shadow: inset 0 0 14px rgba(76,175,80,0.10); }
-                .stat-confirmed .stat-icon-wrap { background: rgba(76,175,80,0.20); border: 1px solid rgba(76,175,80,0.45); box-shadow: inset 0 0 16px rgba(76,175,80,0.18), 0 0 18px rgba(76,175,80,0.20); }
-                .stat-completed .stat-icon-wrap { background: rgba(107,202,255,0.14); border: 1px solid rgba(107,202,255,0.35); box-shadow: inset 0 0 14px rgba(107,202,255,0.15); }
-                .stat-noshow .stat-icon-wrap { background: rgba(255,107,107,0.14); border: 1px solid rgba(255,107,107,0.35); box-shadow: inset 0 0 14px rgba(255,107,107,0.15); }
+                .stat-pending .stat-icon-wrap {
+                    background: rgba(76,175,80,0.18);
+                    border-color: rgba(76,175,80,0.50);
+                    box-shadow: inset 0 0 18px rgba(76,175,80,0.20);
+                }
+                .stat-confirmed .stat-icon-wrap {
+                    background: rgba(76,175,80,0.30);
+                    border-color: rgba(76,175,80,0.70);
+                    box-shadow: inset 0 0 20px rgba(76,175,80,0.30), 0 0 24px rgba(76,175,80,0.30);
+                }
+                .stat-completed .stat-icon-wrap {
+                    background: rgba(107,202,255,0.20);
+                    border-color: rgba(107,202,255,0.55);
+                    box-shadow: inset 0 0 18px rgba(107,202,255,0.20);
+                }
+                .stat-noshow .stat-icon-wrap {
+                    background: rgba(255,107,107,0.20);
+                    border-color: rgba(255,107,107,0.55);
+                    box-shadow: inset 0 0 18px rgba(255,107,107,0.20);
+                }
 
-                .stat-icon { font-size: 1.6rem; flex-shrink: 0; }
+                .stat-icon { font-size: 1.8rem; flex-shrink: 0; }
                 .stat-content { position: relative; z-index: 1; }
-                .stat-num { font-size: 2.4rem; font-weight: 900; color: #fff; line-height: 1; }
-                .stat-label { font-size: 0.85rem; font-weight: 800; margin-top: 4px; }
-                .stat-pending .stat-label { color: #66BB6A; }
+                .stat-num { font-size: 2.6rem; font-weight: 900; color: #fff; line-height: 1; }
+                .stat-label { font-size: 0.95rem; font-weight: 800; margin-top: 4px; }
+                .stat-pending .stat-label { color: #81C784; }
                 .stat-confirmed .stat-label { color: #4CAF50; }
                 .stat-completed .stat-label { color: #6bcaff; }
                 .stat-noshow .stat-label { color: #ff6b6b; }
 
-                /* ─── Filtros como pills ─── */
+                /* ─── Filtros como pills más visibles ─── */
                 .filters { display: flex; gap: 10px; margin-bottom: 22px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; flex-wrap: wrap; }
                 .filters::-webkit-scrollbar { display: none; }
                 .filter-btn {
-                    background: transparent;
-                    border: 1.5px solid rgba(255,255,255,0.10);
-                    color: rgba(255,255,255,0.55);
+                    background: rgba(255,255,255,0.03);
+                    border: 1.5px solid rgba(255,255,255,0.12);
+                    color: rgba(255,255,255,0.6);
                     border-radius: 100px;
-                    padding: 10px 22px;
-                    font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700;
+                    padding: 11px 24px;
+                    font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700;
                     cursor: pointer; transition: all 0.2s;
                     white-space: nowrap; flex-shrink: 0;
                 }
-                .filter-btn:hover { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.20); }
+                .filter-btn:hover {
+                    color: rgba(255,255,255,0.95);
+                    border-color: rgba(255,255,255,0.25);
+                    background: rgba(255,255,255,0.06);
+                }
                 .filter-btn.active {
-                    background: rgba(76,175,80,0.10);
-                    border-color: rgba(76,175,80,0.50);
+                    background: rgba(76,175,80,0.18);
+                    border-color: #4CAF50;
                     color: #66BB6A;
-                    box-shadow: 0 0 16px rgba(76,175,80,0.15);
+                    box-shadow: 0 0 20px rgba(76,175,80,0.25), inset 0 0 12px rgba(76,175,80,0.10);
+                    text-shadow: 0 0 8px rgba(76,175,80,0.4);
                 }
 
-                /* ─── Empty state turnos (con SVG) ─── */
-                .empty-turnos {
-                    background: rgba(15,26,42,0.45);
-                    border: 1px solid rgba(255,255,255,0.05);
-                    border-radius: 20px;
-                    padding: 60px 24px;
+                /* ─── Empty states limpios ─── */
+                .empty-turnos-v2 {
+                    background: linear-gradient(135deg, rgba(15,26,42,0.7), rgba(15,26,42,0.4));
+                    border: 1px solid rgba(255,255,255,0.06);
+                    border-radius: 22px;
+                    padding: 70px 24px;
+                    text-align: center;
                 }
-                .empty-turnos .cal-illu { width: 220px; height: auto; margin-bottom: 16px; }
-                .empty-turnos p { color: rgba(255,255,255,0.55); font-weight: 700; font-size: 0.95rem; }
+                .empty-icon-big {
+                    font-size: 5rem;
+                    margin-bottom: 18px;
+                    filter: drop-shadow(0 8px 24px rgba(76,175,80,0.25));
+                    opacity: 0.9;
+                }
+                .empty-title { color: #fff; font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; }
+                .empty-turnos-v2 p { color: rgba(255,255,255,0.55); font-size: 0.95rem; }
 
-                /* ─── Sidebar Hoy rediseñada ─── */
+                .agenda-empty-v2 { text-align: center; padding: 22px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+                .agenda-empty-icon {
+                    font-size: 2.6rem;
+                    filter: drop-shadow(0 4px 12px rgba(76,175,80,0.2));
+                    opacity: 0.85;
+                }
+                .agenda-empty-v2 p { color: rgba(255,255,255,0.55); font-size: 0.85rem; font-weight: 700; }
+
+                /* ─── Botón Descargar agenda rojo ─── */
                 .btn-agenda-pdf {
-                    background: linear-gradient(135deg, #ff5252, #ff3b3b) !important;
+                    background: linear-gradient(135deg, #ef5350, #e53935) !important;
                     color: #fff !important;
-                    box-shadow: 0 6px 20px rgba(255,82,82,0.32) !important;
+                    box-shadow: 0 6px 22px rgba(239,83,80,0.35) !important;
+                    border: none !important;
                 }
-                .btn-agenda-pdf:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,82,82,0.42) !important; }
-
-                .agenda-empty { text-align: center; padding: 18px 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-                .agenda-empty .cal-smile { width: 140px; height: auto; }
+                .btn-agenda-pdf:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(239,83,80,0.45) !important; }
 
                 .turnos-layout { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: stretch; }
                 .turnos-main { display: flex; flex-direction: column; min-width: 0; }
