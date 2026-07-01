@@ -82,6 +82,44 @@ const STATUS_LABEL = {
     no_show: { label: "Ausente", color: YELLOW, bg: "rgba(255,217,61,0.15)" },
 };
 
+const StatPetIcon = () => (
+    <svg viewBox="0 0 64 64" width="30" height="30" fill="none" aria-hidden="true">
+        <path d="M18 37c4-6 8-9 14-9s10 3 14 9l4 7c3 5-.5 11-6.5 11h-23C14.5 55 11 49 14 44l4-7Z" fill="url(#statPetBody)" stroke="rgba(255,255,255,.55)" strokeWidth="2" />
+        <circle cx="18" cy="25" r="5.5" fill="#FF9800" />
+        <circle cx="29" cy="18" r="5.5" fill="#4CAF50" />
+        <circle cx="41" cy="24" r="5.5" fill="#FFB74D" />
+        <circle cx="49" cy="34" r="4.8" fill="#6bcaff" />
+        <defs><linearGradient id="statPetBody" x1="15" y1="27" x2="47" y2="55"><stop stopColor="#4CAF50"/><stop offset="1" stopColor="#FF9800"/></linearGradient></defs>
+    </svg>
+);
+
+const StatCalendarIcon = () => (
+    <svg viewBox="0 0 64 64" width="30" height="30" fill="none" aria-hidden="true">
+        <rect x="12" y="16" width="40" height="38" rx="9" fill="rgba(255,152,0,.16)" stroke="#FFB74D" strokeWidth="2.2" />
+        <path d="M12 28h40" stroke="#4CAF50" strokeWidth="2.2" />
+        <path d="M22 11v10M42 11v10" stroke="#FF9800" strokeWidth="4" strokeLinecap="round" />
+        <rect x="21" y="35" width="8" height="8" rx="2" fill="#6bcaff" />
+        <rect x="35" y="35" width="8" height="8" rx="2" fill="#FFB300" />
+    </svg>
+);
+
+const StatHourIcon = () => (
+    <svg viewBox="0 0 64 64" width="30" height="30" fill="none" aria-hidden="true">
+        <path d="M23 8h18M28 8v7h8V8" stroke="#a78bfa" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="32" cy="36" r="19" fill="rgba(167,139,250,.16)" stroke="#a78bfa" strokeWidth="2.4" />
+        <path d="M32 24v13l9 6" stroke="#FFB74D" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+const StatVaccineIcon = () => (
+    <svg viewBox="0 0 64 64" width="30" height="30" fill="none" aria-hidden="true">
+        <path d="M42 10l12 12M37 15l12 12" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
+        <rect x="17" y="28" width="27" height="12" rx="4" transform="rotate(-45 17 28)" fill="rgba(107,202,255,.18)" stroke="#6bcaff" strokeWidth="2" />
+        <path d="M22 48l-6 6M16 42l6 6M43 20l-8 8" stroke="#FF6B6B" strokeWidth="4" strokeLinecap="round" />
+        <path d="M26 37l7-7" stroke="#FFB300" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+);
+
 export default function Dashboard() {
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -203,7 +241,7 @@ export default function Dashboard() {
     // ───────────── Estilos comunes
     const cardSt = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 18, padding: 22, color: TEXT, display: "flex", flexDirection: "column" };
     const cardHeader = { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 10 };
-    const cardTitle = { display: "flex", alignItems: "center", gap: 10, fontSize: "1.05rem", fontWeight: 900, fontFamily: FONT, margin: 0, background: `linear-gradient(135deg, ${G1}, ${O2})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", textShadow: "0 3px 0 rgba(0,0,0,.95), 2px 2px 0 rgba(0,0,0,.88), -2px 2px 0 rgba(0,0,0,.88), 2px -2px 0 rgba(0,0,0,.88), -2px -2px 0 rgba(0,0,0,.88), 0 0 16px rgba(0,0,0,.7)", filter: "drop-shadow(0 8px 14px rgba(0,0,0,.35))" };
+    const cardTitle = { display: "flex", alignItems: "center", gap: 10, fontSize: "1.05rem", fontWeight: 900, fontFamily: FONT, margin: 0, background: `linear-gradient(135deg, ${G1}, ${O2})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", textShadow: "0 0 18px rgba(76,175,80,0.10)" };
     const linkSt = (color) => ({ background: "transparent", border: "none", color, fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: FONT, whiteSpace: "nowrap" });
 
     return (
@@ -236,14 +274,14 @@ export default function Dashboard() {
                 {/* ────────── Stats grid (4 cards) ────────── */}
                 <section className="dash-stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
                     {[
-                        { icon: "🐕", color: G2, ringBg: "rgba(76,175,80,0.12)", num: pets.length, label: "Mascotas", link: "Ver todas →", to: "/pets" },
-                        { icon: "📅", color: O2, ringBg: "rgba(255,152,0,0.12)", num: appointments.length, label: "Turnos totales", link: "Ver historial →", to: "/appointments" },
-                        { icon: "⏳", color: V1, ringBg: "rgba(167,139,250,0.12)", num: daysUntilNext ?? "—", label: nextAppt ? "Próximo turno" : "Sin próximo turno", sub: nextAppt ? `${daysUntilNext === 1 ? "día" : "días"} • ${fmtShort(nextAppt.requested_date)}` : null, link: nextAppt ? "Ver mis turnos →" : "Sacar turno →", to: nextAppt ? "/appointments" : "/appointments/new" },
-                        { icon: "💉", color: B1, ringBg: "rgba(107,202,255,0.12)", num: vaccines.length, label: "Vacunas registradas", link: "Ver historial →", to: "/history" },
+                        { icon: <StatPetIcon />, color: G2, ringBg: "rgba(76,175,80,0.12)", num: pets.length, label: "Mascotas", link: "Ver todas →", to: "/pets" },
+                        { icon: <StatCalendarIcon />, color: O2, ringBg: "rgba(255,152,0,0.12)", num: appointments.length, label: "Turnos totales", link: "Ver historial →", to: "/appointments" },
+                        { icon: <StatHourIcon />, color: V1, ringBg: "rgba(167,139,250,0.12)", num: daysUntilNext ?? "—", label: nextAppt ? "Próximo turno" : "Sin próximo turno", sub: nextAppt ? `${daysUntilNext === 1 ? "día" : "días"} • ${fmtShort(nextAppt.requested_date)}` : null, link: nextAppt ? "Ver mis turnos →" : "Sacar turno →", to: nextAppt ? "/appointments" : "/appointments/new" },
+                        { icon: <StatVaccineIcon />, color: B1, ringBg: "rgba(107,202,255,0.12)", num: vaccines.length, label: "Vacunas registradas", link: "Ver historial →", to: "/history" },
                     ].map((s, i) => (
                         <div key={i} className="dash-stat" style={{ ...cardSt, padding: 18, gap: 12 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                                <div style={{ width: 54, height: 54, borderRadius: "50%", background: s.ringBg, border: `1.5px solid ${s.color}40`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem", flexShrink: 0 }}>{s.icon}</div>
+                                <div className="dash-stat-icon" style={{ width: 54, height: 54, borderRadius: "50%", background: s.ringBg, border: `1.5px solid ${s.color}40`, display: "grid", placeItems: "center", flexShrink: 0 }}>{s.icon}</div>
                                 <div style={{ minWidth: 0 }}>
                                     <div style={{ fontSize: "2.2rem", fontWeight: 900, color: s.color, lineHeight: 1, fontFamily: FONT }}>{s.num}</div>
                                     <div style={{ fontSize: "0.82rem", color: MUTED2, marginTop: 4, fontWeight: 600 }}>{s.label}</div>
@@ -635,21 +673,20 @@ export default function Dashboard() {
 .appts-title,
 .hero-title,
 .history-main-title,
-.history-title-main,
-.lp-main-title {
+.history-title-main {
     background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 38%, #FFB300 72%, #FF9800 100%) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
     color: transparent !important;
-
+    -webkit-text-stroke: 0.75px rgba(0, 0, 0, .92);
+    paint-order: stroke fill;
     text-shadow:
-        0 3px 0 rgba(0, 0, 0, .95),
-        2px 2px 0 rgba(0, 0, 0, .88),
-        -2px 2px 0 rgba(0, 0, 0, .88),
-        2px -2px 0 rgba(0, 0, 0, .88),
-        -2px -2px 0 rgba(0, 0, 0, .88),
-        0 0 18px rgba(0, 0, 0, .75) !important;
-    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .42));
+        -0.8px -0.8px 0 rgba(0,0,0,.78),
+         0.8px -0.8px 0 rgba(0,0,0,.78),
+        -0.8px  0.8px 0 rgba(0,0,0,.78),
+         0.8px  0.8px 0 rgba(0,0,0,.78),
+         0 5px 14px rgba(0,0,0,.42),
+         0 0 18px rgba(76,175,80,.12);
 }
 .paw-runner {
     font-size: 3rem;
