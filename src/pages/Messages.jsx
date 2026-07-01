@@ -1,357 +1,554 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getConversations, getMessages, sendMessage, markMessagesRead } from "../services/api";
+import {
+    getConversations,
+    getMessages,
+    sendMessage,
+    markMessagesRead,
+} from "../services/api";
 import api from "../services/api";
+
+const normalizeList = (data) => data?.results ?? data ?? [];
+
+const initials = (name = "") => {
+    const clean = String(name || "").trim();
+    if (!clean) return "?";
+    const parts = clean.split(/\s+/).slice(0, 2);
+    return parts.map((p) => p[0]?.toUpperCase()).join("");
+};
+
+const formatChatDate = (value) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+        return date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    if (date.toDateString() === yesterday.toDateString()) return "Ayer";
+
+    return date.toLocaleDateString("es-AR", { day: "2-digit", month: "short" });
+};
+
+const formatFullDate = (value) => {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "—";
+    return date.toLocaleDateString("es-AR", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+};
 
 export default function Messages() {
     const { user } = useAuth();
     const [conversations, setConversations] = useState([]);
     const [messages, setMessages] = useState([]);
-    const [selectedConv, setSelectedConv] = useState(null);
-    const [text, setText] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [sending, setSending] = useState(false);
     const [contacts, setContacts] = useState([]);
-    const [showNewConv, setShowNewConv] = useState(false);
+    const [appointments, setAppointments] = useState([]);
+    const [selectedConv, setSelectedConv] = useState(null);
     const [selectedContact, setSelectedContact] = useState("");
     const [selectedAppt, setSelectedAppt] = useState("");
-    const [appointments, setAppointments] = useState([]);
-    // En mobile: "list" | "chat"
+    const [text, setText] = useState("");
+    const [query, setQuery] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [messagesLoading, setMessagesLoading] = useState(false);
+    const [contactsLoading, setContactsLoading] = useState(false);
+    const [sending, setSending] = useState(false);
+    const [showNewConv, setShowNewConv] = useState(false);
+    const [error, setError] = useState("");
     const [mobileView, setMobileView] = useState("list");
     const bottomRef = useRef(null);
 
-    useEffect(() => {
-        fetchConversations();
-        fetchContacts();
-    }, []);
+    const isClinic = user?.role === "clinic";
+    const isOwner = user?.role === "owner";
 
     useEffect(() => {
-        if (selectedConv) fetchMessages(selectedConv);
-    }, [selectedConv]);
+        fetchInitialData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.role]);
+
+    useEffect(() => {
+        if (selectedConv) fetchMessagesForConversation(selectedConv);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedConv?.other_user_id]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
+    const fetchInitialData = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            await Promise.all([fetchConversations(), fetchContactsAndAppointments()]);
+        } catch (err) {
+            console.error(err);
+            setError("No se pudieron cargar los mensajes. Probá actualizar la página.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const fetchConversations = async () => {
-        try {
-            const data = await getConversations();
-            setConversations(data);
-        } catch (e) { console.error(e); }
-        finally { setLoading(false); }
+        const data = await getConversations();
+        const list = normalizeList(data);
+        setConversations(list);
+        return list;
     };
 
-    const fetchContacts = async () => {
+    const fetchContactsAndAppointments = async () => {
+        setContactsLoading(true);
         try {
-            if (user?.role === 'owner') {
-                const data = await api.get('/clinics/');
-                const clinics = data.data.results ?? data.data;
-                setContacts(clinics.map(c => ({
-                    id: c.owner,
-                    name: c.name,
-                    clinic_id: c.id,
-                })));
-                const apptData = await api.get('/appointments/');
-                setAppointments(apptData.data.results ?? apptData.data);
-            } else {
-                const petData = await api.get('/pets/');
-                const pets = petData.data.results ?? petData.data;
-                const seen = {};
-                pets.forEach(p => {
-                    if (p.owner && !seen[p.owner]) {
-                        seen[p.owner] = { id: p.owner, name: p.owner_name || `Dueño #${p.owner}` };
-                    }
-                });
-                setContacts(Object.values(seen));
-                const apptData = await api.get('/appointments/');
-                setAppointments(apptData.data.results ?? apptData.data);
+            const apptReq = api.get("/appointments/");
+
+            if (isOwner) {
+                const [clinicsRes, apptRes] = await Promise.all([api.get("/clinics/"), apptReq]);
+                const clinics = normalizeList(clinicsRes.data);
+                const appts = normalizeList(apptRes.data);
+
+                setContacts(
+                    clinics
+                        .filter((clinic) => clinic.owner)
+                        .map((clinic) => ({
+                            id: clinic.owner,
+                            name: clinic.name || clinic.owner_username || `Clínica #${clinic.id}`,
+                            clinic_id: clinic.id,
+                            type: "clinic",
+                        }))
+                );
+                setAppointments(appts);
+                return;
             }
-        } catch (e) { console.error(e); }
+
+            const [petsRes, apptRes] = await Promise.all([api.get("/pets/"), apptReq]);
+            const pets = normalizeList(petsRes.data);
+            const appts = normalizeList(apptRes.data);
+            const seenOwners = new Map();
+
+            pets.forEach((pet) => {
+                if (pet.owner && !seenOwners.has(pet.owner)) {
+                    seenOwners.set(pet.owner, {
+                        id: pet.owner,
+                        name: pet.owner_name || `Dueño #${pet.owner}`,
+                        type: "owner",
+                    });
+                }
+            });
+
+            appts.forEach((appt) => {
+                if (appt.owner && !seenOwners.has(appt.owner)) {
+                    seenOwners.set(appt.owner, {
+                        id: appt.owner,
+                        name: appt.owner_name || `Dueño #${appt.owner}`,
+                        type: "owner",
+                    });
+                }
+            });
+
+            setContacts([...seenOwners.values()]);
+            setAppointments(appts);
+        } finally {
+            setContactsLoading(false);
+        }
     };
 
-    const fetchMessages = async (conv) => {
+    const fetchMessagesForConversation = async (conv) => {
+        if (!conv?.other_user_id) return;
+        setMessagesLoading(true);
+        setError("");
         try {
             const data = await getMessages();
-            const msgs = data.results ?? data;
-            const filtered = msgs.filter(m =>
-                (m.sender === conv.other_user_id || m.recipient === conv.other_user_id)
-            );
+            const list = normalizeList(data);
+            const otherId = Number(conv.other_user_id);
+            const userId = Number(user?.id);
+
+            const filtered = list.filter((msg) => {
+                const sender = Number(msg.sender);
+                const recipient = Number(msg.recipient);
+                return (
+                    (sender === otherId && recipient === userId) ||
+                    (sender === userId && recipient === otherId)
+                );
+            });
+
             setMessages(filtered);
             await markMessagesRead(conv.other_user_id);
-            setConversations(prev => prev.map(c =>
-                c.other_user_id === conv.other_user_id ? { ...c, unread: 0 } : c
-            ));
-        } catch (e) { console.error(e); }
+            setConversations((prev) =>
+                prev.map((item) =>
+                    Number(item.other_user_id) === otherId ? { ...item, unread: 0 } : item
+                )
+            );
+        } catch (err) {
+            console.error(err);
+            setError("No se pudo abrir esta conversación.");
+        } finally {
+            setMessagesLoading(false);
+        }
     };
 
-    const handleSend = async (e) => {
-        e.preventDefault();
-        if (!text.trim() || !selectedConv) return;
-        setSending(true);
-        try {
-            await sendMessage({
-                recipient: selectedConv.other_user_id,
-                content: text.trim(),
-                appointment: selectedAppt || null,
-            });
-            setText("");
-            await fetchMessages(selectedConv);
-            await fetchConversations();
-        } catch (e) { console.error(e); }
-        finally { setSending(false); }
+    const filteredConversations = useMemo(() => {
+        const term = query.trim().toLowerCase();
+        if (!term) return conversations;
+        return conversations.filter((conv) => {
+            const name = String(conv.other_username || "").toLowerCase();
+            const last = String(conv.last_message || "").toLowerCase();
+            const pet = String(conv.pet_name || "").toLowerCase();
+            return name.includes(term) || last.includes(term) || pet.includes(term);
+        });
+    }, [conversations, query]);
+
+    const unreadTotal = useMemo(
+        () => conversations.reduce((sum, conv) => sum + Number(conv.unread || 0), 0),
+        [conversations]
+    );
+
+    const conversationAppointments = useMemo(() => {
+        if (!selectedConv) return [];
+        const otherId = Number(selectedConv.other_user_id);
+
+        return appointments.filter((appt) => {
+            if (appt.status === "cancelled") return false;
+            if (isClinic) return Number(appt.owner) === otherId;
+            const contact = contacts.find((c) => Number(c.id) === otherId);
+            if (contact?.clinic_id) return Number(appt.clinic) === Number(contact.clinic_id);
+            return true;
+        });
+    }, [appointments, contacts, isClinic, selectedConv]);
+
+    const quickReplies = isClinic
+        ? [
+            { label: "✅ Confirmar", text: "Hola, confirmamos tu consulta. Te esperamos en el horario acordado." },
+            { label: "📋 Traer datos", text: "Para atender mejor a tu mascota, por favor traé libreta sanitaria y estudios previos si tenés." },
+            { label: "⏰ Reprogramar", text: "Hola, podemos reprogramar el turno. Decime qué día u horario te queda mejor." },
+            { label: "💬 Consulta", text: "Hola, contame un poco más qué le sucede a tu mascota así podemos orientarte mejor." },
+        ]
+        : [
+            { label: "✅ Confirmo", text: "Hola, confirmo que voy a asistir al turno. ¡Gracias!" },
+            { label: "⏰ Reprogramar", text: "Hola, necesito reprogramar el turno. ¿Tienen otro horario disponible?" },
+            { label: "💬 Consulta", text: "Hola, quería hacer una consulta sobre mi mascota." },
+            { label: "📋 Estudios", text: "Hola, ¿necesito llevar libreta sanitaria o estudios previos?" },
+        ];
+
+    const handleSelectConv = (conv) => {
+        setSelectedConv(conv);
+        setSelectedAppt(conv.appointment_id || "");
+        setMobileView("chat");
     };
 
-    const handleStartConv = async () => {
+    const handleStartConversation = () => {
         if (!selectedContact) return;
-        const contact = contacts.find(c => String(c.id) === String(selectedContact));
+        const contact = contacts.find((item) => String(item.id) === String(selectedContact));
         if (!contact) return;
-        const conv = {
+
+        const existing = conversations.find(
+            (conv) => Number(conv.other_user_id) === Number(contact.id)
+        );
+
+        const conv = existing || {
             other_user_id: contact.id,
             other_username: contact.name,
-            unread: 0,
             last_message: null,
+            last_date: null,
+            unread: 0,
+            appointment_id: null,
             pet_name: null,
         };
+
+        if (!existing) setConversations((prev) => [conv, ...prev]);
         setSelectedConv(conv);
         setShowNewConv(false);
         setSelectedContact("");
-        setMobileView("chat");
-        const exists = conversations.find(c => c.other_user_id === contact.id);
-        if (!exists) setConversations(prev => [conv, ...prev]);
-    };
-
-    // Al seleccionar conv en mobile, navegar al chat
-    const handleSelectConv = (conv) => {
-        setSelectedConv(conv);
+        setSelectedAppt("");
         setMobileView("chat");
     };
 
-    const formatTime = (d) => {
-        if (!d) return "";
-        const date = new Date(d);
-        const today = new Date();
-        if (date.toDateString() === today.toDateString()) {
-            return date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+    const handleSend = async (event) => {
+        event.preventDefault();
+        const content = text.trim();
+        if (!content || !selectedConv) return;
+
+        setSending(true);
+        setError("");
+        try {
+            await sendMessage({
+                recipient: selectedConv.other_user_id,
+                content,
+                appointment: selectedAppt || null,
+            });
+            setText("");
+            await fetchMessagesForConversation(selectedConv);
+            await fetchConversations();
+        } catch (err) {
+            console.error(err);
+            setError("No se pudo enviar el mensaje. Revisá la conexión e intentá de nuevo.");
+        } finally {
+            setSending(false);
         }
-        return date.toLocaleDateString("es-AR", { day: "2-digit", month: "short" });
     };
-
-    const QUICK_REPLIES_OWNER = [
-        { label: "💰 ¿Cuánto sale?", text: "Hola, quisiera saber cuánto sale la consulta." },
-        { label: "🐕 ¿Con síntomas?", text: "Hola, mi mascota tiene síntomas. ¿Puedo llevarla sin turno previo?" },
-        { label: "⏰ ¿Horario temprano?", text: "Hola, ¿tienen disponibilidad en un horario más temprano?" },
-        { label: "✅ Confirmo", text: "Confirmo que voy a estar presente en el turno. ¡Gracias!" },
-        { label: "❌ No puedo ir", text: "Hola, lamentablemente no voy a poder ir al turno. ¿Podemos reprogramar?" },
-    ];
-
-    const QUICK_REPLIES_CLINIC = [
-        { label: "💰 Informar precio", text: "Hola, el valor de la consulta es $" },
-        { label: "✅ Puede venir", text: "Sí, puede traer a su mascota sin problema." },
-        { label: "📋 Necesitamos datos", text: "Para poder atenderlo necesitamos que complete los datos de su mascota en la app." },
-        { label: "⚠️ Requiere turno", text: "Para esa consulta es necesario un turno previo. Por favor agendalo desde la app." },
-        { label: "📞 Llamanos", text: `Para más información podés llamarnos al ${user?.phone || 'nuestro teléfono'}.` },
-    ];
-
-    const quickReplies = user?.role === 'owner' ? QUICK_REPLIES_OWNER : QUICK_REPLIES_CLINIC;
 
     return (
-        <div className="messages-page">
-            <div className="blob b1" /><div className="blob b2" />
-            <div className="messages-inner">
-
-                <header className="messages-header">
-                    {/* En mobile chat: botón volver */}
-                    {mobileView === "chat" && selectedConv ? (
-                        <button className="btn-back" onClick={() => setMobileView("list")}>
-                            ← Volver
-                        </button>
-                    ) : (
-                        <h1 className="messages-title">💬 Mensajes</h1>
-                    )}
-                    <button className="btn-new-conv" onClick={() => setShowNewConv(true)}>
-                        + Nueva
-                    </button>
-                </header>
-
-                <div className="messages-layout">
-
-                    {/* ── Lista de conversaciones ── */}
-                    <div className={`conv-list ${mobileView === "chat" ? "mobile-hidden" : ""}`}>
-                        {loading && (
-                            <div className="conv-empty">
-                                <span className="paw-spin">🐾</span>
-                            </div>
-                        )}
-                        {!loading && conversations.length === 0 && (
-                            <div className="conv-empty">
-                                <span>💬</span>
-                                <p>No tenés conversaciones todavía.</p>
-                                <button className="btn-sm-msg" onClick={() => setShowNewConv(true)}>
-                                    Iniciar una →
-                                </button>
-                            </div>
-                        )}
-                        {conversations.map((conv) => (
-                            <div
-                                key={conv.other_user_id}
-                                className={`conv-item ${selectedConv?.other_user_id === conv.other_user_id ? "active" : ""}`}
-                                onClick={() => handleSelectConv(conv)}
-                            >
-                                <div className="conv-avatar">
-                                    {conv.other_username?.[0]?.toUpperCase() || "?"}
-                                </div>
-                                <div className="conv-info">
-                                    <div className="conv-top">
-                                        <span className="conv-name">{conv.other_username}</span>
-                                        <span className="conv-time">{formatTime(conv.last_date)}</span>
-                                    </div>
-                                    <div className="conv-bottom">
-                                        <span className="conv-last">
-                                            {conv.pet_name && `🐾 ${conv.pet_name} · `}
-                                            {conv.last_message || "Sin mensajes"}
-                                        </span>
-                                        {conv.unread > 0 && (
-                                            <span className="conv-unread">{conv.unread}</span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+        <div className="vp-msg-page">
+            <div className="vp-msg-bg-lines" />
+            <div className="vp-msg-glow vp-msg-glow-green" />
+            <div className="vp-msg-glow vp-msg-glow-orange" />
+            <div className="vp-msg-shell">
+                <header className="vp-msg-hero">
+                    <div>
+                        <p className="vp-msg-kicker">💬 Centro de comunicación</p>
+                        <h1>Mensajes de VetPaw</h1>
+                        <p>
+                            {isClinic
+                                ? "Comunicate con los dueños, respondé consultas y vinculá mensajes a turnos reales."
+                                : "Hablá con veterinarias, seguí tus turnos y mantené toda la información ordenada."}
+                        </p>
                     </div>
 
-                    {/* ── Chat ── */}
-                    <div className={`chat-area ${mobileView === "list" ? "mobile-hidden" : ""}`}>
+                    <div className="vp-msg-hero-actions">
+                        {isClinic && (
+                            <Link className="vp-msg-link-soft" to="/clinic/dashboard">
+                                ← Volver al panel
+                            </Link>
+                        )}
+                        <button className="vp-msg-primary" onClick={() => setShowNewConv(true)}>
+                            + Nueva conversación
+                        </button>
+                    </div>
+                </header>
+
+                <section className="vp-msg-metrics">
+                    <article className="vp-msg-metric">
+                        <span>💬</span>
+                        <div>
+                            <strong>{conversations.length}</strong>
+                            <p>Conversaciones</p>
+                        </div>
+                    </article>
+                    <article className="vp-msg-metric unread">
+                        <span>🔔</span>
+                        <div>
+                            <strong>{unreadTotal}</strong>
+                            <p>Sin leer</p>
+                        </div>
+                    </article>
+                    <article className="vp-msg-metric">
+                        <span>{isClinic ? "👤" : "🏥"}</span>
+                        <div>
+                            <strong>{contacts.length}</strong>
+                            <p>{isClinic ? "Dueños vinculados" : "Clínicas disponibles"}</p>
+                        </div>
+                    </article>
+                </section>
+
+                {error && <div className="vp-msg-error">⚠️ {error}</div>}
+
+                <main className="vp-msg-layout">
+                    <aside className={`vp-msg-sidebar ${mobileView === "chat" ? "is-hidden-mobile" : ""}`}>
+                        <div className="vp-msg-sidebar-head">
+                            <div>
+                                <h2>Conversaciones</h2>
+                                <p>{loading ? "Cargando..." : `${filteredConversations.length} resultado${filteredConversations.length !== 1 ? "s" : ""}`}</p>
+                            </div>
+                            <button className="vp-msg-icon-btn" onClick={fetchInitialData} aria-label="Actualizar conversaciones">
+                                ↻
+                            </button>
+                        </div>
+
+                        <label className="vp-msg-search">
+                            <span>🔍</span>
+                            <input
+                                value={query}
+                                onChange={(event) => setQuery(event.target.value)}
+                                placeholder="Buscar conversación..."
+                            />
+                            {query && <button onClick={() => setQuery("")} type="button">✕</button>}
+                        </label>
+
+                        <div className="vp-msg-conv-list">
+                            {loading && (
+                                <div className="vp-msg-empty small">
+                                    <span className="vp-msg-spin">🐾</span>
+                                    <p>Cargando conversaciones...</p>
+                                </div>
+                            )}
+
+                            {!loading && filteredConversations.length === 0 && (
+                                <div className="vp-msg-empty small">
+                                    <span>💬</span>
+                                    <h3>No hay conversaciones</h3>
+                                    <p>Iniciá una conversación para empezar a usar la mensajería.</p>
+                                    <button className="vp-msg-secondary" onClick={() => setShowNewConv(true)}>
+                                        Iniciar conversación
+                                    </button>
+                                </div>
+                            )}
+
+                            {filteredConversations.map((conv) => (
+                                <button
+                                    key={conv.other_user_id}
+                                    className={`vp-msg-conv ${Number(selectedConv?.other_user_id) === Number(conv.other_user_id) ? "active" : ""}`}
+                                    onClick={() => handleSelectConv(conv)}
+                                >
+                                    <span className="vp-msg-avatar">{initials(conv.other_username)}</span>
+                                    <span className="vp-msg-conv-info">
+                                        <span className="vp-msg-conv-top">
+                                            <strong>{conv.other_username || "Sin nombre"}</strong>
+                                            <small>{formatChatDate(conv.last_date)}</small>
+                                        </span>
+                                        <span className="vp-msg-conv-bottom">
+                                            <span>
+                                                {conv.pet_name ? `🐾 ${conv.pet_name} · ` : ""}
+                                                {conv.last_message || "Sin mensajes todavía"}
+                                            </span>
+                                            {Number(conv.unread) > 0 && <em>{conv.unread}</em>}
+                                        </span>
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </aside>
+
+                    <section className={`vp-msg-chat ${mobileView === "list" ? "is-hidden-mobile" : ""}`}>
                         {!selectedConv ? (
-                            <div className="chat-empty">
-                                <span>💬</span>
-                                <p>Seleccioná una conversación o iniciá una nueva.</p>
+                            <div className="vp-msg-empty chat-empty">
+                                <span>🐾</span>
+                                <h2>Seleccioná una conversación</h2>
+                                <p>Acá vas a poder ver el historial completo y responder desde VetPaw.</p>
                             </div>
                         ) : (
                             <>
-                                <div className="chat-header">
-                                    <div className="chat-avatar">
-                                        {selectedConv.other_username?.[0]?.toUpperCase()}
+                                <div className="vp-msg-chat-head">
+                                    <button className="vp-msg-back" onClick={() => setMobileView("list")}>←</button>
+                                    <span className="vp-msg-avatar large">{initials(selectedConv.other_username)}</span>
+                                    <div className="vp-msg-chat-title">
+                                        <h2>{selectedConv.other_username || "Contacto"}</h2>
+                                        <p>
+                                            {selectedConv.pet_name
+                                                ? `🐾 ${selectedConv.pet_name}`
+                                                : isClinic
+                                                    ? "Dueño de mascota"
+                                                    : "Veterinaria"}
+                                        </p>
                                     </div>
-                                    <div>
-                                        <p className="chat-name">{selectedConv.other_username}</p>
-                                        {selectedConv.pet_name && (
-                                            <p className="chat-sub">🐾 {selectedConv.pet_name}</p>
-                                        )}
-                                    </div>
+                                    <button className="vp-msg-icon-btn desktop-only" onClick={() => fetchMessagesForConversation(selectedConv)}>
+                                        ↻
+                                    </button>
                                 </div>
 
-                                <div className="chat-messages">
-                                    {messages.length === 0 && (
-                                        <div className="chat-empty-msgs">
-                                            <p>No hay mensajes todavía. ¡Escribí el primero!</p>
+                                <div className="vp-msg-chat-body">
+                                    {messagesLoading && (
+                                        <div className="vp-msg-empty small">
+                                            <span className="vp-msg-spin">🐾</span>
+                                            <p>Cargando mensajes...</p>
                                         </div>
                                     )}
-                                    {messages.map((msg) => {
-                                        const isMine = msg.sender === user?.id;
+
+                                    {!messagesLoading && messages.length === 0 && (
+                                        <div className="vp-msg-empty small">
+                                            <span>✨</span>
+                                            <h3>Sin mensajes todavía</h3>
+                                            <p>Escribí el primer mensaje para iniciar la conversación.</p>
+                                        </div>
+                                    )}
+
+                                    {!messagesLoading && messages.map((msg) => {
+                                        const isMine = Number(msg.sender) === Number(user?.id);
                                         return (
-                                            <div key={msg.id} className={`msg-row ${isMine ? "mine" : "theirs"}`}>
+                                            <div key={msg.id} className={`vp-msg-row ${isMine ? "mine" : "theirs"}`}>
                                                 {msg.appointment_reason && (
-                                                    <div className="msg-appt-tag">
+                                                    <div className="vp-msg-appt-tag">
                                                         📅 {msg.appointment_reason}
-                                                        {msg.pet_name && ` · 🐾 ${msg.pet_name}`}
+                                                        {msg.pet_name ? ` · 🐾 ${msg.pet_name}` : ""}
                                                     </div>
                                                 )}
-                                                <div className={`msg-bubble ${isMine ? "mine" : "theirs"}`}>
-                                                    {msg.content}
+                                                <div className="vp-msg-bubble">
+                                                    <p>{msg.content}</p>
                                                 </div>
-                                                <span className="msg-time">{formatTime(msg.created_at)}</span>
+                                                <small>{formatChatDate(msg.created_at)}</small>
                                             </div>
                                         );
                                     })}
                                     <div ref={bottomRef} />
                                 </div>
 
-                                <form className="chat-input-area" onSubmit={handleSend}>
-                                    {appointments.length > 0 && (
-                                        <select
-                                            className="appt-select"
-                                            value={selectedAppt}
-                                            onChange={e => setSelectedAppt(e.target.value)}
-                                        >
+                                <form className="vp-msg-compose" onSubmit={handleSend}>
+                                    {conversationAppointments.length > 0 && (
+                                        <select value={selectedAppt} onChange={(event) => setSelectedAppt(event.target.value)}>
                                             <option value="">Sin vincular a turno</option>
-                                            {appointments
-                                                .filter(a => a.status !== 'cancelled')
-                                                .map(a => (
-                                                    <option key={a.id} value={a.id}>
-                                                        📅 {a.reason || 'Consulta'} — {new Date(a.requested_date).toLocaleDateString('es-AR')}
-                                                    </option>
-                                                ))
-                                            }
+                                            {conversationAppointments.map((appt) => (
+                                                <option key={appt.id} value={appt.id}>
+                                                    {formatFullDate(appt.requested_date)} · {appt.pet_name ? `${appt.pet_name} · ` : ""}{appt.reason || appt.appointment_type_display || "Consulta"}
+                                                </option>
+                                            ))}
                                         </select>
                                     )}
 
-                                    <div className="quick-replies">
-                                        {quickReplies.map((qr, i) => (
-                                            <button
-                                                key={i}
-                                                type="button"
-                                                className="quick-reply-btn"
-                                                onClick={() => setText(qr.text)}
-                                            >
-                                                {qr.label}
+                                    <div className="vp-msg-quick-replies">
+                                        {quickReplies.map((reply) => (
+                                            <button key={reply.label} type="button" onClick={() => setText(reply.text)}>
+                                                {reply.label}
                                             </button>
                                         ))}
                                     </div>
 
-                                    <div className="input-row">
+                                    <div className="vp-msg-input-row">
                                         <input
                                             type="text"
-                                            placeholder="Escribí tu mensaje..."
                                             value={text}
-                                            onChange={e => setText(e.target.value)}
-                                            className="chat-input"
+                                            onChange={(event) => setText(event.target.value)}
+                                            placeholder="Escribí tu mensaje..."
                                             disabled={sending}
                                         />
-                                        <button
-                                            type="submit"
-                                            className="btn-send"
-                                            disabled={sending || !text.trim()}
-                                        >
-                                            {sending ? "..." : "↑"}
+                                        <button type="submit" disabled={sending || !text.trim()}>
+                                            {sending ? "..." : "Enviar"}
                                         </button>
                                     </div>
                                 </form>
                             </>
                         )}
-                    </div>
-                </div>
+                    </section>
+                </main>
             </div>
 
-            {/* ── Modal nueva conversación ── */}
             {showNewConv && (
-                <div className="modal-overlay" onClick={() => setShowNewConv(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>💬 Nueva conversación</h2>
-                            <button className="modal-close" onClick={() => setShowNewConv(false)}>✕</button>
+                <div className="vp-msg-modal-overlay" onClick={() => setShowNewConv(false)}>
+                    <div className="vp-msg-modal" onClick={(event) => event.stopPropagation()}>
+                        <div className="vp-msg-modal-head">
+                            <div>
+                                <p>Nueva conversación</p>
+                                <h2>{isOwner ? "Elegí una veterinaria" : "Elegí un dueño"}</h2>
+                            </div>
+                            <button onClick={() => setShowNewConv(false)}>✕</button>
                         </div>
-                        <div className="form-group">
-                            <label>
-                                {user?.role === 'owner' ? 'Seleccioná una clínica' : 'Seleccioná un dueño'}
-                            </label>
-                            <select
-                                value={selectedContact}
-                                onChange={e => setSelectedContact(e.target.value)}
-                            >
-                                <option value="">— Elegí un contacto —</option>
-                                {contacts.map(c => (
-                                    <option key={c.id} value={c.id}>{c.name}</option>
+
+                        <label className="vp-msg-field">
+                            <span>{isOwner ? "Veterinaria" : "Dueño"}</span>
+                            <select value={selectedContact} onChange={(event) => setSelectedContact(event.target.value)}>
+                                <option value="">Seleccionar contacto</option>
+                                {contacts.map((contact) => (
+                                    <option key={contact.id} value={contact.id}>{contact.name}</option>
                                 ))}
                             </select>
-                        </div>
-                        <div className="form-actions">
-                            <button className="btn-ghost" onClick={() => setShowNewConv(false)}>Cancelar</button>
-                            <button
-                                className="btn-primary-msg"
-                                onClick={handleStartConv}
-                                disabled={!selectedContact}
-                            >
-                                Iniciar →
+                        </label>
+
+                        {contactsLoading && <p className="vp-msg-muted">Cargando contactos...</p>}
+                        {!contactsLoading && contacts.length === 0 && (
+                            <p className="vp-msg-muted">No hay contactos disponibles por ahora.</p>
+                        )}
+
+                        <div className="vp-msg-modal-actions">
+                            <button className="vp-msg-cancel" onClick={() => setShowNewConv(false)}>Cancelar</button>
+                            <button className="vp-msg-primary" disabled={!selectedContact} onClick={handleStartConversation}>
+                                Iniciar conversación
                             </button>
                         </div>
                     </div>
@@ -359,248 +556,792 @@ export default function Messages() {
             )}
 
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
-                *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+                @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 
-                .messages-page {
-                    min-height: 100vh; background: #1a1a2e;
+                *, *::before, *::after { box-sizing: border-box; }
+
+                .vp-msg-page {
+                    min-height: 100vh;
+                    background:
+                        radial-gradient(circle at 12% 4%, rgba(76, 175, 80, 0.18), transparent 34%),
+                        radial-gradient(circle at 88% 20%, rgba(255, 152, 0, 0.14), transparent 34%),
+                        radial-gradient(circle at 48% 100%, rgba(36, 210, 255, 0.10), transparent 42%),
+                        linear-gradient(135deg, #06111f 0%, #081424 46%, #040914 100%);
+                    color: #fff;
                     font-family: 'Nunito', sans-serif;
-                    position: relative; overflow-x: hidden;
-                }
-                .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.08; pointer-events: none; }
-                .b1 { width: 500px; height: 500px; background: #6bcaff; top: -100px; left: -100px; }
-                .b2 { width: 400px; height: 400px; background: #ff6b6b; bottom: -100px; right: -100px; }
-
-                .messages-inner {
-                    max-width: 1100px; margin: 0 auto; padding: 32px 24px;
-                    position: relative; z-index: 1;
-                    display: flex; flex-direction: column; gap: 20px;
-                    height: calc(100dvh - 56px);
+                    position: relative;
+                    overflow-x: hidden;
+                    padding-bottom: 38px;
                 }
 
-                /* ── Header ── */
-                .messages-header {
-                    display: flex; align-items: center;
-                    justify-content: space-between; flex-shrink: 0; gap: 12px;
-                }
-                .messages-title {
-                    font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700;
-                    font-style: italic; color: #fff; letter-spacing: -1px;
-                }
-                .btn-back {
-                    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-                    color: rgba(255,255,255,0.7); border-radius: 10px; padding: 8px 16px;
-                    font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700;
-                    cursor: pointer; transition: background 0.2s;
-                }
-                .btn-back:hover { background: rgba(255,255,255,0.10); }
-                .btn-new-conv {
-                    background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff;
-                    border: none; border-radius: 10px; padding: 10px 20px;
-                    font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 900;
-                    cursor: pointer; white-space: nowrap;
+                .vp-msg-bg-lines {
+                    position: fixed;
+                    inset: 0;
+                    pointer-events: none;
+                    opacity: 0.28;
+                    background-image:
+                        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+                    background-size: 46px 46px;
+                    mask-image: radial-gradient(circle at center, black, transparent 78%);
                 }
 
-                /* ── Layout ── */
-                .messages-layout {
-                    display: grid; grid-template-columns: 300px 1fr;
-                    gap: 16px; flex: 1; min-height: 0;
+                .vp-msg-glow {
+                    position: fixed;
+                    width: 360px;
+                    height: 360px;
+                    border-radius: 999px;
+                    filter: blur(95px);
+                    opacity: 0.16;
+                    pointer-events: none;
                 }
 
-                /* ── Lista conversaciones ── */
-                .conv-list {
-                    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 16px; overflow-y: auto;
-                    display: flex; flex-direction: column;
-                }
-                .conv-empty {
-                    display: flex; flex-direction: column; align-items: center;
-                    justify-content: center; gap: 10px; padding: 40px 20px;
-                    text-align: center; flex: 1;
-                }
-                .conv-empty span { font-size: 2.5rem; }
-                .conv-empty p { color: rgba(255,255,255,0.35); font-size: 0.86rem; }
-                .btn-sm-msg {
-                    background: rgba(107,202,255,0.12); border: 1px solid rgba(107,202,255,0.3);
-                    color: #6bcaff; border-radius: 8px; padding: 7px 14px;
-                    font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer;
-                }
-                .conv-item {
-                    display: flex; align-items: center; gap: 12px;
-                    padding: 14px 16px; cursor: pointer;
-                    border-bottom: 1px solid rgba(255,255,255,0.05);
-                    transition: background 0.15s;
-                }
-                .conv-item:hover { background: rgba(255,255,255,0.04); }
-                .conv-item.active { background: rgba(107,202,255,0.08); border-left: 3px solid #6bcaff; }
-                .conv-avatar {
-                    width: 42px; height: 42px; border-radius: 50%;
-                    background: rgba(107,202,255,0.15); color: #6bcaff;
-                    font-size: 1rem; font-weight: 900;
-                    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-                }
-                .conv-info { flex: 1; min-width: 0; }
-                .conv-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
-                .conv-name { font-size: 0.88rem; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                .conv-time { font-size: 0.7rem; color: rgba(255,255,255,0.35); flex-shrink: 0; margin-left: 8px; }
-                .conv-bottom { display: flex; justify-content: space-between; align-items: center; }
-                .conv-last { font-size: 0.75rem; color: rgba(255,255,255,0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
-                .conv-unread {
-                    background: #ff6b6b; color: #fff; font-size: 0.65rem; font-weight: 900;
-                    border-radius: 50%; width: 18px; height: 18px;
-                    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-                }
-                .paw-spin { font-size: 2rem; animation: spin 1s linear infinite; display: block; }
-                @keyframes spin { to { transform: rotate(360deg); } }
+                .vp-msg-glow-green { background: #4CAF50; left: -110px; top: 16%; }
+                .vp-msg-glow-orange { background: #FF9800; right: -120px; bottom: 8%; }
 
-                /* ── Chat area ── */
-                .chat-area {
-                    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 16px; display: flex; flex-direction: column; min-height: 0;
-                }
-                .chat-empty {
-                    display: flex; flex-direction: column; align-items: center;
-                    justify-content: center; gap: 12px; flex: 1;
-                }
-                .chat-empty span { font-size: 3rem; }
-                .chat-empty p { color: rgba(255,255,255,0.35); font-size: 0.9rem; }
-                .chat-header {
-                    display: flex; align-items: center; gap: 12px;
-                    padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
-                }
-                .chat-avatar {
-                    width: 38px; height: 38px; border-radius: 50%;
-                    background: rgba(107,202,255,0.15); color: #6bcaff;
-                    font-size: 1rem; font-weight: 900;
-                    display: flex; align-items: center; justify-content: center;
-                }
-                .chat-name { font-size: 0.95rem; font-weight: 900; color: #fff; }
-                .chat-sub { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
-                .chat-messages {
-                    flex: 1; overflow-y: auto; padding: 16px;
-                    display: flex; flex-direction: column; gap: 10px; min-height: 0;
-                }
-                .chat-empty-msgs { text-align: center; padding: 40px 0; color: rgba(255,255,255,0.3); font-size: 0.85rem; }
-
-                /* Mensajes */
-                .msg-row { display: flex; flex-direction: column; }
-                .msg-row.mine { align-items: flex-end; }
-                .msg-row.theirs { align-items: flex-start; }
-                .msg-appt-tag {
-                    font-size: 0.7rem; color: rgba(255,217,61,0.7);
-                    background: rgba(255,217,61,0.08); border: 1px solid rgba(255,217,61,0.15);
-                    border-radius: 6px; padding: 2px 8px; margin-bottom: 4px;
-                }
-                .msg-bubble {
-                    max-width: 78%; padding: 10px 14px; border-radius: 14px;
-                    font-size: 0.88rem; line-height: 1.5; word-break: break-word;
-                }
-                .msg-bubble.mine { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border-bottom-right-radius: 4px; }
-                .msg-bubble.theirs { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); border-bottom-left-radius: 4px; }
-                .msg-time { font-size: 0.65rem; color: rgba(255,255,255,0.3); margin-top: 3px; }
-
-                /* Input area */
-                .chat-input-area {
-                    padding: 12px 14px; border-top: 1px solid rgba(255,255,255,0.08);
-                    flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;
-                }
-                .appt-select {
-                    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);
-                    border-radius: 8px; color: rgba(255,255,255,0.6); padding: 6px 10px;
-                    font-family: 'Nunito', sans-serif; font-size: 0.78rem; outline: none; width: 100%;
-                }
-                .appt-select option { background: #1a1a2e; }
-                .quick-replies {
-                    display: flex; gap: 6px; flex-wrap: nowrap;
-                    overflow-x: auto; padding-bottom: 2px;
-                    -webkit-overflow-scrolling: touch; scrollbar-width: none;
-                }
-                .quick-replies::-webkit-scrollbar { display: none; }
-                .quick-reply-btn {
-                    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
-                    color: rgba(255,255,255,0.55); border-radius: 20px; padding: 5px 12px;
-                    font-family: 'Nunito', sans-serif; font-size: 0.75rem; font-weight: 700;
-                    cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
-                }
-                .quick-reply-btn:hover { background: rgba(107,202,255,0.12); border-color: rgba(107,202,255,0.3); color: #6bcaff; }
-                .input-row { display: flex; gap: 8px; }
-                .chat-input {
-                    flex: 1; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10);
-                    border-radius: 10px; color: #fff; padding: 10px 14px;
-                    font-family: 'Nunito', sans-serif; font-size: 0.9rem; outline: none;
-                    transition: border-color 0.2s;
-                }
-                .chat-input:focus { border-color: #4CAF50; }
-                .chat-input::placeholder { color: rgba(255,255,255,0.25); }
-                .btn-send {
-                    background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff;
-                    border: none; border-radius: 10px; width: 44px; height: 44px;
-                    font-size: 1.2rem; font-weight: 900; cursor: pointer;
-                    display: flex; align-items: center; justify-content: center;
-                    flex-shrink: 0; transition: opacity 0.2s;
-                }
-                .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
-
-                /* ── Modal ── */
-                .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
-                .modal { background: #1e1e35; border: 1px solid rgba(255,255,255,0.10); border-radius: 20px; padding: 28px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 16px; }
-                .modal-header { display: flex; justify-content: space-between; align-items: center; }
-                .modal-header h2 { font-family: 'Fraunces', serif; font-size: 1.3rem; font-style: italic; color: #fff; }
-                .modal-close { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-                .form-group { display: flex; flex-direction: column; gap: 6px; }
-                .form-group label { font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; }
-                .form-group select { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.10); border-radius: 10px; color: #fff; padding: 11px 14px; font-family: 'Nunito', sans-serif; font-size: 0.92rem; outline: none; width: 100%; }
-                .form-group select option { background: #1a1a2e; }
-                .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
-                .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); border-radius: 10px; padding: 10px 18px; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; }
-                .btn-primary-msg { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 900; cursor: pointer; }
-                .btn-primary-msg:disabled { opacity: 0.5; cursor: not-allowed; }
-
-                /* ══════════════════════════════
-                RESPONSIVE — TABLET (≤900px)
-                ══════════════════════════════ */
-                @media (max-width: 900px) {
-                    .messages-layout { grid-template-columns: 240px 1fr; }
+                .vp-msg-shell {
+                    width: min(1440px, calc(100% - 44px));
+                    margin: 0 auto;
+                    padding-top: 34px;
+                    position: relative;
+                    z-index: 1;
                 }
 
-                /* ══════════════════════════════
-                RESPONSIVE — MOBILE (≤700px)
-                Lista y chat se alternan con mobileView
-                ══════════════════════════════ */
-                @media (max-width: 700px) {
-                    .messages-inner { padding: 8px 8px; gap: 8px; height: calc(100dvh - 56px); }
-                    .messages-title { font-size: 1.3rem; }
-                    .btn-new-conv { padding: 8px 12px; font-size: 0.82rem; }
-                    .messages-layout { grid-template-columns: 1fr; grid-template-rows: 1fr; }
-                    .conv-list.mobile-hidden { display: none; }
-                    .chat-area.mobile-hidden { display: none; }
-                    .conv-list { border-radius: 12px; }
-                    .chat-area { border-radius: 12px; overflow: hidden; }
-                    .conv-item { padding: 14px 12px; }
-                    .conv-avatar { width: 44px; height: 44px; font-size: 1rem; }
-                    .conv-name { font-size: 0.9rem; }
-                    .conv-last { max-width: calc(100vw - 130px); }
-                    .msg-bubble { max-width: 82%; font-size: 0.85rem; }
-                    .msg-row.mine { align-items: flex-end; padding-right: 4px; }
-                    .msg-row.theirs { align-items: flex-start; padding-left: 4px; }
-                    .chat-messages { padding: 12px 8px; gap: 8px; }
-                    .chat-input-area { padding: 8px 10px; gap: 6px; }
-                    .chat-input { padding: 9px 10px; font-size: 0.86rem; }
-                    .btn-send { width: 40px; height: 40px; font-size: 1.1rem; flex-shrink: 0; }
-                    .input-row { display: flex; gap: 6px; align-items: center; }
-                    .quick-replies { gap: 5px; }
-                    .quick-reply-btn { padding: 5px 10px; font-size: 0.72rem; }
-                    .modal-overlay { padding: 0; align-items: flex-end; }
-                    .modal { border-radius: 20px 20px 0 0; padding: 20px 16px; border-bottom: none; }
-                    .form-actions { flex-direction: column-reverse; gap: 8px; }
-                    .form-actions .btn-ghost, .form-actions .btn-primary-msg { width: 100%; text-align: center; padding: 12px; }
+                .vp-msg-hero {
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: space-between;
+                    gap: 22px;
+                    margin-bottom: 20px;
+                    padding: 22px;
+                    border: 1px solid rgba(255,255,255,0.10);
+                    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+                    border-radius: 28px;
+                    box-shadow: 0 22px 80px rgba(0,0,0,0.28);
+                    backdrop-filter: blur(18px);
                 }
-                /* ══════════════════════════════
-                RESPONSIVE — MOBILE XS (≤380px)
-                ══════════════════════════════ */
-                @media (max-width: 380px) {
-                    .messages-inner { padding: 10px 10px; }
-                    .messages-title { font-size: 1.2rem; }
+
+                .vp-msg-kicker {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: rgba(255,255,255,0.62);
+                    font-size: 0.82rem;
+                    font-weight: 900;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    margin: 0 0 9px;
+                }
+
+                .vp-msg-hero h1 {
+                    margin: 0;
+                    font-size: clamp(2rem, 4vw, 3.15rem);
+                    line-height: 1.02;
+                    letter-spacing: -1.5px;
+                    font-weight: 900;
+                }
+
+                .vp-msg-hero p:not(.vp-msg-kicker) {
+                    margin: 10px 0 0;
+                    max-width: 720px;
+                    color: rgba(255,255,255,0.62);
+                    font-size: 1rem;
+                    line-height: 1.55;
+                }
+
+                .vp-msg-hero-actions {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                }
+
+                .vp-msg-primary,
+                .vp-msg-secondary,
+                .vp-msg-link-soft,
+                .vp-msg-cancel,
+                .vp-msg-icon-btn,
+                .vp-msg-back {
+                    font-family: 'Nunito', sans-serif;
+                    border: 0;
+                    cursor: pointer;
+                    text-decoration: none;
+                    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+                }
+
+                .vp-msg-primary {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    min-height: 42px;
+                    padding: 11px 18px;
+                    color: #04100a;
+                    font-weight: 900;
+                    border-radius: 15px;
+                    background: linear-gradient(135deg, #4CAF50 0%, #85dc69 44%, #FF9800 100%);
+                    box-shadow: 0 14px 35px rgba(76,175,80,0.20);
+                }
+
+                .vp-msg-primary:hover { transform: translateY(-1px); }
+                .vp-msg-primary:disabled { opacity: 0.48; cursor: not-allowed; transform: none; }
+
+                .vp-msg-secondary,
+                .vp-msg-link-soft,
+                .vp-msg-cancel,
+                .vp-msg-icon-btn,
+                .vp-msg-back {
+                    background: rgba(255,255,255,0.07);
+                    border: 1px solid rgba(255,255,255,0.12);
+                    color: rgba(255,255,255,0.76);
+                    border-radius: 14px;
+                    font-weight: 900;
+                }
+
+                .vp-msg-secondary,
+                .vp-msg-link-soft,
+                .vp-msg-cancel { padding: 11px 16px; }
+                .vp-msg-icon-btn,
+                .vp-msg-back {
+                    width: 40px;
+                    height: 40px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1rem;
+                }
+
+                .vp-msg-secondary:hover,
+                .vp-msg-link-soft:hover,
+                .vp-msg-cancel:hover,
+                .vp-msg-icon-btn:hover,
+                .vp-msg-back:hover {
+                    background: rgba(255,255,255,0.11);
+                    border-color: rgba(76,175,80,0.30);
+                }
+
+                .vp-msg-metrics {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 14px;
+                    margin-bottom: 18px;
+                }
+
+                .vp-msg-metric {
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    padding: 16px;
+                    border-radius: 22px;
+                    border: 1px solid rgba(255,255,255,0.10);
+                    background: rgba(255,255,255,0.055);
+                    backdrop-filter: blur(16px);
+                }
+
+                .vp-msg-metric span {
+                    width: 42px;
+                    height: 42px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 15px;
+                    background: rgba(76,175,80,0.12);
+                    border: 1px solid rgba(76,175,80,0.20);
+                }
+
+                .vp-msg-metric.unread span {
+                    background: rgba(255,152,0,0.12);
+                    border-color: rgba(255,152,0,0.24);
+                }
+
+                .vp-msg-metric strong {
+                    display: block;
+                    font-size: 1.55rem;
+                    font-weight: 900;
+                    line-height: 1;
+                }
+
+                .vp-msg-metric p {
+                    margin: 4px 0 0;
+                    color: rgba(255,255,255,0.55);
+                    font-size: 0.83rem;
+                    font-weight: 800;
+                }
+
+                .vp-msg-error {
+                    margin-bottom: 16px;
+                    padding: 12px 15px;
+                    border-radius: 16px;
+                    border: 1px solid rgba(255,107,107,0.28);
+                    background: rgba(255,107,107,0.09);
+                    color: #ffd2d2;
+                    font-weight: 800;
+                }
+
+                .vp-msg-layout {
+                    display: grid;
+                    grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
+                    gap: 18px;
+                    min-height: 650px;
+                    height: calc(100dvh - 265px);
+                }
+
+                .vp-msg-sidebar,
+                .vp-msg-chat {
+                    border-radius: 28px;
+                    border: 1px solid rgba(255,255,255,0.10);
+                    background: rgba(255,255,255,0.055);
+                    box-shadow: 0 24px 90px rgba(0,0,0,0.30);
+                    backdrop-filter: blur(18px);
+                    overflow: hidden;
+                    min-height: 0;
+                }
+
+                .vp-msg-sidebar {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .vp-msg-sidebar-head {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    padding: 18px;
+                    border-bottom: 1px solid rgba(255,255,255,0.08);
+                }
+
+                .vp-msg-sidebar h2,
+                .vp-msg-chat-head h2 {
+                    margin: 0;
+                    font-size: 1.05rem;
+                    font-weight: 900;
+                }
+
+                .vp-msg-sidebar p,
+                .vp-msg-chat-head p {
+                    margin: 4px 0 0;
+                    color: rgba(255,255,255,0.48);
+                    font-size: 0.8rem;
+                    font-weight: 800;
+                }
+
+                .vp-msg-search {
+                    margin: 14px 16px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    min-height: 44px;
+                    border-radius: 16px;
+                    border: 1px solid rgba(255,255,255,0.10);
+                    background: rgba(0,0,0,0.18);
+                    padding: 0 12px;
+                }
+
+                .vp-msg-search input {
+                    flex: 1;
+                    min-width: 0;
+                    background: transparent;
+                    border: 0;
+                    outline: none;
+                    color: #fff;
+                    font-family: 'Nunito', sans-serif;
+                    font-weight: 800;
+                }
+
+                .vp-msg-search input::placeholder { color: rgba(255,255,255,0.32); }
+                .vp-msg-search button {
+                    background: transparent;
+                    color: rgba(255,255,255,0.45);
+                    border: 0;
+                    cursor: pointer;
+                    font-weight: 900;
+                }
+
+                .vp-msg-conv-list {
+                    flex: 1;
+                    min-height: 0;
+                    overflow-y: auto;
+                    padding: 0 10px 12px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .vp-msg-conv-list::-webkit-scrollbar,
+                .vp-msg-chat-body::-webkit-scrollbar,
+                .vp-msg-quick-replies::-webkit-scrollbar { width: 7px; height: 4px; }
+
+                .vp-msg-conv-list::-webkit-scrollbar-thumb,
+                .vp-msg-chat-body::-webkit-scrollbar-thumb,
+                .vp-msg-quick-replies::-webkit-scrollbar-thumb {
+                    background: rgba(255,255,255,0.15);
+                    border-radius: 99px;
+                }
+
+                .vp-msg-conv {
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    text-align: left;
+                    border: 1px solid transparent;
+                    border-radius: 20px;
+                    background: transparent;
+                    color: inherit;
+                    padding: 12px;
+                    cursor: pointer;
+                    font-family: 'Nunito', sans-serif;
+                    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+                }
+
+                .vp-msg-conv:hover {
+                    background: rgba(255,255,255,0.06);
+                    border-color: rgba(255,255,255,0.10);
+                }
+
+                .vp-msg-conv.active {
+                    background: linear-gradient(135deg, rgba(76,175,80,0.15), rgba(255,152,0,0.10));
+                    border-color: rgba(76,175,80,0.28);
+                }
+
+                .vp-msg-avatar {
+                    width: 44px;
+                    height: 44px;
+                    flex: 0 0 44px;
+                    border-radius: 16px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: linear-gradient(135deg, rgba(76,175,80,0.18), rgba(255,152,0,0.14));
+                    border: 1px solid rgba(255,255,255,0.12);
+                    color: #fff;
+                    font-size: 0.88rem;
+                    font-weight: 900;
+                    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+                }
+
+                .vp-msg-avatar.large {
+                    width: 52px;
+                    height: 52px;
+                    flex-basis: 52px;
+                    border-radius: 18px;
+                    font-size: 1rem;
+                }
+
+                .vp-msg-conv-info {
+                    min-width: 0;
+                    flex: 1;
+                }
+
+                .vp-msg-conv-top,
+                .vp-msg-conv-bottom {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 10px;
+                }
+
+                .vp-msg-conv-top strong {
+                    min-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    font-size: 0.92rem;
+                    font-weight: 900;
+                }
+
+                .vp-msg-conv-top small {
+                    flex: 0 0 auto;
+                    color: rgba(255,255,255,0.38);
+                    font-weight: 800;
+                    font-size: 0.72rem;
+                }
+
+                .vp-msg-conv-bottom {
+                    margin-top: 5px;
+                    color: rgba(255,255,255,0.48);
+                    font-size: 0.78rem;
+                    font-weight: 750;
+                }
+
+                .vp-msg-conv-bottom span {
+                    min-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .vp-msg-conv-bottom em {
+                    min-width: 22px;
+                    height: 22px;
+                    padding: 0 6px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 999px;
+                    background: #FF9800;
+                    color: #06111f;
+                    font-size: 0.72rem;
+                    font-weight: 900;
+                    font-style: normal;
+                }
+
+                .vp-msg-chat {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .vp-msg-chat-head {
+                    min-height: 82px;
+                    display: flex;
+                    align-items: center;
+                    gap: 13px;
+                    padding: 15px 18px;
+                    border-bottom: 1px solid rgba(255,255,255,0.08);
+                    background: rgba(0,0,0,0.10);
+                }
+
+                .vp-msg-chat-title {
+                    flex: 1;
+                    min-width: 0;
+                }
+
+                .vp-msg-chat-title h2 {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .vp-msg-back { display: none; }
+
+                .vp-msg-chat-body {
+                    flex: 1;
+                    min-height: 0;
+                    overflow-y: auto;
+                    padding: 22px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    background:
+                        radial-gradient(circle at 50% 0%, rgba(76,175,80,0.08), transparent 32%),
+                        rgba(0,0,0,0.06);
+                }
+
+                .vp-msg-empty {
+                    min-height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-direction: column;
+                    gap: 9px;
+                    text-align: center;
+                    color: rgba(255,255,255,0.54);
+                    padding: 26px;
+                }
+
+                .vp-msg-empty.small {
+                    min-height: 180px;
+                    padding: 18px;
+                }
+
+                .vp-msg-empty.chat-empty { min-height: 100%; }
+                .vp-msg-empty span { font-size: 2.4rem; }
+                .vp-msg-empty h2,
+                .vp-msg-empty h3 { margin: 0; color: rgba(255,255,255,0.86); }
+                .vp-msg-empty p { margin: 0; max-width: 330px; line-height: 1.45; }
+                .vp-msg-spin { display: inline-block; animation: vpMsgSpin 1.35s linear infinite; }
+                @keyframes vpMsgSpin { to { transform: rotate(360deg); } }
+
+                .vp-msg-row {
+                    display: flex;
+                    flex-direction: column;
+                    max-width: min(76%, 680px);
+                }
+
+                .vp-msg-row.mine { align-self: flex-end; align-items: flex-end; }
+                .vp-msg-row.theirs { align-self: flex-start; align-items: flex-start; }
+
+                .vp-msg-bubble {
+                    padding: 11px 14px;
+                    border-radius: 18px;
+                    border: 1px solid rgba(255,255,255,0.10);
+                    box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+                }
+
+                .vp-msg-row.mine .vp-msg-bubble {
+                    background: linear-gradient(135deg, #4CAF50, #FF9800);
+                    color: #06111f;
+                    border-color: rgba(255,255,255,0.18);
+                    border-bottom-right-radius: 6px;
+                    font-weight: 850;
+                }
+
+                .vp-msg-row.theirs .vp-msg-bubble {
+                    background: rgba(255,255,255,0.09);
+                    color: rgba(255,255,255,0.86);
+                    border-bottom-left-radius: 6px;
+                }
+
+                .vp-msg-bubble p {
+                    margin: 0;
+                    line-height: 1.52;
+                    white-space: pre-wrap;
+                    word-break: break-word;
+                    font-size: 0.93rem;
+                }
+
+                .vp-msg-row small {
+                    color: rgba(255,255,255,0.35);
+                    font-size: 0.68rem;
+                    font-weight: 800;
+                    margin-top: 4px;
+                }
+
+                .vp-msg-appt-tag {
+                    margin-bottom: 5px;
+                    padding: 5px 9px;
+                    border-radius: 999px;
+                    border: 1px solid rgba(255,152,0,0.22);
+                    background: rgba(255,152,0,0.10);
+                    color: #ffd399;
+                    font-size: 0.72rem;
+                    font-weight: 900;
+                }
+
+                .vp-msg-compose {
+                    border-top: 1px solid rgba(255,255,255,0.08);
+                    padding: 14px;
+                    background: rgba(0,0,0,0.14);
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .vp-msg-compose select,
+                .vp-msg-field select {
+                    width: 100%;
+                    min-height: 42px;
+                    border-radius: 14px;
+                    border: 1px solid rgba(255,255,255,0.11);
+                    background: rgba(255,255,255,0.07);
+                    color: rgba(255,255,255,0.82);
+                    font-family: 'Nunito', sans-serif;
+                    font-weight: 800;
+                    outline: none;
+                    padding: 0 12px;
+                }
+
+                .vp-msg-compose select option,
+                .vp-msg-field select option { background: #081424; color: #fff; }
+
+                .vp-msg-quick-replies {
+                    display: flex;
+                    gap: 8px;
+                    overflow-x: auto;
+                    padding-bottom: 2px;
+                }
+
+                .vp-msg-quick-replies button {
+                    flex: 0 0 auto;
+                    min-height: 34px;
+                    padding: 0 12px;
+                    border-radius: 999px;
+                    border: 1px solid rgba(255,255,255,0.10);
+                    background: rgba(255,255,255,0.06);
+                    color: rgba(255,255,255,0.68);
+                    font-family: 'Nunito', sans-serif;
+                    font-size: 0.78rem;
+                    font-weight: 900;
+                    cursor: pointer;
+                }
+
+                .vp-msg-quick-replies button:hover {
+                    border-color: rgba(76,175,80,0.28);
+                    background: rgba(76,175,80,0.10);
+                    color: #bdf5b9;
+                }
+
+                .vp-msg-input-row {
+                    display: flex;
+                    gap: 10px;
+                }
+
+                .vp-msg-input-row input {
+                    flex: 1;
+                    min-width: 0;
+                    height: 48px;
+                    border-radius: 16px;
+                    border: 1px solid rgba(255,255,255,0.11);
+                    background: rgba(255,255,255,0.08);
+                    color: #fff;
+                    font-family: 'Nunito', sans-serif;
+                    font-weight: 800;
+                    outline: none;
+                    padding: 0 15px;
+                }
+
+                .vp-msg-input-row input:focus { border-color: rgba(76,175,80,0.48); }
+                .vp-msg-input-row input::placeholder { color: rgba(255,255,255,0.34); }
+
+                .vp-msg-input-row button {
+                    min-width: 96px;
+                    border: 0;
+                    border-radius: 16px;
+                    color: #06111f;
+                    background: linear-gradient(135deg, #4CAF50, #FF9800);
+                    font-family: 'Nunito', sans-serif;
+                    font-weight: 950;
+                    cursor: pointer;
+                }
+
+                .vp-msg-input-row button:disabled {
+                    opacity: 0.48;
+                    cursor: not-allowed;
+                }
+
+                .vp-msg-modal-overlay {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 18px;
+                    background: rgba(0,0,0,0.72);
+                    backdrop-filter: blur(10px);
+                }
+
+                .vp-msg-modal {
+                    width: min(460px, 100%);
+                    border-radius: 26px;
+                    border: 1px solid rgba(255,255,255,0.12);
+                    background:
+                        radial-gradient(circle at 0% 0%, rgba(76,175,80,0.12), transparent 34%),
+                        #091422;
+                    box-shadow: 0 28px 95px rgba(0,0,0,0.48);
+                    padding: 22px;
+                }
+
+                .vp-msg-modal-head {
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: space-between;
+                    gap: 14px;
+                    margin-bottom: 18px;
+                }
+
+                .vp-msg-modal-head p {
+                    margin: 0 0 5px;
+                    color: rgba(255,255,255,0.48);
+                    font-size: 0.78rem;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                    letter-spacing: 0.08em;
+                }
+
+                .vp-msg-modal-head h2 {
+                    margin: 0;
+                    font-size: 1.35rem;
+                    font-weight: 950;
+                }
+
+                .vp-msg-modal-head button {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 12px;
+                    border: 1px solid rgba(255,255,255,0.12);
+                    background: rgba(255,255,255,0.06);
+                    color: rgba(255,255,255,0.64);
+                    cursor: pointer;
+                }
+
+                .vp-msg-field {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .vp-msg-field span {
+                    color: rgba(255,255,255,0.58);
+                    font-size: 0.82rem;
+                    font-weight: 900;
+                }
+
+                .vp-msg-muted {
+                    color: rgba(255,255,255,0.48);
+                    font-size: 0.84rem;
+                    font-weight: 800;
+                    margin: 10px 0 0;
+                }
+
+                .vp-msg-modal-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 10px;
+                    margin-top: 18px;
+                }
+
+                @media (max-width: 980px) {
+                    .vp-msg-layout { grid-template-columns: 310px 1fr; }
+                    .vp-msg-shell { width: min(100% - 28px, 1440px); }
+                }
+
+                @media (max-width: 760px) {
+                    .vp-msg-page { padding-bottom: 0; }
+                    .vp-msg-shell {
+                        width: 100%;
+                        padding: 10px;
+                    }
+
+                    .vp-msg-hero {
+                        border-radius: 22px;
+                        padding: 16px;
+                        flex-direction: column;
+                    }
+
+                    .vp-msg-hero-actions { width: 100%; justify-content: stretch; }
+                    .vp-msg-hero-actions > * { flex: 1; }
+                    .vp-msg-link-soft { text-align: center; }
+
+                    .vp-msg-metrics {
+                        grid-template-columns: 1fr;
+                        gap: 9px;
+                    }
+
+                    .vp-msg-metric { padding: 12px; border-radius: 18px; }
+                    .vp-msg-layout {
+                        height: calc(100dvh - 285px);
+                        min-height: 560px;
+                        grid-template-columns: 1fr;
+                        gap: 0;
+                    }
+
+                    .vp-msg-sidebar,
+                    .vp-msg-chat { border-radius: 22px; }
+                    .vp-msg-chat.is-hidden-mobile,
+                    .vp-msg-sidebar.is-hidden-mobile { display: none; }
+                    .vp-msg-back { display: inline-flex; }
+                    .desktop-only { display: none; }
+                    .vp-msg-chat-body { padding: 14px 10px; }
+                    .vp-msg-row { max-width: 88%; }
+                    .vp-msg-compose { padding: 10px; }
+                    .vp-msg-input-row button { min-width: 74px; }
+                    .vp-msg-modal-overlay { align-items: flex-end; padding: 0; }
+                    .vp-msg-modal { border-radius: 24px 24px 0 0; }
+                    .vp-msg-modal-actions { flex-direction: column-reverse; }
+                    .vp-msg-modal-actions button { width: 100%; }
+                }
+
+                @media (max-width: 430px) {
+                    .vp-msg-hero h1 { font-size: 1.75rem; }
+                    .vp-msg-hero p:not(.vp-msg-kicker) { font-size: 0.9rem; }
+                    .vp-msg-layout { height: calc(100dvh - 300px); }
+                    .vp-msg-conv { padding: 10px; }
+                    .vp-msg-input-row { gap: 7px; }
+                    .vp-msg-input-row input { height: 44px; }
+                    .vp-msg-input-row button { min-width: 64px; font-size: 0.82rem; }
                 }
             `}</style>
         </div>
