@@ -865,43 +865,102 @@ export default function ClinicDashboard() {
 
                 {/* ══ TAB FOTOS ══ */}
                 {tab === "fotos" && (
-                    <div className="photos-section">
-                        <div className="photos-header">
-                            <div>
-                                <h2 className="photos-title">📷 Fotos del local</h2>
-                                <p className="photos-subtitle">{photos.length}/5 fotos — Se muestran en tu perfil público</p>
+                    <div className="photos-section-v2">
+                        {/* Header con ilustración */}
+                        <div className="fotos-header">
+                            <div className="fotos-header-left">
+                                <p className="fotos-eyebrow">📷 Fotos</p>
+                                <h2 className="fotos-title">Fotos del local</h2>
+                                <p className="fotos-subtitle">{photos.length}/5 fotos — Se muestran en tu perfil público</p>
+                            </div>
+                            <div className="fotos-illu" aria-hidden="true">
+                                <FotosIllustration />
                             </div>
                         </div>
+
+                        {/* Dropzone grande */}
                         {photos.length < 5 && (
-                            <div className="photo-upload-box">
-                                <div className="form-group" style={{ marginBottom: 10 }}>
-                                    <label>Descripción (opcional)</label>
-                                    <input type="text" placeholder="Ej: Sala de espera, Consultorio..." value={photoCaption} onChange={e => setPhotoCaption(e.target.value)} maxLength={100} />
+                            <div className="fotos-dropzone">
+                                <div className="dropzone-circle">
+                                    <span className="dropzone-arrow">☁️</span>
+                                </div>
+                                <h3 className="dropzone-title">Subí fotos de tu clínica</h3>
+                                <p className="dropzone-sub">Mostrá tu espacio y generá confianza<br />en tus clientes.</p>
+                                <p className="dropzone-info">JPG, PNG o WebP • Máximo 3MB por foto</p>
+                                <div className="dropzone-caption-wrap">
+                                    <input
+                                        type="text"
+                                        className="dropzone-caption-input"
+                                        placeholder="Descripción (opcional): Sala de espera, Consultorio…"
+                                        value={photoCaption}
+                                        onChange={e => setPhotoCaption(e.target.value)}
+                                        maxLength={100}
+                                    />
                                 </div>
                                 {photoError && <div className="form-error">⚠️ {photoError}</div>}
                                 <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoUpload} style={{ display: 'none' }} />
-                                <button className="btn-upload-photo" onClick={() => fileInputRef.current?.click()} disabled={photoUploading}>
-                                    {photoUploading ? "⏳ Subiendo..." : "📤 Subir foto"}
+                                <button className="dropzone-btn" onClick={() => fileInputRef.current?.click()} disabled={photoUploading}>
+                                    {photoUploading ? "⏳ Subiendo…" : "📤 Subir foto"}
                                 </button>
-                                <p className="photos-hint">JPG, PNG o WebP · Máximo 3MB por foto</p>
                             </div>
                         )}
-                        {photos.length >= 5 && <div className="photos-limit-notice">✅ Llegaste al límite de 5 fotos. Eliminá una para subir otra.</div>}
+                        {photos.length >= 5 && (
+                            <div className="fotos-limit">
+                                <span>🎉</span>
+                                <div>
+                                    <strong>¡Llegaste al límite de 5 fotos!</strong>
+                                    <p>Eliminá una foto para poder subir otra.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Grid Tus fotos */}
+                        <div className="fotos-section-title">Tus fotos ({photos.length}/5)</div>
+
                         {photosLoading ? (
-                            <div className="loading-state"><span className="paw-spin">🐾</span><p>Cargando fotos...</p></div>
-                        ) : photos.length === 0 ? (
-                            <div className="empty-state"><span>📷</span><p>Todavía no subiste fotos de tu local.</p><p style={{ fontSize: '0.8rem' }}>Las fotos aparecen en tu perfil público y generan más confianza.</p></div>
+                            <div className="loading-state"><span className="paw-spin">🐾</span><p>Cargando fotos…</p></div>
                         ) : (
-                            <div className="photos-grid">
+                            <div className="fotos-grid-v2">
                                 {photos.map(photo => (
-                                    <div key={photo.id} className="photo-card">
-                                        <img src={photo.image} alt={photo.caption || "Foto del local"} />
-                                        {photo.caption && <p className="photo-caption">{photo.caption}</p>}
-                                        <button className="btn-delete-photo" onClick={() => handlePhotoDelete(photo.id)}>🗑 Eliminar</button>
+                                    <div key={photo.id} className="foto-card-v2">
+                                        <div className="foto-card-img-wrap">
+                                            <img src={photo.image} alt={photo.caption || "Foto del local"} />
+                                            <button className="foto-menu-btn" aria-label="Más opciones">⋯</button>
+                                        </div>
+                                        <div className="foto-card-info">
+                                            <span className="foto-caption-chip">🏥 {photo.caption || 'Clínica'}</span>
+                                            <button className="foto-delete-btn" onClick={() => handlePhotoDelete(photo.id)} title="Eliminar foto">🗑</button>
+                                        </div>
+                                        <p className="foto-date">Agregada el {photo.created_at ? new Date(photo.created_at).toLocaleDateString('es-AR') : '—'}</p>
                                     </div>
+                                ))}
+                                {/* Slots vacíos */}
+                                {Array.from({ length: Math.max(0, 5 - photos.length) }).map((_, i) => (
+                                    <button
+                                        key={`empty-${i}`}
+                                        className="foto-slot-empty"
+                                        onClick={() => photos.length < 5 && fileInputRef.current?.click()}
+                                        disabled={photos.length >= 5 || photoUploading}
+                                    >
+                                        <span className="foto-slot-icon">📷</span>
+                                        <span className="foto-slot-label">Agregar foto</span>
+                                    </button>
                                 ))}
                             </div>
                         )}
+
+                        {/* Tip abajo */}
+                        <div className="fotos-tip">
+                            <span className="fotos-tip-icon">✨</span>
+                            <div className="fotos-tip-content">
+                                <span className="fotos-tip-title">Tip</span>
+                                <p className="fotos-tip-text">
+                                    Las fotos de tu clínica ayudan a que más dueños te elijan.<br />
+                                    Mostrá tu espacio, tu equipo y lo que hace especial tu veterinaria.
+                                </p>
+                            </div>
+                            <TipDeskIllustration />
+                        </div>
                     </div>
                 )}
 
@@ -1669,6 +1728,223 @@ export default function ClinicDashboard() {
                 .pbtn-violet:hover { background: rgba(167,139,250,0.18); border-color: rgba(167,139,250,0.45); }
                 .pbtn-arrow { font-size: 0.9rem; }
 
+                /* ═══════════ TAB FOTOS ═══════════ */
+                .photos-section-v2 { display: flex; flex-direction: column; gap: 22px; }
+
+                /* Header con ilustración */
+                .fotos-header {
+                    display: grid; grid-template-columns: 1fr 340px;
+                    gap: 24px; align-items: center;
+                    position: relative;
+                    padding: 8px 4px 6px;
+                }
+                .fotos-header-left { min-width: 0; }
+                .fotos-eyebrow {
+                    display: inline-flex; align-items: center; gap: 6px;
+                    color: #66BB6A; font-size: 0.95rem; font-weight: 800;
+                    margin-bottom: 8px;
+                    text-shadow: 0 0 12px rgba(76,175,80,0.30);
+                }
+                .fotos-title {
+                    font-family: 'Nunito', sans-serif;
+                    color: #fff; font-size: 2.1rem; font-weight: 900;
+                    letter-spacing: -0.8px; margin-bottom: 6px;
+                }
+                .fotos-subtitle { color: rgba(255,255,255,0.55); font-size: 0.95rem; }
+                .fotos-illu { display: flex; align-items: center; justify-content: center; }
+                .fotos-illu svg { width: 100%; height: auto; max-height: 160px; }
+
+                /* Dropzone grande */
+                .fotos-dropzone {
+                    background: linear-gradient(180deg, rgba(15,26,42,0.75), rgba(15,26,42,0.55));
+                    border: 2px dashed rgba(107,202,255,0.30);
+                    border-radius: 22px;
+                    padding: 40px 24px 32px;
+                    text-align: center;
+                    display: flex; flex-direction: column; align-items: center; gap: 10px;
+                }
+                .dropzone-circle {
+                    width: 90px; height: 90px; border-radius: 50%;
+                    background: linear-gradient(135deg, rgba(76,175,80,0.14), rgba(76,175,80,0.05));
+                    border: 2px dashed rgba(76,175,80,0.5);
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: 0 0 40px rgba(76,175,80,0.18);
+                    margin-bottom: 4px;
+                }
+                .dropzone-arrow {
+                    font-size: 2.4rem;
+                    filter: drop-shadow(0 4px 12px rgba(76,175,80,0.35));
+                }
+                .dropzone-title {
+                    color: #fff; font-size: 1.5rem; font-weight: 900;
+                    letter-spacing: -0.4px;
+                }
+                .dropzone-sub {
+                    color: rgba(255,255,255,0.65); font-size: 0.95rem;
+                    line-height: 1.5; margin-bottom: 4px;
+                }
+                .dropzone-info { color: rgba(255,255,255,0.35); font-size: 0.82rem; font-weight: 600; }
+                .dropzone-caption-wrap {
+                    width: 100%; max-width: 480px;
+                    margin: 12px 0 6px;
+                }
+                .dropzone-caption-input {
+                    width: 100%;
+                    background: rgba(15,26,42,0.8);
+                    border: 1.5px solid rgba(255,255,255,0.08);
+                    color: #fff; font-family: 'Nunito', sans-serif;
+                    font-size: 0.9rem;
+                    padding: 12px 16px; border-radius: 12px;
+                    outline: none;
+                    transition: border-color 0.15s;
+                }
+                .dropzone-caption-input:focus { border-color: rgba(76,175,80,0.40); }
+                .dropzone-caption-input::placeholder { color: rgba(255,255,255,0.35); }
+                .dropzone-btn {
+                    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+                    color: #fff; border: none;
+                    padding: 14px 34px; border-radius: 12px;
+                    font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800;
+                    cursor: pointer;
+                    display: inline-flex; align-items: center; gap: 8px;
+                    box-shadow: 0 8px 24px rgba(76,175,80,0.32);
+                    transition: all 0.15s;
+                }
+                .dropzone-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(76,175,80,0.45); }
+                .dropzone-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+                /* Limite */
+                .fotos-limit {
+                    display: flex; align-items: center; gap: 16px;
+                    background: linear-gradient(135deg, rgba(76,175,80,0.15), rgba(76,175,80,0.05));
+                    border: 1.5px solid rgba(76,175,80,0.35);
+                    border-radius: 16px; padding: 18px 22px;
+                    color: rgba(255,255,255,0.85);
+                }
+                .fotos-limit span { font-size: 2rem; }
+                .fotos-limit strong { color: #66BB6A; font-weight: 900; display: block; margin-bottom: 4px; }
+                .fotos-limit p { color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+
+                /* Sección título */
+                .fotos-section-title {
+                    color: #fff; font-size: 1.15rem; font-weight: 900;
+                    letter-spacing: -0.3px; margin-top: 6px;
+                }
+
+                /* Grid de fotos */
+                .fotos-grid-v2 {
+                    display: grid;
+                    grid-template-columns: repeat(5, 1fr);
+                    gap: 16px;
+                }
+                .foto-card-v2 {
+                    display: flex; flex-direction: column; gap: 8px;
+                }
+                .foto-card-img-wrap {
+                    position: relative;
+                    width: 100%; aspect-ratio: 1;
+                    border-radius: 16px; overflow: hidden;
+                    background: #0f1a2a;
+                    border: 1px solid rgba(255,255,255,0.08);
+                }
+                .foto-card-img-wrap img {
+                    width: 100%; height: 100%; object-fit: cover; display: block;
+                }
+                .foto-menu-btn {
+                    position: absolute; top: 8px; right: 8px;
+                    background: rgba(0,0,0,0.55);
+                    color: #fff; border: none;
+                    width: 30px; height: 30px; border-radius: 50%;
+                    font-size: 1.2rem; font-weight: 900;
+                    cursor: pointer;
+                    display: flex; align-items: center; justify-content: center;
+                    backdrop-filter: blur(6px);
+                }
+                .foto-menu-btn:hover { background: rgba(0,0,0,0.75); }
+                .foto-card-info { display: flex; align-items: center; gap: 8px; }
+                .foto-caption-chip {
+                    background: rgba(15,26,42,0.7);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    color: rgba(255,255,255,0.85);
+                    padding: 5px 10px; border-radius: 100px;
+                    font-size: 0.78rem; font-weight: 700;
+                    flex: 1; min-width: 0;
+                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+                }
+                .foto-delete-btn {
+                    background: rgba(239,83,80,0.10);
+                    border: 1px solid rgba(239,83,80,0.30);
+                    color: #ef5350;
+                    width: 32px; height: 32px; border-radius: 8px;
+                    font-size: 0.95rem;
+                    cursor: pointer;
+                    display: flex; align-items: center; justify-content: center;
+                    flex-shrink: 0;
+                    transition: all 0.15s;
+                }
+                .foto-delete-btn:hover { background: rgba(239,83,80,0.20); border-color: rgba(239,83,80,0.50); }
+                .foto-date {
+                    color: rgba(255,255,255,0.4);
+                    font-size: 0.72rem; font-weight: 600;
+                }
+
+                /* Slots vacíos "Agregar foto" */
+                .foto-slot-empty {
+                    width: 100%; aspect-ratio: 1;
+                    background: rgba(15,26,42,0.35);
+                    border: 2px dashed rgba(107,202,255,0.20);
+                    border-radius: 16px;
+                    display: flex; flex-direction: column;
+                    align-items: center; justify-content: center;
+                    gap: 10px;
+                    cursor: pointer;
+                    transition: all 0.15s;
+                    font-family: 'Nunito', sans-serif;
+                }
+                .foto-slot-empty:hover:not(:disabled) {
+                    background: rgba(107,202,255,0.05);
+                    border-color: rgba(107,202,255,0.40);
+                    transform: translateY(-2px);
+                }
+                .foto-slot-empty:disabled { opacity: 0.5; cursor: not-allowed; }
+                .foto-slot-icon {
+                    font-size: 2.4rem;
+                    opacity: 0.6;
+                    filter: drop-shadow(0 4px 10px rgba(107,202,255,0.2));
+                }
+                .foto-slot-label {
+                    color: rgba(255,255,255,0.55);
+                    font-size: 0.88rem; font-weight: 700;
+                }
+
+                /* Tip abajo */
+                .fotos-tip {
+                    position: relative;
+                    background: linear-gradient(135deg, rgba(15,26,42,0.75), rgba(15,26,42,0.50));
+                    border: 1px solid rgba(76,175,80,0.20);
+                    border-radius: 22px;
+                    padding: 20px 24px;
+                    display: grid; grid-template-columns: auto 1fr 260px;
+                    gap: 18px; align-items: center;
+                    overflow: hidden;
+                }
+                .fotos-tip-icon {
+                    width: 50px; height: 50px; border-radius: 14px;
+                    background: rgba(167,139,250,0.15);
+                    border: 1px solid rgba(167,139,250,0.35);
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.4rem;
+                    box-shadow: inset 0 0 14px rgba(167,139,250,0.2);
+                    flex-shrink: 0;
+                }
+                .fotos-tip-content { min-width: 0; }
+                .fotos-tip-title {
+                    color: #66BB6A; font-size: 1rem; font-weight: 900;
+                    display: block; margin-bottom: 4px;
+                }
+                .fotos-tip-text { color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.55; }
+                .tip-desk-svg { width: 100%; height: auto; max-height: 90px; opacity: 0.9; }
+
                 .turnos-layout { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: stretch; }
                 .turnos-main { display: flex; flex-direction: column; min-width: 0; }
 
@@ -1866,6 +2142,11 @@ export default function ClinicDashboard() {
                     .patients-stats { grid-template-columns: repeat(2, 1fr); }
                     .patients-filters { grid-template-columns: 1fr; }
                     .pcard-actions { grid-template-columns: repeat(2, 1fr); }
+                    .fotos-header { grid-template-columns: 1fr; text-align: left; }
+                    .fotos-illu { display: none; }
+                    .fotos-grid-v2 { grid-template-columns: repeat(3, 1fr); }
+                    .fotos-tip { grid-template-columns: auto 1fr; }
+                    .fotos-tip .tip-desk-svg { display: none; }
                 }
                 @media (max-width: 800px) {
                     .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -1889,6 +2170,12 @@ export default function ClinicDashboard() {
                     .pcard-main-chips { grid-template-columns: 1fr; }
                     .pcard-actions { grid-template-columns: 1fr; }
                     .pbtn { font-size: 0.82rem; padding: 12px; }
+                    .fotos-title { font-size: 1.6rem; }
+                    .fotos-dropzone { padding: 28px 18px 22px; }
+                    .dropzone-title { font-size: 1.2rem; }
+                    .dropzone-circle { width: 70px; height: 70px; }
+                    .dropzone-arrow { font-size: 1.8rem; }
+                    .fotos-grid-v2 { grid-template-columns: repeat(2, 1fr); gap: 12px; }
                     .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
                     .vet-stat { padding: 14px 16px; border-radius: 14px; gap: 10px; }
                     .stat-icon-wrap { width: 42px; height: 42px; border-radius: 12px; }
@@ -2104,6 +2391,101 @@ function CalendarSmileIllustration() {
             <g fill="#a78bfa" opacity="0.75">
                 <path d="M 122 95 L 123 92 L 124 95 L 127 96 L 124 97 L 123 100 L 122 97 L 119 96 Z" />
             </g>
+        </svg>
+    );
+}
+
+// ── Ilustración de cámara + fotos para el header de Fotos ──
+function FotosIllustration() {
+    return (
+        <svg viewBox="0 0 340 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="fotosCam" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#6bcaff" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#4CAF50" stopOpacity="0.25" />
+                </linearGradient>
+            </defs>
+            <g fill="none" stroke="url(#fotosCam)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round">
+                {/* Foto izquierda (rotada) */}
+                <g transform="translate(35, 90) rotate(-14)">
+                    <rect x="0" y="0" width="90" height="66" rx="4" />
+                    <path d="M 8 50 L 26 32 L 40 44 L 58 26 L 82 50" />
+                    <circle cx="66" cy="20" r="4" />
+                </g>
+                {/* Cámara central grande */}
+                <g transform="translate(120, 45)">
+                    <rect x="0" y="15" width="150" height="110" rx="10" />
+                    <path d="M 30 15 L 40 5 L 90 5 L 100 15" />
+                    <circle cx="75" cy="72" r="34" />
+                    <circle cx="75" cy="72" r="22" strokeWidth="2" />
+                    <circle cx="120" cy="35" r="3" fill="#6bcaff" stroke="none" opacity="0.7" />
+                </g>
+                {/* Foto derecha (rotada al otro lado) */}
+                <g transform="translate(240, 100) rotate(14)">
+                    <rect x="0" y="0" width="80" height="60" rx="4" />
+                    <path d="M 8 45 L 22 28 L 36 40 L 54 24 L 74 42" />
+                    <circle cx="58" cy="17" r="4" />
+                </g>
+            </g>
+            {/* Estrellitas decorativas */}
+            <g fill="#FFB74D" opacity="0.85">
+                <path d="M 60 40 L 62 34 L 64 40 L 70 42 L 64 44 L 62 50 L 60 44 L 54 42 Z" />
+                <path d="M 280 45 L 282 39 L 284 45 L 290 47 L 284 49 L 282 55 L 280 49 L 274 47 Z" />
+            </g>
+            <g fill="#a78bfa" opacity="0.75">
+                <path d="M 195 30 L 197 25 L 199 30 L 204 32 L 199 34 L 197 39 L 195 34 L 190 32 Z" />
+                <path d="M 310 155 L 312 150 L 314 155 L 319 157 L 314 159 L 312 164 L 310 159 L 305 157 Z" />
+            </g>
+        </svg>
+    );
+}
+
+// ── Ilustración del mostrador/escritorio para el Tip ──
+function TipDeskIllustration() {
+    return (
+        <svg className="tip-desk-svg" viewBox="0 0 340 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <g fill="none" stroke="rgba(76,175,80,0.45)" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round">
+                {/* Mesa horizontal */}
+                <line x1="10" y1="70" x2="330" y2="70" strokeWidth="2" />
+                {/* Monitor izquierda */}
+                <rect x="30" y="30" width="42" height="30" rx="2" />
+                <line x1="45" y1="60" x2="57" y2="60" />
+                <line x1="51" y1="60" x2="51" y2="70" />
+                {/* Teclado */}
+                <rect x="30" y="63" width="42" height="4" rx="1" />
+                {/* Libros/Portapapeles */}
+                <rect x="100" y="46" width="24" height="24" rx="2" />
+                <line x1="108" y1="52" x2="120" y2="52" />
+                <line x1="108" y1="58" x2="120" y2="58" />
+                <line x1="108" y1="64" x2="116" y2="64" />
+                {/* Perro / mascota mediano */}
+                <g transform="translate(140, 40)">
+                    <ellipse cx="18" cy="20" rx="15" ry="10" />
+                    <circle cx="30" cy="14" r="6" />
+                    <line x1="27" y1="9" x2="24" y2="4" />
+                    <line x1="33" y1="9" x2="36" y2="4" />
+                    <line x1="10" y1="30" x2="10" y2="35" />
+                    <line x1="26" y1="30" x2="26" y2="35" />
+                </g>
+                {/* Planta */}
+                <g transform="translate(200, 32)">
+                    <rect x="8" y="24" width="18" height="14" rx="2" />
+                    <path d="M 17 24 Q 12 12 6 8 M 17 24 Q 22 12 28 8 M 17 24 L 17 6" />
+                </g>
+                {/* Reloj / cuadro */}
+                <circle cx="260" cy="45" r="12" />
+                <line x1="260" y1="40" x2="260" y2="45" />
+                <line x1="260" y1="45" x2="264" y2="47" />
+                {/* Botella */}
+                <g transform="translate(290, 35)">
+                    <rect x="0" y="10" width="14" height="25" rx="2" />
+                    <line x1="5" y1="10" x2="5" y2="5" />
+                    <line x1="9" y1="10" x2="9" y2="5" />
+                </g>
+            </g>
+            {/* Detalles pequeños */}
+            <circle cx="90" cy="42" r="1.5" fill="#FFB74D" opacity="0.7" />
+            <circle cx="235" cy="38" r="1.5" fill="#6bcaff" opacity="0.7" />
         </svg>
     );
 }
