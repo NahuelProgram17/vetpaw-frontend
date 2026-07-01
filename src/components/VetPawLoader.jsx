@@ -17,30 +17,34 @@ export function VetPawLoader({
     >
       <div className="vp-loader-bg" />
 
-      <div className="vp-loader-card">
-        <div className="vp-dog-track" aria-hidden="true">
-          <img className="vp-running-dog" src={dogRunner} alt="" draggable="false" />
+      <div className="vp-loader-content">
+        <div className="vp-runner-stage" aria-hidden="true">
+          <img className="vp-runner-dog" src={dogRunner} alt="" draggable="false" />
+          <span className="vp-speed-line vp-speed-line-1" />
+          <span className="vp-speed-line vp-speed-line-2" />
+          <span className="vp-speed-line vp-speed-line-3" />
         </div>
 
         <h2 className="vp-loader-title">
           Cargando <span>VetPaw</span>...
         </h2>
+
         <p className="vp-loader-subtitle">{subText}</p>
 
-        <div className="vp-progress-row" aria-hidden="true">
+        <div className="vp-progress-wrap" aria-hidden="true">
           <div className="vp-progress-shell">
             <div className="vp-progress-fill" />
           </div>
-          <strong className="vp-progress-number">78%</strong>
+          <strong>78%</strong>
         </div>
 
         <div className="vp-loader-dots" aria-hidden="true">
           <i /><i /><i /><i /><i /><i /><i /><i />
         </div>
 
-        <div className="vp-loader-pill" aria-hidden="true">
-          <span className="vp-loader-shield">🐾</span>
-          <span>Tu información <b>pet-friendly</b> está en camino</span>
+        <div className="vp-loader-note" aria-hidden="true">
+          <span>🛡️</span>
+          <p>Tu información <b>pet-friendly</b> está en camino</p>
         </div>
       </div>
 
@@ -61,15 +65,15 @@ export function VetPawLoader({
         .vp-loader-full {
           min-height: 100vh;
           width: 100%;
-          padding: 102px 24px 54px;
+          padding: 94px 20px 52px;
         }
 
         .vp-loader-inline {
-          min-height: 430px;
+          min-height: 420px;
           width: 100%;
-          padding: 48px 24px;
+          padding: 48px 20px;
           border-radius: 28px;
-          background: rgba(6, 16, 31, 0.92);
+          background: rgba(5, 15, 30, 0.92);
           border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
@@ -77,7 +81,8 @@ export function VetPawLoader({
           position: fixed;
           inset: 0;
           z-index: 80;
-          background: #06101d;
+          background: rgba(2, 8, 18, 0.84);
+          backdrop-filter: blur(2px);
         }
 
         .vp-loader-bg {
@@ -85,65 +90,97 @@ export function VetPawLoader({
           inset: 0;
           z-index: -2;
           background:
-            linear-gradient(180deg, rgba(2, 9, 20, 0.04), rgba(2, 9, 20, 0.16)),
+            linear-gradient(180deg, rgba(2, 8, 17, 0.10), rgba(2, 8, 17, 0.26)),
             url(${ownerBg});
           background-size: cover;
-          background-position: center;
+          background-position: center top;
         }
 
         .vp-loader-bg::after {
-          content: '';
+          content: "";
           position: absolute;
           inset: 0;
-          background:
-            radial-gradient(circle at 50% 46%, rgba(19, 78, 158, 0.16), transparent 34%),
-            radial-gradient(circle at 50% 92%, rgba(28, 109, 255, 0.13), transparent 36%);
           pointer-events: none;
+          background:
+            radial-gradient(circle at 50% 45%, rgba(15, 91, 172, 0.18), transparent 35%),
+            radial-gradient(circle at 50% 90%, rgba(31, 103, 255, 0.13), transparent 35%);
         }
 
-        .vp-loader-card {
-          width: min(895px, 94vw);
-          min-height: 620px;
+        .vp-loader-content {
+          width: min(860px, 94vw);
+          min-height: 575px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           text-align: center;
           position: relative;
-          animation: vpLoaderEnter 240ms ease-out both;
+          animation: vpLoaderEnter 260ms ease-out both;
         }
 
-        .vp-dog-track {
-          width: min(790px, 92vw);
-          height: clamp(170px, 30vw, 280px);
+        .vp-runner-stage {
+          width: min(760px, 92vw);
+          height: clamp(180px, 30vw, 285px);
           position: relative;
           overflow: hidden;
-          margin-bottom: 16px;
-          border-radius: 22px;
+          margin-bottom: 14px;
+          border-radius: 30px;
+          -webkit-mask-image: radial-gradient(ellipse at center, #000 64%, transparent 76%);
+          mask-image: radial-gradient(ellipse at center, #000 64%, transparent 76%);
         }
 
-        .vp-running-dog {
+        .vp-runner-stage::before {
+          content: "";
+          position: absolute;
+          left: 50%;
+          bottom: 17%;
+          width: 52%;
+          height: 2px;
+          transform: translateX(-50%);
+          background: linear-gradient(90deg, transparent, rgba(111, 218, 85, 0.45), rgba(255, 176, 0, 0.55), transparent);
+          filter: blur(0.4px);
+          opacity: 0.85;
+          animation: vpGroundGlow 1.15s ease-in-out infinite;
+        }
+
+        .vp-runner-dog {
           position: absolute;
           left: 50%;
           bottom: 0;
-          width: min(790px, 92vw);
+          width: min(760px, 92vw);
           max-width: none;
           height: auto;
           display: block;
           user-select: none;
           pointer-events: none;
           transform: translateX(-50%);
+          filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.26));
           animation: vpDogRun 1.05s ease-in-out infinite;
-          filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.22));
+          will-change: transform;
         }
+
+        .vp-speed-line {
+          position: absolute;
+          height: 2px;
+          border-radius: 999px;
+          opacity: 0;
+          left: 15%;
+          background: linear-gradient(90deg, transparent, rgba(62, 214, 255, 0.55), rgba(104, 229, 92, 0.45), transparent);
+          filter: blur(0.5px);
+          animation: vpSpeedLine 1.05s ease-in-out infinite;
+        }
+
+        .vp-speed-line-1 { top: 47%; width: 190px; animation-delay: 0s; }
+        .vp-speed-line-2 { top: 58%; width: 255px; animation-delay: .14s; }
+        .vp-speed-line-3 { top: 69%; width: 145px; animation-delay: .28s; }
 
         .vp-loader-title {
           margin: 0;
-          font-size: clamp(34px, 5vw, 58px);
+          font-size: clamp(36px, 5vw, 60px);
           line-height: 1;
           font-weight: 900;
           letter-spacing: -0.055em;
-          text-shadow: 0 14px 35px rgba(0, 0, 0, 0.32);
+          text-shadow: 0 14px 35px rgba(0, 0, 0, 0.34);
         }
 
         .vp-loader-title span {
@@ -154,27 +191,27 @@ export function VetPawLoader({
         }
 
         .vp-loader-subtitle {
-          margin: 20px 0 24px;
-          font-size: clamp(17px, 2.2vw, 26px);
+          margin: 18px 0 24px;
+          font-size: clamp(18px, 2.2vw, 26px);
           color: rgba(226, 235, 249, 0.78);
           font-weight: 700;
         }
 
-        .vp-progress-row {
-          width: min(580px, 78vw);
+        .vp-progress-wrap {
+          width: min(585px, 82vw);
           display: grid;
           grid-template-columns: 1fr auto;
-          gap: 16px;
           align-items: center;
+          gap: 16px;
         }
 
         .vp-progress-shell {
-          height: 38px;
+          height: 35px;
           border-radius: 999px;
-          border: 2px solid rgba(109, 162, 224, 0.22);
-          background: rgba(7, 20, 41, 0.72);
+          border: 2px solid rgba(111, 162, 226, 0.22);
+          background: rgba(7, 20, 41, 0.66);
           overflow: hidden;
-          box-shadow: inset 0 0 20px rgba(20, 70, 130, 0.22), 0 14px 35px rgba(0, 0, 0, 0.2);
+          box-shadow: inset 0 0 18px rgba(20, 70, 130, 0.22), 0 14px 35px rgba(0, 0, 0, 0.2);
         }
 
         .vp-progress-fill {
@@ -182,11 +219,11 @@ export function VetPawLoader({
           height: 100%;
           border-radius: inherit;
           background: linear-gradient(90deg, #54d466, #e0c524, #ff9f08);
-          box-shadow: 0 0 22px rgba(89, 220, 99, 0.32), 0 0 25px rgba(255, 165, 8, 0.34);
+          box-shadow: 0 0 18px rgba(89, 220, 99, 0.30), 0 0 22px rgba(255, 165, 8, 0.30);
           animation: vpProgressPulse 1.4s ease-in-out infinite alternate;
         }
 
-        .vp-progress-number {
+        .vp-progress-wrap strong {
           font-size: clamp(17px, 2vw, 22px);
           font-weight: 900;
           color: rgba(255, 255, 255, 0.96);
@@ -194,8 +231,8 @@ export function VetPawLoader({
 
         .vp-loader-dots {
           display: flex;
-          gap: 18px;
-          margin-top: 26px;
+          gap: 17px;
+          margin-top: 25px;
         }
 
         .vp-loader-dots i {
@@ -208,44 +245,43 @@ export function VetPawLoader({
 
         .vp-loader-dots i:nth-child(1) { background: #69e95c; animation-delay: 0s; }
         .vp-loader-dots i:nth-child(2) { background: #d7da37; animation-delay: .08s; }
-        .vp-loader-dots i:nth-child(3) { background: #ffa719; animation-delay: .16s; }
+        .vp-loader-dots i:nth-child(3) { background: #ffae18; animation-delay: .16s; }
         .vp-loader-dots i:nth-child(4) { animation-delay: .24s; }
         .vp-loader-dots i:nth-child(5) { animation-delay: .32s; }
         .vp-loader-dots i:nth-child(6) { animation-delay: .40s; }
         .vp-loader-dots i:nth-child(7) { animation-delay: .48s; }
         .vp-loader-dots i:nth-child(8) { animation-delay: .56s; }
 
-        .vp-loader-pill {
+        .vp-loader-note {
           margin-top: 36px;
-          width: min(540px, 85vw);
-          min-height: 62px;
-          padding: 12px 24px;
-          border-radius: 999px;
-          border: 1px solid rgba(142, 185, 241, 0.16);
-          background: rgba(8, 24, 48, 0.56);
-          display: flex;
+          display: inline-flex;
           align-items: center;
-          justify-content: center;
           gap: 14px;
+          padding: 15px 26px;
+          border-radius: 999px;
+          border: 1px solid rgba(111, 162, 226, 0.18);
+          background: rgba(7, 20, 41, 0.45);
           color: rgba(226, 235, 249, 0.78);
-          font-size: clamp(15px, 2vw, 20px);
-          font-weight: 700;
-          box-shadow: 0 18px 45px rgba(0, 0, 0, 0.16);
+          box-shadow: inset 0 0 22px rgba(255, 255, 255, 0.03);
         }
 
-        .vp-loader-pill b {
-          color: #55d866;
-        }
-
-        .vp-loader-shield {
+        .vp-loader-note span {
+          display: grid;
+          place-items: center;
           width: 34px;
           height: 34px;
-          display: inline-grid;
-          place-items: center;
           border-radius: 12px;
-          border: 1px solid rgba(88, 216, 106, 0.42);
-          background: rgba(88, 216, 106, 0.12);
+          background: rgba(76, 175, 80, 0.16);
+          border: 1px solid rgba(255, 176, 0, 0.38);
         }
+
+        .vp-loader-note p {
+          margin: 0;
+          font-size: clamp(14px, 1.6vw, 18px);
+          font-weight: 700;
+        }
+
+        .vp-loader-note b { color: #58d86a; }
 
         .vp-loader-sr-only {
           position: absolute;
@@ -259,35 +295,49 @@ export function VetPawLoader({
           border: 0;
         }
 
-        @keyframes vpLoaderEnter {
-          from { opacity: 0; transform: translateY(8px) scale(0.992); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes vpDogRun {
+          0%   { transform: translateX(calc(-50% - 12px)) translateY(0) scale(1); }
+          22%  { transform: translateX(calc(-50% - 4px)) translateY(-5px) scale(1.006); }
+          50%  { transform: translateX(calc(-50% + 12px)) translateY(0) scale(1); }
+          76%  { transform: translateX(calc(-50% + 3px)) translateY(-4px) scale(1.004); }
+          100% { transform: translateX(calc(-50% - 12px)) translateY(0) scale(1); }
         }
 
-        @keyframes vpDogRun {
-          0% { transform: translateX(calc(-50% - 18px)) translateY(1px) scale(0.996); }
-          35% { transform: translateX(calc(-50% + 5px)) translateY(-8px) scale(1); }
-          70% { transform: translateX(calc(-50% + 22px)) translateY(0px) scale(1.004); }
-          100% { transform: translateX(calc(-50% - 18px)) translateY(1px) scale(0.996); }
+        @keyframes vpSpeedLine {
+          0% { transform: translateX(75px) scaleX(.55); opacity: 0; }
+          35% { opacity: .75; }
+          100% { transform: translateX(-115px) scaleX(1.05); opacity: 0; }
+        }
+
+        @keyframes vpGroundGlow {
+          0%, 100% { opacity: .42; transform: translateX(-50%) scaleX(.92); }
+          50% { opacity: .9; transform: translateX(-50%) scaleX(1.08); }
         }
 
         @keyframes vpProgressPulse {
-          from { filter: brightness(0.96); }
-          to { filter: brightness(1.12); }
+          from { filter: saturate(1); }
+          to { filter: saturate(1.22) brightness(1.05); }
         }
 
         @keyframes vpDot {
-          0%, 100% { transform: translateY(0); opacity: .65; }
-          50% { transform: translateY(-5px); opacity: 1; }
+          0%, 100% { transform: translateY(0); opacity: .55; }
+          50% { transform: translateY(-6px); opacity: 1; }
         }
 
-        @media (max-width: 640px) {
-          .vp-loader-full { padding: 92px 14px 48px; }
-          .vp-loader-card { width: 98vw; min-height: 560px; }
-          .vp-progress-row { width: 86vw; gap: 10px; }
+        @keyframes vpLoaderEnter {
+          from { opacity: 0; transform: translateY(10px) scale(.985); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @media (max-width: 720px) {
+          .vp-loader-full { padding: 86px 14px 44px; }
+          .vp-loader-content { width: 98vw; min-height: 540px; }
+          .vp-runner-stage { height: 185px; }
+          .vp-progress-wrap { width: 88vw; gap: 10px; }
           .vp-progress-shell { height: 30px; }
           .vp-loader-dots { gap: 12px; }
           .vp-loader-dots i { width: 11px; height: 11px; }
+          .vp-loader-note { padding: 12px 18px; }
         }
       `}</style>
     </div>

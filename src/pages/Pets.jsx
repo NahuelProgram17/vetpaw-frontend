@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPets, createPet, updatePet, deletePet, createTreatment, deleteTreatment } from '../services/api';
 import ownerBg from "../assets/vetpaw-owner-bg.png";
+import VetPawLoader from "../components/VetPawLoader";
 
 const TREATMENT_TYPES = [
     { value: 'deworming', label: 'Desparasitación' },
@@ -291,6 +292,10 @@ export default function Pets() {
         return `${years} año${years > 1 ? 's' : ''}`;
     };
 
+    if (loading) {
+        return <VetPawLoader message="Cargando mascotas..." subText="Buscando tus mascotas" />;
+    }
+
     return (
         <div className="pets-page">
             <div className="blob b1" />
@@ -306,13 +311,6 @@ export default function Pets() {
                         </p>
                     </div>
                 </header>
-
-                {loading && (
-                    <div className="loading-state">
-                        <span className="paw-runner">🐕</span>
-                        <p>Cargando mascotas...</p>
-                    </div>
-                )}
 
                 {!loading && pets.length === 0 && (
                     <div className="empty-state">
