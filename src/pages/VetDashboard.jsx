@@ -533,15 +533,84 @@ export default function ClinicDashboard() {
                 {/* ══ TAB PACIENTES ══ */}
                 {!loading && tab === "pacientes" && (
                     <div className="patients-section">
-                        {/* Buscador */}
-                        <div className="patients-search-wrap">
-                            <input
-                                className="patients-search"
-                                type="text"
-                                placeholder="🔍 Buscar por nombre de mascota o dueño..."
-                                value={searchQuery}
-                                onChange={e => { setSearchQuery(e.target.value); setSelectedPetFicha(null); }}
-                            />
+                        {/* Stats cards de pacientes */}
+                        {(() => {
+                            const totalPets = pets.length;
+                            const activePets = pets.filter(p => (p.vaccines?.length || 0) > 0).length;
+                            const now = new Date();
+                            const in60Days = new Date();
+                            in60Days.setDate(in60Days.getDate() + 60);
+                            let reminders = 0;
+                            pets.forEach(pet => {
+                                (pet.vaccines || []).forEach(v => {
+                                    if (v.next_dose) {
+                                        const nd = new Date(v.next_dose);
+                                        if (nd >= now && nd <= in60Days) reminders++;
+                                    }
+                                });
+                            });
+                            return (
+                                <div className="patients-stats">
+                                    <div className="pstat pstat-total">
+                                        <div className="pstat-icon-wrap"><span className="pstat-icon">🐾</span></div>
+                                        <div className="pstat-content">
+                                            <p className="pstat-num">{totalPets}</p>
+                                            <p className="pstat-label">Pacientes totales</p>
+                                            <p className="pstat-sub">Todos tus pacientes registrados</p>
+                                        </div>
+                                        <div className="pstat-deco" aria-hidden="true">🐾</div>
+                                    </div>
+                                    <div className="pstat pstat-active">
+                                        <div className="pstat-icon-wrap"><span className="pstat-icon">✅</span></div>
+                                        <div className="pstat-content">
+                                            <p className="pstat-num">{activePets}</p>
+                                            <p className="pstat-label">Activos</p>
+                                            <p className="pstat-sub">Con vacunas registradas</p>
+                                        </div>
+                                        <div className="pstat-deco" aria-hidden="true">✅</div>
+                                    </div>
+                                    <div className="pstat pstat-reminders">
+                                        <div className="pstat-icon-wrap"><span className="pstat-icon">💉</span></div>
+                                        <div className="pstat-content">
+                                            <p className="pstat-num">{reminders}</p>
+                                            <p className="pstat-label">Recordatorios</p>
+                                            <p className="pstat-sub">Vacunas por vencer (60 días)</p>
+                                        </div>
+                                        <div className="pstat-deco" aria-hidden="true">💉</div>
+                                    </div>
+                                    <div className="pstat pstat-rating">
+                                        <div className="pstat-icon-wrap"><span className="pstat-icon">❤️</span></div>
+                                        <div className="pstat-content">
+                                            <p className="pstat-num">{totalPets > 0 ? totalPets : '—'}</p>
+                                            <p className="pstat-label">Vinculados</p>
+                                            <p className="pstat-sub">Mascotas de tu clínica</p>
+                                        </div>
+                                        <div className="pstat-deco" aria-hidden="true">❤️</div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
+                        {/* Buscador + dropdown */}
+                        <div className="patients-filters">
+                            <div className="patients-search-wrap">
+                                <span className="patients-search-icon">🔍</span>
+                                <input
+                                    className="patients-search"
+                                    type="text"
+                                    placeholder="Buscar por nombre de mascota o dueño..."
+                                    value={searchQuery}
+                                    onChange={e => { setSearchQuery(e.target.value); setSelectedPetFicha(null); }}
+                                />
+                                {searchQuery && (
+                                    <button className="patients-search-clear" onClick={() => setSearchQuery('')}>✕</button>
+                                )}
+                            </div>
+                            <div className="patients-filter-drop">
+                                <span className="filter-drop-icon">🎯</span>
+                                <span className="filter-drop-label">Todos los pacientes</span>
+                                <span className="filter-drop-caret">▾</span>
+                            </div>
                         </div>
 
                         {/* Si hay una mascota seleccionada, mostrar su ficha completa */}
@@ -670,38 +739,121 @@ export default function ClinicDashboard() {
                             pets.length === 0 ? (
                                 <div className="empty-state"><span>🐾</span><p>No hay mascotas vinculadas a tu clínica todavía.</p></div>
                             ) : (
-                                <div className="pets-grid">
+                                <div className="pets-grid-v2">
                                     {pets
                                         .filter(pet =>
                                             pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                             (pet.owner_name && pet.owner_name.toLowerCase().includes(searchQuery.toLowerCase()))
                                         )
-                                        .map(pet => (
-                                            <div key={pet.id} className="pet-card" onClick={() => { setSelectedPetFicha(pet); fetchClinicalPhotos(pet.id); }}>
-                                                <div className="pet-avatar">{pet.photo ? <img src={pet.photo} alt={pet.name} /> : <span>{SPECIES_ICON[pet.species] || "🐾"}</span>}</div>
-                                                <div className="pet-info">
-                                                    <h3 className="pet-name">{pet.name}</h3>
-                                                    <p className="pet-species">{pet.species_display}</p>
-                                                    {pet.breed && <p className="pet-breed">{pet.breed}</p>}
-                                                    <p className="pet-owner">👤 {pet.owner_name || "—"}</p>
-                                                </div>
-                                                <div className="pet-details">
-                                                    {pet.weight && <span>⚖️ {pet.weight} kg</span>}
-                                                    {pet.is_neutered && <span>✂️ Castrado/a</span>}
-                                                    {pet.allergies && <span>⚠️ Alergias</span>}
-                                                </div>
-                                                <div className="pet-card-btns">
-                                                    <button className="btn-view-history">Ver ficha completa →</button>
-                                                    <button className="btn-pdf" onClick={e => { e.stopPropagation(); handleDownloadPDF(pet.id, pet.name); }}>📄 PDF</button>
-                                                </div>
-                                            </div>
-                                        ))
+                                        .map(pet => {
+                                            const age = pet.birth_date ? (() => {
+                                                const b = new Date(pet.birth_date);
+                                                const now = new Date();
+                                                let years = now.getFullYear() - b.getFullYear();
+                                                const m = now.getMonth() - b.getMonth();
+                                                if (m < 0 || (m === 0 && now.getDate() < b.getDate())) years--;
+                                                return years;
+                                            })() : null;
+                                            const sex = pet.sex === 'male' ? { icon: '♂', label: 'Macho' } : pet.sex === 'female' ? { icon: '♀', label: 'Hembra' } : null;
+                                            const vaccineCount = pet.vaccines?.length || 0;
+                                            return (
+                                                <article key={pet.id} className="pcard">
+                                                    <div className="pcard-top">
+                                                        <div className="pcard-photo">
+                                                            {pet.photo
+                                                                ? <img src={pet.photo} alt={pet.name} />
+                                                                : <span>{SPECIES_ICON[pet.species] || "🐾"}</span>}
+                                                        </div>
+                                                        <div className="pcard-header">
+                                                            <div className="pcard-title-row">
+                                                                <h3 className="pcard-name">{pet.name}</h3>
+                                                                <span className="pcard-badge">● Activo</span>
+                                                            </div>
+                                                            <p className="pcard-species-row">
+                                                                {pet.species_display || pet.species}
+                                                                {sex && <> · <span className="pcard-sex">{sex.icon} {sex.label}</span></>}
+                                                                {pet.breed && <> · {pet.breed}</>}
+                                                            </p>
+                                                            {pet.owner_name && <p className="pcard-owner">👤 {pet.owner_name}</p>}
+                                                        </div>
+                                                        <button className="pcard-menu-btn" aria-label="Más opciones">⋯</button>
+                                                    </div>
+
+                                                    {/* Chips principales: edad, peso, color */}
+                                                    {(age !== null || pet.weight || pet.color) && (
+                                                        <div className="pcard-main-chips">
+                                                            {age !== null && (
+                                                                <div className="pchip pchip-main">
+                                                                    <span className="pchip-icon">📅</span>
+                                                                    <div>
+                                                                        <span className="pchip-value">{age} {age === 1 ? 'año' : 'años'}</span>
+                                                                        <span className="pchip-label">Edad</span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {pet.weight && (
+                                                                <div className="pchip pchip-main">
+                                                                    <span className="pchip-icon">⚖️</span>
+                                                                    <div>
+                                                                        <span className="pchip-value">{pet.weight} kg</span>
+                                                                        <span className="pchip-label">Peso</span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {pet.color && (
+                                                                <div className="pchip pchip-main">
+                                                                    <span className="pchip-icon">🎨</span>
+                                                                    <div>
+                                                                        <span className="pchip-value">{pet.color}</span>
+                                                                        <span className="pchip-label">Color</span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Chips secundarios: feeding, habitat, lives_with */}
+                                                    {(pet.feeding || pet.habitat || pet.lives_with_animals) && (
+                                                        <div className="pcard-mini-chips">
+                                                            {pet.feeding && <span className="pmini">🍖 {pet.feeding}</span>}
+                                                            {pet.habitat && <span className="pmini">🏠 {pet.habitat}</span>}
+                                                            {pet.lives_with_animals && <span className="pmini">🐾 Convive con otros animales</span>}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Vacunas */}
+                                                    {vaccineCount > 0 && (
+                                                        <p className="pcard-vaccines">🛡 {vaccineCount} vacuna{vaccineCount !== 1 ? 's' : ''} registrada{vaccineCount !== 1 ? 's' : ''}</p>
+                                                    )}
+
+                                                    {/* Botones */}
+                                                    <div className="pcard-actions">
+                                                        <button className="pbtn pbtn-outline" onClick={() => { setSelectedPetFicha(pet); fetchClinicalPhotos(pet.id); }}>
+                                                            📄 Ver ficha completa <span className="pbtn-arrow">→</span>
+                                                        </button>
+                                                        <button className="pbtn pbtn-outline" onClick={() => handleDownloadPDF(pet.id, pet.name)}>
+                                                            📁 Historial
+                                                        </button>
+                                                        <button className="pbtn pbtn-primary" onClick={() => { setSelectedPetFicha(pet); fetchClinicalPhotos(pet.id); }}>
+                                                            📅 Sacar turno
+                                                        </button>
+                                                        <button className="pbtn pbtn-violet" onClick={() => { setSelectedPetFicha(pet); fetchClinicalPhotos(pet.id); }}>
+                                                            🛡 Antiparasitarios
+                                                        </button>
+                                                    </div>
+                                                </article>
+                                            );
+                                        })
                                     }
                                     {pets.filter(pet =>
                                         pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                         (pet.owner_name && pet.owner_name.toLowerCase().includes(searchQuery.toLowerCase()))
                                     ).length === 0 && (
-                                            <div className="empty-state"><span>🔍</span><p>No se encontraron resultados para "{searchQuery}".</p></div>
+                                            <div className="empty-state empty-turnos-v2">
+                                                <div className="empty-icon-big">🔍</div>
+                                                <h3 className="empty-title">Sin resultados</h3>
+                                                <p>No se encontraron pacientes para "{searchQuery}".</p>
+                                            </div>
                                         )}
                                 </div>
                             )
@@ -1299,6 +1451,224 @@ export default function ClinicDashboard() {
                 }
                 .btn-agenda-pdf:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(239,83,80,0.45) !important; }
 
+                /* ═══════════ TAB PACIENTES ═══════════ */
+                .patients-section { display: flex; flex-direction: column; gap: 22px; }
+
+                /* Stats de pacientes */
+                .patients-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+                .pstat {
+                    position: relative;
+                    border-radius: 20px;
+                    padding: 22px 24px;
+                    display: flex; align-items: flex-start; gap: 16px;
+                    min-width: 0; overflow: hidden;
+                    transition: all 0.2s;
+                    border: 2px solid;
+                }
+                .pstat:hover { transform: translateY(-3px); }
+                .pstat-deco {
+                    position: absolute; right: -14px; bottom: -18px;
+                    font-size: 6rem; opacity: 0.06;
+                    pointer-events: none;
+                }
+                .pstat-total {
+                    background: linear-gradient(135deg, rgba(107,202,255,0.14), rgba(107,202,255,0.04));
+                    border-color: rgba(107,202,255,0.40);
+                }
+                .pstat-active {
+                    background: linear-gradient(135deg, rgba(76,175,80,0.14), rgba(76,175,80,0.04));
+                    border-color: rgba(76,175,80,0.40);
+                }
+                .pstat-reminders {
+                    background: linear-gradient(135deg, rgba(167,139,250,0.14), rgba(167,139,250,0.04));
+                    border-color: rgba(167,139,250,0.40);
+                }
+                .pstat-rating {
+                    background: linear-gradient(135deg, rgba(255,152,0,0.14), rgba(255,152,0,0.04));
+                    border-color: rgba(255,152,0,0.40);
+                }
+                .pstat-icon-wrap {
+                    width: 56px; height: 56px; border-radius: 16px;
+                    display: flex; align-items: center; justify-content: center;
+                    flex-shrink: 0; position: relative; z-index: 1;
+                    border: 2px solid;
+                }
+                .pstat-total .pstat-icon-wrap {
+                    background: rgba(107,202,255,0.20);
+                    border-color: rgba(107,202,255,0.55);
+                    box-shadow: inset 0 0 18px rgba(107,202,255,0.22);
+                }
+                .pstat-active .pstat-icon-wrap {
+                    background: rgba(76,175,80,0.20);
+                    border-color: rgba(76,175,80,0.55);
+                    box-shadow: inset 0 0 18px rgba(76,175,80,0.22);
+                }
+                .pstat-reminders .pstat-icon-wrap {
+                    background: rgba(167,139,250,0.20);
+                    border-color: rgba(167,139,250,0.55);
+                    box-shadow: inset 0 0 18px rgba(167,139,250,0.22);
+                }
+                .pstat-rating .pstat-icon-wrap {
+                    background: rgba(255,152,0,0.20);
+                    border-color: rgba(255,152,0,0.55);
+                    box-shadow: inset 0 0 18px rgba(255,152,0,0.22);
+                }
+                .pstat-icon { font-size: 1.7rem; }
+                .pstat-content { position: relative; z-index: 1; min-width: 0; }
+                .pstat-num { font-size: 2.3rem; font-weight: 900; color: #fff; line-height: 1; }
+                .pstat-label { font-size: 0.95rem; font-weight: 800; margin-top: 5px; }
+                .pstat-total .pstat-label { color: #6bcaff; }
+                .pstat-active .pstat-label { color: #66BB6A; }
+                .pstat-reminders .pstat-label { color: #a78bfa; }
+                .pstat-rating .pstat-label { color: #FFB74D; }
+                .pstat-sub { font-size: 0.75rem; color: rgba(255,255,255,0.45); font-weight: 600; margin-top: 3px; line-height: 1.35; }
+
+                /* Filtros: buscador + dropdown */
+                .patients-filters { display: grid; grid-template-columns: 1fr auto; gap: 12px; }
+                .patients-search-wrap {
+                    position: relative;
+                    background: rgba(15,26,42,0.75);
+                    border: 1.5px solid rgba(255,255,255,0.08);
+                    border-radius: 16px;
+                    padding: 0 16px;
+                    display: flex; align-items: center; gap: 10px;
+                    transition: border-color 0.15s;
+                }
+                .patients-search-wrap:focus-within { border-color: rgba(76,175,80,0.40); }
+                .patients-search-icon { color: rgba(255,255,255,0.4); font-size: 1rem; flex-shrink: 0; }
+                .patients-search {
+                    flex: 1; background: transparent; border: none; outline: none;
+                    color: #fff; font-size: 0.95rem;
+                    padding: 15px 0;
+                    font-family: 'Nunito', sans-serif;
+                }
+                .patients-search::placeholder { color: rgba(255,255,255,0.35); }
+                .patients-search-clear {
+                    background: rgba(255,255,255,0.06); border: none; color: rgba(255,255,255,0.6);
+                    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+                    display: flex; align-items: center; justify-content: center; font-size: 0.7rem;
+                }
+                .patients-filter-drop {
+                    display: flex; align-items: center; gap: 10px;
+                    background: rgba(15,26,42,0.75);
+                    border: 1.5px solid rgba(255,255,255,0.08);
+                    border-radius: 16px; padding: 0 18px;
+                    color: rgba(255,255,255,0.85); font-weight: 700; font-size: 0.9rem;
+                    cursor: default;
+                    height: 54px;
+                }
+                .filter-drop-icon { font-size: 1rem; opacity: 0.7; }
+                .filter-drop-label { white-space: nowrap; }
+                .filter-drop-caret { color: rgba(255,255,255,0.4); font-size: 0.75rem; }
+
+                /* Grid de pacientes */
+                .pets-grid-v2 { display: flex; flex-direction: column; gap: 16px; }
+
+                .pcard {
+                    background: linear-gradient(135deg, rgba(15,26,42,0.85), rgba(15,26,42,0.60));
+                    border: 1.5px solid rgba(255,255,255,0.06);
+                    border-radius: 22px;
+                    padding: 24px;
+                    display: flex; flex-direction: column; gap: 16px;
+                    transition: all 0.2s;
+                    position: relative;
+                }
+                .pcard:hover { border-color: rgba(76,175,80,0.25); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.20); }
+
+                .pcard-top { display: flex; gap: 20px; align-items: flex-start; }
+                .pcard-photo {
+                    width: 130px; height: 130px; border-radius: 18px;
+                    overflow: hidden; flex-shrink: 0;
+                    background: linear-gradient(135deg, rgba(107,202,255,0.15), rgba(76,175,80,0.10));
+                    border: 1.5px solid rgba(107,202,255,0.20);
+                    display: flex; align-items: center; justify-content: center;
+                }
+                .pcard-photo img { width: 100%; height: 100%; object-fit: cover; }
+                .pcard-photo span { font-size: 4rem; }
+                .pcard-header { flex: 1; min-width: 0; }
+                .pcard-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+                .pcard-name { color: #fff; font-size: 1.6rem; font-weight: 900; letter-spacing: -0.5px; }
+                .pcard-badge {
+                    display: inline-flex; align-items: center; gap: 4px;
+                    background: rgba(76,175,80,0.15);
+                    color: #66BB6A; font-size: 0.72rem; font-weight: 800;
+                    padding: 4px 12px; border-radius: 100px;
+                    border: 1px solid rgba(76,175,80,0.30);
+                }
+                .pcard-species-row { color: rgba(255,255,255,0.75); font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
+                .pcard-sex { color: #a78bfa; font-weight: 700; }
+                .pcard-owner { color: rgba(255,255,255,0.55); font-size: 0.85rem; }
+                .pcard-menu-btn {
+                    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+                    color: rgba(255,255,255,0.6); cursor: pointer;
+                    width: 34px; height: 34px; border-radius: 10px;
+                    font-size: 1.2rem; font-weight: 700;
+                    display: flex; align-items: center; justify-content: center;
+                    flex-shrink: 0;
+                }
+                .pcard-menu-btn:hover { background: rgba(255,255,255,0.10); color: #fff; }
+
+                /* Chips principales edad/peso/color */
+                .pcard-main-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+                .pchip-main {
+                    background: rgba(255,255,255,0.03);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 14px;
+                    padding: 12px 16px;
+                    display: flex; align-items: center; gap: 12px;
+                }
+                .pchip-icon { font-size: 1.4rem; flex-shrink: 0; }
+                .pchip-main > div { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+                .pchip-value { color: #fff; font-weight: 800; font-size: 0.95rem; }
+                .pchip-label { color: rgba(255,255,255,0.5); font-size: 0.72rem; font-weight: 600; margin-top: 2px; }
+
+                /* Chips secundarios feeding/habitat/etc */
+                .pcard-mini-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+                .pmini {
+                    background: rgba(255,255,255,0.04);
+                    border: 1px solid rgba(255,255,255,0.06);
+                    border-radius: 100px;
+                    padding: 5px 12px;
+                    color: rgba(255,255,255,0.75);
+                    font-size: 0.78rem; font-weight: 700;
+                }
+
+                .pcard-vaccines { color: rgba(255,255,255,0.6); font-size: 0.85rem; font-weight: 700; }
+
+                /* Botones de la pcard */
+                .pcard-actions {
+                    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+                    border-top: 1px solid rgba(255,255,255,0.06);
+                    padding-top: 14px;
+                }
+                .pbtn {
+                    border: none; cursor: pointer;
+                    padding: 11px 14px; border-radius: 12px;
+                    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.85rem;
+                    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+                    transition: all 0.15s;
+                    white-space: nowrap;
+                }
+                .pbtn-outline {
+                    background: rgba(107,202,255,0.05);
+                    color: #6bcaff;
+                    border: 1.5px solid rgba(107,202,255,0.25);
+                }
+                .pbtn-outline:hover { background: rgba(107,202,255,0.12); border-color: rgba(107,202,255,0.45); }
+                .pbtn-primary {
+                    background: linear-gradient(135deg, #4CAF50, #FF9800);
+                    color: #fff;
+                    box-shadow: 0 6px 18px rgba(76,175,80,0.25);
+                }
+                .pbtn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(76,175,80,0.35); }
+                .pbtn-violet {
+                    background: rgba(167,139,250,0.10);
+                    color: #a78bfa;
+                    border: 1.5px solid rgba(167,139,250,0.30);
+                }
+                .pbtn-violet:hover { background: rgba(167,139,250,0.18); border-color: rgba(167,139,250,0.45); }
+                .pbtn-arrow { font-size: 0.9rem; }
+
                 .turnos-layout { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: stretch; }
                 .turnos-main { display: flex; flex-direction: column; min-width: 0; }
 
@@ -1493,6 +1863,9 @@ export default function ClinicDashboard() {
                     .vet-header-bg { display: none; }
                     .vet-header-right { align-items: stretch; }
                     .vet-features { grid-template-columns: repeat(2, 1fr); }
+                    .patients-stats { grid-template-columns: repeat(2, 1fr); }
+                    .patients-filters { grid-template-columns: 1fr; }
+                    .pcard-actions { grid-template-columns: repeat(2, 1fr); }
                 }
                 @media (max-width: 800px) {
                     .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -1508,6 +1881,14 @@ export default function ClinicDashboard() {
                     .vet-features { grid-template-columns: 1fr; }
                     .feature-item { padding: 12px; }
                     .tab-btn { font-size: 0.78rem; padding: 8px 10px; }
+                    .patients-stats { grid-template-columns: 1fr; }
+                    .pstat { padding: 16px 18px; }
+                    .pstat-num { font-size: 1.9rem; }
+                    .pcard-top { flex-direction: column; align-items: stretch; }
+                    .pcard-photo { width: 100%; height: 200px; }
+                    .pcard-main-chips { grid-template-columns: 1fr; }
+                    .pcard-actions { grid-template-columns: 1fr; }
+                    .pbtn { font-size: 0.82rem; padding: 12px; }
                     .vet-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
                     .vet-stat { padding: 14px 16px; border-radius: 14px; gap: 10px; }
                     .stat-icon-wrap { width: 42px; height: 42px; border-radius: 12px; }
