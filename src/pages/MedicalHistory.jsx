@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getVisits, getPets, getAppointments } from "../services/api";
 import api from "../services/api";
+import ownerBg from "../assets/vetpaw-owner-bg.png";
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif";
 const G1 = "#4CAF50";
@@ -38,8 +39,8 @@ function scrollToId(id, cb) {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-const SPECIES_EMOJI = { dog: "🐶", cat: "🐱", rabbit: "🐰", bird: "🐦", hamster: "🐹", reptile: "🦎", fish: "🐟", other: "🐾" };
-const VISIT_ICONS = ["🩺", "🌡️", "📋", "🐾", "💊", "🦷"];
+const SPECIES_EMOJI = { dog: "🐶", cat: "🐱", rabbit: "🐰", bird: "🐦", hamster: "🐹", reptile: "🦎", fish: "🐟", other: "🐕" };
+const VISIT_ICONS = ["🩺", "🌡️", "📋", "🐕", "💊", "🦷"];
 const VISIT_COLORS = [G1, O1, BLUE, PURPLE, G2, O2];
 
 export default function MedicalHistory() {
@@ -110,9 +111,9 @@ export default function MedicalHistory() {
     if (loading) return <div style={{ minHeight: "100vh", background: "#0a121d", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: FONT }}>Cargando historial… 🐾</div>;
 
     if (!pets.length) return (
-        <div style={{ minHeight: "100vh", background: "#0a121d", fontFamily: FONT, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div className="owner-cosmic-bg history-page" style={{ minHeight: "100vh", fontFamily: FONT, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ textAlign: "center", maxWidth: 420 }}>
-                <div style={{ fontSize: 54, marginBottom: 16 }}>🐾</div>
+                <div style={{ fontSize: 54, marginBottom: 16 }}>🐕</div>
                 <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10 }}>Todavía no tenés mascotas</h2>
                 <p style={{ color: MUTED, marginBottom: 24, lineHeight: 1.6 }}>Cargá tu primera mascota para empezar a llevar su historial médico.</p>
                 <Link to="/pets/new" style={{ display: "inline-block", background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontWeight: 800, padding: "13px 28px", borderRadius: 12, textDecoration: "none" }}>+ Cargar mi primera mascota</Link>
@@ -141,10 +142,86 @@ export default function MedicalHistory() {
     const fillBtn = (txt, to) => <Link to={to} style={{ display: "block", textAlign: "center", background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontSize: 12.5, fontWeight: 800, padding: "9px 0", borderRadius: 10, textDecoration: "none" }}>{txt}</Link>;
 
     return (
-        <div style={{ minHeight: "100vh", background: "#0a121d", fontFamily: FONT, color: "#fff", padding: "26px 22px 56px" }}>
+        <div className="owner-cosmic-bg history-page" style={{ minHeight: "100vh", fontFamily: FONT, color: "#fff", padding: "26px 22px 56px", position: "relative" }}>
             <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
             <style>{`
-                .mh-wrap { max-width: 1240px; margin: 0 auto; }
+
+/* ───────────────── VetPaw dueño visual refresh v2 ───────────────── */
+.owner-cosmic-bg,
+.dash-page,
+.pets-page,
+.appts-page,
+.clinics-page,
+.lostpets-page,
+.history-page {
+    background:
+        linear-gradient(180deg, rgba(3, 10, 20, .72) 0%, rgba(5, 12, 28, .78) 42%, rgba(4, 9, 20, .86) 100%),
+        url(${ownerBg}) center top / cover fixed no-repeat !important;
+    position: relative;
+    isolation: isolate;
+}
+.owner-cosmic-bg::before,
+.dash-page::before,
+.pets-page::before,
+.appts-page::before,
+.clinics-page::before,
+.lostpets-page::before,
+.history-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 15% 10%, rgba(54, 116, 255, .10), transparent 28%),
+        radial-gradient(circle at 76% 88%, rgba(31, 95, 255, .15), transparent 32%),
+        radial-gradient(circle at 92% 32%, rgba(76, 175, 80, .07), transparent 26%);
+    opacity: .75;
+}
+.owner-cosmic-bg::after,
+.dash-page::after,
+.pets-page::after,
+.appts-page::after,
+.clinics-page::after,
+.lostpets-page::after,
+.history-page::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.025), transparent);
+    opacity: .45;
+}
+.owner-title,
+.dash-title-modern,
+.pets-title,
+.appts-title,
+.hero-title,
+.history-title {
+    font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif !important;
+    font-style: normal !important;
+    font-weight: 900 !important;
+    letter-spacing: -1.3px !important;
+    text-shadow: 0 10px 34px rgba(0,0,0,.25);
+}
+.owner-icon-badge {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    display: inline-grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(76,175,80,.16), rgba(255,152,0,.15));
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: inset 0 0 26px rgba(255,255,255,.04), 0 12px 30px rgba(0,0,0,.25);
+    color: #fff;
+    vertical-align: middle;
+}
+.owner-icon-badge svg { width: 30px; height: 30px; display: block; }
+.owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+
+                .mh-wrap { max-width: 1400px; margin: 0 auto; }
                 .mh-top { display: grid; grid-template-columns: 1fr 300px; gap: 18px; align-items: start; }
                 .mh-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 13px; margin-top: 18px; }
                 .mh-body { display: grid; grid-template-columns: 1fr 300px; gap: 18px; margin-top: 18px; align-items: start; }
@@ -173,11 +250,11 @@ export default function MedicalHistory() {
                     {/* Perfil */}
                     <div className="mh-profile" style={{ ...card, display: "flex", gap: 22, padding: 22, alignItems: "center" }}>
                         <div style={{ width: 140, height: 140, borderRadius: 18, overflow: "hidden", flexShrink: 0, background: CARD2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 54, border: `1px solid ${BORDER}` }}>
-                            {pet?.photo ? <img src={pet.photo} alt={pet.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (SPECIES_EMOJI[pet?.species] || "🐾")}
+                            {pet?.photo ? <img src={pet.photo} alt={pet.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (SPECIES_EMOJI[pet?.species] || "🐕")}
                         </div>
                         <div style={{ flex: 1 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 3, flexWrap: "wrap" }}>
-                                <h1 style={{ fontSize: 27, fontWeight: 900 }}>{pet?.name}</h1>
+                                <h1 className="history-title" style={{ fontSize: 27, fontWeight: 900 }}>{pet?.name}</h1>
                                 {profileComplete && <span title="Perfil completo" style={{ width: 20, height: 20, borderRadius: "50%", background: G1, color: "#fff", fontSize: 12, display: "inline-flex", alignItems: "center", justifyContent: "center", fontWeight: 900 }}>✓</span>}
                             </div>
                             <p style={{ color: MUTED2, marginBottom: 15, fontSize: 14.5 }}>{pet?.species_display}{pet?.breed ? ` · ${pet.breed}` : ""}</p>
@@ -211,7 +288,7 @@ export default function MedicalHistory() {
                                 return (
                                     <button key={p.id} onClick={() => setSelectedId(p.id)} style={{ display: "flex", alignItems: "center", gap: 12, padding: 10, borderRadius: 14, cursor: "pointer", textAlign: "left", fontFamily: FONT, border: sel ? `1.5px solid ${G1}` : `1.5px solid ${BORDER}`, background: sel ? "rgba(76,175,80,0.08)" : CARD2, color: "#fff", width: "100%" }}>
                                         <div style={{ width: 46, height: 46, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: "#0a121b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>
-                                            {p.photo ? <img src={p.photo} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (SPECIES_EMOJI[p.species] || "🐾")}
+                                            {p.photo ? <img src={p.photo} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (SPECIES_EMOJI[p.species] || "🐕")}
                                         </div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <div style={{ fontSize: 13.5, fontWeight: 800 }}>{p.name}</div>
@@ -268,7 +345,7 @@ export default function MedicalHistory() {
 
                         {/* Historial médico */}
                         <div id="mh-historial" style={{ ...card, padding: 20 }}>
-                            <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 14 }}>📋 Historial médico</h2>
+                            <h2 className="history-title" style={{ fontSize: 18, fontWeight: 900, marginBottom: 14 }}>📋 Historial médico</h2>
                             <div style={{ display: "flex", gap: 5, marginBottom: 18, background: CARD2, padding: 5, borderRadius: 11, flexWrap: "wrap" }}>
                                 <button className={`mh-tab ${tab === "consultas" ? "active" : ""}`} onClick={() => setTab("consultas")}>Consultas</button>
                                 <button className={`mh-tab ${tab === "fotos" ? "active" : ""}`} onClick={() => setTab("fotos")}>Fotos y documentos</button>
@@ -383,7 +460,7 @@ export default function MedicalHistory() {
                         <p style={{ fontSize: 12.5, color: MUTED, marginTop: 4 }}>Mantené al día los controles, vacunas y prevención.</p>
                     </div>
                     <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                        <Link to="/appointments/new" style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontWeight: 800, fontSize: 13, padding: "12px 22px", borderRadius: 12, textDecoration: "none" }}>📅 Sacar turno</Link>
+                        <Link to="/appointments/new" style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontWeight: 800, fontSize: 13, padding: "12px 22px", borderRadius: 12, textDecoration: "none" }}>🗓️ Sacar turno</Link>
                         <Link to="/pets" style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontWeight: 800, fontSize: 13, padding: "12px 22px", borderRadius: 12, textDecoration: "none" }}>💊 Antiparasitarios</Link>
                         <Link to="/blog" style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontWeight: 800, fontSize: 13, padding: "12px 22px", borderRadius: 12, textDecoration: "none" }}>📖 Ver consejos de salud</Link>
                     </div>

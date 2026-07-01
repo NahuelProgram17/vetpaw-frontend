@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getPets, getAppointments, getClinics, getVaccines, markNotificationsSeen } from "../services/api";
+import ownerBg from "../assets/vetpaw-owner-bg.png";
 
 // ───────────────────────── Tokens de diseño
 const BG = "#0a121d";
@@ -23,11 +24,11 @@ const RED = "#ff6b6b";
 const YELLOW = "#ffd93d";
 const GRAD = `linear-gradient(135deg, ${G1}, ${O1})`;
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif";
-const TITLE_FONT = "'Baloo 2', 'Plus Jakarta Sans', 'Nunito', sans-serif";
+const TITLE_FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif";
 
 // ───────────────────────── Helpers
 const SPECIES_EMOJI = { dog: "🐶", perro: "🐶", cat: "🐱", gato: "🐱", bird: "🦜", pajaro: "🦜", pájaro: "🦜", rabbit: "🐰", conejo: "🐰", fish: "🐟", pez: "🐟" };
-const petEmoji = (s) => SPECIES_EMOJI[(s || "").toLowerCase()] || "🐾";
+const petEmoji = (s) => SPECIES_EMOJI[(s || "").toLowerCase()] || "🐕";
 
 const calcAge = (bd) => {
     if (!bd) return null;
@@ -197,7 +198,7 @@ export default function Dashboard() {
     if (loading) {
         return (
             <div style={{ minHeight: "100vh", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, fontFamily: FONT, color: MUTED }}>
-                <span style={{ fontSize: "3rem", animation: "dashSpin 1s linear infinite", display: "inline-block" }}>🐾</span>
+                <span style={{ fontSize: "3rem", animation: "dashSpin 1s linear infinite", display: "inline-block" }}>🐕</span>
                 <p>Cargando tu espacio…</p>
                 <style>{`@keyframes dashSpin { to { transform: rotate(360deg); } }`}</style>
             </div>
@@ -240,7 +241,7 @@ export default function Dashboard() {
                 {/* ────────── Stats grid (4 cards) ────────── */}
                 <section className="dash-stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
                     {[
-                        { icon: "🐾", color: G2, ringBg: "rgba(76,175,80,0.12)", num: pets.length, label: "Mascotas", link: "Ver todas →", to: "/pets" },
+                        { icon: "🐕", color: G2, ringBg: "rgba(76,175,80,0.12)", num: pets.length, label: "Mascotas", link: "Ver todas →", to: "/pets" },
                         { icon: "📅", color: O2, ringBg: "rgba(255,152,0,0.12)", num: appointments.length, label: "Turnos totales", link: "Ver historial →", to: "/appointments" },
                         { icon: "⏳", color: V1, ringBg: "rgba(167,139,250,0.12)", num: daysUntilNext ?? "—", label: nextAppt ? "Próximo turno" : "Sin próximo turno", sub: nextAppt ? `${daysUntilNext === 1 ? "día" : "días"} • ${fmtShort(nextAppt.requested_date)}` : null, link: nextAppt ? "Ver mis turnos →" : "Sacar turno →", to: nextAppt ? "/appointments" : "/appointments/new" },
                         { icon: "💉", color: B1, ringBg: "rgba(107,202,255,0.12)", num: vaccines.length, label: "Vacunas registradas", link: "Ver historial →", to: "/history" },
@@ -306,12 +307,12 @@ export default function Dashboard() {
                     {/* ─── Mi mascota principal ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <h2 style={cardTitle}>🐾 Mi mascota principal</h2>
+                            <h2 style={cardTitle}>🐕 Mi mascota principal</h2>
                             {pets.length > 1 && <button onClick={() => navigate("/pets")} style={linkSt(G2)}>Ver todas →</button>}
                         </div>
                         {!mainPet ? (
                             <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "30px 12px", textAlign: "center", gap: 12 }}>
-                                <span style={{ fontSize: "3rem" }}>🐾</span>
+                                <span style={{ fontSize: "3rem" }}>🐕</span>
                                 <p style={{ color: MUTED, fontSize: "0.92rem", margin: 0 }}>Todavía no registraste ninguna mascota.</p>
                                 <button onClick={() => navigate("/pets")} style={{ background: GRAD, color: "#fff", border: "none", borderRadius: 11, padding: "10px 18px", fontWeight: 800, cursor: "pointer", fontFamily: FONT }}>Registrá tu primera mascota</button>
                             </div>
@@ -358,7 +359,7 @@ export default function Dashboard() {
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
                                         {mainPet.feeding && <span style={chip(B1)}>🥣 {FEEDING_LABEL[mainPet.feeding] || mainPet.feeding}</span>}
                                         {mainPet.habitat && <span style={chip(O2)}>🏠 {HABITAT_LABEL[mainPet.habitat] || mainPet.habitat}</span>}
-                                        {mainPet.lives_with_animals && <span style={chip(V1)}>🐾 Convive</span>}
+                                        {mainPet.lives_with_animals && <span style={chip(V1)}>🐕 Convive</span>}
                                         {mainPet.microchip && <span style={chip(G2)} title={`Chip: ${mainPet.microchip}`}>🔖 Chip</span>}
                                     </div>
                                 )}
@@ -366,7 +367,7 @@ export default function Dashboard() {
                                 {/* Botones de acción */}
                                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: "auto" }}>
                                     <button onClick={() => navigate("/pets")} style={ghostBtn()}>Ver perfil</button>
-                                    <button onClick={() => navigate(`/appointments/new?pet=${mainPet.id}`)} style={gradBtn()}>📅 Sacar turno</button>
+                                    <button onClick={() => navigate(`/appointments/new?pet=${mainPet.id}`)} style={gradBtn()}>🗓️ Sacar turno</button>
                                 </div>
                             </>
                         )}
@@ -375,7 +376,7 @@ export default function Dashboard() {
                     {/* ─── Próximo turno ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <h2 style={cardTitle}>📅 Próximo turno</h2>
+                            <h2 style={cardTitle}>🗓️ Próximo turno</h2>
                             {nextAppt && daysUntilNext !== null && (
                                 <span style={{ background: "rgba(255,152,0,0.15)", color: O2, border: `1px solid ${O2}50`, borderRadius: 999, padding: "3px 10px", fontSize: "0.72rem", fontWeight: 700, whiteSpace: "nowrap" }}>
                                     {daysUntilNext === 0 ? "Hoy" : daysUntilNext === 1 ? "Mañana" : `Faltan ${daysUntilNext} días`}
@@ -534,7 +535,7 @@ export default function Dashboard() {
                 {/* ────────── CTA Cuidado que se nota ────────── */}
                 <section style={{ background: `linear-gradient(135deg, ${CARD}, ${CARD2})`, border: `1px solid ${BORDER}`, borderRadius: 18, padding: 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap", position: "relative", overflow: "hidden" }}>
                     <div style={{ flex: "1 1 280px", display: "flex", alignItems: "center", gap: 16, zIndex: 1 }}>
-                        <div style={{ width: 60, height: 60, borderRadius: "50%", background: GRAD, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem", flexShrink: 0, boxShadow: "0 6px 18px rgba(76,175,80,0.30)" }}>🐾</div>
+                        <div style={{ width: 60, height: 60, borderRadius: "50%", background: GRAD, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem", flexShrink: 0, boxShadow: "0 6px 18px rgba(76,175,80,0.30)" }}>🐕</div>
                         <div>
                             <h3 style={{ fontSize: "1.15rem", fontWeight: 800, color: TEXT, margin: 0, marginBottom: 4 }}>Cuidado que se nota</h3>
                             <p style={{ fontSize: "0.88rem", color: MUTED2, margin: 0, lineHeight: 1.5 }}>Llevá un control al día de la salud de tu mascota y disfrutá más momentos juntos.</p>
@@ -557,21 +558,19 @@ export default function Dashboard() {
 
             {/* Responsive */}
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
-/* ───────────────── VetPaw dueño visual refresh ───────────────── */
+/* ───────────────── VetPaw dueño visual refresh v2 ───────────────── */
 .owner-cosmic-bg,
 .dash-page,
 .pets-page,
 .appts-page,
 .clinics-page,
-.lostpets-page {
+.lostpets-page,
+.history-page {
     background:
-        radial-gradient(circle at 14% 4%, rgba(65, 115, 255, 0.34), transparent 30%),
-        radial-gradient(circle at 78% 94%, rgba(31, 95, 255, 0.42), transparent 34%),
-        radial-gradient(circle at 96% 28%, rgba(76, 175, 80, 0.16), transparent 30%),
-        radial-gradient(circle at 8% 82%, rgba(255, 152, 0, 0.10), transparent 28%),
-        linear-gradient(180deg, #041124 0%, #061426 52%, #040914 100%) !important;
+        linear-gradient(180deg, rgba(3, 10, 20, .72) 0%, rgba(5, 12, 28, .78) 42%, rgba(4, 9, 20, .86) 100%),
+        url(${ownerBg}) center top / cover fixed no-repeat !important;
     position: relative;
     isolation: isolate;
 }
@@ -580,50 +579,44 @@ export default function Dashboard() {
 .pets-page::before,
 .appts-page::before,
 .clinics-page::before,
-.lostpets-page::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background-image:
-        radial-gradient(circle, rgba(255,184,60,.95) 0 1.2px, transparent 1.4px),
-        radial-gradient(circle, rgba(82,216,105,.85) 0 1.2px, transparent 1.4px),
-        radial-gradient(circle, rgba(75,162,255,.9) 0 1px, transparent 1.2px),
-        linear-gradient(180deg, transparent 0 48%, rgba(76,175,80,.32) 50%, transparent 58%),
-        linear-gradient(180deg, transparent 0 42%, rgba(255,152,0,.32) 50%, transparent 58%),
-        linear-gradient(180deg, transparent 0 46%, rgba(74,150,255,.36) 50%, transparent 58%);
-    background-size: 520px 520px, 700px 700px, 610px 610px, 1px 360px, 1px 520px, 1px 430px;
-    background-position: 12% 16%, 84% 20%, 70% 74%, 9% 16%, 92% 10%, 62% 0%;
-    opacity: .72;
-    mix-blend-mode: screen;
-}
-.owner-cosmic-bg::after,
-.dash-page::after,
-.pets-page::after,
-.appts-page::after,
-.clinics-page::after,
-.lostpets-page::after {
+.lostpets-page::before,
+.history-page::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
     background:
-        radial-gradient(circle at 5% 92%, rgba(79, 195, 247, .28), transparent 18%),
-        radial-gradient(circle at 92% 96%, rgba(76, 175, 80, .14), transparent 22%),
-        linear-gradient(90deg, transparent, rgba(255,255,255,.035), transparent);
-    opacity: .85;
+        radial-gradient(circle at 15% 10%, rgba(54, 116, 255, .10), transparent 28%),
+        radial-gradient(circle at 76% 88%, rgba(31, 95, 255, .15), transparent 32%),
+        radial-gradient(circle at 92% 32%, rgba(76, 175, 80, .07), transparent 26%);
+    opacity: .75;
+}
+.owner-cosmic-bg::after,
+.dash-page::after,
+.pets-page::after,
+.appts-page::after,
+.clinics-page::after,
+.lostpets-page::after,
+.history-page::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.025), transparent);
+    opacity: .45;
 }
 .owner-title,
 .dash-title-modern,
 .pets-title,
 .appts-title,
-.hero-title {
-    font-family: 'Baloo 2', 'Plus Jakarta Sans', 'Nunito', sans-serif !important;
+.hero-title,
+.history-title {
+    font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif !important;
     font-style: normal !important;
     font-weight: 900 !important;
-    letter-spacing: -1.5px !important;
+    letter-spacing: -1.3px !important;
     text-shadow: 0 10px 34px rgba(0,0,0,.25);
 }
 .owner-icon-badge {
@@ -632,7 +625,7 @@ export default function Dashboard() {
     border-radius: 18px;
     display: inline-grid;
     place-items: center;
-    background: linear-gradient(135deg, rgba(76,175,80,.18), rgba(255,152,0,.18));
+    background: linear-gradient(135deg, rgba(76,175,80,.16), rgba(255,152,0,.15));
     border: 1px solid rgba(255,255,255,.10);
     box-shadow: inset 0 0 26px rgba(255,255,255,.04), 0 12px 30px rgba(0,0,0,.25);
     color: #fff;

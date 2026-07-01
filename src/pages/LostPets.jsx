@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useState, useRef, useEffect } from 'react'
 import api from '../services/api'
+import ownerBg from "../assets/vetpaw-owner-bg.png";
 
 // ───────────────────────── Tokens de diseño
 const BG = "#0a121d"
@@ -37,7 +38,7 @@ const SPECIES_FORM = [
     { val: 'bird', label: 'Pájaro', emoji: '🦜' },
     { val: 'rabbit', label: 'Conejo', emoji: '🐰' },
     { val: 'fish', label: 'Pez', emoji: '🐟' },
-    { val: 'other', label: 'Otro', emoji: '🐾' },
+    { val: 'other', label: 'Otro', emoji: '🐕' },
 ]
 
 // ───────────────────────── Helpers
@@ -50,7 +51,7 @@ const fmtDate = (d) => {
 
 const speciesEmoji = (s) => {
     const found = SPECIES_FORM.find(x => x.val === s)
-    return found ? found.emoji : '🐾'
+    return found ? found.emoji : '🐕'
 }
 
 
@@ -273,7 +274,7 @@ export default function LostPets() {
                             sub="Mascotas que esperan volver a casa"
                         />
                         <StatCard
-                            icon="🐾"
+                            icon="🐕"
                             color={G2}
                             ringBg="rgba(76,175,80,0.12)"
                             num={foundCount}
@@ -379,7 +380,7 @@ export default function LostPets() {
                     {/* ─── Formulario "Publicá un aviso" ─── */}
                     <section ref={formRef} style={{ ...cardSt, padding: 0, overflow: 'hidden' }}>
                         <div style={{ padding: '20px 24px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 14 }}>
-                            <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(76,175,80,0.12)', border: `1px solid ${G2}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🐾</div>
+                            <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(76,175,80,0.12)', border: `1px solid ${G2}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🐕</div>
                             <div>
                                 <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: TEXT, margin: 0 }}>Publicá un aviso</h2>
                                 <p style={{ fontSize: 12, color: MUTED3, margin: 0, marginTop: 2 }}>Completá los datos para ayudar a que más personas te encuentren.</p>
@@ -519,7 +520,7 @@ export default function LostPets() {
 
                                     <button type="submit" disabled={enviando}
                                         style={{ width: '100%', marginTop: 18, padding: 15, background: enviando ? 'rgba(255,255,255,0.08)' : GRAD, color: '#fff', fontWeight: 800, fontSize: 15, borderRadius: 12, border: 'none', cursor: enviando ? 'not-allowed' : 'pointer', fontFamily: FONT, boxShadow: enviando ? 'none' : '0 6px 22px rgba(76,175,80,0.25)' }}>
-                                        {enviando ? 'Publicando…' : '🐾 Publicar aviso'}
+                                        {enviando ? 'Publicando…' : 'Publicar aviso'}
                                         {!enviando && <div style={{ fontSize: 11, fontWeight: 500, marginTop: 2, opacity: 0.85 }}>Tu publicación ayudará a que más personas la vean</div>}
                                     </button>
                                 </form>
@@ -534,7 +535,7 @@ export default function LostPets() {
                     {/* ¿Qué hacer? */}
                     <div style={cardSt}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(102,187,106,0.12)', border: `1px solid ${G2}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🐾</div>
+                            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(102,187,106,0.12)', border: `1px solid ${G2}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🐕</div>
                             <h3 style={{ fontSize: '1rem', fontWeight: 800, color: TEXT, margin: 0 }}>¿Qué hacer?</h3>
                         </div>
 
@@ -639,19 +640,17 @@ export default function LostPets() {
             <style>{`
 
 
-/* ───────────────── VetPaw dueño visual refresh ───────────────── */
+/* ───────────────── VetPaw dueño visual refresh v2 ───────────────── */
 .owner-cosmic-bg,
 .dash-page,
 .pets-page,
 .appts-page,
 .clinics-page,
-.lostpets-page {
+.lostpets-page,
+.history-page {
     background:
-        radial-gradient(circle at 14% 4%, rgba(65, 115, 255, 0.34), transparent 30%),
-        radial-gradient(circle at 78% 94%, rgba(31, 95, 255, 0.42), transparent 34%),
-        radial-gradient(circle at 96% 28%, rgba(76, 175, 80, 0.16), transparent 30%),
-        radial-gradient(circle at 8% 82%, rgba(255, 152, 0, 0.10), transparent 28%),
-        linear-gradient(180deg, #041124 0%, #061426 52%, #040914 100%) !important;
+        linear-gradient(180deg, rgba(3, 10, 20, .72) 0%, rgba(5, 12, 28, .78) 42%, rgba(4, 9, 20, .86) 100%),
+        url(${ownerBg}) center top / cover fixed no-repeat !important;
     position: relative;
     isolation: isolate;
 }
@@ -660,50 +659,44 @@ export default function LostPets() {
 .pets-page::before,
 .appts-page::before,
 .clinics-page::before,
-.lostpets-page::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background-image:
-        radial-gradient(circle, rgba(255,184,60,.95) 0 1.2px, transparent 1.4px),
-        radial-gradient(circle, rgba(82,216,105,.85) 0 1.2px, transparent 1.4px),
-        radial-gradient(circle, rgba(75,162,255,.9) 0 1px, transparent 1.2px),
-        linear-gradient(180deg, transparent 0 48%, rgba(76,175,80,.32) 50%, transparent 58%),
-        linear-gradient(180deg, transparent 0 42%, rgba(255,152,0,.32) 50%, transparent 58%),
-        linear-gradient(180deg, transparent 0 46%, rgba(74,150,255,.36) 50%, transparent 58%);
-    background-size: 520px 520px, 700px 700px, 610px 610px, 1px 360px, 1px 520px, 1px 430px;
-    background-position: 12% 16%, 84% 20%, 70% 74%, 9% 16%, 92% 10%, 62% 0%;
-    opacity: .72;
-    mix-blend-mode: screen;
-}
-.owner-cosmic-bg::after,
-.dash-page::after,
-.pets-page::after,
-.appts-page::after,
-.clinics-page::after,
-.lostpets-page::after {
+.lostpets-page::before,
+.history-page::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
     background:
-        radial-gradient(circle at 5% 92%, rgba(79, 195, 247, .28), transparent 18%),
-        radial-gradient(circle at 92% 96%, rgba(76, 175, 80, .14), transparent 22%),
-        linear-gradient(90deg, transparent, rgba(255,255,255,.035), transparent);
-    opacity: .85;
+        radial-gradient(circle at 15% 10%, rgba(54, 116, 255, .10), transparent 28%),
+        radial-gradient(circle at 76% 88%, rgba(31, 95, 255, .15), transparent 32%),
+        radial-gradient(circle at 92% 32%, rgba(76, 175, 80, .07), transparent 26%);
+    opacity: .75;
+}
+.owner-cosmic-bg::after,
+.dash-page::after,
+.pets-page::after,
+.appts-page::after,
+.clinics-page::after,
+.lostpets-page::after,
+.history-page::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.025), transparent);
+    opacity: .45;
 }
 .owner-title,
 .dash-title-modern,
 .pets-title,
 .appts-title,
-.hero-title {
-    font-family: 'Baloo 2', 'Plus Jakarta Sans', 'Nunito', sans-serif !important;
+.hero-title,
+.history-title {
+    font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif !important;
     font-style: normal !important;
     font-weight: 900 !important;
-    letter-spacing: -1.5px !important;
+    letter-spacing: -1.3px !important;
     text-shadow: 0 10px 34px rgba(0,0,0,.25);
 }
 .owner-icon-badge {
@@ -712,7 +705,7 @@ export default function LostPets() {
     border-radius: 18px;
     display: inline-grid;
     place-items: center;
-    background: linear-gradient(135deg, rgba(76,175,80,.18), rgba(255,152,0,.18));
+    background: linear-gradient(135deg, rgba(76,175,80,.16), rgba(255,152,0,.15));
     border: 1px solid rgba(255,255,255,.10);
     box-shadow: inset 0 0 26px rgba(255,255,255,.04), 0 12px 30px rgba(0,0,0,.25);
     color: #fff;

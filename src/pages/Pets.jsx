@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPets, createPet, updatePet, deletePet, createTreatment, deleteTreatment } from '../services/api';
+import ownerBg from "../assets/vetpaw-owner-bg.png";
 
 const TREATMENT_TYPES = [
     { value: 'deworming', label: 'Desparasitación' },
@@ -32,7 +33,7 @@ const SPECIES_EMOJI = {
 };
 
 const petEmoji = (species) =>
-    SPECIES_EMOJI[(species || '').toLowerCase()] || '🐾';
+    SPECIES_EMOJI[(species || '').toLowerCase()] || '🐕';
 
 const EMPTY_FORM = {
     name: '',
@@ -308,7 +309,7 @@ export default function Pets() {
 
                 {loading && (
                     <div className="loading-state">
-                        <span className="paw-spin">🐾</span>
+                        <span className="paw-spin">🐕</span>
                         <p>Cargando mascotas...</p>
                     </div>
                 )}
@@ -431,7 +432,7 @@ export default function Pets() {
                                                 </span>
                                             )}
                                             {pet.lives_with_animals && (
-                                                <span className="pet-chip">🐾 Convive con otros animales</span>
+                                                <span className="pet-chip">🐕 Convive con otros animales</span>
                                             )}
                                             {pet.temperament && (
                                                 <span className="pet-chip">
@@ -466,7 +467,7 @@ export default function Pets() {
                                             className="pet-btn pet-btn-grad"
                                             onClick={() => navigate(`/appointments/new?pet=${pet.id}`)}
                                         >
-                                            📅 Sacar turno
+                                            🗓️ Sacar turno
                                         </button>
                                         <button
                                             className="pet-btn pet-btn-grad"
@@ -653,7 +654,7 @@ export default function Pets() {
                                     onChange={handleChange}
                                 />
                                 <label htmlFor="lives_with_animals">
-                                    🐾 Convive con otros animales
+                                    🐕 Convive con otros animales
                                 </label>
                             </div>
 
@@ -739,7 +740,7 @@ export default function Pets() {
                                         ? 'Guardando...'
                                         : editingPet
                                             ? 'Guardar cambios'
-                                            : 'Crear mascota 🐾'}
+                                            : 'Crear mascota 🐕'}
                                 </button>
                             </div>
                         </form>
@@ -845,19 +846,17 @@ export default function Pets() {
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
 
-/* ───────────────── VetPaw dueño visual refresh ───────────────── */
+/* ───────────────── VetPaw dueño visual refresh v2 ───────────────── */
 .owner-cosmic-bg,
 .dash-page,
 .pets-page,
 .appts-page,
 .clinics-page,
-.lostpets-page {
+.lostpets-page,
+.history-page {
     background:
-        radial-gradient(circle at 14% 4%, rgba(65, 115, 255, 0.34), transparent 30%),
-        radial-gradient(circle at 78% 94%, rgba(31, 95, 255, 0.42), transparent 34%),
-        radial-gradient(circle at 96% 28%, rgba(76, 175, 80, 0.16), transparent 30%),
-        radial-gradient(circle at 8% 82%, rgba(255, 152, 0, 0.10), transparent 28%),
-        linear-gradient(180deg, #041124 0%, #061426 52%, #040914 100%) !important;
+        linear-gradient(180deg, rgba(3, 10, 20, .72) 0%, rgba(5, 12, 28, .78) 42%, rgba(4, 9, 20, .86) 100%),
+        url(${ownerBg}) center top / cover fixed no-repeat !important;
     position: relative;
     isolation: isolate;
 }
@@ -866,50 +865,44 @@ export default function Pets() {
 .pets-page::before,
 .appts-page::before,
 .clinics-page::before,
-.lostpets-page::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background-image:
-        radial-gradient(circle, rgba(255,184,60,.95) 0 1.2px, transparent 1.4px),
-        radial-gradient(circle, rgba(82,216,105,.85) 0 1.2px, transparent 1.4px),
-        radial-gradient(circle, rgba(75,162,255,.9) 0 1px, transparent 1.2px),
-        linear-gradient(180deg, transparent 0 48%, rgba(76,175,80,.32) 50%, transparent 58%),
-        linear-gradient(180deg, transparent 0 42%, rgba(255,152,0,.32) 50%, transparent 58%),
-        linear-gradient(180deg, transparent 0 46%, rgba(74,150,255,.36) 50%, transparent 58%);
-    background-size: 520px 520px, 700px 700px, 610px 610px, 1px 360px, 1px 520px, 1px 430px;
-    background-position: 12% 16%, 84% 20%, 70% 74%, 9% 16%, 92% 10%, 62% 0%;
-    opacity: .72;
-    mix-blend-mode: screen;
-}
-.owner-cosmic-bg::after,
-.dash-page::after,
-.pets-page::after,
-.appts-page::after,
-.clinics-page::after,
-.lostpets-page::after {
+.lostpets-page::before,
+.history-page::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
     background:
-        radial-gradient(circle at 5% 92%, rgba(79, 195, 247, .28), transparent 18%),
-        radial-gradient(circle at 92% 96%, rgba(76, 175, 80, .14), transparent 22%),
-        linear-gradient(90deg, transparent, rgba(255,255,255,.035), transparent);
-    opacity: .85;
+        radial-gradient(circle at 15% 10%, rgba(54, 116, 255, .10), transparent 28%),
+        radial-gradient(circle at 76% 88%, rgba(31, 95, 255, .15), transparent 32%),
+        radial-gradient(circle at 92% 32%, rgba(76, 175, 80, .07), transparent 26%);
+    opacity: .75;
+}
+.owner-cosmic-bg::after,
+.dash-page::after,
+.pets-page::after,
+.appts-page::after,
+.clinics-page::after,
+.lostpets-page::after,
+.history-page::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.025), transparent);
+    opacity: .45;
 }
 .owner-title,
 .dash-title-modern,
 .pets-title,
 .appts-title,
-.hero-title {
-    font-family: 'Baloo 2', 'Plus Jakarta Sans', 'Nunito', sans-serif !important;
+.hero-title,
+.history-title {
+    font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif !important;
     font-style: normal !important;
     font-weight: 900 !important;
-    letter-spacing: -1.5px !important;
+    letter-spacing: -1.3px !important;
     text-shadow: 0 10px 34px rgba(0,0,0,.25);
 }
 .owner-icon-badge {
@@ -918,7 +911,7 @@ export default function Pets() {
     border-radius: 18px;
     display: inline-grid;
     place-items: center;
-    background: linear-gradient(135deg, rgba(76,175,80,.18), rgba(255,152,0,.18));
+    background: linear-gradient(135deg, rgba(76,175,80,.16), rgba(255,152,0,.15));
     border: 1px solid rgba(255,255,255,.10);
     box-shadow: inset 0 0 26px rgba(255,255,255,.04), 0 12px 30px rgba(0,0,0,.25);
     color: #fff;
