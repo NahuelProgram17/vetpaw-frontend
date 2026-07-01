@@ -14,6 +14,54 @@ const STATUS_LABEL = {
 
 const EMPTY_FORM = { pet: "", clinic: "", requested_date: "", reason: "", appointment_type: "control" };
 
+
+
+function OwnerPawIcon() {
+    return (
+        <span className="owner-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+                <path d="M22 34c3-5 6-7 10-7s7 2 10 7l5 8c3 5 0 11-6 11H23c-6 0-9-6-6-11l5-8Z" fill="url(#pawBody)" stroke="rgba(255,255,255,.48)" strokeWidth="2"/>
+                <circle cx="18" cy="24" r="6" fill="#FF9800"/><circle cx="30" cy="17" r="6" fill="#4CAF50"/><circle cx="44" cy="24" r="6" fill="#6bcaff"/><circle cx="50" cy="36" r="5" fill="#FFB74D"/>
+                <defs><linearGradient id="pawBody" x1="16" y1="25" x2="49" y2="54"><stop stopColor="#4CAF50"/><stop offset="1" stopColor="#FF9800"/></linearGradient></defs>
+            </svg>
+        </span>
+    );
+}
+function OwnerCalendarIcon() {
+    return (
+        <span className="owner-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+                <rect x="12" y="16" width="40" height="36" rx="8" fill="rgba(107,202,255,.13)" stroke="#6bcaff" strokeWidth="2"/>
+                <path d="M12 27h40" stroke="#4CAF50" strokeWidth="2"/>
+                <path d="M22 11v10M42 11v10" stroke="#FF9800" strokeWidth="4" strokeLinecap="round"/>
+                <rect x="20" y="34" width="8" height="8" rx="2" fill="#4CAF50"/><rect x="32" y="34" width="8" height="8" rx="2" fill="#FF9800"/>
+            </svg>
+        </span>
+    );
+}
+function OwnerVetIcon() {
+    return (
+        <span className="owner-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+                <path d="M13 51V25l19-13 19 13v26" stroke="#6bcaff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M25 51V37h14v14" stroke="#4CAF50" strokeWidth="2.4" strokeLinecap="round"/>
+                <path d="M32 23v12M26 29h12" stroke="#FF9800" strokeWidth="4" strokeLinecap="round"/>
+            </svg>
+        </span>
+    );
+}
+function OwnerAlertPetIcon() {
+    return (
+        <span className="owner-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+                <path d="M32 11 55 52H9L32 11Z" fill="rgba(255,152,0,.15)" stroke="#FF9800" strokeWidth="2.5"/>
+                <path d="M24 39c2.4-4 4.8-5.8 8-5.8S37.6 35 40 39l2.2 3.5c1.8 2.8-.2 6.5-3.6 6.5H25.4c-3.4 0-5.4-3.7-3.6-6.5L24 39Z" fill="#4CAF50"/>
+                <circle cx="23" cy="31" r="3.5" fill="#FFB74D"/><circle cx="30" cy="26" r="3.5" fill="#6bcaff"/><circle cx="38" cy="31" r="3.5" fill="#FF9800"/>
+            </svg>
+        </span>
+    );
+}
+
 export default function Appointments() {
     const [searchParams] = useSearchParams();
     const [appointments, setAppointments] = useState([]);
@@ -215,7 +263,7 @@ export default function Appointments() {
 
                 <header className="appts-header">
                     <div>
-                        <h1 className="appts-title">📅 Mis turnos</h1>
+                        <div className="owner-hero-title-row"><OwnerCalendarIcon /><h1 className="appts-title">Mis turnos</h1></div>
                         <p className="appts-subtitle">Gestioná y seguí tus citas veterinarias</p>
                     </div>
                     <button className="btn-primary" onClick={openNew}>+ Nuevo turno</button>
@@ -226,8 +274,8 @@ export default function Appointments() {
                 {appointments.length > 0 && (
                     <div className="appts-stats">
                         {[
-                            { ic: "📅", c: "#4CAF50", val: upcoming.length, t: "Próximos", s: "Turnos futuros" },
-                            { ic: "🕐", c: "#6bcaff", val: past.length, t: "Pasados", s: "Turnos anteriores" },
+                            { ic: "🗓️", c: "#4CAF50", val: upcoming.length, t: "Próximos", s: "Turnos futuros" },
+                            { ic: "⏱️", c: "#6bcaff", val: past.length, t: "Pasados", s: "Turnos anteriores" },
                             { ic: "✅", c: "#4CAF50", val: cConfirmed, t: "Confirmados", s: "Turnos confirmados" },
                             { ic: "✖️", c: "#ff6b6b", val: cCancelled, t: "Cancelados", s: "Turnos cancelados" },
                         ].map((x, i) => (
@@ -569,7 +617,90 @@ export default function Appointments() {
             )}
 
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
+
+/* ───────────────── VetPaw dueño visual refresh ───────────────── */
+.owner-cosmic-bg,
+.dash-page,
+.pets-page,
+.appts-page,
+.clinics-page,
+.lostpets-page {
+    background:
+        radial-gradient(circle at 14% 4%, rgba(65, 115, 255, 0.34), transparent 30%),
+        radial-gradient(circle at 78% 94%, rgba(31, 95, 255, 0.42), transparent 34%),
+        radial-gradient(circle at 96% 28%, rgba(76, 175, 80, 0.16), transparent 30%),
+        radial-gradient(circle at 8% 82%, rgba(255, 152, 0, 0.10), transparent 28%),
+        linear-gradient(180deg, #041124 0%, #061426 52%, #040914 100%) !important;
+    position: relative;
+    isolation: isolate;
+}
+.owner-cosmic-bg::before,
+.dash-page::before,
+.pets-page::before,
+.appts-page::before,
+.clinics-page::before,
+.lostpets-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        radial-gradient(circle, rgba(255,184,60,.95) 0 1.2px, transparent 1.4px),
+        radial-gradient(circle, rgba(82,216,105,.85) 0 1.2px, transparent 1.4px),
+        radial-gradient(circle, rgba(75,162,255,.9) 0 1px, transparent 1.2px),
+        linear-gradient(180deg, transparent 0 48%, rgba(76,175,80,.32) 50%, transparent 58%),
+        linear-gradient(180deg, transparent 0 42%, rgba(255,152,0,.32) 50%, transparent 58%),
+        linear-gradient(180deg, transparent 0 46%, rgba(74,150,255,.36) 50%, transparent 58%);
+    background-size: 520px 520px, 700px 700px, 610px 610px, 1px 360px, 1px 520px, 1px 430px;
+    background-position: 12% 16%, 84% 20%, 70% 74%, 9% 16%, 92% 10%, 62% 0%;
+    opacity: .72;
+    mix-blend-mode: screen;
+}
+.owner-cosmic-bg::after,
+.dash-page::after,
+.pets-page::after,
+.appts-page::after,
+.clinics-page::after,
+.lostpets-page::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 5% 92%, rgba(79, 195, 247, .28), transparent 18%),
+        radial-gradient(circle at 92% 96%, rgba(76, 175, 80, .14), transparent 22%),
+        linear-gradient(90deg, transparent, rgba(255,255,255,.035), transparent);
+    opacity: .85;
+}
+.owner-title,
+.dash-title-modern,
+.pets-title,
+.appts-title,
+.hero-title {
+    font-family: 'Baloo 2', 'Plus Jakarta Sans', 'Nunito', sans-serif !important;
+    font-style: normal !important;
+    font-weight: 900 !important;
+    letter-spacing: -1.5px !important;
+    text-shadow: 0 10px 34px rgba(0,0,0,.25);
+}
+.owner-icon-badge {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    display: inline-grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(76,175,80,.18), rgba(255,152,0,.18));
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: inset 0 0 26px rgba(255,255,255,.04), 0 12px 30px rgba(0,0,0,.25);
+    color: #fff;
+    vertical-align: middle;
+}
+.owner-icon-badge svg { width: 30px; height: 30px; display: block; }
+.owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
                 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
                 .appts-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin-bottom: 20px; }
                 .appts-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
@@ -578,15 +709,15 @@ export default function Appointments() {
                 @media (max-width: 1000px) { .appts-layout { grid-template-columns: 1fr; } .appts-stats { grid-template-columns: repeat(2, 1fr); } }
                 @media (max-width: 520px) { .appts-stats { grid-template-columns: 1fr; } }
 
-                .appts-page { min-height: 100vh; background: #1a1a2e; font-family: 'Nunito', sans-serif; position: relative; overflow-x: hidden; padding-bottom: 60px; width: 100%; max-width: 100vw; box-sizing: border-box; }
+                .appts-page { min-height: 100vh; background: transparent; font-family: 'Nunito', sans-serif; position: relative; overflow-x: hidden; padding-bottom: 60px; width: 100%; max-width: 100vw; box-sizing: border-box; }
                 .appts-page * { box-sizing: border-box; }
-                .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.08; pointer-events: none; }
+                .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.04; pointer-events: none; z-index:0; }
                 .b1 { width: 500px; height: 500px; background: #ffd93d; top: -100px; left: -100px; }
                 .b2 { width: 400px; height: 400px; background: #ff6b6b; bottom: -100px; right: -100px; }
-                .appts-inner { max-width: 860px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; width: 100%; box-sizing: border-box; }
+                .appts-inner { max-width: 1400px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; width: 100%; box-sizing: border-box; }
 
                 .appts-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-                .appts-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; font-style: italic; color: #fff; letter-spacing: -1px; }
+                .appts-title { font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 2.7rem; font-weight: 900; font-style: normal; color: #fff; letter-spacing: -1.5px; margin:0; line-height:1; }
                 .appts-subtitle { color: rgba(255,255,255,0.45); font-size: 0.9rem; margin-top: 4px; }
                 .btn-primary { background: linear-gradient(135deg, #4CAF50, #FF9800); color: #fff; border: none; border-radius: 12px; padding: 12px 22px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(76,175,80,0.3); transition: transform 0.15s, box-shadow 0.15s; white-space: nowrap; }
                 .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(76,175,80,0.5); }

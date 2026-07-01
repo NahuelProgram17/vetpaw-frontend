@@ -53,6 +53,54 @@ const speciesEmoji = (s) => {
     return found ? found.emoji : '🐾'
 }
 
+
+
+function OwnerPawIcon() {
+    return (
+        <span className="owner-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+                <path d="M22 34c3-5 6-7 10-7s7 2 10 7l5 8c3 5 0 11-6 11H23c-6 0-9-6-6-11l5-8Z" fill="url(#pawBody)" stroke="rgba(255,255,255,.48)" strokeWidth="2"/>
+                <circle cx="18" cy="24" r="6" fill="#FF9800"/><circle cx="30" cy="17" r="6" fill="#4CAF50"/><circle cx="44" cy="24" r="6" fill="#6bcaff"/><circle cx="50" cy="36" r="5" fill="#FFB74D"/>
+                <defs><linearGradient id="pawBody" x1="16" y1="25" x2="49" y2="54"><stop stopColor="#4CAF50"/><stop offset="1" stopColor="#FF9800"/></linearGradient></defs>
+            </svg>
+        </span>
+    );
+}
+function OwnerCalendarIcon() {
+    return (
+        <span className="owner-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+                <rect x="12" y="16" width="40" height="36" rx="8" fill="rgba(107,202,255,.13)" stroke="#6bcaff" strokeWidth="2"/>
+                <path d="M12 27h40" stroke="#4CAF50" strokeWidth="2"/>
+                <path d="M22 11v10M42 11v10" stroke="#FF9800" strokeWidth="4" strokeLinecap="round"/>
+                <rect x="20" y="34" width="8" height="8" rx="2" fill="#4CAF50"/><rect x="32" y="34" width="8" height="8" rx="2" fill="#FF9800"/>
+            </svg>
+        </span>
+    );
+}
+function OwnerVetIcon() {
+    return (
+        <span className="owner-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+                <path d="M13 51V25l19-13 19 13v26" stroke="#6bcaff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M25 51V37h14v14" stroke="#4CAF50" strokeWidth="2.4" strokeLinecap="round"/>
+                <path d="M32 23v12M26 29h12" stroke="#FF9800" strokeWidth="4" strokeLinecap="round"/>
+            </svg>
+        </span>
+    );
+}
+function OwnerAlertPetIcon() {
+    return (
+        <span className="owner-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+                <path d="M32 11 55 52H9L32 11Z" fill="rgba(255,152,0,.15)" stroke="#FF9800" strokeWidth="2.5"/>
+                <path d="M24 39c2.4-4 4.8-5.8 8-5.8S37.6 35 40 39l2.2 3.5c1.8 2.8-.2 6.5-3.6 6.5H25.4c-3.4 0-5.4-3.7-3.6-6.5L24 39Z" fill="#4CAF50"/>
+                <circle cx="23" cy="31" r="3.5" fill="#FFB74D"/><circle cx="30" cy="26" r="3.5" fill="#6bcaff"/><circle cx="38" cy="31" r="3.5" fill="#FF9800"/>
+            </svg>
+        </span>
+    );
+}
+
 export default function LostPets() {
     const { user } = useAuth()
     const navigate = useNavigate()
@@ -193,10 +241,10 @@ export default function LostPets() {
     const lbl = { fontSize: 12, fontWeight: 700, color: MUTED, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.6 }
 
     return (
-        <div style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: FONT, paddingBottom: 60 }}>
-            <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <div className="lostpets-page" style={{ minHeight: '100vh', background: 'transparent', color: TEXT, fontFamily: FONT, paddingBottom: 60, position: 'relative' }}>
+            <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-            <div className="lp-shell" style={{ maxWidth: 1280, margin: '0 auto', padding: '90px 24px 32px', display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24 }}>
+            <div className="lp-shell" style={{ maxWidth: 1400, margin: '0 auto', padding: '90px 24px 32px', display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24 }}>
 
                 {/* ═════════════════════════════ MAIN COLUMN ═════════════════════════════ */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
@@ -204,7 +252,7 @@ export default function LostPets() {
                     {/* ─── Header ─── */}
                     <header className="lp-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                         <div>
-                            <h1 style={{ fontSize: '1.95rem', fontWeight: 900, color: TEXT, margin: 0, lineHeight: 1.1, letterSpacing: '-0.5px' }}>
+                            <h1 className="owner-title lp-main-title" style={{ fontSize: '2.6rem', fontWeight: 900, color: TEXT, margin: 0, lineHeight: 1.05, letterSpacing: '-1.5px' }}>
                                 Mascotas <span style={{ color: O2 }}>perdidas</span> o <span style={{ color: G2 }}>encontradas</span>
                             </h1>
                             <p style={{ fontSize: '0.95rem', color: MUTED2, margin: 0, marginTop: 8, lineHeight: 1.5, maxWidth: 560 }}>
@@ -589,6 +637,90 @@ export default function LostPets() {
 
             {/* ── Responsive ── */}
             <style>{`
+
+
+/* ───────────────── VetPaw dueño visual refresh ───────────────── */
+.owner-cosmic-bg,
+.dash-page,
+.pets-page,
+.appts-page,
+.clinics-page,
+.lostpets-page {
+    background:
+        radial-gradient(circle at 14% 4%, rgba(65, 115, 255, 0.34), transparent 30%),
+        radial-gradient(circle at 78% 94%, rgba(31, 95, 255, 0.42), transparent 34%),
+        radial-gradient(circle at 96% 28%, rgba(76, 175, 80, 0.16), transparent 30%),
+        radial-gradient(circle at 8% 82%, rgba(255, 152, 0, 0.10), transparent 28%),
+        linear-gradient(180deg, #041124 0%, #061426 52%, #040914 100%) !important;
+    position: relative;
+    isolation: isolate;
+}
+.owner-cosmic-bg::before,
+.dash-page::before,
+.pets-page::before,
+.appts-page::before,
+.clinics-page::before,
+.lostpets-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        radial-gradient(circle, rgba(255,184,60,.95) 0 1.2px, transparent 1.4px),
+        radial-gradient(circle, rgba(82,216,105,.85) 0 1.2px, transparent 1.4px),
+        radial-gradient(circle, rgba(75,162,255,.9) 0 1px, transparent 1.2px),
+        linear-gradient(180deg, transparent 0 48%, rgba(76,175,80,.32) 50%, transparent 58%),
+        linear-gradient(180deg, transparent 0 42%, rgba(255,152,0,.32) 50%, transparent 58%),
+        linear-gradient(180deg, transparent 0 46%, rgba(74,150,255,.36) 50%, transparent 58%);
+    background-size: 520px 520px, 700px 700px, 610px 610px, 1px 360px, 1px 520px, 1px 430px;
+    background-position: 12% 16%, 84% 20%, 70% 74%, 9% 16%, 92% 10%, 62% 0%;
+    opacity: .72;
+    mix-blend-mode: screen;
+}
+.owner-cosmic-bg::after,
+.dash-page::after,
+.pets-page::after,
+.appts-page::after,
+.clinics-page::after,
+.lostpets-page::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 5% 92%, rgba(79, 195, 247, .28), transparent 18%),
+        radial-gradient(circle at 92% 96%, rgba(76, 175, 80, .14), transparent 22%),
+        linear-gradient(90deg, transparent, rgba(255,255,255,.035), transparent);
+    opacity: .85;
+}
+.owner-title,
+.dash-title-modern,
+.pets-title,
+.appts-title,
+.hero-title {
+    font-family: 'Baloo 2', 'Plus Jakarta Sans', 'Nunito', sans-serif !important;
+    font-style: normal !important;
+    font-weight: 900 !important;
+    letter-spacing: -1.5px !important;
+    text-shadow: 0 10px 34px rgba(0,0,0,.25);
+}
+.owner-icon-badge {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    display: inline-grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(76,175,80,.18), rgba(255,152,0,.18));
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: inset 0 0 26px rgba(255,255,255,.04), 0 12px 30px rgba(0,0,0,.25);
+    color: #fff;
+    vertical-align: middle;
+}
+.owner-icon-badge svg { width: 30px; height: 30px; display: block; }
+.owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
                 @keyframes lpCardIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
                 .lp-card { animation: lpCardIn 0.3s ease both; transition: transform .18s, border-color .18s, box-shadow .18s; }
                 .lp-card:hover { transform: translateY(-3px); border-color: ${G2}40; box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
