@@ -33,6 +33,7 @@ import ClinicProfile from './pages/ClinicProfile'
 import AdminPanel from './pages/AdminPanel'
 import LostPets from './pages/LostPets'
 import Configuracion from './pages/Configuracion'
+import SeasonalTheme from './components/SeasonalTheme'
 
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
       <ScrollToTop />
         <RouteChangeLoader />
         <Navbar />
+        <SeasonalTheme />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
