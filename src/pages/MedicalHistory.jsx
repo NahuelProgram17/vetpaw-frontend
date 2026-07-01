@@ -108,7 +108,34 @@ export default function MedicalHistory() {
 
     const card = { background: CARD, border: `1.5px solid ${BORDER}`, borderRadius: 18 };
 
-    if (loading) return <div style={{ minHeight: "100vh", background: "#0a121d", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: FONT }}>Cargando historial… 🐾</div>;
+    if (loading) return <div className="owner-cosmic-bg history-page" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", gap: 14, alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: FONT }}><span className="paw-runner">🐕</span><p style={{ color: MUTED, fontWeight: 700 }}>Cargando historial…</p><style>{`
+.owner-gradient-title,
+.dash-title-modern,
+.pets-title,
+.appts-title,
+.hero-title,
+.history-main-title,
+.history-title-main {
+    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 38%, #FFB300 72%, #FF9800 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    text-shadow: 0 0 24px rgba(76,175,80,.12);
+}
+.paw-runner {
+    font-size: 3rem;
+    display: inline-block;
+    animation: pawRun 1.35s ease-in-out infinite;
+    transform-origin: center bottom;
+}
+@keyframes pawRun {
+    0% { transform: translateX(-22px) translateY(0) rotate(-7deg); opacity: .55; }
+    25% { transform: translateX(-8px) translateY(-5px) rotate(4deg); opacity: 1; }
+    50% { transform: translateX(10px) translateY(0) rotate(-3deg); opacity: 1; }
+    75% { transform: translateX(24px) translateY(-5px) rotate(5deg); opacity: .9; }
+    100% { transform: translateX(42px) translateY(0) rotate(-6deg); opacity: .55; }
+}
+`}</style></div>;
 
     if (!pets.length) return (
         <div className="owner-cosmic-bg history-page" style={{ minHeight: "100vh", fontFamily: FONT, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
@@ -220,6 +247,34 @@ export default function MedicalHistory() {
 .owner-icon-badge svg { width: 30px; height: 30px; display: block; }
 .owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
+.owner-gradient-title,
+.dash-title-modern,
+.pets-title,
+.appts-title,
+.hero-title,
+.history-main-title,
+.history-title-main {
+    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 38%, #FFB300 72%, #FF9800 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    text-shadow: 0 0 24px rgba(76,175,80,.12);
+}
+.paw-runner {
+    font-size: 3rem;
+    display: inline-block;
+    animation: pawRun 1.35s ease-in-out infinite;
+    transform-origin: center bottom;
+}
+@keyframes pawRun {
+    0% { transform: translateX(-22px) translateY(0) rotate(-7deg); opacity: .55; }
+    25% { transform: translateX(-8px) translateY(-5px) rotate(4deg); opacity: 1; }
+    50% { transform: translateX(10px) translateY(0) rotate(-3deg); opacity: 1; }
+    75% { transform: translateX(24px) translateY(-5px) rotate(5deg); opacity: .9; }
+    100% { transform: translateX(42px) translateY(0) rotate(-6deg); opacity: .55; }
+}
+
+
 
                 .mh-wrap { max-width: 1400px; margin: 0 auto; }
                 .mh-top { display: grid; grid-template-columns: 1fr 300px; gap: 18px; align-items: start; }
@@ -244,6 +299,15 @@ export default function MedicalHistory() {
             `}</style>
 
             <div className="mh-wrap">
+                <header className="history-main-header" style={{ marginBottom: 22 }}>
+                    <div className="owner-hero-title-row">
+                        <span style={{ fontSize: 34, lineHeight: 1 }}>📋</span>
+                        <div>
+                            <h1 className="history-main-title owner-gradient-title" style={{ fontSize: "2.45rem", fontWeight: 900, margin: 0, letterSpacing: "-1.4px", lineHeight: 1 }}>Historial</h1>
+                            <p style={{ color: MUTED, margin: "8px 0 0", fontWeight: 700 }}>Toda la salud de tu mascota en un solo lugar.</p>
+                        </div>
+                    </div>
+                </header>
 
                 {/* ===== FILA SUPERIOR: perfil + Mis mascotas ===== */}
                 <div className="mh-top">

@@ -232,7 +232,7 @@ export default function Clinics() {
                             <span className="eyebrow-icon">🏥</span>
                             RED DE CENTROS VETERINARIOS
                         </div>
-                        <div className="owner-hero-title-row"><OwnerVetIcon /><h1 className="hero-title">Veterinarias</h1></div>
+                        <div className="owner-hero-title-row"><OwnerVetIcon /><h1 className="hero-title owner-gradient-title">Veterinarias</h1></div>
                         <p className="hero-subtitle">
                             Encontrá clínicas veterinarias de confianza cerca tuyo.
                             <br />Atención profesional para el bienestar de tu mascota.
@@ -341,7 +341,7 @@ export default function Clinics() {
                 {/* ─── Loading / Empty ─── */}
                 {loading && (
                     <div className="loading-state">
-                        <span className="paw-spin">🐕</span>
+                        <span className="paw-runner">🐕</span>
                         <p>Cargando clínicas…</p>
                     </div>
                 )}
@@ -723,6 +723,34 @@ const styles = `
 .owner-icon-badge svg { width: 30px; height: 30px; display: block; }
 .owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
+.owner-gradient-title,
+.dash-title-modern,
+.pets-title,
+.appts-title,
+.hero-title,
+.history-main-title,
+.history-title-main {
+    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 38%, #FFB300 72%, #FF9800 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    text-shadow: 0 0 24px rgba(76,175,80,.12);
+}
+.paw-runner {
+    font-size: 3rem;
+    display: inline-block;
+    animation: pawRun 1.35s ease-in-out infinite;
+    transform-origin: center bottom;
+}
+@keyframes pawRun {
+    0% { transform: translateX(-22px) translateY(0) rotate(-7deg); opacity: .55; }
+    25% { transform: translateX(-8px) translateY(-5px) rotate(4deg); opacity: 1; }
+    50% { transform: translateX(10px) translateY(0) rotate(-3deg); opacity: 1; }
+    75% { transform: translateX(24px) translateY(-5px) rotate(5deg); opacity: .9; }
+    100% { transform: translateX(42px) translateY(0) rotate(-6deg); opacity: .55; }
+}
+
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 .clinics-page {
@@ -900,7 +928,7 @@ const styles = `
     background: #16212f; border-radius: 20px; padding: 60px 24px;
     text-align: center; border: 1px solid rgba(255,255,255,0.06);
 }
-.paw-spin { font-size: 3rem; display: inline-block; animation: spin 1.4s linear infinite; }
+.paw-spin { font-size: 3rem; display: inline-block; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-state p { color: rgba(255,255,255,0.5); margin-top: 12px; font-weight: 700; }
 .empty-emoji { font-size: 3.5rem; }

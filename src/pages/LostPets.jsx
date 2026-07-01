@@ -714,6 +714,34 @@ export default function LostPets() {
 .owner-icon-badge svg { width: 30px; height: 30px; display: block; }
 .owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
+.owner-gradient-title,
+.dash-title-modern,
+.pets-title,
+.appts-title,
+.hero-title,
+.history-main-title,
+.history-title-main {
+    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 38%, #FFB300 72%, #FF9800 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    text-shadow: 0 0 24px rgba(76,175,80,.12);
+}
+.paw-runner {
+    font-size: 3rem;
+    display: inline-block;
+    animation: pawRun 1.35s ease-in-out infinite;
+    transform-origin: center bottom;
+}
+@keyframes pawRun {
+    0% { transform: translateX(-22px) translateY(0) rotate(-7deg); opacity: .55; }
+    25% { transform: translateX(-8px) translateY(-5px) rotate(4deg); opacity: 1; }
+    50% { transform: translateX(10px) translateY(0) rotate(-3deg); opacity: 1; }
+    75% { transform: translateX(24px) translateY(-5px) rotate(5deg); opacity: .9; }
+    100% { transform: translateX(42px) translateY(0) rotate(-6deg); opacity: .55; }
+}
+
+
                 @keyframes lpCardIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
                 .lp-card { animation: lpCardIn 0.3s ease both; transition: transform .18s, border-color .18s, box-shadow .18s; }
                 .lp-card:hover { transform: translateY(-3px); border-color: ${G2}40; box-shadow: 0 12px 32px rgba(0,0,0,0.4); }

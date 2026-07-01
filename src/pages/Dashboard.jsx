@@ -198,9 +198,36 @@ export default function Dashboard() {
     if (loading) {
         return (
             <div style={{ minHeight: "100vh", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, fontFamily: FONT, color: MUTED }}>
-                <span style={{ fontSize: "3rem", animation: "dashSpin 1s linear infinite", display: "inline-block" }}>🐕</span>
+                <span className="paw-runner">🐕</span>
                 <p>Cargando tu espacio…</p>
-                <style>{`@keyframes dashSpin { to { transform: rotate(360deg); } }`}</style>
+                <style>{`
+.owner-gradient-title,
+.dash-title-modern,
+.pets-title,
+.appts-title,
+.hero-title,
+.history-main-title,
+.history-title-main {
+    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 38%, #FFB300 72%, #FF9800 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    text-shadow: 0 0 24px rgba(76,175,80,.12);
+}
+.paw-runner {
+    font-size: 3rem;
+    display: inline-block;
+    animation: pawRun 1.35s ease-in-out infinite;
+    transform-origin: center bottom;
+}
+@keyframes pawRun {
+    0% { transform: translateX(-22px) translateY(0) rotate(-7deg); opacity: .55; }
+    25% { transform: translateX(-8px) translateY(-5px) rotate(4deg); opacity: 1; }
+    50% { transform: translateX(10px) translateY(0) rotate(-3deg); opacity: 1; }
+    75% { transform: translateX(24px) translateY(-5px) rotate(5deg); opacity: .9; }
+    100% { transform: translateX(42px) translateY(0) rotate(-6deg); opacity: .55; }
+}
+`}</style>
             </div>
         );
     }
@@ -208,7 +235,7 @@ export default function Dashboard() {
     // ───────────── Estilos comunes
     const cardSt = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 18, padding: 22, color: TEXT, display: "flex", flexDirection: "column" };
     const cardHeader = { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 10 };
-    const cardTitle = { display: "flex", alignItems: "center", gap: 10, fontSize: "1.05rem", fontWeight: 800, color: TEXT, fontFamily: FONT, margin: 0 };
+    const cardTitle = { display: "flex", alignItems: "center", gap: 10, fontSize: "1.05rem", fontWeight: 900, fontFamily: FONT, margin: 0, background: `linear-gradient(135deg, ${G1}, ${O2})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", textShadow: "0 0 18px rgba(76,175,80,0.10)" };
     const linkSt = (color) => ({ background: "transparent", border: "none", color, fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: FONT, whiteSpace: "nowrap" });
 
     return (
@@ -219,7 +246,7 @@ export default function Dashboard() {
                 <header className="dash-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 14 }}>
                     <div>
                         <p style={{ fontSize: "0.92rem", color: MUTED, marginBottom: 4, fontWeight: 600 }}>¡Hola, {firstName}! 👋</p>
-                        <h1 className="dash-title-modern" style={{ fontFamily: TITLE_FONT, fontSize: "2.4rem", fontWeight: 900, fontStyle: "normal", color: TEXT, letterSpacing: "-1.5px", margin: 0 }}>Tu panel VetPaw</h1>
+                        <h1 className="dash-title-modern owner-gradient-title" style={{ fontFamily: TITLE_FONT, fontSize: "2.4rem", fontWeight: 900, fontStyle: "normal", letterSpacing: "-1.5px", margin: 0 }}>Tu panel VetPaw</h1>
                     </div>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                         {isAdmin && (
@@ -633,6 +660,34 @@ export default function Dashboard() {
 }
 .owner-icon-badge svg { width: 30px; height: 30px; display: block; }
 .owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+.owner-gradient-title,
+.dash-title-modern,
+.pets-title,
+.appts-title,
+.hero-title,
+.history-main-title,
+.history-title-main {
+    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 38%, #FFB300 72%, #FF9800 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    text-shadow: 0 0 24px rgba(76,175,80,.12);
+}
+.paw-runner {
+    font-size: 3rem;
+    display: inline-block;
+    animation: pawRun 1.35s ease-in-out infinite;
+    transform-origin: center bottom;
+}
+@keyframes pawRun {
+    0% { transform: translateX(-22px) translateY(0) rotate(-7deg); opacity: .55; }
+    25% { transform: translateX(-8px) translateY(-5px) rotate(4deg); opacity: 1; }
+    50% { transform: translateX(10px) translateY(0) rotate(-3deg); opacity: 1; }
+    75% { transform: translateX(24px) translateY(-5px) rotate(5deg); opacity: .9; }
+    100% { transform: translateX(42px) translateY(0) rotate(-6deg); opacity: .55; }
+}
+
 
                 @media (max-width: 1024px) {
                     .dash-stats { grid-template-columns: repeat(2, 1fr) !important; }
