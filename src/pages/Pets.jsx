@@ -36,6 +36,32 @@ const SPECIES_EMOJI = {
 const petEmoji = (species) =>
     SPECIES_EMOJI[(species || '').toLowerCase()] || '🐕';
 
+const API_ORIGIN = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000')
+    .replace(/\/api\/?$/, '')
+    .replace(/\/$/, '');
+
+const mediaUrl = (url) => {
+    if (!url) return null;
+    if (/^(https?:|data:|blob:)/i.test(url)) return url;
+    return `${API_ORIGIN}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
+const TEMPERAMENT_META = {
+    friendly: { emoji: '😊', label: 'Amigable' },
+    shy: { emoji: '🙈', label: 'Tímido' },
+    nervous: { emoji: '😰', label: 'Nervioso' },
+    protective: { emoji: '🛡️', label: 'Protector' },
+    playful: { emoji: '🎾', label: 'Juguetón' },
+    sleepy: { emoji: '😴', label: 'Dormilón' },
+    eater: { emoji: '🍽️', label: 'Comilón' },
+    intimidating: { emoji: '😤', label: 'Intimidante' },
+};
+
+const temperamentMeta = (value, display) => {
+    const meta = TEMPERAMENT_META[value] || { emoji: '🐾', label: display || value };
+    return { ...meta, label: display || meta.label };
+};
+
 const EMPTY_FORM = {
     name: '',
     species: 'dog',
@@ -175,7 +201,7 @@ export default function Pets() {
             lives_with_animals: pet.lives_with_animals || false,
             temperament: pet.temperament || '',
         });
-        setPhotoPreview(pet.photo || null);
+        setPhotoPreview(mediaUrl(pet.photo));
         setError('');
         setShowModal(true);
     };
@@ -330,7 +356,7 @@ export default function Pets() {
                                 <div className="pet-photo-side">
                                     {pet.photo ? (
                                         <img
-                                            src={pet.photo}
+                                            src={mediaUrl(pet.photo)}
                                             alt={pet.name}
                                             className="pet-row-photo"
                                         />
@@ -363,13 +389,15 @@ export default function Pets() {
                                                         className="pet-menu-item"
                                                         onClick={() => { setOpenMenuId(null); openEdit(pet); }}
                                                     >
-                                                        ✏️ Editar
+                                                        <span className="pet-menu-icon">✏️</span>
+                                                        <span>Editar</span>
                                                     </button>
                                                     <button
                                                         className="pet-menu-item danger"
                                                         onClick={() => { setOpenMenuId(null); setDeleteConfirm(pet.id); }}
                                                     >
-                                                        🗑️ Eliminar
+                                                        <span className="pet-menu-icon">🗑️</span>
+                                                        <span>Eliminar</span>
                                                     </button>
                                                 </div>
                                             )}
@@ -432,7 +460,10 @@ export default function Pets() {
                                             )}
                                             {pet.temperament && (
                                                 <span className="pet-chip">
-                                                    {pet.temperament === 'friendly' ? '😊' : pet.temperament === 'shy' ? '🙈' : pet.temperament === 'nervous' ? '😰' : pet.temperament === 'protective' ? '🛡️' : '🎾'} {pet.temperament_display || pet.temperament}
+                                                    {(() => {
+                                                        const meta = temperamentMeta(pet.temperament, pet.temperament_display);
+                                                        return `${meta.emoji} ${meta.label}`;
+                                                    })()}
                                                 </span>
                                             )}
                                         </div>
@@ -667,6 +698,9 @@ export default function Pets() {
                                     <option value="nervous">😰 Nervioso</option>
                                     <option value="protective">🛡️ Protector</option>
                                     <option value="playful">🎾 Juguetón</option>
+                                    <option value="sleepy">😴 Dormilón</option>
+                                    <option value="eater">🍽️ Comilón</option>
+                                    <option value="intimidating">😤 Intimidante</option>
                                 </select>
                             </div>
 
@@ -1079,43 +1113,70 @@ export default function Pets() {
                 /* Menú "..." */
                 .pet-menu-wrap { position: relative; flex-shrink: 0; }
                 .pet-menu-btn {
-                    background: #1b2a3d;
-                    border: 1px solid rgba(255,255,255,0.08);
-                    color: rgba(255,255,255,0.7);
-                    border-radius: 9px;
-                    width: 34px; height: 34px;
+                    background: linear-gradient(135deg, rgba(76,175,80,0.16), rgba(255,152,0,0.12));
+                    border: 1px solid rgba(255,255,255,0.12);
+                    color: rgba(255,255,255,0.82);
+                    border-radius: 999px;
+                    width: 40px; height: 34px;
                     cursor: pointer;
-                    font-size: 1rem; font-weight: 700;
+                    font-size: 1.15rem; font-weight: 900;
+                    line-height: 1;
+                    letter-spacing: 1px;
                     display: flex; align-items: center; justify-content: center;
-                    transition: background 0.2s, color 0.2s;
+                    box-shadow: inset 0 0 18px rgba(255,255,255,0.04), 0 8px 20px rgba(0,0,0,0.22);
+                    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
                 }
-                .pet-menu-btn:hover { background: #213348; color: #fff; }
+                .pet-menu-btn:hover {
+                    transform: translateY(-1px);
+                    color: #fff;
+                    border-color: rgba(76,175,80,0.38);
+                    box-shadow: 0 12px 26px rgba(76,175,80,0.15), 0 8px 20px rgba(0,0,0,0.28);
+                }
                 .pet-menu {
                     position: absolute;
-                    top: calc(100% + 6px);
+                    top: calc(100% + 10px);
                     right: 0;
-                    background: #1b2a3d;
-                    border: 1px solid rgba(255,255,255,0.1);
-                    border-radius: 12px;
-                    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
-                    min-width: 150px;
+                    background: linear-gradient(180deg, rgba(28,42,62,0.98), rgba(16,26,41,0.98));
+                    border: 1px solid rgba(255,255,255,0.12);
+                    border-radius: 16px;
+                    box-shadow: 0 18px 46px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.06);
+                    min-width: 178px;
                     overflow: hidden;
-                    z-index: 10;
+                    z-index: 30;
                     display: flex; flex-direction: column;
+                    padding: 7px;
+                    backdrop-filter: blur(12px);
+                }
+                .pet-menu::before {
+                    content: "";
+                    position: absolute;
+                    top: -6px;
+                    right: 18px;
+                    width: 12px;
+                    height: 12px;
+                    transform: rotate(45deg);
+                    background: rgba(28,42,62,0.98);
+                    border-left: 1px solid rgba(255,255,255,0.12);
+                    border-top: 1px solid rgba(255,255,255,0.12);
                 }
                 .pet-menu-item {
                     background: transparent; border: none;
-                    color: rgba(255,255,255,0.85);
+                    color: rgba(255,255,255,0.9);
                     text-align: left;
-                    padding: 10px 13px;
+                    padding: 11px 12px;
                     cursor: pointer;
                     font-family: 'Plus Jakarta Sans', sans-serif;
-                    font-size: 0.86rem; font-weight: 600;
-                    transition: background 0.15s;
+                    font-size: 0.9rem; font-weight: 800;
+                    border-radius: 12px;
+                    display: flex; align-items: center; gap: 10px;
+                    transition: background 0.15s ease, transform 0.15s ease, color 0.15s ease;
+                    position: relative;
+                    z-index: 1;
                 }
-                .pet-menu-item:hover { background: rgba(255,255,255,0.06); }
-                .pet-menu-item.danger { color: #ff8888; }
-                .pet-menu-item.danger:hover { background: rgba(255,107,107,0.12); }
+                .pet-menu-icon { width: 24px; height: 24px; display: inline-grid; place-items: center; border-radius: 8px; background: rgba(255,255,255,0.06); }
+                .pet-menu-item:hover { background: rgba(76,175,80,0.13); color: #fff; transform: translateX(2px); }
+                .pet-menu-item.danger { color: #ff9d9d; }
+                .pet-menu-item.danger:hover { background: rgba(255,107,107,0.14); color: #ffb3b3; }
 
                 /* Especie · sexo */
                 .pet-row-meta {
