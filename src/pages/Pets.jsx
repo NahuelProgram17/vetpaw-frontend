@@ -801,7 +801,40 @@ export default function Pets() {
 
                         {tError && <div className="form-error">{tError}</div>}
 
-                        {/* Cargar nueva aplicación */}
+                        {/* Historial agrupado por tipo */}
+                        <div className="treatment-history">
+                            {TREATMENT_TYPES.map((type) => {
+                                const items = (treatmentPet.treatments || [])
+                                    .filter((t) => t.treatment_type === type.value);
+                                return (
+                                    <div key={type.value} className="treatment-group">
+                                        <h4>{type.emoji} {type.label} <span>({items.length})</span></h4>
+                                        {items.length === 0 ? (
+                                            <p className="treatment-empty">Sin registros todavía.</p>
+                                        ) : (
+                                            <ul className="treatment-list">
+                                                {items.map((t) => (
+                                                    <li key={t.id}>
+                                                        <div>
+                                                            <strong>{fmtDate(t.date_applied)}</strong>
+                                                            {t.product && <span className="treatment-prod"> · {t.product}</span>}
+                                                        </div>
+                                                        <button
+                                                            className="treatment-del"
+                                                            title="Eliminar"
+                                                            onClick={() => handleDeleteTreatment(t.id)}
+                                                        >🗑️</button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+
+                        <div className="treatment-form-title">➕ Nueva aplicación</div>
                         <form className="pet-form" onSubmit={handleAddTreatment}>
                             <div className="form-row">
                                 <div className="form-group">
@@ -851,37 +884,6 @@ export default function Pets() {
                             </button>
                         </form>
 
-                        {/* Historial agrupado por tipo */}
-                        <div className="treatment-history">
-                            {TREATMENT_TYPES.map((type) => {
-                                const items = (treatmentPet.treatments || [])
-                                    .filter((t) => t.treatment_type === type.value);
-                                return (
-                                    <div key={type.value} className="treatment-group">
-                                        <h4>{type.emoji} {type.label} <span>({items.length})</span></h4>
-                                        {items.length === 0 ? (
-                                            <p className="treatment-empty">Sin registros todavía.</p>
-                                        ) : (
-                                            <ul className="treatment-list">
-                                                {items.map((t) => (
-                                                    <li key={t.id}>
-                                                        <div>
-                                                            <strong>{fmtDate(t.date_applied)}</strong>
-                                                            {t.product && <span className="treatment-prod"> · {t.product}</span>}
-                                                        </div>
-                                                        <button
-                                                            className="treatment-del"
-                                                            title="Eliminar"
-                                                            onClick={() => handleDeleteTreatment(t.id)}
-                                                        >🗑️</button>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
                     </div>
                 </div>
             )}
@@ -1342,7 +1344,16 @@ export default function Pets() {
                 .add-pet-cta:hover .add-pet-cta-btn { background: rgba(76,175,80,0.08); }
 
                 /* ── Historial de antiparasitarios ── */
-                .treatment-history { margin-top: 22px; display: flex; flex-direction: column; gap: 16px; }
+                
+.treatment-form-title{
+    margin:18px 0 10px;
+    padding-top:16px;
+    border-top:1px solid rgba(255,255,255,.10);
+    color:#55d66b;
+    font-weight:900;
+    font-size:1.05rem;
+}
+.treatment-history { margin-top: 22px; display: flex; flex-direction: column; gap: 16px; }
                 .treatment-group h4 {
                     font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700;
                     color: #fff; margin-bottom: 8px;
