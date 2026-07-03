@@ -672,23 +672,28 @@ export default function ClinicDashboard() {
 
   const openClinicalFile = async (file) => {
     const fallbackUrl = getClinicalFileUrl(file);
+    const isPdf = isClinicalPdf(file);
+
     if (!file?.id) {
-      if (fallbackUrl) window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+      if (!isPdf && fallbackUrl) window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+      else showMessage("error", "No se pudo abrir el PDF clínico.");
       return;
     }
+
     try {
       const response = await api.get(`/clinical-photos/${file.id}/download/`, { responseType: "blob" });
-      const type = response.headers?.["content-type"] || file.content_type || (isClinicalPdf(file) ? "application/pdf" : "application/octet-stream");
+      const type = response.headers?.["content-type"] || file.content_type || (isPdf ? "application/pdf" : "application/octet-stream");
       const blob = new Blob([response.data], { type });
       const blobUrl = URL.createObjectURL(blob);
       window.open(blobUrl, "_blank", "noopener,noreferrer");
       setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
     } catch (error) {
       console.error(error);
-      if (fallbackUrl) {
+      // Para PDFs NO hacemos fallback a Cloudinary directo, porque ahí aparece el 401.
+      if (!isPdf && fallbackUrl) {
         window.open(fallbackUrl, "_blank", "noopener,noreferrer");
       } else {
-        showMessage("error", "No se pudo abrir el archivo clínico.");
+        showMessage("error", isPdf ? "No se pudo abrir el PDF. Eliminá ese archivo y subilo de nuevo." : "No se pudo abrir el archivo clínico.");
       }
     }
   };
