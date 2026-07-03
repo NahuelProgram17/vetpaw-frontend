@@ -168,6 +168,8 @@ export default function ClinicDashboard() {
   const [vaccineForm, setVaccineForm] = useState(EMPTY_VACCINE);
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [showVaccineModal, setShowVaccineModal] = useState(false);
+  const [showControlModal, setShowControlModal] = useState(false);
+  const [controlForm, setControlForm] = useState({ pet: '', requested_date: '', appointment_type: 'control', reason: 'Control general' });
   const [saving, setSaving] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoCaption, setPhotoCaption] = useState("");
@@ -207,17 +209,18 @@ export default function ClinicDashboard() {
   }, [tab]);
 
   useEffect(() => {
-    if (!showVisitModal && !showVaccineModal) return;
+    if (!showVisitModal && !showVaccineModal && !showControlModal) return;
 
     const handleEscape = (event) => {
       if (event.key !== "Escape") return;
       setShowVisitModal(false);
       setShowVaccineModal(false);
+      setShowControlModal(false);
     };
 
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [showVisitModal, showVaccineModal]);
+  }, [showVisitModal, showVaccineModal, showControlModal]);
 
   const fetchClinicProfile = async () => {
     try {
@@ -415,6 +418,33 @@ export default function ClinicDashboard() {
     setShowVisitModal(true);
   };
 
+  const openControlModal = (pet) => {
+    setControlForm({
+      pet: pet.id,
+      requested_date: '',
+      appointment_type: 'control',
+      reason: 'Control general',
+    });
+    setShowControlModal(true);
+  };
+
+  const handleControlSubmit = async (event) => {
+    event.preventDefault();
+    if (!controlForm.pet || !controlForm.requested_date) return showMessage('error', 'Paciente y fecha/hora son obligatorios.');
+    setSaving(true);
+    try {
+      await api.post('/appointments/program_control/', controlForm);
+      setShowControlModal(false);
+      await fetchAll();
+      showMessage('success', 'Control programado correctamente.');
+    } catch (error) {
+      console.error(error);
+      showMessage('error', error.response?.data?.error || 'No se pudo programar el control.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleVisitSubmit = async (event) => {
     event.preventDefault();
     if (!visitForm.pet) return showMessage("error", "Falta seleccionar el paciente.");
@@ -549,7 +579,7 @@ export default function ClinicDashboard() {
   const handleClinicalPhotoUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file || !selectedPet) return;
-    if (file.size > 5 * 1024 * 1024) return showMessage("error", "La foto clínica no puede superar los 5MB.");
+    if (file.size > 10 * 1024 * 1024) return showMessage("error", "El archivo clínico no puede superar los 10MB.");
     const formData = new FormData();
     formData.append("image", file);
     formData.append("pet", selectedPet.id);
@@ -560,24 +590,24 @@ export default function ClinicDashboard() {
       setClinicalPhotoCaption("");
       if (clinicalFileInputRef.current) clinicalFileInputRef.current.value = "";
       await fetchClinicalPhotos(selectedPet.id);
-      showMessage("success", "Foto clínica subida.");
+      showMessage("success", "Archivo clínico subido.");
     } catch (error) {
       console.error(error);
-      showMessage("error", error.response?.data?.error || "No se pudo subir la foto clínica.");
+      showMessage("error", error.response?.data?.error || "No se pudo subir el archivo clínico.");
     } finally {
       setClinicalPhotoUploading(false);
     }
   };
 
   const deleteClinicalPhoto = async (photoId) => {
-    if (!window.confirm("¿Eliminás esta foto clínica?")) return;
+    if (!window.confirm("¿Eliminás este archivo clínico?")) return;
     try {
       await api.delete(`/clinical-photos/${photoId}/delete/`);
       await fetchClinicalPhotos(selectedPet.id);
-      showMessage("success", "Foto clínica eliminada.");
+      showMessage("success", "Archivo clínico eliminado.");
     } catch (error) {
       console.error(error);
-      showMessage("error", "No se pudo eliminar la foto clínica.");
+      showMessage("error", "No se pudo eliminar el archivo clínico.");
     }
   };
 
@@ -725,6 +755,7 @@ export default function ClinicDashboard() {
                 openPetFile={openPetFile}
                 downloadPetPDF={downloadPetPDF}
                 openVisitModal={openVisitModal}
+                openControlModal={openControlModal}
                 openVaccineModal={openVaccineModal}
               />
             )}
@@ -880,6 +911,7 @@ function PacientesTab({
   openPetFile,
   downloadPetPDF,
   openVisitModal,
+  openControlModal,
   openVaccineModal,
 }) {
   if (selectedPet) {
@@ -893,7 +925,7 @@ function PacientesTab({
           detailed
           onFile={() => {}}
           onPdf={() => downloadPetPDF(selectedPet)}
-          onVisit={() => openVisitModal(selectedPet)}
+          onVisit={() => openControlModal(selectedPet)}
           onVaccine={() => openVaccineModal(selectedPet)}
         />
 
@@ -948,22 +980,34 @@ function PacientesTab({
         </div>
 
         <section className="vp-card vp-clinical-photos">
-          <h3 className="vp-section-title">📷 Fotos clínicas</h3>
+          <h3 className="vp-section-title">📎 Archivos clínicos</h3>
           <div className="vp-inline-form">
-            <input value={clinicalPhotoCaption} onChange={(e) => setClinicalPhotoCaption(e.target.value)} placeholder="Descripción, por ejemplo: radiografía, lesión, control..." />
-            <input ref={clinicalFileInputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={handleClinicalPhotoUpload} />
-            <button onClick={() => clinicalFileInputRef.current?.click()} disabled={clinicalPhotoUploading}>{clinicalPhotoUploading ? "Subiendo..." : "Subir foto"}</button>
+            <input value={clinicalPhotoCaption} onChange={(e) => setClinicalPhotoCaption(e.target.value)} placeholder="Descripción, por ejemplo: radiografía, análisis, lesión, control..." />
+            <input ref={clinicalFileInputRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf" hidden onChange={handleClinicalPhotoUpload} />
+            <button onClick={() => clinicalFileInputRef.current?.click()} disabled={clinicalPhotoUploading}>{clinicalPhotoUploading ? "Subiendo..." : "Subir archivo"}</button>
           </div>
           {clinicalPhotos.length === 0 ? (
-            <EmptyState icon="📷" title="Sin fotos clínicas" text="Las fotos clínicas quedan asociadas a este paciente." compact />
+            <EmptyState icon="📎" title="Sin archivos clínicos" text="Subí fotos, estudios o documentos PDF asociados a este paciente." compact />
           ) : (
             <div className="vp-photo-grid small">
-              {clinicalPhotos.map((photo) => (
-                <article className="vp-photo" key={photo.id}>
-                  <img src={photo.image_url || photo.image} alt={photo.caption || "Foto clínica"} />
-                  <div><strong>{photo.caption || "Foto clínica"}</strong><button onClick={() => deleteClinicalPhoto(photo.id)}>Eliminar</button></div>
-                </article>
-              ))}
+              {clinicalPhotos.map((photo) => {
+                const fileUrl = photo.image_url || photo.image;
+                const isPdf = photo.is_pdf || photo.file_type === 'pdf' || String(fileUrl || '').toLowerCase().endsWith('.pdf');
+                return (
+                  <article className={`vp-photo ${isPdf ? 'pdf' : ''}`} key={photo.id}>
+                    {isPdf ? (
+                      <a className="vp-pdf-card" href={fileUrl} target="_blank" rel="noreferrer">
+                        <span>📄</span>
+                        <b>Ver PDF</b>
+                        <small>{photo.filename || 'Documento clínico'}</small>
+                      </a>
+                    ) : (
+                      <img src={fileUrl} alt={photo.caption || "Archivo clínico"} />
+                    )}
+                    <div><strong>{photo.caption || (isPdf ? "Documento clínico" : "Foto clínica")}</strong><button onClick={() => deleteClinicalPhoto(photo.id)}>Eliminar</button></div>
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>
@@ -997,7 +1041,7 @@ function PacientesTab({
               vaccines={vaccines}
               onFile={() => openPetFile(pet)}
               onPdf={() => downloadPetPDF(pet)}
-              onVisit={() => openVisitModal(pet)}
+              onVisit={() => openControlModal(pet)}
               onVaccine={() => openVaccineModal(pet)}
             />
           ))}
@@ -1034,7 +1078,7 @@ function FotosTab({ photos, photosLoading, photoUploading, photoCaption, setPhot
           <h3>Subí fotos de tu clínica</h3>
           <p>Mostrá tu espacio y generá confianza en tus clientes.</p>
           <input value={photoCaption} onChange={(e) => setPhotoCaption(e.target.value)} maxLength={100} placeholder="Descripción opcional: sala de espera, consultorio..." />
-          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={handlePhotoUpload} />
+          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf" hidden onChange={handlePhotoUpload} />
           <button onClick={() => fileInputRef.current?.click()} disabled={photoUploading}>{photoUploading ? "Subiendo..." : "📤 Subir foto"}</button>
           <small>JPG, PNG o WebP · Máximo 3MB por foto</small>
         </div>
@@ -1306,7 +1350,7 @@ function PetMainCard({ pet, visits, vaccines, onFile, onPdf, onVisit, onVaccine,
         <div className="vp-pet-actions">
           <button className="outline" onClick={onFile}>📄 Ver ficha completa</button>
           <button className="outline green" onClick={onPdf}>📁 Historial</button>
-          <button className="gradient" onClick={onVisit}>📅 Sacar turno</button>
+          <button className="gradient" onClick={onVisit}>📅 Programar control</button>
           <button className="outline violet" onClick={onVaccine}>💉 Cargar vacuna</button>
         </div>
       </div>
@@ -1342,6 +1386,25 @@ function VisitModal({ visitForm, setVisitForm, saving, onClose, onSubmit }) {
         <label>Observaciones<textarea rows="3" value={visitForm.observations} onChange={(e) => set("observations", e.target.value)} /></label>
         <label>Próxima visita<input type="date" value={visitForm.next_visit} onChange={(e) => set("next_visit", e.target.value)} /></label>
         <div className="modal-actions"><button type="button" onClick={onClose}>Cancelar</button><button className="gradient" disabled={saving}>{saving ? "Guardando..." : "Guardar visita"}</button></div>
+      </form>
+    </Modal>
+  );
+}
+
+function ControlModal({ controlForm, setControlForm, saving, onClose, onSubmit }) {
+  const set = (key, value) => setControlForm((prev) => ({ ...prev, [key]: value }));
+  return (
+    <Modal title="📅 Programar control" onClose={onClose}>
+      <form className="vp-modal-form" onSubmit={onSubmit}>
+        <label>Fecha y hora del control *<input type="datetime-local" value={controlForm.requested_date} onChange={(e) => set('requested_date', e.target.value)} /></label>
+        <label>Tipo de turno
+          <select value={controlForm.appointment_type} onChange={(e) => set('appointment_type', e.target.value)}>
+            {appointmentTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+          </select>
+        </label>
+        <label>Motivo<input value={controlForm.reason} onChange={(e) => set('reason', e.target.value)} placeholder="Ej: Control general, revisión, seguimiento..." /></label>
+        <p className="vp-modal-help">Este control queda cargado en la agenda de la clínica y visible para el dueño de la mascota.</p>
+        <div className="modal-actions"><button type="button" onClick={onClose}>Cancelar</button><button className="gradient" disabled={saving}>{saving ? "Guardando..." : "Programar control"}</button></div>
       </form>
     </Modal>
   );
@@ -1387,9 +1450,9 @@ const styles = `
 .vp-day-card{padding:24px}.vp-day-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.vp-day-head div{display:flex;flex-direction:column;text-align:center}.vp-day-head strong{font-size:1.45rem}.vp-day-head span{color:var(--muted);text-transform:capitalize}.vp-download{width:100%;border:0;border-radius:14px;padding:14px;color:#fff;font-weight:900;cursor:pointer}.vp-download.red{background:linear-gradient(135deg,#ff445d,#e82443)}.vp-day-list{display:grid;gap:10px;margin-top:16px}.vp-day-appt{text-align:left;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;color:#fff;padding:12px;display:grid;grid-template-columns:66px 1fr;gap:10px;cursor:pointer;align-items:start;transition:.18s ease}.vp-day-appt:hover{transform:translateY(-1px);border-color:rgba(85,214,107,.35);background:rgba(85,214,107,.055)}.vp-day-time{color:#fff;font-size:1.08rem;line-height:1.2}.vp-day-details{display:grid;gap:4px;min-width:0}.vp-day-details p{margin:0;line-height:1.25}.vp-day-label{font-weight:900;color:var(--green)}.vp-day-value{font-weight:900;color:var(--orange);text-transform:capitalize}.vp-day-external{font-weight:900;color:var(--orange)}.vp-day-appt em{color:#7db8ff;font-style:normal;font-weight:800;margin-top:4px}.vp-day-count{text-align:center;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:16px}
 .vp-empty{display:grid;place-items:center;text-align:center;min-height:260px;padding:34px;color:var(--muted)}.vp-empty.compact{min-height:120px}.vp-empty div{font-size:3.1rem;filter:drop-shadow(0 0 18px rgba(69,167,255,.35))}.vp-empty h3{color:#fff;margin:8px 0 4px;font-size:1.25rem}.vp-empty p{max-width:420px}
 .vp-search-row{display:grid;grid-template-columns:1fr 260px;gap:12px;margin-bottom:16px}.vp-search,.vp-select-look{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:15px;padding:13px 16px;color:var(--muted)}.vp-search input{flex:1;background:none;border:0;outline:0;color:#fff;font:inherit}.vp-pet-list{display:grid;gap:16px}.vp-pet-card{position:relative;display:grid;grid-template-columns:160px 1fr;gap:22px;padding:18px}.vp-pet-card.detailed{margin-bottom:18px}.vp-pet-photo{height:160px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:3rem}.vp-pet-photo img{width:100%;height:100%;object-fit:cover}.vp-pet-title{display:flex;gap:12px;align-items:center}.vp-pet-title h3{font-size:2rem;line-height:1;margin:0}.vp-pet-title span{color:var(--green);font-weight:900;background:rgba(85,214,107,.12);border:1px solid rgba(85,214,107,.2);padding:5px 10px;border-radius:999px}.vp-pet-info>p{color:var(--muted);margin:6px 0}.vp-muted{color:var(--muted)}.vp-pet-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.vp-pet-chips span{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:13px;padding:12px;display:flex;gap:8px;align-items:center}.vp-pet-chips small{display:block;color:var(--muted)}.vp-mini-chips{display:flex;gap:8px;flex-wrap:wrap}.vp-mini-chips em{font-style:normal;background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:999px;padding:7px 11px;color:var(--muted)}.vp-vaccine-count{margin:12px 0!important}.vp-pet-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.vp-pet-actions button.outline{color:#9ed3ff}.vp-pet-actions button.green{color:var(--green)}.vp-pet-actions button.violet{color:#d5b8ff}.vp-pet-actions button.gradient,.gradient{background:linear-gradient(135deg,var(--green),var(--orange));border:0!important;color:#fff!important;box-shadow:0 12px 30px rgba(255,173,22,.16)}.vp-dot-menu{position:absolute;right:18px;top:18px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff}.vp-back{margin-bottom:16px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:#fff;border-radius:12px;padding:11px 14px;font-weight:900}.vp-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.vp-section-title{margin:0 0 14px;font-size:1.2rem}.vp-history-list{display:grid;gap:12px}.vp-history-item{display:grid;grid-template-columns:64px 1fr;gap:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03)}.history-date{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:13px;background:rgba(69,167,255,.09)}.history-date strong{font-size:1.5rem;color:var(--blue)}.history-date span{text-transform:uppercase;color:var(--muted);font-weight:900}.vp-table-wrap{overflow:auto}.vp-table{width:100%;border-collapse:collapse}.vp-table th,.vp-table td{padding:12px;border-bottom:1px solid var(--line);text-align:left}.vp-table th{color:var(--green)}
-.vp-page-title{display:flex;gap:16px;align-items:center;margin:10px 0 20px}.title-icon{width:62px;height:62px;border-radius:16px;display:grid;place-items:center;background:rgba(69,167,255,.14);border:1px solid rgba(69,167,255,.25);font-size:1.7rem}.title-icon.violet{background:rgba(167,124,255,.13);border-color:rgba(167,124,255,.28)}.vp-page-title h2{font-size:2.35rem;margin:0}.vp-page-title p{color:var(--muted);margin:4px 0 0}.vp-upload-zone{text-align:center;padding:34px;margin-bottom:22px;border-style:dashed}.upload-icon{font-size:3.4rem;color:var(--green);margin-bottom:10px}.vp-upload-zone input,.vp-inline-form input,.vp-external-form input,.vp-external-form select,.vp-hour-row input,.vp-duration-list select,.vp-modal-form input,.vp-modal-form textarea{background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:12px;color:#fff;padding:11px 13px;font:inherit;outline:0}.vp-upload-zone input{display:block;max-width:560px;width:100%;margin:14px auto}.vp-upload-zone button{background:linear-gradient(135deg,#18c983,#4c91ff);color:#fff;border:0}.vp-upload-zone small{display:block;color:var(--muted);margin-top:9px}.vp-photo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}.vp-photo-grid.small{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}.vp-photo{overflow:hidden}.vp-photo img{width:100%;height:150px;object-fit:cover}.vp-photo div{padding:12px;display:flex;justify-content:space-between;gap:12px;align-items:center}.vp-photo button{background:rgba(255,77,104,.12);border:1px solid rgba(255,77,104,.25);color:#ff8a9d;border-radius:10px;padding:8px 10px}.vp-photo-placeholder{min-height:218px;color:var(--muted);display:grid;place-items:center;font:inherit}.vp-photo-placeholder span{display:block}.vp-tip{margin-top:20px;padding:18px;display:flex;gap:14px}.vp-tip b{color:var(--green)}.vp-tip span{color:var(--muted)}
+.vp-page-title{display:flex;gap:16px;align-items:center;margin:10px 0 20px}.title-icon{width:62px;height:62px;border-radius:16px;display:grid;place-items:center;background:rgba(69,167,255,.14);border:1px solid rgba(69,167,255,.25);font-size:1.7rem}.title-icon.violet{background:rgba(167,124,255,.13);border-color:rgba(167,124,255,.28)}.vp-page-title h2{font-size:2.35rem;margin:0}.vp-page-title p{color:var(--muted);margin:4px 0 0}.vp-upload-zone{text-align:center;padding:34px;margin-bottom:22px;border-style:dashed}.upload-icon{font-size:3.4rem;color:var(--green);margin-bottom:10px}.vp-upload-zone input,.vp-inline-form input,.vp-external-form input,.vp-external-form select,.vp-hour-row input,.vp-duration-list select,.vp-modal-form input,.vp-modal-form textarea,.vp-modal-form select{background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:12px;color:#fff;padding:11px 13px;font:inherit;outline:0}.vp-upload-zone input{display:block;max-width:560px;width:100%;margin:14px auto}.vp-upload-zone button{background:linear-gradient(135deg,#18c983,#4c91ff);color:#fff;border:0}.vp-upload-zone small{display:block;color:var(--muted);margin-top:9px}.vp-photo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}.vp-photo-grid.small{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}.vp-photo{overflow:hidden}.vp-photo img{width:100%;height:150px;object-fit:cover}.vp-pdf-card{height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-decoration:none;color:#eaf2ff;background:linear-gradient(135deg,rgba(255,173,22,.12),rgba(69,167,255,.08));border-bottom:1px solid var(--line)}.vp-pdf-card span{font-size:2.4rem}.vp-pdf-card b{color:var(--orange);font-weight:900}.vp-pdf-card small{max-width:88%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}.vp-photo div{padding:12px;display:flex;justify-content:space-between;gap:12px;align-items:center}.vp-photo button{background:rgba(255,77,104,.12);border:1px solid rgba(255,77,104,.25);color:#ff8a9d;border-radius:10px;padding:8px 10px}.vp-photo-placeholder{min-height:218px;color:var(--muted);display:grid;place-items:center;font:inherit}.vp-photo-placeholder span{display:block}.vp-tip{margin-top:20px;padding:18px;display:flex;gap:14px}.vp-tip b{color:var(--green)}.vp-tip span{color:var(--muted)}
 .vp-agenda-config{max-width:980px}.vp-card.soft{padding:18px;margin-bottom:12px}.vp-days{display:flex;gap:8px;flex-wrap:wrap}.vp-days button{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--muted);border-radius:10px;padding:10px 13px;font-weight:900}.vp-days button.active{background:rgba(85,214,107,.16);border-color:rgba(85,214,107,.42);color:var(--green)}.vp-hour-list,.vp-duration-list{display:grid;gap:10px}.vp-hour-row{display:grid;grid-template-columns:140px 54px 120px 54px 120px;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}.vp-hour-row span,.vp-duration-list span{color:var(--muted)}.vp-duration-list label{display:grid;grid-template-columns:1fr 160px;align-items:center;gap:12px}.vp-duration-list.two{grid-template-columns:1fr 1fr}.vp-save{width:100%;margin-top:14px;background:linear-gradient(135deg,#18c983,#55d66b);color:#fff;border:0}.vp-external-form{display:grid;gap:10px}.vp-external-form label,.vp-modal-form label{display:grid;gap:6px;color:var(--muted);font-weight:800}.vp-external-form button{background:linear-gradient(135deg,var(--green),var(--orange));border:0;color:#fff}.vp-inline-form{display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:14px}.vp-inline-form button{background:linear-gradient(135deg,#18c983,#4c91ff);border:0;color:#fff}
-.vp-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.62);display:grid;place-items:center;z-index:200;padding:20px}.vp-modal{width:min(720px,100%);max-height:88vh;overflow:auto;background:#071323;border:1px solid var(--line);border-radius:22px;box-shadow:0 28px 90px rgba(0,0,0,.55)}.vp-modal header{display:flex;justify-content:space-between;align-items:center;padding:18px;border-bottom:1px solid var(--line)}.vp-modal header h2{margin:0}.vp-modal header button{background:none;border:0;color:#fff;font-size:2rem;cursor:pointer}.vp-modal-form{padding:18px;display:grid;gap:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+.vp-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.62);display:grid;place-items:center;z-index:200;padding:20px}.vp-modal{width:min(720px,100%);max-height:88vh;overflow:auto;background:#071323;border:1px solid var(--line);border-radius:22px;box-shadow:0 28px 90px rgba(0,0,0,.55)}.vp-modal header{display:flex;justify-content:space-between;align-items:center;padding:18px;border-bottom:1px solid var(--line)}.vp-modal header h2{margin:0}.vp-modal header button{background:none;border:0;color:#fff;font-size:2rem;cursor:pointer}.vp-modal-form{padding:18px;display:grid;gap:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}.vp-modal-help{margin:0;color:var(--muted);font-weight:800;background:rgba(85,214,107,.08);border:1px solid rgba(85,214,107,.18);border-radius:14px;padding:12px}
 
 /* Mejoras comerciales: compartir perfil, ficha completa y ayuda de agenda */
 .vp-hero-actions{display:flex;align-items:stretch;gap:14px;flex-wrap:wrap;justify-content:flex-end}
