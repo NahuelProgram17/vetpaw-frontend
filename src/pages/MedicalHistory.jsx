@@ -5,6 +5,15 @@ import api from "../services/api";
 import ownerBg from "../assets/vetpaw-owner-bg.png";
 import VetPawLoader from '../components/VetPawLoader';
 
+import healthHeartIcon from "../assets/vetpaw-icons/health-heart.png";
+import stethoscopeIcon from "../assets/vetpaw-icons/stethoscope.png";
+import syringeIcon from "../assets/vetpaw-icons/syringe.png";
+import calendarIcon from "../assets/vetpaw-icons/calendar.png";
+import antiparasiticIcon from "../assets/vetpaw-icons/antiparasitic.png";
+import medicalFolderIcon from "../assets/vetpaw-icons/medical-folder.png";
+import healthBookIcon from "../assets/vetpaw-icons/health-book.png";
+import reminderBellIcon from "../assets/vetpaw-icons/reminder-bell.png";
+
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif";
 const G1 = "#4CAF50";
 const G2 = "#66BB6A";
@@ -129,12 +138,21 @@ export default function MedicalHistory() {
     const SummaryCard = ({ accent, icon, title, children, btn }) => (
         <div style={{ ...card, padding: 18, display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 10, background: `${accent}22`, border: `1px solid ${accent}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0 }}>{icon}</div>
+                <div style={{ width: 44, height: 44, borderRadius: 14, background: `${accent}1f`, border: `1px solid ${accent}55`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden", boxShadow: `0 10px 24px ${accent}18` }}>
+                    <img src={icon} alt={title} style={{ width: 42, height: 42, objectFit: "contain", display: "block" }} />
+                </div>
                 <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.5, textTransform: "uppercase", color: MUTED2 }}>{title}</span>
             </div>
             <div style={{ flex: 1 }}>{children}</div>
             {btn && <div style={{ marginTop: 14 }}>{btn}</div>}
         </div>
+    );
+
+    const IconTitle = ({ icon, children, size = 34 }) => (
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 9 }}>
+            <img src={icon} alt="" aria-hidden="true" style={{ width: size, height: size, objectFit: "contain", display: "inline-block", filter: "drop-shadow(0 6px 14px rgba(0,0,0,.35))" }} />
+            <span>{children}</span>
+        </span>
     );
     const GRAD = `linear-gradient(135deg, ${G1}, ${O1})`;
     const ghostBtn = (txt, onClick, to) => to
@@ -350,33 +368,33 @@ export default function MedicalHistory() {
 
                 {/* ===== TARJETAS RESUMEN ===== */}
                 <div className="mh-cards">
-                    <SummaryCard accent={G1} icon="❤️" title="Resumen de salud" btn={ghostBtn("Ver detalles", () => scrollToId("mh-historial"))}>
+                    <SummaryCard accent={G1} icon={healthHeartIcon} title="Resumen de salud" btn={ghostBtn("Ver detalles", () => scrollToId("mh-historial"))}>
                         <div style={{ fontSize: 18, fontWeight: 900, color: health.color }}>{health.label}</div>
                         <p style={{ fontSize: 11.5, color: MUTED, marginTop: 6, lineHeight: 1.45 }}>{health.desc}</p>
                     </SummaryCard>
 
-                    <SummaryCard accent={BLUE} icon="🩺" title="Última consulta" btn={ghostBtn("Ver consulta", () => scrollToId("mh-historial", () => setTab("consultas")))}>
+                    <SummaryCard accent={BLUE} icon={stethoscopeIcon} title="Última consulta" btn={ghostBtn("Ver consulta", () => scrollToId("mh-historial", () => setTab("consultas")))}>
                         {lastVisit ? (<>
                             <div style={{ fontSize: 14.5, fontWeight: 800 }}>{lastVisit.reason || "Control"}</div>
                             <p style={{ fontSize: 11.5, color: MUTED, marginTop: 6 }}>{fmtShort(lastVisit.date)}{lastVisit.vet_first_name ? <><br />Dr/a. {lastVisit.vet_first_name} {lastVisit.vet_last_name}</> : ""}</p>
                         </>) : <div style={{ fontSize: 13.5, color: MUTED }}>Sin consultas aún</div>}
                     </SummaryCard>
 
-                    <SummaryCard accent={G2} icon="💉" title="Vacunas" btn={ghostBtn("Ver libreta", () => scrollToId("mh-libreta"))}>
+                    <SummaryCard accent={G2} icon={syringeIcon} title="Vacunas" btn={ghostBtn("Ver libreta", () => scrollToId("mh-libreta"))}>
                         {vaccines.length ? (<>
                             <div style={{ fontSize: 26, fontWeight: 900, color: G2 }}>{vaccines.length}</div>
                             <p style={{ fontSize: 11.5, color: MUTED }}>{vaccines.length === 1 ? "vacuna registrada" : "vacunas registradas"}</p>
                         </>) : <div style={{ fontSize: 13.5, color: MUTED }}>Todavía no</div>}
                     </SummaryCard>
 
-                    <SummaryCard accent={O1} icon="📅" title="Próximo turno" btn={nextAppointment ? fillBtn("Ver turno", "/appointments") : ghostBtn("Sacar turno", null, "/appointments/new")}>
+                    <SummaryCard accent={O1} icon={calendarIcon} title="Próximo turno" btn={nextAppointment ? fillBtn("Ver turno", "/appointments") : ghostBtn("Sacar turno", null, "/appointments/new")}>
                         {nextAppointment ? (<>
                             <div style={{ fontSize: 14.5, fontWeight: 800 }}>{fmtFull(nextAppointment.requested_date)}</div>
                             <p style={{ fontSize: 11.5, color: MUTED, marginTop: 6 }}>{nextAppointment.appointment_type_display || nextAppointment.reason || "Control"}</p>
                         </>) : <div style={{ fontSize: 13.5, color: MUTED }}>Sin turnos</div>}
                     </SummaryCard>
 
-                    <SummaryCard accent={O2} icon="💊" title="Antiparasitarios" btn={lastTreatment ? fillBtn("Ver plan", "/pets") : ghostBtn("Registrar", null, "/pets")}>
+                    <SummaryCard accent={O2} icon={antiparasiticIcon} title="Antiparasitarios" btn={lastTreatment ? fillBtn("Ver plan", "/pets") : ghostBtn("Registrar", null, "/pets")}>
                         {lastTreatment ? (<>
                             <div style={{ fontSize: 14.5, fontWeight: 800, color: G2 }}>{lastTreatment.treatment_type_display}</div>
                             <p style={{ fontSize: 11.5, color: MUTED, marginTop: 6 }}>Último: {fmtShort(lastTreatment.date_applied)}</p>
@@ -390,7 +408,7 @@ export default function MedicalHistory() {
 
                         {/* Historial médico */}
                         <div id="mh-historial" style={{ ...card, padding: 20 }}>
-                            <h2 className="history-title" style={{ fontSize: 18, fontWeight: 900, marginBottom: 14 }}>📋 Historial médico</h2>
+                            <h2 className="history-title" style={{ fontSize: 18, fontWeight: 900, marginBottom: 14 }}><IconTitle icon={medicalFolderIcon}>Historial médico</IconTitle></h2>
                             <div style={{ display: "flex", gap: 5, marginBottom: 18, background: CARD2, padding: 5, borderRadius: 11, flexWrap: "wrap" }}>
                                 <button className={`mh-tab ${tab === "consultas" ? "active" : ""}`} onClick={() => setTab("consultas")}>Consultas</button>
                                 <button className={`mh-tab ${tab === "fotos" ? "active" : ""}`} onClick={() => setTab("fotos")}>Fotos y documentos</button>
@@ -434,7 +452,7 @@ export default function MedicalHistory() {
 
                         {/* Libreta sanitaria */}
                         <div id="mh-libreta" style={{ ...card, padding: 20 }}>
-                            <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16 }}>📖 Libreta sanitaria</h2>
+                            <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16 }}><IconTitle icon={healthBookIcon} size={32}>Libreta sanitaria</IconTitle></h2>
                             {vaccines.length ? (
                                 <div>
                                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -463,7 +481,7 @@ export default function MedicalHistory() {
                     {/* Sidebar derecha */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                         <div style={{ ...card, padding: 18 }}>
-                            <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 14 }}>💉 Próximas vacunas</h3>
+                            <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 14 }}><IconTitle icon={syringeIcon} size={30}>Próximas vacunas</IconTitle></h3>
                             {upcomingVaccines.length ? (
                                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                                     {upcomingVaccines.slice(0, 4).map((v) => {
@@ -483,7 +501,7 @@ export default function MedicalHistory() {
                         </div>
 
                         <div style={{ ...card, padding: 18 }}>
-                            <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 14 }}>🔔 Recordatorios</h3>
+                            <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 14 }}><IconTitle icon={reminderBellIcon} size={30}>Recordatorios</IconTitle></h3>
                             {reminders.length ? (
                                 <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
                                     {reminders.map((r, i) => (
