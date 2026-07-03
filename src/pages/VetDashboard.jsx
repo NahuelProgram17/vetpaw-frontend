@@ -674,33 +674,31 @@ export default function ClinicDashboard() {
     const fallbackUrl = getClinicalFileUrl(file);
     const isPdf = isClinicalPdf(file);
 
-    // Las imágenes tienen que abrirse como antes: link directo de Cloudinary en otra pestaña.
-    // No las pasamos por la API, porque algunos navegadores las descargan como archivo genérico.
-    if (!isPdf) {
-      if (fallbackUrl) {
-        window.open(fallbackUrl, "_blank", "noopener,noreferrer");
-      } else {
-        showMessage("error", "No se pudo abrir la imagen clínica.");
-      }
-      return;
-    }
-
     if (!file?.id) {
-      showMessage("error", "No se pudo abrir el PDF clínico.");
+      if (fallbackUrl && !isPdf) {
+        window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+        return;
+      }
+      showMessage("error", isPdf ? "No se pudo abrir el PDF clínico." : "No se pudo abrir la imagen clínica.");
       return;
     }
 
     try {
+      // Abrimos desde la API autenticada para controlar bien el Content-Type.
+      // Antes algunas imágenes quedaban como archivo genérico y Chrome las descargaba.
       const response = await api.get(`/clinical-photos/${file.id}/download/`, { responseType: "blob" });
-      const type = response.headers?.["content-type"] || file.content_type || "application/pdf";
+      const type = response.headers?.["content-type"] || file.content_type || (isPdf ? "application/pdf" : "image/jpeg");
       const blob = new Blob([response.data], { type });
       const blobUrl = URL.createObjectURL(blob);
       window.open(blobUrl, "_blank", "noopener,noreferrer");
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 120000);
     } catch (error) {
       console.error(error);
-      // Para PDFs NO hacemos fallback a Cloudinary directo, porque ahí aparece el 401.
-      showMessage("error", "No se pudo abrir el PDF. Eliminá ese archivo y subilo de nuevo.");
+      if (!isPdf && fallbackUrl) {
+        window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+        return;
+      }
+      showMessage("error", isPdf ? "No se pudo abrir el PDF. Eliminá ese archivo y subilo de nuevo." : "No se pudo abrir la imagen clínica.");
     }
   };
 
