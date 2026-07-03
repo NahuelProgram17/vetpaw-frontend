@@ -162,6 +162,19 @@ export default function Pets() {
         return () => document.removeEventListener('mousedown', onDocClick);
     }, [openMenuId]);
 
+    useEffect(() => {
+        if (!showModal && !treatmentPetId) return;
+
+        const handleEscape = (event) => {
+            if (event.key !== 'Escape') return;
+            closeModal();
+            closeTreatments();
+        };
+
+        window.addEventListener('keydown', handleEscape);
+        return () => window.removeEventListener('keydown', handleEscape);
+    }, [showModal, treatmentPetId]);
+
     const fetchPets = async () => {
         try {
             const data = await getPets();
@@ -500,7 +513,7 @@ export default function Pets() {
                                             className="pet-btn pet-btn-grad"
                                             onClick={() => openTreatments(pet)}
                                         >
-                                            🛡️ Antiparasitarios
+                                            💉 Cargar vacuna
                                             {pet.treatments && pet.treatments.length > 0 ? ` (${pet.treatments.length})` : ''}
                                         </button>
                                     </div>
@@ -782,7 +795,7 @@ export default function Pets() {
                 <div className="modal-overlay" onClick={closeTreatments}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Antiparasitarios — {treatmentPet.name}</h2>
+                            <h2>Cargar vacuna — {treatmentPet.name}</h2>
                             <button className="modal-close" onClick={closeTreatments}>✕</button>
                         </div>
 

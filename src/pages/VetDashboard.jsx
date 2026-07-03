@@ -206,6 +206,19 @@ export default function ClinicDashboard() {
     if (tab === "mi-agenda") fetchSchedule();
   }, [tab]);
 
+  useEffect(() => {
+    if (!showVisitModal && !showVaccineModal) return;
+
+    const handleEscape = (event) => {
+      if (event.key !== "Escape") return;
+      setShowVisitModal(false);
+      setShowVaccineModal(false);
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [showVisitModal, showVaccineModal]);
+
   const fetchClinicProfile = async () => {
     try {
       const { data } = await api.get("/clinics/");
@@ -1294,7 +1307,7 @@ function PetMainCard({ pet, visits, vaccines, onFile, onPdf, onVisit, onVaccine,
           <button className="outline" onClick={onFile}>📄 Ver ficha completa</button>
           <button className="outline green" onClick={onPdf}>📁 Historial</button>
           <button className="gradient" onClick={onVisit}>📅 Sacar turno</button>
-          <button className="outline violet" onClick={onVaccine}>🛡 Antiparasitarios</button>
+          <button className="outline violet" onClick={onVaccine}>💉 Cargar vacuna</button>
         </div>
       </div>
     </article>
