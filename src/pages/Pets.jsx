@@ -5,9 +5,9 @@ import ownerBg from "../assets/vetpaw-owner-bg.png";
 import VetPawLoader from "../components/VetPawLoader";
 
 const TREATMENT_TYPES = [
-    { value: 'deworming', label: 'Desparasitación' },
-    { value: 'flea', label: 'Pastilla antipulgas' },
-    { value: 'pipette', label: 'Pipeta' },
+    { value: 'deworming', label: 'Desparasitación', emoji: '🛡️' },
+    { value: 'flea', label: 'Pastilla antipulgas', emoji: '💊' },
+    { value: 'pipette', label: 'Pipeta', emoji: '💧' },
 ];
 const treatmentMeta = (t) => TREATMENT_TYPES.find((x) => x.value === t) || { label: t, emoji: '💊' };
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -513,7 +513,7 @@ export default function Pets() {
                                             className="pet-btn pet-btn-grad"
                                             onClick={() => openTreatments(pet)}
                                         >
-                                            💉 Cargar vacuna
+                                            💊 Antiparasitarios
                                             {pet.treatments && pet.treatments.length > 0 ? ` (${pet.treatments.length})` : ''}
                                         </button>
                                     </div>
@@ -795,7 +795,7 @@ export default function Pets() {
                 <div className="modal-overlay" onClick={closeTreatments}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Cargar vacuna — {treatmentPet.name}</h2>
+                            <h2>Antiparasitarios — {treatmentPet.name}</h2>
                             <button className="modal-close" onClick={closeTreatments}>✕</button>
                         </div>
 
@@ -811,7 +811,7 @@ export default function Pets() {
                                         onChange={(e) => setTForm({ ...tForm, treatment_type: e.target.value })}
                                     >
                                         {TREATMENT_TYPES.map((t) => (
-                                            <option key={t.value} value={t.value}>{t.label}</option>
+                                            <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -858,7 +858,7 @@ export default function Pets() {
                                     .filter((t) => t.treatment_type === type.value);
                                 return (
                                     <div key={type.value} className="treatment-group">
-                                        <h4>{type.label} <span>({items.length})</span></h4>
+                                        <h4>{type.emoji} {type.label} <span>({items.length})</span></h4>
                                         {items.length === 0 ? (
                                             <p className="treatment-empty">Sin registros todavía.</p>
                                         ) : (
