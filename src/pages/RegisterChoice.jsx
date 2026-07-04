@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import ownerIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
 import clinicIcon from "../assets/vetpaw-dashboard-icons/dashboard-clinics.png";
+import registerDogBg from "../assets/register/register-dog-side.png";
+import registerCatBg from "../assets/register/register-cat-side.png";
 
 export default function RegisterChoice() {
     const navigate = useNavigate();
@@ -68,8 +70,9 @@ export default function RegisterChoice() {
             min-height: calc(100vh - 72px);
             padding: clamp(28px, 5vw, 72px) 18px;
             background:
-                radial-gradient(circle at 12% 88%, rgba(76, 175, 80, 0.24), transparent 30%),
-                radial-gradient(circle at 92% 12%, rgba(255, 152, 0, 0.24), transparent 32%),
+                radial-gradient(circle at 0% 100%, rgba(76, 175, 80, 0.30), transparent 31%),
+                radial-gradient(circle at 100% 10%, rgba(255, 152, 0, 0.26), transparent 34%),
+                radial-gradient(circle at 50% 28%, rgba(15, 69, 118, 0.28), transparent 44%),
                 linear-gradient(135deg, #061425 0%, #071a2f 44%, #06111f 100%);
             display: flex;
             align-items: center;
@@ -85,8 +88,8 @@ export default function RegisterChoice() {
             position: absolute;
             inset: 0;
             background-image:
-                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+                linear-gradient(rgba(255,255,255,.026) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.026) 1px, transparent 1px);
             background-size: 44px 44px;
             mask-image: radial-gradient(circle at center, black 0%, transparent 78%);
             pointer-events: none;
@@ -94,35 +97,28 @@ export default function RegisterChoice() {
 
         .choice-bg {
             position: absolute;
-            width: min(35vw, 560px);
-            aspect-ratio: 1 / 1;
-            background-size: cover;
-            background-position: center;
-            opacity: .16;
-            filter: grayscale(100%) contrast(1.05) brightness(.86);
-            mix-blend-mode: screen;
+            height: calc(100% - 10px);
+            top: 8px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: .56;
+            filter: saturate(.82) contrast(1.05);
             pointer-events: none;
-        }
-
-        .choice-bg::after {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            background: radial-gradient(circle at center, transparent 32%, #061425 74%);
+            z-index: 0;
         }
 
         .choice-bg-dog {
-            left: -7vw;
-            top: 17%;
-            background-image: url('/perro1.jpg');
-            transform: rotate(-5deg) scale(1.05);
+            left: 0;
+            width: min(36vw, 520px);
+            background-position: left center;
+            background-image: url('${registerDogBg}');
         }
 
         .choice-bg-cat {
-            right: -7vw;
-            top: 23%;
-            background-image: url('/gato1.jpg');
-            transform: rotate(5deg) scale(1.08);
+            right: 0;
+            width: min(34vw, 500px);
+            background-position: right center;
+            background-image: url('${registerCatBg}');
         }
 
         .choice-glow {
@@ -152,8 +148,8 @@ export default function RegisterChoice() {
         .choice-paw {
             position: absolute;
             font-size: clamp(44px, 7vw, 96px);
-            opacity: .06;
-            color: #fff;
+            opacity: .075;
+            color: #d8ecff;
             filter: blur(.2px);
             user-select: none;
             pointer-events: none;
@@ -194,6 +190,7 @@ export default function RegisterChoice() {
             border: 1px solid rgba(255,255,255,.12);
             box-shadow:
                 0 32px 100px rgba(0,0,0,.45),
+                0 0 42px rgba(76, 175, 80, .08),
                 inset 0 1px 0 rgba(255,255,255,.08);
             overflow: hidden;
             animation: cardIn .55s cubic-bezier(.22,.68,0,1.08) both;
@@ -387,10 +384,14 @@ export default function RegisterChoice() {
             font-weight: 700;
         }
         .auth-link {
-            color: #74e45e;
+            background: linear-gradient(90deg, #74e45e 0%, #9ee34d 46%, #ffae00 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
             font-weight: 900;
             cursor: pointer;
             position: relative;
+            text-shadow: 0 0 18px rgba(116, 228, 94, .14);
         }
         .auth-link::after {
             content: '';
@@ -406,9 +407,9 @@ export default function RegisterChoice() {
         @media (max-width: 820px) {
             .choice-page { padding: 24px 14px; align-items: flex-start; }
             .choice-card { padding: 30px 18px; border-radius: 24px; }
-            .choice-bg { opacity: .09; width: 72vw; }
-            .choice-bg-dog { left: -25vw; top: 8%; }
-            .choice-bg-cat { right: -28vw; top: 45%; }
+            .choice-bg { opacity: .22; width: 72vw; height: 62vh; }
+            .choice-bg-dog { left: -22vw; top: 7%; }
+            .choice-bg-cat { right: -25vw; top: 38%; }
             .choice-btn {
                 grid-template-columns: 82px 1fr 42px;
                 gap: 14px;
