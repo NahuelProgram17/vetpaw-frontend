@@ -4,6 +4,54 @@ import { getPets, createPet, updatePet, deletePet, createTreatment, deleteTreatm
 import ownerBg from "../assets/vetpaw-owner-bg.png";
 import VetPawLoader from "../components/VetPawLoader";
 import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
+import DogFriendlyIcon from "../assets/vetpaw-temperament-icons/dog/friendly.png";
+import DogShyIcon from "../assets/vetpaw-temperament-icons/dog/shy.png";
+import DogNervousIcon from "../assets/vetpaw-temperament-icons/dog/nervous.png";
+import DogProtectiveIcon from "../assets/vetpaw-temperament-icons/dog/protective.png";
+import DogPlayfulIcon from "../assets/vetpaw-temperament-icons/dog/playful.png";
+import DogSleepyIcon from "../assets/vetpaw-temperament-icons/dog/sleepy.png";
+import DogEaterIcon from "../assets/vetpaw-temperament-icons/dog/eater.png";
+import DogIntimidatingIcon from "../assets/vetpaw-temperament-icons/dog/intimidating.png";
+import HorseFriendlyIcon from "../assets/vetpaw-temperament-icons/horse/friendly.png";
+import HorseShyIcon from "../assets/vetpaw-temperament-icons/horse/shy.png";
+import HorseNervousIcon from "../assets/vetpaw-temperament-icons/horse/nervous.png";
+import HorseProtectiveIcon from "../assets/vetpaw-temperament-icons/horse/protective.png";
+import HorsePlayfulIcon from "../assets/vetpaw-temperament-icons/horse/playful.png";
+import HorseSleepyIcon from "../assets/vetpaw-temperament-icons/horse/sleepy.png";
+import HorseEaterIcon from "../assets/vetpaw-temperament-icons/horse/eater.png";
+import HorseIntimidatingIcon from "../assets/vetpaw-temperament-icons/horse/intimidating.png";
+import RabbitFriendlyIcon from "../assets/vetpaw-temperament-icons/rabbit/friendly.png";
+import RabbitShyIcon from "../assets/vetpaw-temperament-icons/rabbit/shy.png";
+import RabbitNervousIcon from "../assets/vetpaw-temperament-icons/rabbit/nervous.png";
+import RabbitProtectiveIcon from "../assets/vetpaw-temperament-icons/rabbit/protective.png";
+import RabbitPlayfulIcon from "../assets/vetpaw-temperament-icons/rabbit/playful.png";
+import RabbitSleepyIcon from "../assets/vetpaw-temperament-icons/rabbit/sleepy.png";
+import RabbitEaterIcon from "../assets/vetpaw-temperament-icons/rabbit/eater.png";
+import RabbitIntimidatingIcon from "../assets/vetpaw-temperament-icons/rabbit/intimidating.png";
+import BirdFriendlyIcon from "../assets/vetpaw-temperament-icons/bird/friendly.png";
+import BirdShyIcon from "../assets/vetpaw-temperament-icons/bird/shy.png";
+import BirdNervousIcon from "../assets/vetpaw-temperament-icons/bird/nervous.png";
+import BirdProtectiveIcon from "../assets/vetpaw-temperament-icons/bird/protective.png";
+import BirdPlayfulIcon from "../assets/vetpaw-temperament-icons/bird/playful.png";
+import BirdSleepyIcon from "../assets/vetpaw-temperament-icons/bird/sleepy.png";
+import BirdEaterIcon from "../assets/vetpaw-temperament-icons/bird/eater.png";
+import BirdIntimidatingIcon from "../assets/vetpaw-temperament-icons/bird/intimidating.png";
+import CowFriendlyIcon from "../assets/vetpaw-temperament-icons/cow/friendly.png";
+import CowShyIcon from "../assets/vetpaw-temperament-icons/cow/shy.png";
+import CowNervousIcon from "../assets/vetpaw-temperament-icons/cow/nervous.png";
+import CowProtectiveIcon from "../assets/vetpaw-temperament-icons/cow/protective.png";
+import CowPlayfulIcon from "../assets/vetpaw-temperament-icons/cow/playful.png";
+import CowSleepyIcon from "../assets/vetpaw-temperament-icons/cow/sleepy.png";
+import CowEaterIcon from "../assets/vetpaw-temperament-icons/cow/eater.png";
+import CowIntimidatingIcon from "../assets/vetpaw-temperament-icons/cow/intimidating.png";
+import GenericFriendlyIcon from "../assets/vetpaw-temperament-icons/generic/friendly.png";
+import GenericShyIcon from "../assets/vetpaw-temperament-icons/generic/shy.png";
+import GenericNervousIcon from "../assets/vetpaw-temperament-icons/generic/nervous.png";
+import GenericProtectiveIcon from "../assets/vetpaw-temperament-icons/generic/protective.png";
+import GenericPlayfulIcon from "../assets/vetpaw-temperament-icons/generic/playful.png";
+import GenericSleepyIcon from "../assets/vetpaw-temperament-icons/generic/sleepy.png";
+import GenericEaterIcon from "../assets/vetpaw-temperament-icons/generic/eater.png";
+import GenericIntimidatingIcon from "../assets/vetpaw-temperament-icons/generic/intimidating.png";
 
 const TREATMENT_TYPES = [
     { value: 'deworming', label: 'Desparasitación', emoji: '🛡️' },
@@ -23,19 +71,31 @@ const SPECIES_EMOJI = {
     perro: '🐶',
     cat: '🐱',
     gato: '🐱',
+    horse: '🐴',
+    caballo: '🐴',
     bird: '🦜',
+    ave: '🦜',
     pajaro: '🦜',
+    pájaro: '🦜',
     rabbit: '🐰',
     conejo: '🐰',
+    cow: '🐮',
+    vaca: '🐮',
+    toro: '🐂',
+    bull: '🐂',
     fish: '🐟',
     pez: '🐟',
     hamster: '🐹',
     turtle: '🐢',
     tortuga: '🐢',
+    reptile: '🦎',
+    reptil: '🦎',
+    other: '🐾',
+    otro: '🐾',
 };
 
 const petEmoji = (species) =>
-    SPECIES_EMOJI[(species || '').toLowerCase()] || '🐕';
+    SPECIES_EMOJI[(species || '').toLowerCase()] || '🐾';
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000')
     .replace(/\/api\/?$/, '')
@@ -48,20 +108,46 @@ const mediaUrl = (url) => {
 };
 
 const TEMPERAMENT_META = {
-    friendly: { emoji: '😊', label: 'Amigable' },
-    shy: { emoji: '🙈', label: 'Tímido' },
-    nervous: { emoji: '😰', label: 'Nervioso' },
-    protective: { emoji: '🛡️', label: 'Protector' },
-    playful: { emoji: '🎾', label: 'Juguetón' },
-    sleepy: { emoji: '😴', label: 'Dormilón' },
-    eater: { emoji: '🍽️', label: 'Comilón' },
-    intimidating: { emoji: '😤', label: 'Intimidante' },
+    friendly: { label: 'Amigable' },
+    shy: { label: 'Tímido' },
+    nervous: { label: 'Nervioso' },
+    protective: { label: 'Protector' },
+    playful: { label: 'Juguetón' },
+    sleepy: { label: 'Dormilón' },
+    eater: { label: 'Comilón' },
+    intimidating: { label: 'Intimidante' },
 };
 
-const temperamentMeta = (value, display) => {
-    const meta = TEMPERAMENT_META[value] || { emoji: '🐾', label: display || value };
-    return { ...meta, label: display || meta.label };
+const TEMPERAMENT_ICON_SETS = {
+    dog: { friendly: DogFriendlyIcon, shy: DogShyIcon, nervous: DogNervousIcon, protective: DogProtectiveIcon, playful: DogPlayfulIcon, sleepy: DogSleepyIcon, eater: DogEaterIcon, intimidating: DogIntimidatingIcon },
+    horse: { friendly: HorseFriendlyIcon, shy: HorseShyIcon, nervous: HorseNervousIcon, protective: HorseProtectiveIcon, playful: HorsePlayfulIcon, sleepy: HorseSleepyIcon, eater: HorseEaterIcon, intimidating: HorseIntimidatingIcon },
+    rabbit: { friendly: RabbitFriendlyIcon, shy: RabbitShyIcon, nervous: RabbitNervousIcon, protective: RabbitProtectiveIcon, playful: RabbitPlayfulIcon, sleepy: RabbitSleepyIcon, eater: RabbitEaterIcon, intimidating: RabbitIntimidatingIcon },
+    bird: { friendly: BirdFriendlyIcon, shy: BirdShyIcon, nervous: BirdNervousIcon, protective: BirdProtectiveIcon, playful: BirdPlayfulIcon, sleepy: BirdSleepyIcon, eater: BirdEaterIcon, intimidating: BirdIntimidatingIcon },
+    cow: { friendly: CowFriendlyIcon, shy: CowShyIcon, nervous: CowNervousIcon, protective: CowProtectiveIcon, playful: CowPlayfulIcon, sleepy: CowSleepyIcon, eater: CowEaterIcon, intimidating: CowIntimidatingIcon },
+    generic: { friendly: GenericFriendlyIcon, shy: GenericShyIcon, nervous: GenericNervousIcon, protective: GenericProtectiveIcon, playful: GenericPlayfulIcon, sleepy: GenericSleepyIcon, eater: GenericEaterIcon, intimidating: GenericIntimidatingIcon },
 };
+
+const normalizeSpeciesForIcons = (species) => {
+    const value = (species || '').toString().trim().toLowerCase();
+    if (['dog', 'perro'].includes(value)) return 'dog';
+    if (['horse', 'caballo', 'equino'].includes(value)) return 'horse';
+    if (['rabbit', 'conejo'].includes(value)) return 'rabbit';
+    if (['bird', 'ave', 'pajaro', 'pájaro', 'loro', 'canario'].includes(value)) return 'bird';
+    if (['cow', 'vaca', 'toro', 'bull', 'bovine', 'bovino'].includes(value)) return 'cow';
+    return 'generic';
+};
+
+const temperamentMeta = (value, display, species) => {
+    const meta = TEMPERAMENT_META[value] || { label: display || value };
+    const speciesKey = normalizeSpeciesForIcons(species);
+    const icon = TEMPERAMENT_ICON_SETS[speciesKey]?.[value] || TEMPERAMENT_ICON_SETS.generic?.[value] || TEMPERAMENT_ICON_SETS.generic.friendly;
+    return { ...meta, label: display || meta.label, icon };
+};
+
+const TEMPERAMENT_OPTIONS = Object.entries(TEMPERAMENT_META).map(([value, meta]) => ({
+    value,
+    label: meta.label,
+}));
 
 const EMPTY_FORM = {
     name: '',
@@ -133,6 +219,7 @@ export default function Pets() {
     const [showModal, setShowModal] = useState(false);
     const [editingPet, setEditingPet] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
+    const [temperamentOpen, setTemperamentOpen] = useState(false);
     const [photoPreview, setPhotoPreview] = useState(null);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -218,6 +305,7 @@ export default function Pets() {
 
     const closeModal = () => {
         setShowModal(false);
+        setTemperamentOpen(false);
         setEditingPet(null);
         setPhotoPreview(null);
         setError('');
@@ -226,6 +314,12 @@ export default function Pets() {
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
+        if (name === 'species') setTemperamentOpen(false);
+    };
+
+    const selectTemperament = (value) => {
+        setForm((prev) => ({ ...prev, temperament: value }));
+        setTemperamentOpen(false);
     };
 
     const handlePhotoChange = (e) => {
@@ -469,10 +563,15 @@ export default function Pets() {
                                                 <span className="pet-chip">🐕 Convive con otros animales</span>
                                             )}
                                             {pet.temperament && (
-                                                <span className="pet-chip">
+                                                <span className="pet-chip pet-chip--temperament">
                                                     {(() => {
-                                                        const meta = temperamentMeta(pet.temperament, pet.temperament_display);
-                                                        return `${meta.emoji} ${meta.label}`;
+                                                        const meta = temperamentMeta(pet.temperament, pet.temperament_display, pet.species);
+                                                        return (
+                                                            <>
+                                                                <img src={meta.icon} alt="" className="pet-temperament-chip-icon" />
+                                                                <span>{meta.label}</span>
+                                                            </>
+                                                        );
                                                     })()}
                                                 </span>
                                             )}
@@ -585,10 +684,12 @@ export default function Pets() {
                                     >
                                         <option value="dog">🐶 Perro</option>
                                         <option value="cat">🐱 Gato</option>
+                                        <option value="horse">🐴 Caballo</option>
                                         <option value="bird">🦜 Ave</option>
                                         <option value="rabbit">🐰 Conejo</option>
+                                        <option value="cow">🐮 Vaca / Toro</option>
                                         <option value="hamster">🐹 Hámster</option>
-                                        <option value="turtle">🐢 Tortuga</option>
+                                        <option value="reptile">🦎 Reptil</option>
                                         <option value="fish">🐟 Pez</option>
                                         <option value="other">🐾 Otro</option>
                                     </select>
@@ -697,21 +798,42 @@ export default function Pets() {
 
                             <div className="form-group full">
                                 <label>Carácter</label>
-                                <select
-                                    name="temperament"
-                                    value={form.temperament}
-                                    onChange={handleChange}
-                                >
-                                    <option value="">— Seleccioná —</option>
-                                    <option value="friendly">😊 Amigable</option>
-                                    <option value="shy">🙈 Tímido</option>
-                                    <option value="nervous">😰 Nervioso</option>
-                                    <option value="protective">🛡️ Protector</option>
-                                    <option value="playful">🎾 Juguetón</option>
-                                    <option value="sleepy">😴 Dormilón</option>
-                                    <option value="eater">🍽️ Comilón</option>
-                                    <option value="intimidating">😤 Intimidante</option>
-                                </select>
+                                <div className="temperament-picker">
+                                    <button
+                                        type="button"
+                                        className="temperament-trigger"
+                                        onClick={() => setTemperamentOpen((open) => !open)}
+                                    >
+                                        {form.temperament ? (() => {
+                                            const meta = temperamentMeta(form.temperament, null, form.species);
+                                            return (
+                                                <>
+                                                    <img src={meta.icon} alt="" className="temperament-trigger-icon" />
+                                                    <span>{meta.label}</span>
+                                                </>
+                                            );
+                                        })() : <span className="temperament-placeholder">— Seleccioná —</span>}
+                                        <span className="temperament-chevron">⌄</span>
+                                    </button>
+                                    {temperamentOpen && (
+                                        <div className="temperament-menu">
+                                            {TEMPERAMENT_OPTIONS.map((option) => {
+                                                const meta = temperamentMeta(option.value, option.label, form.species);
+                                                return (
+                                                    <button
+                                                        key={option.value}
+                                                        type="button"
+                                                        className={`temperament-option ${form.temperament === option.value ? 'active' : ''}`}
+                                                        onClick={() => selectTemperament(option.value)}
+                                                    >
+                                                        <img src={meta.icon} alt="" className="temperament-option-icon" />
+                                                        <span>{meta.label}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="form-group full">
@@ -1244,6 +1366,18 @@ export default function Pets() {
                     display: inline-flex; align-items: center; gap: 6px;
                 }
 
+                .pet-chip--temperament {
+                    padding-left: 7px;
+                }
+                .pet-temperament-chip-icon {
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 999px;
+                    object-fit: cover;
+                    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.35));
+                    flex-shrink: 0;
+                }
+
                 /* Alerta de alergias */
                 .pet-alert {
                     background: rgba(255,217,61,0.08);
@@ -1459,6 +1593,90 @@ export default function Pets() {
                 }
                 .form-group select { cursor: pointer; appearance: none; }
                 .form-group select option { background: #1a1a2e; }
+
+                .temperament-picker {
+                    position: relative;
+                    z-index: 5;
+                }
+                .temperament-trigger {
+                    width: 100%;
+                    min-height: 52px;
+                    background: rgba(255,255,255,0.06);
+                    border: 1.5px solid rgba(255,255,255,0.10);
+                    border-radius: 10px;
+                    color: #fff;
+                    padding: 8px 12px;
+                    font-family: 'Nunito', sans-serif;
+                    font-size: 0.92rem;
+                    font-weight: 700;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    cursor: pointer;
+                    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+                    text-align: left;
+                }
+                .temperament-trigger:hover,
+                .temperament-trigger:focus {
+                    border-color: #4CAF50;
+                    box-shadow: 0 0 0 3px rgba(76,175,80,0.12);
+                    outline: none;
+                }
+                .temperament-placeholder { color: rgba(255,255,255,0.65); font-weight: 600; }
+                .temperament-trigger-icon,
+                .temperament-option-icon {
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 999px;
+                    object-fit: cover;
+                    flex-shrink: 0;
+                    filter: drop-shadow(0 3px 8px rgba(0,0,0,0.35));
+                }
+                .temperament-chevron {
+                    margin-left: auto;
+                    color: rgba(255,255,255,0.55);
+                    font-size: 1.15rem;
+                    line-height: 1;
+                }
+                .temperament-menu {
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    top: calc(100% + 7px);
+                    background: #16162a;
+                    border: 1px solid rgba(76,175,80,0.36);
+                    border-radius: 14px;
+                    padding: 8px;
+                    box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 7px;
+                    max-height: 280px;
+                    overflow: auto;
+                    z-index: 70;
+                }
+                .temperament-option {
+                    background: rgba(255,255,255,0.045);
+                    border: 1px solid rgba(255,255,255,0.07);
+                    color: rgba(255,255,255,0.88);
+                    border-radius: 12px;
+                    padding: 7px 9px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                    font-family: 'Nunito', sans-serif;
+                    font-size: 0.9rem;
+                    font-weight: 800;
+                    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+                    text-align: left;
+                }
+                .temperament-option:hover,
+                .temperament-option.active {
+                    background: rgba(76,175,80,0.12);
+                    border-color: rgba(76,175,80,0.42);
+                    transform: translateY(-1px);
+                }
                 .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(255,255,255,0.2); }
                 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
                     border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76,175,80,0.12);
@@ -1544,6 +1762,9 @@ export default function Pets() {
                         max-height: 92vh; border-bottom: none;
                     }
                     .modal-header h2 { font-size: 1.15rem; }
+
+                    .temperament-menu { grid-template-columns: 1fr; max-height: 240px; }
+                    .temperament-trigger-icon, .temperament-option-icon { width: 30px; height: 30px; }
 
                     /* Formulario: todos los fields en columna */
                     .form-row { flex-direction: column; gap: 10px; }
