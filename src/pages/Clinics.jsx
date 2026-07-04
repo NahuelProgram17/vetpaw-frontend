@@ -5,6 +5,14 @@ import { getClinics, joinClinic } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import ownerBg from "../assets/vetpaw-owner-bg.png";
+import dashboardClinicsIcon from "../assets/vetpaw-dashboard-icons/dashboard-clinics.png";
+import dashboardAppointmentsIcon from "../assets/vetpaw-dashboard-icons/dashboard-appointments.png";
+import dashboardNextAppointmentIcon from "../assets/vetpaw-dashboard-icons/dashboard-next-appointment.png";
+import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
+import dashboardVaccinesIcon from "../assets/vetpaw-dashboard-icons/dashboard-vaccines.png";
+import stethoscopeIcon from "../assets/vetpaw-icons/stethoscope.png";
+import healthHeartIcon from "../assets/vetpaw-icons/health-heart.png";
+import reminderBellIcon from "../assets/vetpaw-icons/reminder-bell.png";
 
 const SERVICE_LABELS = {
     dogs: { label: 'Perros', emoji: '🐶' },
@@ -23,7 +31,16 @@ const SERVICE_LABELS = {
 
 const SPECIES_KEYS = ['dogs', 'cats', 'rabbits', 'birds', 'horses', 'exotic'];
 
-
+function VPIcon({ src, alt = '', className = '' }) {
+    return (
+        <img
+            src={src}
+            alt={alt}
+            className={`vp-custom-icon ${className}`.trim()}
+            aria-hidden={!alt}
+        />
+    );
+}
 
 function OwnerPawIcon() {
     return (
@@ -229,17 +246,17 @@ export default function Clinics() {
                 <section className="hero">
                     <div className="hero-left">
                         <div className="hero-eyebrow">
-                            <span className="eyebrow-icon">🏥</span>
+                            <VPIcon src={dashboardClinicsIcon} className="eyebrow-img" />
                             RED DE CENTROS VETERINARIOS
                         </div>
-                        <div className="owner-hero-title-row"><OwnerVetIcon /><h1 className="hero-title owner-gradient-title">Veterinarias</h1></div>
+                        <div className="owner-hero-title-row"><VPIcon src={dashboardClinicsIcon} className="hero-title-icon" /><h1 className="hero-title owner-gradient-title">Veterinarias</h1></div>
                         <p className="hero-subtitle">
                             Encontrá clínicas veterinarias de confianza cerca tuyo.
                             <br />Atención profesional para el bienestar de tu mascota.
                         </p>
                         <div className="hero-chips">
                             <span className="hero-chip">
-                                <span className="chip-icon">🏥</span>
+                                <VPIcon src={dashboardClinicsIcon} className="chip-img" />
                                 {clinics.length} clínica{clinics.length !== 1 ? 's' : ''} disponible{clinics.length !== 1 ? 's' : ''}
                             </span>
                             {lastUpdate && (
@@ -250,13 +267,13 @@ export default function Clinics() {
                             )}
                             {locationStatus === 'ok' && (
                                 <span className="hero-chip chip-ok">
-                                    <span className="chip-icon">📍</span>
+                                    <span className="chip-icon chip-pin">●</span>
                                     Ubicación detectada
                                 </span>
                             )}
                             {locationStatus === 'denied' && (
                                 <span className="hero-chip chip-warn">
-                                    <span className="chip-icon">📍</span>
+                                    <span className="chip-icon chip-pin">●</span>
                                     Sin ubicación — todas las clínicas
                                 </span>
                             )}
@@ -265,7 +282,7 @@ export default function Clinics() {
                     <div className="hero-right">
                         <HeroIllustration />
                         <button className="hero-cta" onClick={() => navigate('/appointments/new')}>
-                            <span className="cta-icon">📅</span>
+                            <VPIcon src={dashboardAppointmentsIcon} className="cta-img" />
                             <span className="cta-text">
                                 <span className="cta-title">Sacar turno</span>
                                 <span className="cta-sub">Reservá ahora</span>
@@ -294,14 +311,14 @@ export default function Clinics() {
                         onClick={() => setFilter24h(!filter24h)}
                         title="Solo veterinarias 24hs"
                     >
-                        <span>🕐 24hs</span>
+                        <span className="filter-label-with-icon"><VPIcon src={dashboardNextAppointmentIcon} className="filter-img" />24hs</span>
                         <span className={`switch ${filter24h ? 'on' : ''}`}>
                             <span className="switch-knob" />
                         </span>
                     </button>
 
                     <div className="filter-select">
-                        <span className="select-icon">🐕</span>
+                        <VPIcon src={dashboardPetsIcon} className="select-img" />
                         <select value={filterSpecies} onChange={(e) => setFilterSpecies(e.target.value)}>
                             <option value="">Todas las especies</option>
                             {availableSpecies.map((s) => (
@@ -314,7 +331,7 @@ export default function Clinics() {
                     </div>
 
                     <div className="filter-select">
-                        <span className="select-icon">🩺</span>
+                        <VPIcon src={stethoscopeIcon} className="select-img" />
                         <select value={filterService} onChange={(e) => setFilterService(e.target.value)}>
                             <option value="">Todos los servicios</option>
                             {availableServices.map((s) => (
@@ -348,7 +365,7 @@ export default function Clinics() {
 
                 {!loading && filtered.length === 0 && (
                     <div className="empty-state">
-                        <span className="empty-emoji">🏥</span>
+                        <VPIcon src={dashboardClinicsIcon} className="empty-img" />
                         <h2>Sin resultados</h2>
                         <p>
                             {hasActiveFilters
@@ -376,7 +393,7 @@ export default function Clinics() {
                                         {clinic.logo ? (
                                             <img src={clinic.logo} alt={clinic.name} />
                                         ) : (
-                                            <ClinicSvgPlaceholder />
+                                            <VPIcon src={dashboardClinicsIcon} className="clinic-placeholder-img" alt={`${clinic.name} logo`} />
                                         )}
                                     </div>
                                     <div className="card-head-info">
@@ -436,7 +453,7 @@ export default function Clinics() {
                                 <div className="clinic-details">
                                     {(clinic.address || clinic.locality || clinic.province) && (
                                         <div className="clinic-detail">
-                                            <span className="detail-icon">📍</span>
+                                            <span className="detail-icon detail-dot">●</span>
                                             <span>
                                                 {[clinic.address, clinic.locality, clinic.province]
                                                     .filter(Boolean).join(', ')}
@@ -445,19 +462,19 @@ export default function Clinics() {
                                     )}
                                     {clinic.phone && (
                                         <div className="clinic-detail">
-                                            <span className="detail-icon">📞</span>
+                                            <span className="detail-icon detail-phone">☎</span>
                                             <a href={`tel:${clinic.phone}`}>{clinic.phone}</a>
                                         </div>
                                     )}
                                     {clinic.email && (
                                         <div className="clinic-detail">
-                                            <span className="detail-icon">✉️</span>
+                                            <span className="detail-icon detail-mail">✉</span>
                                             <a href={`mailto:${clinic.email}`}>{clinic.email}</a>
                                         </div>
                                     )}
                                     {clinic.members_count > 0 && (
                                         <div className="clinic-detail">
-                                            <span className="detail-icon">👥</span>
+                                            <span className="detail-icon detail-members">●</span>
                                             <span>
                                                 {clinic.members_count} miembro{clinic.members_count !== 1 ? 's' : ''}
                                             </span>
@@ -470,14 +487,14 @@ export default function Clinics() {
                                         className="btn-perfil"
                                         onClick={() => navigate(`/clinicas/${clinic.slug}`)}
                                     >
-                                        👁 Ver perfil
+                                        Ver perfil
                                     </button>
                                     <button
                                         className="btn-turno"
                                         onClick={() => navigate('/appointments/new')}
                                         disabled={!clinic.is_active}
                                     >
-                                        🗓️ Sacar turno
+                                        <VPIcon src={dashboardAppointmentsIcon} className="btn-inline-img" /> Sacar turno
                                     </button>
                                     {user?.role === 'owner' && (
                                         clinic.is_member ? (
@@ -490,7 +507,7 @@ export default function Clinics() {
                                                 onClick={() => handleJoin(clinic.id)}
                                                 disabled={joining === clinic.id || !clinic.is_active}
                                             >
-                                                {joining === clinic.id ? 'Asociando…' : '🔗 Asociarse'}
+                                                {joining === clinic.id ? 'Asociando…' : 'Asociarse'}
                                             </button>
                                         )
                                     )}
@@ -544,13 +561,13 @@ export default function Clinics() {
                 {/* ─── Banda de confianza ─── */}
                 {!loading && clinics.length > 0 && (
                     <section className="trust-band">
-                        <TrustItem icon="🛡" iconColor="#4CAF50" title="Tu mascota en buenas manos"
+                        <TrustItem iconSrc={healthHeartIcon} iconColor="#4CAF50" title="Tu mascota en buenas manos"
                             sub="Todos los centros son verificados por VetPaw para garantizar atención de calidad." />
-                        <TrustItem icon="👨‍⚕️" iconColor="#FF9800" title="Profesionales"
+                        <TrustItem iconSrc={stethoscopeIcon} iconColor="#FF9800" title="Profesionales"
                             sub="Veterinarios matriculados" />
-                        <TrustItem icon="💚" iconColor="#ef5350" title="Atención 24/7"
+                        <TrustItem iconSrc={reminderBellIcon} iconColor="#ef5350" title="Atención 24/7"
                             sub="Urgencias y emergencias" />
-                        <TrustItem icon="🔒" iconColor="#6bcaff" title="Seguridad"
+                        <TrustItem iconSrc={dashboardVaccinesIcon} iconColor="#6bcaff" title="Seguridad"
                             sub="Centros verificados" />
                     </section>
                 )}
@@ -564,50 +581,19 @@ export default function Clinics() {
 // ─── Sub-componentes ───
 function HeroIllustration() {
     return (
-        <svg className="hero-illu" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs>
-                <linearGradient id="houseG" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgba(76,175,80,0.18)" />
-                    <stop offset="100%" stopColor="rgba(76,175,80,0)" />
-                </linearGradient>
-                <linearGradient id="pinG" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#4CAF50" />
-                    <stop offset="100%" stopColor="#FF9800" />
-                </linearGradient>
-            </defs>
-            {/* Casa 1 */}
-            <g opacity="0.55">
-                <polygon points="40,90 80,55 120,90" fill="none" stroke="rgba(76,175,80,0.4)" strokeWidth="1.5" />
-                <rect x="50" y="90" width="60" height="55" fill="none" stroke="rgba(76,175,80,0.4)" strokeWidth="1.5" />
-                <rect x="72" y="115" width="16" height="30" fill="none" stroke="rgba(76,175,80,0.4)" strokeWidth="1.5" />
-                <rect x="58" y="100" width="10" height="10" fill="none" stroke="rgba(76,175,80,0.4)" strokeWidth="1.5" />
-                <rect x="92" y="100" width="10" height="10" fill="none" stroke="rgba(76,175,80,0.4)" strokeWidth="1.5" />
-                <line x1="76" y1="72" x2="76" y2="60" stroke="rgba(255,152,0,0.5)" strokeWidth="1.5" />
-                <rect x="72" y="55" width="10" height="6" fill="rgba(255,152,0,0.5)" />
-            </g>
-            {/* Casa 2 (grande, atrás) */}
-            <g opacity="0.4">
-                <polygon points="140,80 190,40 240,80" fill="none" stroke="rgba(107,202,255,0.45)" strokeWidth="1.5" />
-                <rect x="150" y="80" width="80" height="65" fill="none" stroke="rgba(107,202,255,0.45)" strokeWidth="1.5" />
-                <rect x="180" y="105" width="20" height="40" fill="none" stroke="rgba(107,202,255,0.45)" strokeWidth="1.5" />
-                <rect x="158" y="90" width="14" height="14" fill="none" stroke="rgba(107,202,255,0.45)" strokeWidth="1.5" />
-                <rect x="208" y="90" width="14" height="14" fill="none" stroke="rgba(107,202,255,0.45)" strokeWidth="1.5" />
-                {/* cruz médica */}
-                <rect x="186" y="55" width="8" height="20" fill="rgba(76,175,80,0.7)" />
-                <rect x="180" y="61" width="20" height="8" fill="rgba(76,175,80,0.7)" />
-            </g>
-            {/* Pin GPS grande */}
-            <g transform="translate(252,30)">
-                <path d="M 0,0 C -16,0 -25,12 -25,28 C -25,46 0,72 0,72 C 0,72 25,46 25,28 C 25,12 16,0 0,0 Z"
-                    fill="url(#pinG)" />
-                <circle cx="0" cy="28" r="9" fill="#0a121d" />
-            </g>
-            {/* Detallitos decorativos */}
-            <circle cx="30" cy="30" r="1.5" fill="rgba(76,175,80,0.6)" />
-            <circle cx="290" cy="120" r="1.5" fill="rgba(255,152,0,0.6)" />
-            <circle cx="180" cy="20" r="1.5" fill="rgba(107,202,255,0.6)" />
-            <circle cx="120" cy="160" r="1.5" fill="rgba(167,139,250,0.6)" />
-        </svg>
+        <div className="hero-illu hero-icon-showcase" aria-hidden="true">
+            <div className="hero-icon-orbit orbit-main">
+                <VPIcon src={dashboardClinicsIcon} className="hero-art-clinic" />
+            </div>
+            <div className="hero-icon-orbit orbit-appointment">
+                <VPIcon src={dashboardAppointmentsIcon} className="hero-art-small" />
+            </div>
+            <div className="hero-icon-orbit orbit-pets">
+                <VPIcon src={dashboardPetsIcon} className="hero-art-small" />
+            </div>
+            <span className="hero-spark s1">✦</span>
+            <span className="hero-spark s2">✦</span>
+        </div>
     );
 }
 
@@ -631,11 +617,11 @@ function ClinicSvgPlaceholder() {
     );
 }
 
-function TrustItem({ icon, iconColor, title, sub }) {
+function TrustItem({ iconSrc, iconColor, title, sub }) {
     return (
         <div className="trust-item">
             <span className="trust-icon" style={{ color: iconColor, background: `${iconColor}15` }}>
-                {icon}
+                <VPIcon src={iconSrc} className="trust-img" />
             </span>
             <div className="trust-text">
                 <div className="trust-title">{title}</div>
@@ -721,6 +707,65 @@ const styles = `
     vertical-align: middle;
 }
 .owner-icon-badge svg { width: 30px; height: 30px; display: block; }
+.vp-custom-icon {
+    display: inline-block;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,.28));
+    vertical-align: middle;
+}
+.hero-title-icon {
+    width: 62px;
+    height: 62px;
+    padding: 7px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(76,175,80,.16), rgba(255,152,0,.12));
+    border: 1px solid rgba(255,255,255,.10);
+}
+.eyebrow-img { width: 25px; height: 25px; margin-right: 8px; }
+.chip-img { width: 18px; height: 18px; margin-right: 5px; }
+.filter-img, .select-img { width: 23px; height: 23px; flex: 0 0 auto; }
+.filter-label-with-icon { display: inline-flex; align-items: center; gap: 7px; }
+.cta-img { width: 42px; height: 42px; }
+.btn-inline-img { width: 25px; height: 25px; margin-right: 4px; }
+.empty-img { width: 96px; height: 96px; }
+.clinic-placeholder-img { width: 68px; height: 68px; }
+.trust-img { width: 42px; height: 42px; }
+.hero-icon-showcase {
+    position: relative;
+    min-height: 180px;
+    display: grid;
+    place-items: center;
+}
+.hero-icon-showcase::before {
+    content: '';
+    position: absolute;
+    width: 220px;
+    height: 150px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(76,175,80,.17), rgba(255,152,0,.08), transparent 72%);
+    filter: blur(2px);
+}
+.hero-icon-orbit {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    border-radius: 24px;
+    background: linear-gradient(145deg, rgba(15,28,44,.86), rgba(8,17,31,.72));
+    border: 1px solid rgba(255,255,255,.09);
+    box-shadow: 0 18px 45px rgba(0,0,0,.24), inset 0 0 24px rgba(255,255,255,.035);
+}
+.orbit-main { width: 138px; height: 126px; }
+.orbit-appointment { width: 72px; height: 72px; right: 22px; top: 16px; }
+.orbit-pets { width: 64px; height: 64px; left: 28px; bottom: 18px; }
+.hero-art-clinic { width: 96px; height: 96px; }
+.hero-art-small { width: 48px; height: 48px; }
+.hero-spark { position: absolute; color: #ffb23d; font-size: 18px; filter: drop-shadow(0 0 12px rgba(255,152,0,.7)); }
+.hero-spark.s1 { top: 20px; left: 44px; color: #70db70; }
+.hero-spark.s2 { bottom: 26px; right: 50px; }
+.chip-pin, .detail-dot, .detail-members { color: #FF9800; text-shadow: 0 0 12px rgba(255,152,0,.35); }
+.detail-phone { color: #ef5350; }
+.detail-mail { color: #6bcaff; }
+
 .owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
  .owner-gradient-title,

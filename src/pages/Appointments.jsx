@@ -5,6 +5,10 @@ import { getAppointments, createAppointment, updateAppointment, cancelAppointmen
 import api from "../services/api";
 import ownerBg from "../assets/vetpaw-owner-bg.png";
 import dashboardAppointmentsIcon from "../assets/vetpaw-dashboard-icons/dashboard-appointments.png";
+import appointmentUpcomingIcon from "../assets/vetpaw-appointment-icons/appointment-upcoming.png";
+import appointmentPastIcon from "../assets/vetpaw-appointment-icons/appointment-past.png";
+import appointmentConfirmedIcon from "../assets/vetpaw-appointment-icons/appointment-confirmed.png";
+import appointmentCancelledIcon from "../assets/vetpaw-appointment-icons/appointment-cancelled.png";
 
 const STATUS_LABEL = {
     pending:   { label: "Pendiente",  color: "#ffd93d" },
@@ -271,13 +275,15 @@ export default function Appointments() {
                 {appointments.length > 0 && (
                     <div className="appts-stats">
                         {[
-                            { ic: "🗓️", c: "#4CAF50", val: upcoming.length, t: "Próximos", s: "Turnos futuros" },
-                            { ic: "⏱️", c: "#6bcaff", val: past.length, t: "Pasados", s: "Turnos anteriores" },
-                            { ic: "✅", c: "#4CAF50", val: cConfirmed, t: "Confirmados", s: "Turnos confirmados" },
-                            { ic: "✖️", c: "#ff6b6b", val: cCancelled, t: "Cancelados", s: "Turnos cancelados" },
+                            { icon: appointmentUpcomingIcon, c: "#4CAF50", val: upcoming.length, t: "Próximos", s: "Turnos futuros" },
+                            { icon: appointmentPastIcon, c: "#6bcaff", val: past.length, t: "Pasados", s: "Turnos anteriores" },
+                            { icon: appointmentConfirmedIcon, c: "#4CAF50", val: cConfirmed, t: "Confirmados", s: "Turnos confirmados" },
+                            { icon: appointmentCancelledIcon, c: "#ff6b6b", val: cCancelled, t: "Cancelados", s: "Turnos cancelados" },
                         ].map((x, i) => (
-                            <div key={i} className="appt-scard" style={{ display: "flex", alignItems: "center", gap: 13 }}>
-                                <div style={{ width: 46, height: 46, borderRadius: 12, background: `${x.c}22`, border: `1px solid ${x.c}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 21, flexShrink: 0 }}>{x.ic}</div>
+                            <div key={i} className="appt-scard appt-scard--icon">
+                                <div className="appt-stat-icon-shell" style={{ background: `${x.c}18`, borderColor: `${x.c}55` }}>
+                                    <img src={x.icon} alt="" className="appt-stat-icon-img" />
+                                </div>
                                 <div>
                                     <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{x.val}</div>
                                     <div style={{ fontSize: 13, fontWeight: 800, marginTop: 3 }}>{x.t}</div>
@@ -732,6 +738,9 @@ export default function Appointments() {
                 .appts-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
                 .appts-side { display: flex; flex-direction: column; gap: 16px; }
                 .appt-scard { background: #16212f; border: 1.5px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px; color: #fff; }
+                .appt-scard--icon { display:flex; align-items:center; gap:14px; }
+                .appt-stat-icon-shell { width:56px; height:56px; border-radius:16px; border:1px solid; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.18); }
+                .appt-stat-icon-img { width:52px; height:52px; object-fit:contain; display:block; filter: drop-shadow(0 5px 9px rgba(0,0,0,.38)); }
                 @media (max-width: 1000px) { .appts-layout { grid-template-columns: 1fr; } .appts-stats { grid-template-columns: repeat(2, 1fr); } }
                 @media (max-width: 520px) { .appts-stats { grid-template-columns: 1fr; } }
 
