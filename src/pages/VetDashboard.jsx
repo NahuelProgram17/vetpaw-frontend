@@ -108,6 +108,43 @@ function getAgendaDayLabel(value) {
   return "Agenda";
 }
 
+function startOfLocalDay(value) {
+  const d = new Date(value);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function addDays(value, amount) {
+  const d = new Date(value);
+  d.setDate(d.getDate() + amount);
+  return d;
+}
+
+function startOfWeek(value) {
+  const d = startOfLocalDay(value);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+
+function isSameDay(a, b) {
+  const da = new Date(a);
+  const db = new Date(b);
+  return da.getFullYear() === db.getFullYear() && da.getMonth() === db.getMonth() && da.getDate() === db.getDate();
+}
+
+function buildMonthDays(value) {
+  const first = new Date(value.getFullYear(), value.getMonth(), 1);
+  const start = startOfWeek(first);
+  return Array.from({ length: 42 }, (_, idx) => addDays(start, idx));
+}
+
+function formatAgendaRange(start, end) {
+  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+  if (sameMonth) return `${formatDate(start, { day: "numeric" })} – ${formatDate(end, { day: "numeric", month: "long", year: "numeric" })}`;
+  return `${formatDate(start, { day: "numeric", month: "short" })} – ${formatDate(end, { day: "numeric", month: "short", year: "numeric" })}`;
+}
+
 function getAppointmentReason(appt) {
   return appt.appointment_type_display || appt.reason || "Consulta";
 }
@@ -221,6 +258,7 @@ export default function ClinicDashboard() {
   const [scheduleLoading, setScheduleLoading] = useState(false);
   const [filter, setFilter] = useState("pending");
   const [agendaDate, setAgendaDate] = useState(new Date());
+  const [agendaView, setAgendaView] = useState("day");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPet, setSelectedPet] = useState(null);
   const [visitForm, setVisitForm] = useState(EMPTY_VISIT);
@@ -796,9 +834,9 @@ export default function ClinicDashboard() {
 
         <nav className="vp-tabs" aria-label="Secciones del panel veterinario">
           <button className={tab === "turnos" ? "active" : ""} onClick={() => setTab("turnos")}>📅 Turnos</button>
+          <button className={tab === "mi-agenda" ? "active" : ""} onClick={() => setTab("mi-agenda")}>🗓 Mi Agenda</button>
           <button className={tab === "pacientes" ? "active" : ""} onClick={() => setTab("pacientes")}>🐾 Pacientes</button>
           <button className={tab === "fotos" ? "active" : ""} onClick={() => setTab("fotos")}>📷 Fotos</button>
-          <button className={tab === "mi-agenda" ? "active" : ""} onClick={() => setTab("mi-agenda")}>🗓 Mi Agenda</button>
         </nav>
 
         {loading ? (
@@ -821,6 +859,32 @@ export default function ClinicDashboard() {
                 openVisitModal={openVisitModal}
                 setHighlightedAppt={setHighlightedAppt}
                 highlightedAppt={highlightedAppt}
+                onOpenFullAgenda={(view = "day") => {
+                  setAgendaView(view);
+                  setTab("mi-agenda");
+                }}
+              />
+            )}
+
+            {tab === "mi-agenda" && (
+              <AgendaManagerTab
+                appointments={appointments}
+                agendaDate={agendaDate}
+                setAgendaDate={setAgendaDate}
+                agendaView={agendaView}
+                setAgendaView={setAgendaView}
+                downloadAgendaPDF={downloadAgendaPDF}
+                schedule={schedule}
+                scheduleLoading={scheduleLoading}
+                scheduleSaving={scheduleSaving}
+                toggleWorkingDay={toggleWorkingDay}
+                updateDayHour={updateDayHour}
+                setSchedule={setSchedule}
+                saveSchedule={saveSchedule}
+                externalForm={externalForm}
+                setExternalForm={setExternalForm}
+                externalSaving={externalSaving}
+                addExternalAppointment={addExternalAppointment}
               />
             )}
 
@@ -862,22 +926,6 @@ export default function ClinicDashboard() {
                 fileInputRef={fileInputRef}
                 handlePhotoUpload={handlePhotoUpload}
                 deletePhoto={deletePhoto}
-              />
-            )}
-
-            {tab === "mi-agenda" && (
-              <AgendaConfigTab
-                schedule={schedule}
-                scheduleLoading={scheduleLoading}
-                scheduleSaving={scheduleSaving}
-                toggleWorkingDay={toggleWorkingDay}
-                updateDayHour={updateDayHour}
-                setSchedule={setSchedule}
-                saveSchedule={saveSchedule}
-                externalForm={externalForm}
-                setExternalForm={setExternalForm}
-                externalSaving={externalSaving}
-                addExternalAppointment={addExternalAppointment}
               />
             )}
           </>
@@ -923,6 +971,7 @@ function TurnosTab({
   openVisitModal,
   setHighlightedAppt,
   highlightedAppt,
+  onOpenFullAgenda,
 }) {
   return (
     <>
@@ -976,6 +1025,7 @@ function TurnosTab({
             setFilter("all");
             setTimeout(() => document.getElementById(`appt-${appt.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
           }}
+          onOpenFullAgenda={onOpenFullAgenda}
         />
       </div>
     </>
@@ -1209,6 +1259,239 @@ function FotosTab({ photos, photosLoading, photoUploading, photoCaption, setPhot
   );
 }
 
+
+function AgendaManagerTab({
+  appointments,
+  agendaDate,
+  setAgendaDate,
+  agendaView,
+  setAgendaView,
+  downloadAgendaPDF,
+  schedule,
+  scheduleLoading,
+  scheduleSaving,
+  toggleWorkingDay,
+  updateDayHour,
+  setSchedule,
+  saveSchedule,
+  externalForm,
+  setExternalForm,
+  externalSaving,
+  addExternalAppointment,
+}) {
+  const activeAppointments = useMemo(
+    () => appointments.filter((appt) => appt.status !== "cancelled").sort((a, b) => new Date(a.requested_date) - new Date(b.requested_date)),
+    [appointments]
+  );
+  const weekStart = startOfWeek(agendaDate);
+  const weekDays = Array.from({ length: 7 }, (_, idx) => addDays(weekStart, idx));
+  const weekEnd = addDays(weekStart, 6);
+  const monthDays = buildMonthDays(agendaDate);
+  const dayAppointments = activeAppointments.filter((appt) => isSameDay(appt.requested_date, agendaDate));
+  const weekAppointments = activeAppointments.filter((appt) => {
+    const d = startOfLocalDay(appt.requested_date);
+    return d >= weekStart && d <= weekEnd;
+  });
+  const visibleAppointments = agendaView === "month"
+    ? activeAppointments.filter((appt) => new Date(appt.requested_date).getMonth() === agendaDate.getMonth() && new Date(appt.requested_date).getFullYear() === agendaDate.getFullYear())
+    : agendaView === "week" ? weekAppointments : dayAppointments;
+
+  const moveDate = (amount) => {
+    const next = new Date(agendaDate);
+    if (agendaView === "month") next.setMonth(next.getMonth() + amount);
+    else next.setDate(next.getDate() + (agendaView === "week" ? amount * 7 : amount));
+    setAgendaDate(next);
+  };
+
+  const title = agendaView === "month"
+    ? formatDate(agendaDate, { month: "long", year: "numeric" })
+    : agendaView === "week"
+      ? formatAgendaRange(weekStart, weekEnd)
+      : formatDate(agendaDate, { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+
+  if (agendaView === "config") {
+    return (
+      <section className="vp-agenda-manager">
+        <AgendaManagerHeader agendaView={agendaView} setAgendaView={setAgendaView} />
+        <AgendaConfigTab
+          schedule={schedule}
+          scheduleLoading={scheduleLoading}
+          scheduleSaving={scheduleSaving}
+          toggleWorkingDay={toggleWorkingDay}
+          updateDayHour={updateDayHour}
+          setSchedule={setSchedule}
+          saveSchedule={saveSchedule}
+          externalForm={externalForm}
+          setExternalForm={setExternalForm}
+          externalSaving={externalSaving}
+          addExternalAppointment={addExternalAppointment}
+        />
+      </section>
+    );
+  }
+
+  return (
+    <section className="vp-agenda-manager">
+      <AgendaManagerHeader agendaView={agendaView} setAgendaView={setAgendaView} />
+
+      <div className="vp-agenda-toolbar">
+        <div className="vp-agenda-view-tabs">
+          <button className={agendaView === "day" ? "active" : ""} onClick={() => setAgendaView("day")}>Día</button>
+          <button className={agendaView === "week" ? "active" : ""} onClick={() => setAgendaView("week")}>Semana</button>
+          <button className={agendaView === "month" ? "active" : ""} onClick={() => setAgendaView("month")}>Mes</button>
+          <button onClick={() => { setAgendaDate(new Date()); setAgendaView("day"); }}>Hoy</button>
+        </div>
+        <div className="vp-agenda-nav">
+          <button onClick={() => moveDate(-1)}>‹</button>
+          <strong>{title}</strong>
+          <button onClick={() => moveDate(1)}>›</button>
+        </div>
+        <button className="vp-download agenda" onClick={downloadAgendaPDF}>📄 Descargar agenda del día</button>
+      </div>
+
+      <div className="vp-agenda-board">
+        <aside className="vp-agenda-sidebar">
+          <MiniCalendar agendaDate={agendaDate} setAgendaDate={setAgendaDate} appointments={activeAppointments} />
+          <section className="vp-card vp-agenda-summary">
+            <h3>Resumen</h3>
+            <p><b>{visibleAppointments.length}</b> turnos en esta vista</p>
+            <p><span className="dot green" /> {visibleAppointments.filter((a) => a.status === "confirmed").length} confirmados</p>
+            <p><span className="dot orange" /> {visibleAppointments.filter((a) => a.status === "pending").length} pendientes</p>
+            <p><span className="dot blue" /> {visibleAppointments.filter((a) => a.status === "completed").length} realizados</p>
+          </section>
+          <button className="vp-config-shortcut" onClick={() => setAgendaView("config")}>⚙️ Configurar mi agenda</button>
+        </aside>
+
+        {agendaView === "day" && <AgendaDayView appointments={dayAppointments} />}
+        {agendaView === "week" && <AgendaWeekView days={weekDays} appointments={weekAppointments} />}
+        {agendaView === "month" && <AgendaMonthView days={monthDays} currentMonth={agendaDate.getMonth()} appointments={activeAppointments} setAgendaDate={setAgendaDate} setAgendaView={setAgendaView} />}
+      </div>
+    </section>
+  );
+}
+
+function AgendaManagerHeader({ agendaView, setAgendaView }) {
+  return (
+    <div className="vp-page-title vp-agenda-manager-title">
+      <div className="title-icon violet">🗓</div>
+      <div>
+        <h2>Mi Agenda</h2>
+        <p>Visualizá tus turnos por día, semana o mes. La configuración queda guardada aparte.</p>
+      </div>
+      <button className={agendaView === "config" ? "vp-config-pill active" : "vp-config-pill"} onClick={() => setAgendaView(agendaView === "config" ? "week" : "config")}>⚙️ Configurar mi agenda</button>
+    </div>
+  );
+}
+
+function MiniCalendar({ agendaDate, setAgendaDate, appointments }) {
+  const days = buildMonthDays(agendaDate);
+  return (
+    <section className="vp-card vp-mini-calendar">
+      <div className="mini-head">
+        <strong>{formatDate(agendaDate, { month: "long", year: "numeric" })}</strong>
+      </div>
+      <div className="mini-grid labels">{DAY_SHORT.map((d) => <span key={d}>{d}</span>)}</div>
+      <div className="mini-grid">
+        {days.map((day) => {
+          const count = appointments.filter((appt) => isSameDay(appt.requested_date, day)).length;
+          const isActive = isSameDay(day, agendaDate);
+          return (
+            <button key={day.toISOString()} className={`${day.getMonth() !== agendaDate.getMonth() ? "muted" : ""} ${isActive ? "active" : ""}`} onClick={() => setAgendaDate(day)}>
+              {day.getDate()}
+              {count > 0 && <i>{count}</i>}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function AgendaDayView({ appointments }) {
+  return (
+    <section className="vp-card vp-agenda-day-view">
+      <h3>Turnos del día</h3>
+      {appointments.length === 0 ? (
+        <EmptyState icon="🗓" title="Sin turnos este día" text="No hay turnos cargados para esta fecha." compact />
+      ) : (
+        <div className="vp-agenda-table-list">
+          {appointments.map((appt) => <AgendaRow key={appt.id} appt={appt} />)}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function AgendaRow({ appt }) {
+  const meta = STATUS[appt.status] || STATUS.pending;
+  return (
+    <article className={`vp-agenda-row ${meta.className}`}>
+      <strong>{formatTime(appt.requested_date)}</strong>
+      <div className="agenda-patient-dot" />
+      <div>
+        <b>{getPetName(appt)}</b>
+        <span>{appt.owner_name || appt.external_label || "Turno externo"}</span>
+      </div>
+      <div>
+        <b>{getAppointmentReason(appt)}</b>
+        <span>{appt.appointment_type_display || "Consulta"}</span>
+      </div>
+      <span className={`vp-status ${meta.className}`}>{meta.label}</span>
+    </article>
+  );
+}
+
+function AgendaWeekView({ days, appointments }) {
+  return (
+    <section className="vp-card vp-week-calendar">
+      <div className="week-grid">
+        {days.map((day) => (
+          <div className="week-day" key={day.toISOString()}>
+            <div className="week-day-head"><span>{formatDate(day, { weekday: "short" })}</span><b>{day.getDate()}</b></div>
+            <div className="week-events">
+              {appointments.filter((appt) => isSameDay(appt.requested_date, day)).slice(0, 5).map((appt) => (
+                <AgendaEvent key={appt.id} appt={appt} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="vp-agenda-legend"><span className="dot green" /> Control general <span className="dot blue" /> Vacunación <span className="dot violet" /> Consulta <span className="dot orange" /> Otros</div>
+    </section>
+  );
+}
+
+function AgendaMonthView({ days, currentMonth, appointments, setAgendaDate, setAgendaView }) {
+  return (
+    <section className="vp-card vp-month-calendar">
+      <div className="month-grid labels">{DAY_SHORT.map((d) => <span key={d}>{d}</span>)}</div>
+      <div className="month-grid">
+        {days.map((day) => {
+          const dayAppts = appointments.filter((appt) => isSameDay(appt.requested_date, day));
+          return (
+            <button key={day.toISOString()} className={day.getMonth() !== currentMonth ? "muted" : ""} onClick={() => { setAgendaDate(day); setAgendaView("day"); }}>
+              <b>{day.getDate()}</b>
+              {dayAppts.slice(0, 2).map((appt) => <small key={appt.id}>{formatTime(appt.requested_date)} {getPetName(appt)}</small>)}
+              {dayAppts.length > 2 && <em>+{dayAppts.length - 2} más</em>}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function AgendaEvent({ appt }) {
+  const type = (appt.appointment_type || appt.reason || "").toLowerCase();
+  const typeClass = type.includes("vacc") || type.includes("vacun") ? "vaccine" : type.includes("surgery") || type.includes("cirug") ? "surgery" : type.includes("consult") ? "consult" : "control";
+  return (
+    <div className={`vp-week-event ${typeClass}`}>
+      <strong>{formatTime(appt.requested_date)} · {getPetName(appt)}</strong>
+      <span>{getAppointmentReason(appt)}</span>
+    </div>
+  );
+}
+
 function AgendaCalendarArt() {
   return (
     <div className="vp-agenda-art" aria-hidden="true">
@@ -1333,7 +1616,7 @@ function AgendaConfigTab({
   );
 }
 
-function AgendaDayCard({ agendaDate, agendaTurnos, changeAgendaDay, downloadAgendaPDF, onJumpToAppointment }) {
+function AgendaDayCard({ agendaDate, agendaTurnos, changeAgendaDay, downloadAgendaPDF, onJumpToAppointment, onOpenFullAgenda }) {
   return (
     <aside className="vp-card vp-day-card">
       <div className="vp-day-head">
@@ -1376,6 +1659,7 @@ function AgendaDayCard({ agendaDate, agendaTurnos, changeAgendaDay, downloadAgen
         </div>
       )}
       <div className="vp-day-count">{agendaTurnos.length} turno{agendaTurnos.length !== 1 ? "s" : ""} este día</div>
+      <button className="vp-open-agenda" onClick={() => onOpenFullAgenda?.("day")}>🗓 Ver agenda completa</button>
     </aside>
   );
 }
@@ -1562,6 +1846,12 @@ const styles = `
 .vp-completeness{font-size:.78rem!important;padding:5px 10px!important;border-radius:999px!important;white-space:nowrap}
 .vp-completeness.ok{color:#7cff93!important;background:rgba(85,214,107,.12)!important;border-color:rgba(85,214,107,.28)!important}.vp-completeness.warn{color:#ffd273!important;background:rgba(255,173,22,.12)!important;border-color:rgba(255,173,22,.28)!important}
 .vp-agenda-note{grid-column:1/-1;margin:-6px 0 2px;padding:14px 18px;border-radius:18px;background:linear-gradient(135deg,rgba(85,214,107,.10),rgba(69,167,255,.06));border:1px solid rgba(85,214,107,.22);color:rgba(226,235,255,.78);font-weight:800}.vp-agenda-note strong{color:#72e785}
+
+/* Nueva agenda visual + configuración separada */
+.vp-agenda-manager{display:grid;gap:18px}.vp-agenda-manager-title{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px}.vp-config-pill,.vp-config-shortcut,.vp-open-agenda{border:1px solid rgba(85,214,107,.3);background:linear-gradient(135deg,rgba(85,214,107,.13),rgba(69,167,255,.06));color:var(--green);border-radius:14px;padding:12px 16px;font-weight:900;cursor:pointer}.vp-config-pill.active{background:linear-gradient(135deg,var(--green),var(--orange));color:#fff}.vp-open-agenda{width:100%;margin-top:14px}.vp-agenda-toolbar{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}.vp-agenda-view-tabs{display:flex;gap:10px;flex-wrap:wrap}.vp-agenda-view-tabs button,.vp-agenda-nav button{border:1px solid var(--line);background:rgba(255,255,255,.04);color:rgba(255,255,255,.8);border-radius:13px;padding:11px 15px;font-weight:900;cursor:pointer}.vp-agenda-view-tabs button.active{color:var(--green);border-color:rgba(85,214,107,.55);box-shadow:0 0 0 2px rgba(85,214,107,.10)}.vp-agenda-nav{display:flex;align-items:center;justify-content:center;gap:12px}.vp-agenda-nav strong{min-width:260px;text-align:center;text-transform:capitalize}.vp-download.agenda{background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.025));border:1px solid var(--line);color:#fff;white-space:nowrap}.vp-agenda-board{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}.vp-agenda-sidebar{display:grid;gap:14px}.vp-mini-calendar,.vp-agenda-summary,.vp-agenda-day-view,.vp-week-calendar,.vp-month-calendar{padding:18px}.mini-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;text-transform:capitalize}.mini-grid,.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.mini-grid.labels,.month-grid.labels{color:var(--muted);font-size:.78rem;font-weight:900;text-align:center;margin-bottom:8px}.mini-grid button{position:relative;min-height:34px;border:0;border-radius:10px;background:rgba(255,255,255,.035);color:#fff;font-weight:800;cursor:pointer}.mini-grid button.muted{opacity:.35}.mini-grid button.active{background:linear-gradient(135deg,var(--green),var(--orange));color:#06101f}.mini-grid button i{position:absolute;right:4px;top:3px;width:14px;height:14px;border-radius:50%;display:grid;place-items:center;background:rgba(69,167,255,.85);font-size:.6rem;font-style:normal}.vp-agenda-summary h3,.vp-agenda-day-view h3{margin:0 0 12px}.vp-agenda-summary p{margin:8px 0;color:var(--muted)}.vp-agenda-summary b{color:#fff;font-size:1.6rem}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:8px}.dot.green{background:var(--green)}.dot.orange{background:var(--orange)}.dot.blue{background:var(--blue)}.dot.violet{background:var(--violet)}.vp-agenda-table-list{display:grid;gap:10px}.vp-agenda-row{display:grid;grid-template-columns:76px 12px 1fr 1fr auto;gap:14px;align-items:center;padding:14px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid var(--line)}.vp-agenda-row>strong{font-size:1.1rem}.agenda-patient-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 18px rgba(85,214,107,.55)}.vp-agenda-row div b{display:block}.vp-agenda-row div span{display:block;color:var(--muted);font-size:.86rem}.week-grid{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:10px;min-height:560px}.week-day{border:1px solid rgba(148,189,255,.13);border-radius:18px;background:rgba(255,255,255,.025);overflow:hidden}.week-day-head{padding:12px;border-bottom:1px solid rgba(148,189,255,.12);display:flex;justify-content:space-between;align-items:center;text-transform:capitalize}.week-day-head b{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(85,214,107,.13);color:var(--green)}.week-events{padding:10px;display:grid;gap:8px}.vp-week-event{padding:10px;border-radius:12px;border-left:3px solid var(--green);background:rgba(85,214,107,.09);text-align:left}.vp-week-event.vaccine{border-left-color:var(--blue);background:rgba(69,167,255,.09)}.vp-week-event.surgery{border-left-color:var(--red);background:rgba(255,77,104,.08)}.vp-week-event.consult{border-left-color:var(--violet);background:rgba(167,124,255,.08)}.vp-week-event strong{display:block;font-size:.82rem}.vp-week-event span{display:block;color:var(--muted);font-size:.76rem;margin-top:3px}.vp-agenda-legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);font-weight:800;margin-top:14px}.month-grid button{min-height:116px;text-align:left;border:1px solid rgba(148,189,255,.12);border-radius:14px;background:rgba(255,255,255,.025);color:#fff;padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:4px}.month-grid button.muted{opacity:.38}.month-grid button b{color:var(--green)}.month-grid button small{background:rgba(69,167,255,.09);border-left:3px solid var(--blue);border-radius:8px;padding:4px 6px;color:rgba(255,255,255,.86);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.month-grid button em{color:var(--orange);font-style:normal;font-size:.78rem;font-weight:900}.vp-agenda-config .vp-page-title{display:none}
+
+@media (max-width:1100px){.vp-agenda-toolbar{grid-template-columns:1fr}.vp-agenda-board{grid-template-columns:1fr}.week-grid{overflow:auto;grid-template-columns:repeat(7,210px)}.vp-agenda-manager-title{grid-template-columns:auto 1fr}.vp-config-pill{grid-column:1/-1;width:100%}}
+@media (max-width:680px){.vp-agenda-row{grid-template-columns:64px 8px 1fr;align-items:start}.vp-agenda-row>div:nth-of-type(2),.vp-agenda-row>.vp-status{grid-column:3/-1}.month-grid button{min-height:90px;padding:8px}.vp-agenda-nav strong{min-width:0}.vp-agenda-toolbar{gap:10px}}
 
 @media (max-width:1000px){.vp-hero{grid-template-columns:1fr}.vp-turnos-grid{grid-template-columns:1fr}.vp-metrics.turnos,.vp-metrics.patients{grid-template-columns:repeat(2,1fr)}.vp-pet-actions{grid-template-columns:1fr 1fr}.vp-photo-grid{grid-template-columns:repeat(2,1fr)}.vp-detail-grid{grid-template-columns:1fr}.vp-duration-list.two{grid-template-columns:1fr}}@media (max-width:680px){.vp-page{padding:24px 12px 60px}.vp-hero h1{font-size:2.1rem}.vp-tabs{overflow:auto;gap:16px}.vp-metrics.turnos,.vp-metrics.patients,.vp-search-row{grid-template-columns:1fr}.vp-pet-card{grid-template-columns:1fr}.vp-pet-photo{height:220px}.vp-pet-chips{grid-template-columns:1fr}.vp-pet-actions{grid-template-columns:1fr}.vp-hour-row{grid-template-columns:1fr 1fr}.vp-duration-list label{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
 
