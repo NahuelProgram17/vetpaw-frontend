@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getPets, createPet, updatePet, deletePet, createTreatment, deleteTreatment } from '../services/api';
 import ownerBg from "../assets/vetpaw-owner-bg.png";
 import VetPawLoader from "../components/VetPawLoader";
+import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
 
 const TREATMENT_TYPES = [
     { value: 'deworming', label: 'Desparasitación', emoji: '🛡️' },
@@ -85,12 +86,8 @@ const EMPTY_FORM = {
 
 function OwnerPawIcon() {
     return (
-        <span className="owner-icon-badge" aria-hidden="true">
-            <svg viewBox="0 0 64 64" fill="none">
-                <path d="M22 34c3-5 6-7 10-7s7 2 10 7l5 8c3 5 0 11-6 11H23c-6 0-9-6-6-11l5-8Z" fill="url(#pawBody)" stroke="rgba(255,255,255,.48)" strokeWidth="2"/>
-                <circle cx="18" cy="24" r="6" fill="#FF9800"/><circle cx="30" cy="17" r="6" fill="#4CAF50"/><circle cx="44" cy="24" r="6" fill="#6bcaff"/><circle cx="50" cy="36" r="5" fill="#FFB74D"/>
-                <defs><linearGradient id="pawBody" x1="16" y1="25" x2="49" y2="54"><stop stopColor="#4CAF50"/><stop offset="1" stopColor="#FF9800"/></linearGradient></defs>
-            </svg>
+        <span className="owner-icon-badge owner-icon-badge--image" aria-hidden="true">
+            <img src={dashboardPetsIcon} alt="" className="owner-title-icon-img" />
         </span>
     );
 }
@@ -963,6 +960,8 @@ export default function Pets() {
     vertical-align: middle;
 }
 .owner-icon-badge svg { width: 30px; height: 30px; display: block; }
+.owner-icon-badge--image { overflow: hidden; }
+.owner-title-icon-img { width: 38px; height: 38px; object-fit: contain; display: block; filter: drop-shadow(0 8px 16px rgba(0,0,0,.28)); }
 .owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
  .owner-gradient-title,

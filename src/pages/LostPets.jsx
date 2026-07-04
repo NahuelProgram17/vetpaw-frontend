@@ -3,6 +3,10 @@ import { useAuth } from '../context/AuthContext'
 import { useState, useRef, useEffect } from 'react'
 import api from '../services/api'
 import ownerBg from "../assets/vetpaw-owner-bg.png";
+import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
+import lostSearchIcon from "../assets/vetpaw-lost-icons/lost-search.png";
+import lostFoundIcon from "../assets/vetpaw-lost-icons/lost-found.png";
+import lostReportsIcon from "../assets/vetpaw-lost-icons/lost-reports.png";
 
 // ───────────────────────── Tokens de diseño
 const BG = "#0a121d"
@@ -58,12 +62,8 @@ const speciesEmoji = (s) => {
 
 function OwnerPawIcon() {
     return (
-        <span className="owner-icon-badge" aria-hidden="true">
-            <svg viewBox="0 0 64 64" fill="none">
-                <path d="M22 34c3-5 6-7 10-7s7 2 10 7l5 8c3 5 0 11-6 11H23c-6 0-9-6-6-11l5-8Z" fill="url(#pawBody)" stroke="rgba(255,255,255,.48)" strokeWidth="2"/>
-                <circle cx="18" cy="24" r="6" fill="#FF9800"/><circle cx="30" cy="17" r="6" fill="#4CAF50"/><circle cx="44" cy="24" r="6" fill="#6bcaff"/><circle cx="50" cy="36" r="5" fill="#FFB74D"/>
-                <defs><linearGradient id="pawBody" x1="16" y1="25" x2="49" y2="54"><stop stopColor="#4CAF50"/><stop offset="1" stopColor="#FF9800"/></linearGradient></defs>
-            </svg>
+        <span className="owner-icon-badge owner-icon-badge--image" aria-hidden="true">
+            <img src={dashboardPetsIcon} alt="" className="owner-title-icon-img" />
         </span>
     );
 }
@@ -253,9 +253,9 @@ export default function LostPets() {
                     {/* ─── Header ─── */}
                     <header className="lp-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                         <div>
-                            <h1 className="owner-title lp-main-title" style={{ fontSize: '2.6rem', fontWeight: 900, color: TEXT, margin: 0, lineHeight: 1.05, letterSpacing: '-1.5px' }}>
+                            <div className="owner-hero-title-row"><OwnerPawIcon /><h1 className="owner-title lp-main-title" style={{ fontSize: '2.6rem', fontWeight: 900, color: TEXT, margin: 0, lineHeight: 1.05, letterSpacing: '-1.5px' }}>
                                 Mascotas <span style={{ color: O2 }}>perdidas</span> o <span style={{ color: G2 }}>encontradas</span>
-                            </h1>
+                            </h1></div>
                             <p style={{ fontSize: '0.95rem', color: MUTED2, margin: 0, marginTop: 8, lineHeight: 1.5, maxWidth: 560 }}>
                                 Ayudanos a reunir familias. Publicá un aviso o buscá mascotas en tu zona.
                             </p>
@@ -266,7 +266,7 @@ export default function LostPets() {
                     {/* ─── 3 Stat cards ─── */}
                     <section className="lp-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
                         <StatCard
-                            icon="🔍"
+                            iconImg={lostSearchIcon}
                             color={O2}
                             ringBg="rgba(255,152,0,0.12)"
                             num={lostCount}
@@ -274,7 +274,7 @@ export default function LostPets() {
                             sub="Mascotas que esperan volver a casa"
                         />
                         <StatCard
-                            icon="🐕"
+                            iconImg={lostFoundIcon}
                             color={G2}
                             ringBg="rgba(76,175,80,0.12)"
                             num={foundCount}
@@ -282,7 +282,7 @@ export default function LostPets() {
                             sub="Mascotas encontradas recientemente"
                         />
                         <StatCard
-                            icon="🔔"
+                            iconImg={lostReportsIcon}
                             color={O2}
                             ringBg="rgba(255,152,0,0.12)"
                             num={totalActive}
@@ -712,6 +712,8 @@ export default function LostPets() {
     vertical-align: middle;
 }
 .owner-icon-badge svg { width: 30px; height: 30px; display: block; }
+.owner-icon-badge--image { overflow: hidden; }
+.owner-title-icon-img { width: 38px; height: 38px; object-fit: contain; display: block; filter: drop-shadow(0 8px 16px rgba(0,0,0,.28)); }
 .owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
  .owner-gradient-title,
@@ -776,10 +778,10 @@ export default function LostPets() {
 }
 
 // ──────────────── Sub-componentes
-function StatCard({ icon, color, ringBg, num, label, sub, cta, onClick }) {
+function StatCard({ icon, iconImg, color, ringBg, num, label, sub, cta, onClick }) {
     return (
         <div onClick={onClick} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 16, display: 'flex', alignItems: 'center', gap: 14, cursor: onClick ? 'pointer' : 'default', minWidth: 0 }}>
-            <div style={{ width: 50, height: 50, borderRadius: '50%', background: ringBg, border: `1.5px solid ${color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', flexShrink: 0 }}>{icon}</div>
+            <div style={{ width: 54, height: 54, borderRadius: '18px', background: ringBg, border: `1.5px solid ${color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', flexShrink: 0, overflow: 'hidden' }}>{iconImg ? <img src={iconImg} alt="" style={{ width: 48, height: 48, objectFit: 'contain', filter: 'drop-shadow(0 8px 14px rgba(0,0,0,.30))' }} /> : icon}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '1.9rem', fontWeight: 900, color, lineHeight: 1, fontFamily: FONT }}>{num}</div>
                 <div style={{ fontSize: '0.85rem', color: TEXT, fontWeight: 700, marginTop: 4 }}>{label}</div>

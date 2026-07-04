@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { getAppointments, createAppointment, updateAppointment, cancelAppointment, getPets, getClinics } from "../services/api";
 import api from "../services/api";
 import ownerBg from "../assets/vetpaw-owner-bg.png";
+import dashboardAppointmentsIcon from "../assets/vetpaw-dashboard-icons/dashboard-appointments.png";
 
 const STATUS_LABEL = {
     pending:   { label: "Pendiente",  color: "#ffd93d" },
@@ -30,13 +31,8 @@ function OwnerPawIcon() {
 }
 function OwnerCalendarIcon() {
     return (
-        <span className="owner-icon-badge" aria-hidden="true">
-            <svg viewBox="0 0 64 64" fill="none">
-                <rect x="12" y="16" width="40" height="36" rx="8" fill="rgba(107,202,255,.13)" stroke="#6bcaff" strokeWidth="2"/>
-                <path d="M12 27h40" stroke="#4CAF50" strokeWidth="2"/>
-                <path d="M22 11v10M42 11v10" stroke="#FF9800" strokeWidth="4" strokeLinecap="round"/>
-                <rect x="20" y="34" width="8" height="8" rx="2" fill="#4CAF50"/><rect x="32" y="34" width="8" height="8" rx="2" fill="#FF9800"/>
-            </svg>
+        <span className="owner-icon-badge owner-icon-badge--image" aria-hidden="true">
+            <img src={dashboardAppointmentsIcon} alt="" className="owner-title-icon-img" />
         </span>
     );
 }
@@ -692,6 +688,8 @@ export default function Appointments() {
     vertical-align: middle;
 }
 .owner-icon-badge svg { width: 30px; height: 30px; display: block; }
+.owner-icon-badge--image { overflow: hidden; }
+.owner-title-icon-img { width: 38px; height: 38px; object-fit: contain; display: block; filter: drop-shadow(0 8px 16px rgba(0,0,0,.28)); }
 .owner-hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
  .owner-gradient-title,
