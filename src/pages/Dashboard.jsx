@@ -3,6 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getPets, getAppointments, getClinics, getVaccines, markNotificationsSeen } from "../services/api";
 import ownerBg from "../assets/vetpaw-owner-bg.png";
+import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
+import dashboardAppointmentsIcon from "../assets/vetpaw-dashboard-icons/dashboard-appointments.png";
+import dashboardNextAppointmentIcon from "../assets/vetpaw-dashboard-icons/dashboard-next-appointment.png";
+import dashboardVaccinesIcon from "../assets/vetpaw-dashboard-icons/dashboard-vaccines.png";
+import dashboardMainPetIcon from "../assets/vetpaw-dashboard-icons/dashboard-main-pet.png";
+import dashboardRemindersIcon from "../assets/vetpaw-dashboard-icons/dashboard-reminders.png";
+import dashboardClinicsIcon from "../assets/vetpaw-dashboard-icons/dashboard-clinics.png";
+import dashboardActivityIcon from "../assets/vetpaw-dashboard-icons/dashboard-activity.png";
 import VetPawLoader from '../components/VetPawLoader';
 
 // ───────────────────────── Tokens de diseño
@@ -26,6 +34,21 @@ const YELLOW = "#ffd93d";
 const GRAD = `linear-gradient(135deg, ${G1}, ${O1})`;
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif";
 const TITLE_FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif";
+const DashboardIcon = ({ src, size = 30 }) => (
+    <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        style={{
+            width: size,
+            height: size,
+            display: "block",
+            objectFit: "contain",
+            filter: "drop-shadow(0 4px 7px rgba(0,0,0,.42))",
+        }}
+    />
+);
+
 
 // ───────────────────────── Helpers
 const SPECIES_EMOJI = { dog: "🐶", perro: "🐶", cat: "🐱", gato: "🐱", bird: "🦜", pajaro: "🦜", pájaro: "🦜", rabbit: "🐰", conejo: "🐰", fish: "🐟", pez: "🐟" };
@@ -190,6 +213,7 @@ export default function Dashboard() {
                 meta: [a.clinic_name, a.reason || a.appointment_type_display].filter(Boolean).join(" · "),
                 color: isCancelled ? PINK : isConfirmed ? G2 : isCompleted ? V1 : O2,
                 icon: "📅",
+                iconSrc: dashboardNextAppointmentIcon,
             });
         });
         vaccines.forEach(v => {
@@ -200,6 +224,7 @@ export default function Dashboard() {
                 meta: [v.vet_first_name && `${v.vet_first_name} ${v.vet_last_name || ""}`.trim(), v.clinic_name].filter(Boolean).join(" · "),
                 color: G2,
                 icon: "💉",
+                iconSrc: dashboardVaccinesIcon,
             });
         });
         allTreatments.forEach(t => {
@@ -210,6 +235,7 @@ export default function Dashboard() {
                 meta: t.pet_name,
                 color: O2,
                 icon: "🛡️",
+                iconSrc: dashboardRemindersIcon,
             });
         });
         return events
@@ -278,10 +304,10 @@ export default function Dashboard() {
                 {/* ────────── Stats grid (4 cards) ────────── */}
                 <section className="dash-stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
                     {[
-                        { icon: <StatPetIcon />, color: G2, ringBg: "rgba(76,175,80,0.12)", num: pets.length, label: "Mascotas", link: "Ver todas →", to: "/pets" },
-                        { icon: <StatCalendarIcon />, color: O2, ringBg: "rgba(255,152,0,0.12)", num: appointments.length, label: "Turnos totales", link: "Ver historial →", to: "/appointments" },
-                        { icon: <StatHourIcon />, color: V1, ringBg: "rgba(167,139,250,0.12)", num: daysUntilNext ?? "—", label: nextAppt ? "Próximo turno" : "Sin próximo turno", sub: nextAppt ? `${daysUntilNext === 1 ? "día" : "días"} • ${fmtShort(nextAppt.requested_date)}` : null, link: nextAppt ? "Ver mis turnos →" : "Sacar turno →", to: nextAppt ? "/appointments" : "/appointments/new" },
-                        { icon: <StatVaccineIcon />, color: B1, ringBg: "rgba(107,202,255,0.12)", num: vaccines.length, label: "Vacunas registradas", link: "Ver historial →", to: "/history" },
+                        { icon: <DashboardIcon src={dashboardPetsIcon} size={48} />, color: G2, ringBg: "rgba(76,175,80,0.12)", num: pets.length, label: "Mascotas", link: "Ver todas →", to: "/pets" },
+                        { icon: <DashboardIcon src={dashboardAppointmentsIcon} size={48} />, color: O2, ringBg: "rgba(255,152,0,0.12)", num: appointments.length, label: "Turnos totales", link: "Ver historial →", to: "/appointments" },
+                        { icon: <DashboardIcon src={dashboardNextAppointmentIcon} size={48} />, color: V1, ringBg: "rgba(167,139,250,0.12)", num: daysUntilNext ?? "—", label: nextAppt ? "Próximo turno" : "Sin próximo turno", sub: nextAppt ? `${daysUntilNext === 1 ? "día" : "días"} • ${fmtShort(nextAppt.requested_date)}` : null, link: nextAppt ? "Ver mis turnos →" : "Sacar turno →", to: nextAppt ? "/appointments" : "/appointments/new" },
+                        { icon: <DashboardIcon src={dashboardVaccinesIcon} size={48} />, color: B1, ringBg: "rgba(107,202,255,0.12)", num: vaccines.length, label: "Vacunas registradas", link: "Ver historial →", to: "/history" },
                     ].map((s, i) => (
                         <div key={i} className="dash-stat" style={{ ...cardSt, padding: 18, gap: 12 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -344,12 +370,12 @@ export default function Dashboard() {
                     {/* ─── Mi mascota principal ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <SectionTitle icon="🐕">Mi mascota principal</SectionTitle>
+                            <SectionTitle icon={<DashboardIcon src={dashboardMainPetIcon} size={32} />}>Mi mascota principal</SectionTitle>
                             {pets.length > 1 && <button onClick={() => navigate("/pets")} style={linkSt(G2)}>Ver todas →</button>}
                         </div>
                         {!mainPet ? (
                             <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "30px 12px", textAlign: "center", gap: 12 }}>
-                                <span style={{ fontSize: "3rem" }}>🐕</span>
+                                <DashboardIcon src={dashboardMainPetIcon} size={76} />
                                 <p style={{ color: MUTED, fontSize: "0.92rem", margin: 0 }}>Todavía no registraste ninguna mascota.</p>
                                 <button onClick={() => navigate("/pets")} style={{ background: GRAD, color: "#fff", border: "none", borderRadius: 11, padding: "10px 18px", fontWeight: 800, cursor: "pointer", fontFamily: FONT }}>Registrá tu primera mascota</button>
                             </div>
@@ -413,7 +439,7 @@ export default function Dashboard() {
                     {/* ─── Próximo turno ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <SectionTitle icon="🗓️">Próximo turno</SectionTitle>
+                            <SectionTitle icon={<DashboardIcon src={dashboardNextAppointmentIcon} size={32} />}>Próximo turno</SectionTitle>
                             {nextAppt && daysUntilNext !== null && (
                                 <span style={{ background: "rgba(255,152,0,0.15)", color: O2, border: `1px solid ${O2}50`, borderRadius: 999, padding: "3px 10px", fontSize: "0.72rem", fontWeight: 700, whiteSpace: "nowrap" }}>
                                     {daysUntilNext === 0 ? "Hoy" : daysUntilNext === 1 ? "Mañana" : `Faltan ${daysUntilNext} días`}
@@ -422,7 +448,7 @@ export default function Dashboard() {
                         </div>
                         {!nextAppt ? (
                             <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "30px 12px", textAlign: "center", gap: 12 }}>
-                                <span style={{ fontSize: "3rem" }}>📭</span>
+                                <DashboardIcon src={dashboardNextAppointmentIcon} size={86} />
                                 <p style={{ color: MUTED, fontSize: "0.92rem", margin: 0 }}>No tenés turnos próximos.</p>
                                 <button onClick={() => navigate("/appointments/new")} style={gradBtn()}>Sacar turno</button>
                             </div>
@@ -430,7 +456,7 @@ export default function Dashboard() {
                             <>
                                 {nextAppt.clinic_name && (
                                     <div style={{ display: "flex", alignItems: "center", gap: 10, padding: 12, background: CARD2, borderRadius: 12, marginBottom: 12 }}>
-                                        <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(107,202,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.05rem", flexShrink: 0 }}>🏥</div>
+                                        <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(107,202,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><DashboardIcon src={dashboardClinicsIcon} size={28} /></div>
                                         <div style={{ minWidth: 0, overflow: "hidden" }}>
                                             <p style={{ fontSize: "0.88rem", fontWeight: 700, color: TEXT, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nextAppt.clinic_name}</p>
                                             {nextAppt.pet_name && <p style={{ fontSize: "0.74rem", color: MUTED, margin: 0 }}>{nextAppt.pet_name}</p>}
@@ -463,13 +489,13 @@ export default function Dashboard() {
                     {/* ─── Recordatorios ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <SectionTitle icon="🔔">Recordatorios</SectionTitle>
+                            <SectionTitle icon={<DashboardIcon src={dashboardRemindersIcon} size={32} />}>Recordatorios</SectionTitle>
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                             {/* Vacunas al día */}
                             <div style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 12, display: "flex", alignItems: "center", gap: 12 }}>
                                 <div style={{ width: 38, height: 38, borderRadius: "50%", background: vaccineStatus.kind === "ok" ? "rgba(76,175,80,0.15)" : vaccineStatus.kind === "expired" ? "rgba(255,152,0,0.15)" : "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", flexShrink: 0 }}>
-                                    {vaccineStatus.kind === "ok" ? "🛡️" : vaccineStatus.kind === "expired" ? "⚠️" : "💉"}
+                                    {vaccineStatus.kind === "expired" ? "⚠️" : <DashboardIcon src={dashboardVaccinesIcon} size={30} />}
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <p style={{ fontSize: "0.88rem", fontWeight: 700, color: TEXT, margin: 0 }}>
@@ -488,7 +514,7 @@ export default function Dashboard() {
 
                             {/* Antiparasitario: muestra PRÓXIMO si hay next_dose futuro, sino ÚLTIMO aplicado */}
                             <div style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 12, display: "flex", alignItems: "center", gap: 12 }}>
-                                <div style={{ width: 38, height: 38, borderRadius: "50%", background: nextTreatment ? "rgba(76,175,80,0.15)" : lastTreatment ? "rgba(255,152,0,0.15)" : "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", flexShrink: 0 }}>🛡️</div>
+                                <div style={{ width: 38, height: 38, borderRadius: "50%", background: nextTreatment ? "rgba(76,175,80,0.15)" : lastTreatment ? "rgba(255,152,0,0.15)" : "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", flexShrink: 0 }}><DashboardIcon src={dashboardRemindersIcon} size={30} /></div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <p style={{ fontSize: "0.88rem", fontWeight: 700, color: TEXT, margin: 0 }}>
                                         {nextTreatment
@@ -517,19 +543,19 @@ export default function Dashboard() {
                     {/* ─── Clínicas disponibles ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <SectionTitle icon="🏥">Clínicas disponibles</SectionTitle>
+                            <SectionTitle icon={<DashboardIcon src={dashboardClinicsIcon} size={32} />}>Clínicas disponibles</SectionTitle>
                             <button onClick={() => navigate("/clinics")} style={linkSt(G2)}>Ver todas →</button>
                         </div>
                         {clinics.length === 0 ? (
                             <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "30px 12px", textAlign: "center", gap: 10 }}>
-                                <span style={{ fontSize: "2.5rem" }}>🏥</span>
+                                <DashboardIcon src={dashboardClinicsIcon} size={76} />
                                 <p style={{ color: MUTED, fontSize: "0.9rem", margin: 0 }}>No hay clínicas registradas todavía.</p>
                             </div>
                         ) : (
                             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                                 {clinics.slice(0, 3).map(c => (
                                     <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, background: CARD2, borderRadius: 12 }}>
-                                        <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(76,175,80,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.05rem", flexShrink: 0 }}>🏥</div>
+                                        <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(76,175,80,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><DashboardIcon src={dashboardClinicsIcon} size={28} /></div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <p style={{ fontSize: "0.9rem", fontWeight: 700, color: TEXT, margin: 0, textTransform: "capitalize", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</p>
                                             <p style={{ fontSize: "0.75rem", color: MUTED, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.address || c.locality || "Sin dirección"}</p>
@@ -544,11 +570,11 @@ export default function Dashboard() {
                     {/* ─── Actividad reciente (timeline mezclado) ─── */}
                     <div style={cardSt}>
                         <div style={cardHeader}>
-                            <SectionTitle icon="📋">Actividad reciente</SectionTitle>
+                            <SectionTitle icon={<DashboardIcon src={dashboardActivityIcon} size={32} />}>Actividad reciente</SectionTitle>
                         </div>
                         {recentActivity.length === 0 ? (
                             <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "30px 12px", textAlign: "center", gap: 10 }}>
-                                <span style={{ fontSize: "2.5rem" }}>📋</span>
+                                <DashboardIcon src={dashboardActivityIcon} size={76} />
                                 <p style={{ color: MUTED, fontSize: "0.9rem", margin: 0 }}>Aún no hay actividad registrada.</p>
                             </div>
                         ) : (
@@ -556,7 +582,7 @@ export default function Dashboard() {
                                 {recentActivity.map(ev => (
                                     <div key={ev.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 4px" }}>
                                         <div style={{ width: 10, height: 10, borderRadius: "50%", background: ev.color, flexShrink: 0, boxShadow: `0 0 8px ${ev.color}80` }} />
-                                        <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>{ev.icon}</span>
+                                        {ev.iconSrc ? <DashboardIcon src={ev.iconSrc} size={26} /> : <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>{ev.icon}</span>}
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <p style={{ fontSize: "0.88rem", fontWeight: 700, color: TEXT, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ev.title}</p>
                                             {ev.meta && <p style={{ fontSize: "0.74rem", color: MUTED, margin: 0, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ev.meta}</p>}
