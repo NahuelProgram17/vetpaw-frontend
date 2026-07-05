@@ -71,6 +71,18 @@ const SPECIES_ICON = {
   other: "🐾",
 };
 
+const FEEDING_LABEL = {
+  balanced: "Balanceada",
+  homemade: "Casera",
+  mixed: "Mixta",
+};
+
+const HABITAT_LABEL = {
+  apartment: "Departamento",
+  house: "Casa con patio",
+  field: "Campo",
+};
+
 const appointmentTypeOptions = [
   { value: "control", label: "Control general" },
   { value: "vaccine", label: "Vacunación" },
@@ -265,8 +277,6 @@ export default function ClinicDashboard() {
   const [vaccineForm, setVaccineForm] = useState(EMPTY_VACCINE);
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [showVaccineModal, setShowVaccineModal] = useState(false);
-  const [showControlModal, setShowControlModal] = useState(false);
-  const [controlForm, setControlForm] = useState({ pet: '', requested_date: '', appointment_type: 'control', reason: 'Control general' });
   const [saving, setSaving] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoCaption, setPhotoCaption] = useState("");
@@ -306,18 +316,17 @@ export default function ClinicDashboard() {
   }, [tab]);
 
   useEffect(() => {
-    if (!showVisitModal && !showVaccineModal && !showControlModal) return;
+    if (!showVisitModal && !showVaccineModal) return;
 
     const handleEscape = (event) => {
       if (event.key !== "Escape") return;
       setShowVisitModal(false);
       setShowVaccineModal(false);
-      setShowControlModal(false);
     };
 
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [showVisitModal, showVaccineModal, showControlModal]);
+  }, [showVisitModal, showVaccineModal]);
 
   const fetchClinicProfile = async () => {
     try {
@@ -513,33 +522,6 @@ export default function ClinicDashboard() {
       reason: isAppointment ? apptOrPet.reason || "" : "",
     });
     setShowVisitModal(true);
-  };
-
-  const openControlModal = (pet) => {
-    setControlForm({
-      pet: pet.id,
-      requested_date: '',
-      appointment_type: 'control',
-      reason: 'Control general',
-    });
-    setShowControlModal(true);
-  };
-
-  const handleControlSubmit = async (event) => {
-    event.preventDefault();
-    if (!controlForm.pet || !controlForm.requested_date) return showMessage('error', 'Paciente y fecha/hora son obligatorios.');
-    setSaving(true);
-    try {
-      await api.post('/appointments/program_control/', controlForm);
-      setShowControlModal(false);
-      await fetchAll();
-      showMessage('success', 'Control programado correctamente.');
-    } catch (error) {
-      console.error(error);
-      showMessage('error', error.response?.data?.error || 'No se pudo programar el control.');
-    } finally {
-      setSaving(false);
-    }
   };
 
   const handleVisitSubmit = async (event) => {
@@ -911,7 +893,6 @@ export default function ClinicDashboard() {
                 openPetFile={openPetFile}
                 downloadPetPDF={downloadPetPDF}
                 openVisitModal={openVisitModal}
-                openControlModal={openControlModal}
                 openVaccineModal={openVaccineModal}
               />
             )}
@@ -1054,7 +1035,6 @@ function PacientesTab({
   openPetFile,
   downloadPetPDF,
   openVisitModal,
-  openControlModal,
   openVaccineModal,
 }) {
   const openClinicalUploadFromCard = () => {
@@ -1727,8 +1707,8 @@ function PetMainCard({ pet, visits, vaccines, onFile, onPdf, onUploadFile, onVac
           {pet.color && <span>🎨 <b>{pet.color}</b><small>Color</small></span>}
         </div>
         <div className="vp-mini-chips">
-          {pet.feeding && <em>🍲 {pet.feeding}</em>}
-          {pet.habitat && <em>🏠 {pet.habitat}</em>}
+          {pet.feeding && <em>🍲 {FEEDING_LABEL[pet.feeding] || pet.feeding}</em>}
+          {pet.habitat && <em>🏠 {HABITAT_LABEL[pet.habitat] || pet.habitat}</em>}
           {pet.lives_with_animals && <em>🐾 Convive con otros animales</em>}
         </div>
         <p className="vp-vaccine-count">🛡 {petVaccines.length} vacuna{petVaccines.length !== 1 ? "s" : ""} registrada{petVaccines.length !== 1 ? "s" : ""} · {petVisits.length} visita{petVisits.length !== 1 ? "s" : ""}</p>
@@ -1773,54 +1753,6 @@ function VisitModal({ visitForm, setVisitForm, saving, onClose, onSubmit }) {
         <div className="modal-actions"><button type="button" onClick={onClose}>Cancelar</button><button className="gradient" disabled={saving}>{saving ? "Guardando..." : "Guardar visita"}</button></div>
       </form>
     </Modal>
-  );
-}
-
-function ControlModal({ controlForm, setControlForm, saving, onClose, onSubmit }) {
-  const set = (key, value) => setControlForm((prev) => ({ ...prev, [key]: value }));
-  return (
-    <Modal title="📅 Programar control" onClose={onClose}>
-      <form className="vp-modal-form" onSubmit={onSubmit}>
-        <label>Fecha y hora del control *<input type="datetime-local" value={controlForm.requested_date} onChange={(e) => set('requested_date', e.target.value)} /></label>
-        <label>Tipo de turno
-          <select value={controlForm.appointment_type} onChange={(e) => set('appointment_type', e.target.value)}>
-            {appointmentTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-          </select>
-        </label>
-        <label>Motivo<input value={controlForm.reason} onChange={(e) => set('reason', e.target.value)} placeholder="Ej: Control general, revisión, seguimiento..." /></label>
-        <p className="vp-modal-help">Este control queda cargado en la agenda de la clínica y visible para el dueño de la mascota.</p>
-        <div className="modal-actions"><button type="button" onClick={onClose}>Cancelar</button><button className="gradient" disabled={saving}>{saving ? "Guardando..." : "Programar control"}</button></div>
-      </form>
-    </Modal>
-  );
-}
-
-function VaccineModal({ vaccineForm, setVaccineForm, saving, onClose, onSubmit }) {
-  const set = (key, value) => setVaccineForm((prev) => ({ ...prev, [key]: value }));
-  return (
-    <Modal title="💉 Registrar vacuna" onClose={onClose}>
-      <form className="vp-modal-form" onSubmit={onSubmit}>
-        <label>Nombre de vacuna *<input value={vaccineForm.name} onChange={(e) => set("name", e.target.value)} /></label>
-        <div className="form-grid"><label>Fecha aplicada<input type="date" value={vaccineForm.date_applied} onChange={(e) => set("date_applied", e.target.value)} /></label><label>Próxima dosis<input type="date" value={vaccineForm.next_dose} onChange={(e) => set("next_dose", e.target.value)} /></label></div>
-        <label>Lote<input value={vaccineForm.batch} onChange={(e) => set("batch", e.target.value)} /></label>
-        <div className="form-grid"><label>Nombre veterinario *<input value={vaccineForm.vet_first_name} onChange={(e) => set("vet_first_name", e.target.value)} /></label><label>Apellido *<input value={vaccineForm.vet_last_name} onChange={(e) => set("vet_last_name", e.target.value)} /></label></div>
-        <label>Matrícula *<input value={vaccineForm.vet_license} onChange={(e) => set("vet_license", e.target.value)} /></label>
-        <label>Clínica<input value={vaccineForm.vet_clinic_name} onChange={(e) => set("vet_clinic_name", e.target.value)} /></label>
-        <label>Notas<textarea rows="3" value={vaccineForm.notes} onChange={(e) => set("notes", e.target.value)} /></label>
-        <div className="modal-actions"><button type="button" onClick={onClose}>Cancelar</button><button className="gradient" disabled={saving}>{saving ? "Guardando..." : "Guardar vacuna"}</button></div>
-      </form>
-    </Modal>
-  );
-}
-
-function Modal({ title, children, onClose }) {
-  return (
-    <div className="vp-modal-backdrop" onMouseDown={onClose}>
-      <div className="vp-modal" onMouseDown={(e) => e.stopPropagation()}>
-        <header><h2>{title}</h2><button onClick={onClose}>×</button></header>
-        {children}
-      </div>
-    </div>
   );
 }
 

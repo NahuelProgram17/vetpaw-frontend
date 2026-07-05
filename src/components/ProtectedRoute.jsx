@@ -48,7 +48,7 @@ export default function ProtectedRoute({ children, role }) {
     }
 
     if (role && user.role !== role) {
-        return <Navigate to={user.role === 'vet' ? '/vet/dashboard' : '/dashboard'} replace />
+        return <Navigate to={user.role === 'clinic' ? '/clinic/dashboard' : '/dashboard'} replace />
     }
 
     return children
