@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
 import AdsManager from '../components/AdsManager'
 import BlogManager from '../components/BlogManager'
+import AdminLostPetsManager from '../components/AdminLostPetsManager'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const G1 = '#4CAF50'
@@ -125,7 +126,7 @@ export default function AdminPanel() {
 
     return (
         <div style={{ minHeight: '100vh', background: DARK, fontFamily: FONT, paddingBottom: 60 }}>
-            <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
+            <div style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 24px' }}>
 
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 12 }}>
@@ -144,6 +145,7 @@ export default function AdminPanel() {
                     {[
                         { k: 'dashboard', l: '📊 Dashboard' },
                         { k: 'pending',   l: `🏥 Pendientes${pending_clinics.length > 0 ? ` (${pending_clinics.length})` : ''}` },
+                        { k: 'lostPets',  l: `🔍 Mascotas perdidas${g.total_lost_active > 0 ? ` (${g.total_lost_active})` : ''}` },
                         { k: 'ads',       l: '📢 Anuncios' },
                         { k: 'blog',      l: '📝 Blog' },
                     ].map(t => (
@@ -160,6 +162,8 @@ export default function AdminPanel() {
                 {tab === 'ads' && <AdsManager />}
 
                 {tab === 'blog' && <BlogManager />}
+
+                {tab === 'lostPets' && <AdminLostPetsManager />}
 
                 {tab === 'pending' && (<>
                     <SectionTitle>🏥 Veterinarias pendientes de aprobación</SectionTitle>
@@ -315,4 +319,4 @@ export default function AdminPanel() {
             </div>
         </div>
     )
-}
+}
