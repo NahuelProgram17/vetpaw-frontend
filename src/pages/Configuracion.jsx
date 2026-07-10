@@ -69,7 +69,7 @@ export default function Configuracion() {
         <div style={{ minHeight: "100vh", background: BG, color: TEXT, fontFamily: FONT, paddingBottom: 60 }}>
             <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap" rel="stylesheet" />
 
-            <div className="cfg-shell" style={{ maxWidth: 1100, margin: "0 auto", padding: "90px 24px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
+            <div className="cfg-shell" style={{ maxWidth: 1400, margin: "0 auto", padding: "90px 24px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
 
                 {/* ── Header ── */}
                 <header>

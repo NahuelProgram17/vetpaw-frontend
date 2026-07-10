@@ -36,7 +36,7 @@ export default function Blog() {
             </div>
 
             {/* Contenido */}
-            <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 20px 80px' }}>
+            <div style={{ maxWidth: 1400, margin: '0 auto', padding: '40px 20px 80px' }}>
                 {loading ? (
                     <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>Cargando notas...</p>
                 ) : posts.length === 0 ? (

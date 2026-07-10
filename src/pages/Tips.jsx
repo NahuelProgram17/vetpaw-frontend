@@ -117,7 +117,7 @@ export default function Tips() {
             </div>
 
             {/* FILTROS EN CHIPS */}
-            <div className="tips-filters" style={{ padding: '0 40px 40px', maxWidth: 1100, margin: '0 auto' }}>
+            <div className="tips-filters" style={{ padding: '0 40px 40px', maxWidth: 1400, margin: '0 auto' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
                     {categorias.map(cat => {
                         const activo = categoriaActiva === cat
@@ -141,7 +141,7 @@ export default function Tips() {
             </div>
 
             {/* CONTENIDO */}
-            <div className="tips-grid-wrap" style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px 100px' }}>
+            <div className="tips-grid-wrap" style={{ maxWidth: 1400, margin: '0 auto', padding: '0 40px 100px' }}>
 
                 {mostrarEmerg && (
                     <Seccion badge="🚨 Primeros auxilios" badgeColor="#ff6b6b" badgeBg="rgba(255,107,107,0.12)" badgeBorder="rgba(255,107,107,0.3)" titulo="Guías de emergencia" subtitulo="Leé esto antes de que lo necesites. En una emergencia, cada segundo cuenta.">
