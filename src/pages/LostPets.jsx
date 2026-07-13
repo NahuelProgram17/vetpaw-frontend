@@ -582,9 +582,13 @@ export default function LostPets() {
             {selectedPet && (
                 <div onClick={() => setSelectedPet(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
                     <div onClick={e => e.stopPropagation()} style={{ background: CARD, borderRadius: 20, overflow: 'hidden', maxWidth: 520, width: '100%', maxHeight: '90vh', overflowY: 'auto', border: `2px solid ${selectedPet.report_type === 'lost' ? O2 + '50' : G2 + '50'}`, boxShadow: '0 32px 80px rgba(0,0,0,0.6)' }}>
-                        <div style={{ position: 'relative', height: 280, background: CARD2 }}>
+                        <div style={{ position: 'relative', height: 'clamp(300px, 52vh, 520px)', background: '#070d16', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {selectedPet.photo_url ? (
-                                <img src={selectedPet.photo_url} alt={selectedPet.pet_name || 'Mascota'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <img
+                                    src={selectedPet.photo_url}
+                                    alt={selectedPet.pet_name || 'Mascota'}
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block' }}
+                                />
                             ) : (
                                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 64 }}>{speciesEmoji(selectedPet.species)}</div>
                             )}
