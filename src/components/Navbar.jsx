@@ -490,19 +490,19 @@ export default function Navbar() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         {!user ? (
                             <>
-                                <Link to="/clinics" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Veterinarias</Link>
+                                <Link to="/clinics" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('clinics', isActive('/clinics'), true)} Veterinarias</Link>
                                 <Link to="/mascotas-perdidas" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('lost', isActive('/mascotas-perdidas'), true)} Mascotas perdidas</Link>
                                 <InstallPWA />
-                                <Link to="/login" style={{ ...btnOutline, marginLeft: 8 }}
+                                <Link to="/login" style={{ ...btnOutline, marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 8 }}
                                     onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
                                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.background = 'transparent' }}>
-                                    Ingresar
+                                    {renderNavIcon('login', isActive('/login'), true)} Ingresar
                                 </Link>
                                 <Link to="/register" style={{ ...btnGradient, marginLeft: 6 }}>Registrarme</Link>
                             </>
                         ) : user.role === 'clinic' ? (
                             <>
-                                <Link to="/clinic/dashboard" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi panel</Link>
+                                <Link to="/clinic/dashboard" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('panel', isActive('/clinic/dashboard'), true)} Mi panel</Link>
                                 <Link to="/messages" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>
                                     {renderNavIcon('messages', isActive('/messages'), true)} Mensajes
                                     {unreadMessages > 0 && (
@@ -511,7 +511,7 @@ export default function Navbar() {
                                         </span>
                                     )}
                                 </Link>
-                                <Link to="/profile" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi perfil</Link>
+                                <Link to="/profile" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('profile', isActive('/profile'), true)} Mi perfil</Link>
                                 <Link to="/configuracion" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('settings', isActive('/configuracion'), true)} Configuración</Link>
                                 <InstallPWA />
                                 <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 4px' }}>|</span>
@@ -524,11 +524,11 @@ export default function Navbar() {
                             </>
                         ) : (
                             <>
-                                <Link to="/dashboard" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi panel</Link>
-                                <Link to="/pets" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mascotas</Link>
-                                <Link to="/appointments" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Turnos</Link>
-                                <Link to="/history" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Historial</Link>
-                                <Link to="/clinics" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Veterinarias</Link>
+                                <Link to="/dashboard" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('panel', isActive('/dashboard'), true)} Mi panel</Link>
+                                <Link to="/pets" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('pets', isActive('/pets'), true)} Mascotas</Link>
+                                <Link to="/appointments" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('appointments', isActive('/appointments'), true)} Turnos</Link>
+                                <Link to="/history" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('history', isActive('/history'), true)} Historial</Link>
+                                <Link to="/clinics" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('clinics', isActive('/clinics'), true)} Veterinarias</Link>
                                 <Link to="/mascotas-perdidas" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('lost', isActive('/mascotas-perdidas'), true)} Mascotas perdidas</Link>
                                 <Link to="/messages" style={{ ...linkStyle, position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>
                                     {renderNavIcon('messages', isActive('/messages'), true)}
@@ -538,7 +538,7 @@ export default function Navbar() {
                                         </span>
                                     )}
                                 </Link>
-                                <Link to="/profile" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi perfil</Link>
+                                <Link to="/profile" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('profile', isActive('/profile'), true)} Mi perfil</Link>
                                 <Link to="/configuracion" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('settings', isActive('/configuracion'), true)} Configuración</Link>
                                 <InstallPWA />
                                 <div style={{ position: 'relative' }} ref={notifRef}>
@@ -600,7 +600,7 @@ export default function Navbar() {
                         )}
                         {user?.role === 'owner' && (
                             <button onClick={handleOpenNotif} style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, padding: '4px 6px' }}>
-                                🔔
+                                {renderNavIcon('notifications', showNotif || isActive('/notifications'), true)}
                                 {notifications.length > 0 && (
                                     <span style={{ position: 'absolute', top: 0, right: 0, background: O1, color: '#fff', fontSize: 9, fontWeight: 800, width: 14, height: 14, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         {notifications.length}
@@ -656,7 +656,7 @@ export default function Navbar() {
                             {user ? (
                                 <div>
                                     <p style={{ color: G1, fontFamily: FONT, fontWeight: 800, fontSize: 15 }}>{user.first_name || user.username}</p>
-                                    <p style={{ color: 'rgba(255,255,255,0.35)', fontFamily: FONT, fontSize: 12, marginTop: 2 }}>{user.role === 'clinic' ? '🏥 Clínica' : '🐾 Dueño/a'}</p>
+                                    <p style={{ color: 'rgba(255,255,255,0.35)', fontFamily: FONT, fontSize: 12, marginTop: 2 }}>{user.role === 'clinic' ? 'Clínica' : 'Dueño/a'}</p>
                                 </div>
                             ) : (
                                 <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 44 }} />
