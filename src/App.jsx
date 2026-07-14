@@ -33,6 +33,8 @@ import ClinicProfile from './pages/ClinicProfile'
 import AdminPanel from './pages/AdminPanel'
 import LostPets from './pages/LostPets'
 import Configuracion from './pages/Configuracion'
+import Notifications from './pages/Notifications'
+import BirthdayCelebration from './components/BirthdayCelebration'
 
 
 function App() {
@@ -42,6 +44,7 @@ function App() {
       <ScrollToTop />
         <RouteChangeLoader />
         <Navbar />
+        <BirthdayCelebration />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -61,6 +64,7 @@ function App() {
           <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/configuracion" element={<ProtectedRoute><Configuracion /></ProtectedRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute role="owner"><Notifications /></ProtectedRoute>} />
           <Route path="/tips" element={<Tips />} />
           <Route path="/clinic/estadisticas" element={<ProtectedRoute role="clinic"><Estadisticas /></ProtectedRoute>} />
           <Route path="/admin-panel" element={<AdminPanel />} />

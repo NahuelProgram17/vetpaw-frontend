@@ -189,4 +189,19 @@ export const confirmPasswordReset = (uidb64, token, password, password2) =>
     api.post(`/users/password-reset-confirm/${uidb64}/${token}/`, { password, password2 }).then(r => r.data);
 
 
+
+// ── Cumpleaños VetPaw ────────────────────────────────
+export const getBirthdayCelebrations = (unread = false) =>
+    api.get(`/birthday-celebrations/${unread ? '?unread=true' : ''}`).then((r) => r.data);
+export const getCurrentBirthdayCelebrations = () =>
+    api.get('/birthday-celebrations/current/').then((r) => r.data);
+export const openBirthdayGift = (id) =>
+    api.post(`/birthday-celebrations/${id}/open-gift/`).then((r) => r.data);
+export const markBirthdayCelebrationRead = (id) =>
+    api.post(`/birthday-celebrations/${id}/mark-read/`).then((r) => r.data);
+export const markAllBirthdayCelebrationsRead = () =>
+    api.post('/birthday-celebrations/mark-all-read/').then((r) => r.data);
+export const markBirthdayCardDownloaded = (id) =>
+    api.post(`/birthday-celebrations/${id}/card-downloaded/`).then((r) => r.data);
+
 export default api;

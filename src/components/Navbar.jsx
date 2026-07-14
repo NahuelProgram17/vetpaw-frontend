@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getAppointments, markNotificationsSeen, getUnreadCount } from '../services/api'
+import { getAppointments, markNotificationsSeen, getUnreadCount, getBirthdayCelebrations } from '../services/api'
 import InstallPWA from './InstallPWA'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
@@ -62,6 +62,14 @@ export default function Navbar() {
     }, [user])
 
     useEffect(() => {
+        const refreshBirthdays = () => {
+            if (user?.role === 'owner') fetchNotifications()
+        }
+        window.addEventListener('vetpaw:birthday-updated', refreshBirthdays)
+        return () => window.removeEventListener('vetpaw:birthday-updated', refreshBirthdays)
+    }, [user?.role])
+
+    useEffect(() => {
         const handler = (e) => {
             if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotif(false)
         }
@@ -91,9 +99,27 @@ export default function Navbar() {
 
     const fetchNotifications = async () => {
         try {
-            const data = await getAppointments()
-            const appts = data.results ?? data
-            setNotifications(appts.filter(a => a.seen_by_owner === false))
+            const [appointmentData, birthdayData] = await Promise.all([
+                getAppointments(),
+                getBirthdayCelebrations(true),
+            ])
+            const appts = appointmentData.results ?? appointmentData
+            const birthdays = birthdayData.results ?? birthdayData
+            const appointmentNotifications = (Array.isArray(appts) ? appts : [])
+                .filter(a => a.seen_by_owner === false)
+                .map(a => ({ ...a, notification_type: 'appointment', notification_key: `appointment-${a.id}` }))
+            const birthdayNotifications = (Array.isArray(birthdays) ? birthdays : [])
+                .map(b => ({
+                    id: b.id,
+                    notification_type: 'birthday',
+                    notification_key: `birthday-${b.id}`,
+                    status: 'birthday',
+                    reason: `${b.pet_name} cumple ${b.age} año${b.age === 1 ? '' : 's'}`,
+                    pet_name: b.pet_name,
+                    clinic_name: b.badge?.name || 'Insignia VetPaw',
+                    requested_date: b.birthday_date,
+                }))
+            setNotifications([...birthdayNotifications, ...appointmentNotifications])
         } catch (e) { console.error(e) }
     }
 
@@ -107,14 +133,17 @@ export default function Navbar() {
     const handleOpenNotif = async () => {
         setShowNotif(!showNotif)
         if (!showNotif && notifications.length > 0) {
-            try { await markNotificationsSeen(); setNotifications([]) }
-            catch (e) { console.error(e) }
+            try {
+                await markNotificationsSeen()
+                setNotifications((items) => items.filter((item) => item.notification_type === 'birthday'))
+            } catch (e) { console.error(e) }
         }
     }
 
     const handleLogout = () => { logout(); navigate('/'); setMenuOpen(false) }
 
     const statusLabel = (s) => {
+        if (s === 'birthday') return '🎂 Cumpleaños'
         if (s === 'confirmed') return '✅ Confirmado'
         if (s === 'cancelled') return '❌ Cancelado'
         return s
@@ -382,16 +411,16 @@ export default function Navbar() {
                                         ) : (
                                             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                                                 {notifications.map(n => (
-                                                    <div key={n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                                    <div key={n.notification_key || n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                                                         <p style={{ color: '#fff', fontSize: 15, fontWeight: 700, fontFamily: FONT }}>{statusLabel(n.status)} — {n.reason || 'Turno'}</p>
-                                                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>🐾 {n.pet_name} · 🏥 {n.clinic_name}</p>
+                                                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>🐾 {n.pet_name} · {n.notification_type === 'birthday' ? '🎖️' : '🏥'} {n.clinic_name}</p>
                                                         <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, marginTop: 2 }}>{new Date(n.requested_date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
                                                     </div>
                                                 ))}
                                             </div>
                                         )}
                                         <div style={{ padding: '10px 18px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                                            <Link to="/appointments" onClick={() => setShowNotif(false)} style={{ color: G1, fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: FONT }}>Ver todos los turnos →</Link>
+                                            <Link to="/notifications" onClick={() => setShowNotif(false)} style={{ color: G1, fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: FONT }}>Ver todas las notificaciones →</Link>
                                         </div>
                                     </div>
                                 )}
@@ -547,16 +576,16 @@ export default function Navbar() {
                                             ) : (
                                                 <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                                                     {notifications.map(n => (
-                                                        <div key={n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                                        <div key={n.notification_key || n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                                                             <p style={{ color: '#fff', fontSize: 15, fontWeight: 700, fontFamily: FONT }}>{statusLabel(n.status)} — {n.reason || 'Turno'}</p>
-                                                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>🐾 {n.pet_name} · 🏥 {n.clinic_name}</p>
+                                                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>🐾 {n.pet_name} · {n.notification_type === 'birthday' ? '🎖️' : '🏥'} {n.clinic_name}</p>
                                                             <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, marginTop: 2 }}>{new Date(n.requested_date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
                                                         </div>
                                                     ))}
                                                 </div>
                                             )}
                                             <div style={{ padding: '10px 18px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                                                <Link to="/appointments" onClick={() => setShowNotif(false)} style={{ color: G1, fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: FONT }}>Ver todos los turnos →</Link>
+                                                <Link to="/notifications" onClick={() => setShowNotif(false)} style={{ color: G1, fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: FONT }}>Ver todas las notificaciones →</Link>
                                             </div>
                                         </div>
                                     )}
@@ -684,15 +713,15 @@ export default function Navbar() {
                             ) : (
                                 <div style={{ maxHeight: 260, overflowY: 'auto' }}>
                                     {notifications.map(n => (
-                                        <div key={n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                        <div key={n.notification_key || n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                                             <p style={{ color: '#fff', fontSize: 14, fontWeight: 700, fontFamily: FONT }}>{statusLabel(n.status)} — {n.reason || 'Turno'}</p>
-                                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>🐾 {n.pet_name} · 🏥 {n.clinic_name}</p>
+                                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>🐾 {n.pet_name} · {n.notification_type === 'birthday' ? '🎖️' : '🏥'} {n.clinic_name}</p>
                                         </div>
                                     ))}
                                 </div>
                             )}
                             <div style={{ padding: '10px 18px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                                <Link to="/appointments" onClick={() => setShowNotif(false)} style={{ color: G1, fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: FONT }}>Ver todos los turnos →</Link>
+                                <Link to="/notifications" onClick={() => setShowNotif(false)} style={{ color: G1, fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: FONT }}>Ver todas las notificaciones →</Link>
                             </div>
                         </div>
                     )}
@@ -700,4 +729,4 @@ export default function Navbar() {
             )}
         </>
     )
-}
+}

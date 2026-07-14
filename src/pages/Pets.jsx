@@ -457,7 +457,8 @@ export default function Pets() {
                     <div className="pets-list">
                         {pets.map((pet) => (
                             <div key={pet.id} className="pet-row">
-                                <div className="pet-photo-side">
+                                <div className={`pet-photo-side ${pet.birthday_frame_active ? 'birthday-photo-active' : ''}`}>
+                                    {pet.birthday_frame_active && <span className="pet-birthday-crown" title="¡Semana de cumpleaños!">👑</span>}
                                     {pet.photo ? (
                                         <img
                                             src={mediaUrl(pet.photo)}
@@ -520,6 +521,18 @@ export default function Pets() {
                                             </>
                                         )}
                                     </p>
+
+                                    {pet.birthday_badges?.length > 0 && (
+                                        <div className="pet-birthday-badges">
+                                            {pet.birthday_badges.slice(0, 4).map((celebration) => (
+                                                <span key={celebration.id} className="pet-birthday-badge" title={celebration.badge?.subtitle}>
+                                                    <b>{celebration.badge?.emoji || '🎖️'}</b>
+                                                    <span>{celebration.badge?.name}</span>
+                                                    <small>{celebration.year}</small>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
 
                                     {/* Fila de stats: edad / peso / color */}
                                     <div className="pet-stats-row">
@@ -1198,7 +1211,20 @@ export default function Pets() {
                 .pet-photo-side {
                     flex-shrink: 0;
                     width: 220px;
+                    position: relative;
+                    border-radius: 17px;
                 }
+                .pet-photo-side.birthday-photo-active {
+                    padding: 5px;
+                    background: linear-gradient(135deg, #4CAF50, #FFD54F, #FF9800, #4CAF50);
+                    background-size: 260% 260%;
+                    animation: birthdayFrameMove 4s ease infinite;
+                    box-shadow: 0 0 0 5px rgba(255,213,79,.07), 0 16px 35px rgba(255,152,0,.2);
+                }
+                .pet-photo-side.birthday-photo-active .pet-row-photo { width: 210px; height: 210px; border-radius: 12px; }
+                .pet-birthday-crown { position: absolute; z-index: 4; top: -29px; right: -18px; font-size: 49px; transform: rotate(14deg); filter: drop-shadow(0 8px 8px rgba(0,0,0,.45)); animation: birthdayCrownPet 1.9s ease-in-out infinite; }
+                @keyframes birthdayFrameMove { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+                @keyframes birthdayCrownPet { 0%,100% { transform: rotate(12deg) translateY(0); } 50% { transform: rotate(17deg) translateY(-5px); } }
                 .pet-row-photo {
                     width: 220px; height: 220px;
                     border-radius: 14px;
@@ -1313,6 +1339,11 @@ export default function Pets() {
                 .pet-menu-item:hover { background: rgba(76,175,80,0.13); color: #fff; transform: translateX(2px); }
                 .pet-menu-item.danger { color: #ff9d9d; }
                 .pet-menu-item.danger:hover { background: rgba(255,107,107,0.14); color: #ffb3b3; }
+
+                .pet-birthday-badges { display: flex; flex-wrap: wrap; gap: 7px; }
+                .pet-birthday-badge { display: inline-flex; align-items: center; gap: 6px; min-height: 31px; padding: 5px 9px; border-radius: 999px; border: 1px solid rgba(255,202,84,.25); background: linear-gradient(135deg,rgba(76,175,80,.12),rgba(255,152,0,.1)); color: rgba(255,255,255,.82); font-size: 10px; font-weight: 800; }
+                .pet-birthday-badge b { font-size: 16px; line-height: 1; }
+                .pet-birthday-badge small { color: #ffd675; font-size: 9px; }
 
                 /* Especie · sexo */
                 .pet-row-meta {
@@ -1717,6 +1748,7 @@ export default function Pets() {
                     .pet-row { flex-direction: column; gap: 14px; }
                     .pet-photo-side { width: 100%; }
                     .pet-row-photo { width: 100%; height: 220px; }
+                    .pet-photo-side.birthday-photo-active .pet-row-photo { width: 100%; height: 210px; }
                     .pet-actions-row { grid-template-columns: 1fr; }
                     .add-pet-cta { flex-wrap: wrap; }
                 }
