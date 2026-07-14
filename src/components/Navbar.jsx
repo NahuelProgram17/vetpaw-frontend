@@ -6,6 +6,7 @@ import InstallPWA from './InstallPWA'
 import NavIcon from './VetPawNavIcons'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
+const BROWSER_FONT = "'Nunito', 'Plus Jakarta Sans', sans-serif"
 const G1 = '#4CAF50'
 const O1 = '#FF9800'
 
@@ -191,6 +192,42 @@ export default function Navbar() {
         textDecoration: 'none', borderRadius: 8,
         transition: 'color .15s, background .15s', letterSpacing: 0.2,
     }
+
+    const browserLinkStyle = (path, accent = G1) => {
+        const active = isActive(path)
+        const softAccent = accent === O1 ? '#ffc36a' : '#8fda91'
+        return {
+            fontFamily: BROWSER_FONT,
+            fontSize: 14,
+            fontWeight: 800,
+            color: active ? accent : softAccent,
+            padding: '9px 9px 7px',
+            textDecoration: 'none',
+            borderRadius: 9,
+            letterSpacing: 0.15,
+            lineHeight: 1.05,
+            whiteSpace: 'nowrap',
+            background: active ? `${accent}16` : 'transparent',
+            borderBottom: active ? `2px solid ${accent}` : '2px solid transparent',
+            transition: 'color .16s, background .16s, border-color .16s, transform .16s',
+        }
+    }
+
+    const browserLinkEvents = (path, accent = G1) => ({
+        onMouseEnter: (e) => {
+            e.currentTarget.style.color = accent
+            e.currentTarget.style.background = `${accent}14`
+            e.currentTarget.style.borderBottomColor = accent
+            e.currentTarget.style.transform = 'translateY(-1px)'
+        },
+        onMouseLeave: (e) => {
+            const active = isActive(path)
+            e.currentTarget.style.color = active ? accent : (accent === O1 ? '#ffc36a' : '#8fda91')
+            e.currentTarget.style.background = active ? `${accent}16` : 'transparent'
+            e.currentTarget.style.borderBottomColor = active ? accent : 'transparent'
+            e.currentTarget.style.transform = 'translateY(0)'
+        },
+    })
     const linkHover = (e) => {
         e.currentTarget.style.color = G1
         e.currentTarget.style.background = 'rgba(76,175,80,0.08)'
@@ -232,7 +269,7 @@ export default function Navbar() {
 
         return (
             <>
-                <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+                <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
                 <aside style={{
                     position: 'fixed', top: 0, left: 0, bottom: 0,
@@ -462,7 +499,7 @@ export default function Navbar() {
     // ══════════════════════════════════════════
     return (
         <>
-            <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+            <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
             <style>{`
                 @media (max-width: 480px) {
                     .vp-nav-main { padding: 0 16px !important; }
@@ -487,65 +524,75 @@ export default function Navbar() {
                 </Link>
 
                 {!isMobile && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         {!user ? (
                             <>
-                                <Link to="/clinics" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('clinics', isActive('/clinics'), true)} Veterinarias</Link>
-                                <Link to="/mascotas-perdidas" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('lost', isActive('/mascotas-perdidas'), true)} Mascotas perdidas</Link>
+                                <Link to="/clinics" style={browserLinkStyle('/clinics', G1)} {...browserLinkEvents('/clinics', G1)}>Veterinarias</Link>
+                                <Link to="/mascotas-perdidas" style={browserLinkStyle('/mascotas-perdidas', O1)} {...browserLinkEvents('/mascotas-perdidas', O1)}>Mascotas perdidas</Link>
                                 <InstallPWA />
-                                <Link to="/login" style={{ ...btnOutline, marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 8 }}
-                                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
-                                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.background = 'transparent' }}>
-                                    {renderNavIcon('login', isActive('/login'), true)} Ingresar
+                                <Link to="/login" style={{ ...btnOutline, marginLeft: 8, fontFamily: BROWSER_FONT, fontWeight: 800 }}
+                                    onMouseEnter={e => { e.currentTarget.style.borderColor = G1; e.currentTarget.style.color = G1; e.currentTarget.style.background = 'rgba(76,175,80,0.08)' }}
+                                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'transparent' }}>
+                                    Ingresar
                                 </Link>
-                                <Link to="/register" style={{ ...btnGradient, marginLeft: 6 }}>Registrarme</Link>
+                                <Link to="/register" style={{ ...btnGradient, marginLeft: 6, fontFamily: BROWSER_FONT, fontWeight: 900 }}>Registrarme</Link>
                             </>
                         ) : user.role === 'clinic' ? (
                             <>
-                                <Link to="/clinic/dashboard" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('panel', isActive('/clinic/dashboard'), true)} Mi panel</Link>
-                                <Link to="/messages" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>
-                                    {renderNavIcon('messages', isActive('/messages'), true)} Mensajes
+                                <Link to="/clinic/dashboard" style={browserLinkStyle('/clinic/dashboard', G1)} {...browserLinkEvents('/clinic/dashboard', G1)}>Mi panel</Link>
+                                <Link to="/messages" style={{ ...browserLinkStyle('/messages', O1), display: 'inline-flex', alignItems: 'center', gap: 6 }} {...browserLinkEvents('/messages', O1)}>
+                                    Mensajes
                                     {unreadMessages > 0 && (
-                                        <span style={{ background: O1, color: '#fff', fontSize: 10, fontWeight: 800, width: 16, height: 16, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <span style={{ background: G1, color: '#07131d', fontSize: 10, fontWeight: 900, minWidth: 17, height: 17, padding: '0 5px', borderRadius: 9, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                             {unreadMessages}
                                         </span>
                                     )}
                                 </Link>
-                                <Link to="/profile" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('profile', isActive('/profile'), true)} Mi perfil</Link>
-                                <Link to="/configuracion" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('settings', isActive('/configuracion'), true)} Configuración</Link>
+                                <Link to="/profile" style={browserLinkStyle('/profile', G1)} {...browserLinkEvents('/profile', G1)}>Mi perfil</Link>
+                                <Link to="/configuracion" style={browserLinkStyle('/configuracion', O1)} {...browserLinkEvents('/configuracion', O1)}>Configuración</Link>
                                 <InstallPWA />
-                                <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 4px' }}>|</span>
-                                <span style={{ ...linkStyle, color: G1, fontWeight: 700 }}>{user.first_name || user.username}</span>
-                                <button onClick={handleLogout} style={{ ...linkStyle, background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)' }}
-                                    onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-                                    onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}>
+                                <span style={{ color: 'rgba(255,255,255,0.18)', margin: '0 3px' }}>|</span>
+                                <span style={{ fontFamily: BROWSER_FONT, color: G1, fontWeight: 900, fontSize: 14, padding: '7px 6px' }}>{user.first_name || user.username}</span>
+                                <button onClick={handleLogout} style={{ fontFamily: BROWSER_FONT, fontSize: 14, fontWeight: 800, background: 'none', border: 'none', cursor: 'pointer', color: '#ffc36a', padding: '7px 7px' }}
+                                    onMouseEnter={e => e.currentTarget.style.color = O1}
+                                    onMouseLeave={e => e.currentTarget.style.color = '#ffc36a'}>
                                     Salir
                                 </button>
                             </>
                         ) : (
                             <>
-                                <Link to="/dashboard" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('panel', isActive('/dashboard'), true)} Mi panel</Link>
-                                <Link to="/pets" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('pets', isActive('/pets'), true)} Mascotas</Link>
-                                <Link to="/appointments" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('appointments', isActive('/appointments'), true)} Turnos</Link>
-                                <Link to="/history" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('history', isActive('/history'), true)} Historial</Link>
-                                <Link to="/clinics" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('clinics', isActive('/clinics'), true)} Veterinarias</Link>
-                                <Link to="/mascotas-perdidas" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('lost', isActive('/mascotas-perdidas'), true)} Mascotas perdidas</Link>
-                                <Link to="/messages" style={{ ...linkStyle, position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>
-                                    {renderNavIcon('messages', isActive('/messages'), true)}
+                                <Link to="/dashboard" style={browserLinkStyle('/dashboard', G1)} {...browserLinkEvents('/dashboard', G1)}>Mi panel</Link>
+                                <Link to="/pets" style={browserLinkStyle('/pets', O1)} {...browserLinkEvents('/pets', O1)}>Mascotas</Link>
+                                <Link to="/appointments" style={browserLinkStyle('/appointments', G1)} {...browserLinkEvents('/appointments', G1)}>Turnos</Link>
+                                <Link to="/history" style={browserLinkStyle('/history', O1)} {...browserLinkEvents('/history', O1)}>Historial</Link>
+                                <Link to="/clinics" style={browserLinkStyle('/clinics', G1)} {...browserLinkEvents('/clinics', G1)}>Veterinarias</Link>
+                                <Link to="/mascotas-perdidas" style={browserLinkStyle('/mascotas-perdidas', O1)} {...browserLinkEvents('/mascotas-perdidas', O1)}>Mascotas perdidas</Link>
+                                <Link to="/messages" style={{ ...browserLinkStyle('/messages', G1), display: 'inline-flex', alignItems: 'center', gap: 5 }} {...browserLinkEvents('/messages', G1)}>
+                                    Mensajes
                                     {unreadMessages > 0 && (
-                                        <span style={{ position: 'absolute', top: 2, right: 2, background: O1, color: '#fff', fontSize: 9, fontWeight: 800, width: 15, height: 15, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <span style={{ background: O1, color: '#07131d', fontSize: 10, fontWeight: 900, minWidth: 17, height: 17, padding: '0 5px', borderRadius: 9, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                             {unreadMessages}
                                         </span>
                                     )}
                                 </Link>
-                                <Link to="/profile" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('profile', isActive('/profile'), true)} Mi perfil</Link>
-                                <Link to="/configuracion" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('settings', isActive('/configuracion'), true)} Configuración</Link>
+                                <Link to="/profile" style={browserLinkStyle('/profile', O1)} {...browserLinkEvents('/profile', O1)}>Mi perfil</Link>
+                                <Link to="/configuracion" style={browserLinkStyle('/configuracion', G1)} {...browserLinkEvents('/configuracion', G1)}>Configuración</Link>
                                 <InstallPWA />
                                 <div style={{ position: 'relative' }} ref={notifRef}>
-                                    <button onClick={handleOpenNotif} style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', fontSize: 16 }}>
-                                        {renderNavIcon('notifications', showNotif || isActive('/notifications'), true)}
+                                    <button
+                                        onClick={handleOpenNotif}
+                                        style={{
+                                            ...browserLinkStyle('/notifications', O1),
+                                            position: 'relative',
+                                            borderTop: 'none', borderLeft: 'none', borderRight: 'none',
+                                            cursor: 'pointer',
+                                            display: 'inline-flex', alignItems: 'center', gap: 5,
+                                        }}
+                                        {...browserLinkEvents('/notifications', O1)}
+                                    >
+                                        Notificaciones
                                         {notifications.length > 0 && (
-                                            <span style={{ position: 'absolute', top: 2, right: 2, background: O1, color: '#fff', fontSize: 9, fontWeight: 800, width: 15, height: 15, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <span style={{ background: G1, color: '#07131d', fontSize: 10, fontWeight: 900, minWidth: 17, height: 17, padding: '0 5px', borderRadius: 9, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 {notifications.length}
                                             </span>
                                         )}
@@ -553,7 +600,7 @@ export default function Navbar() {
                                     {showNotif && (
                                         <div style={{ position: 'absolute', right: 0, top: 46, width: 300, background: '#0f1923', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, boxShadow: '0 16px 48px rgba(0,0,0,0.5)', overflow: 'hidden', zIndex: 300 }}>
                                             <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                                                <p style={{ color: '#fff', fontWeight: 800, fontSize: 14, fontFamily: FONT }}>Notificaciones</p>
+                                                <p style={{ color: '#fff', fontWeight: 800, fontSize: 14, fontFamily: BROWSER_FONT }}>Notificaciones</p>
                                             </div>
                                             {notifications.length === 0 ? (
                                                 <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>No tenés notificaciones nuevas</div>
@@ -561,7 +608,7 @@ export default function Navbar() {
                                                 <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                                                     {notifications.map(n => (
                                                         <div key={n.notification_key || n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                                                            <p style={{ color: '#fff', fontSize: 15, fontWeight: 700, fontFamily: FONT }}>{statusLabel(n.status)} — {n.reason || 'Turno'}</p>
+                                                            <p style={{ color: '#fff', fontSize: 15, fontWeight: 700, fontFamily: BROWSER_FONT }}>{statusLabel(n.status)} — {n.reason || 'Turno'}</p>
                                                             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>🐾 {n.pet_name} · {n.notification_type === 'birthday' ? '🎖️' : '🏥'} {n.clinic_name}</p>
                                                             <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, marginTop: 2 }}>{new Date(n.requested_date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
                                                         </div>
@@ -569,16 +616,16 @@ export default function Navbar() {
                                                 </div>
                                             )}
                                             <div style={{ padding: '10px 18px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                                                <Link to="/notifications" onClick={() => setShowNotif(false)} style={{ color: G1, fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: FONT }}>Ver todas las notificaciones →</Link>
+                                                <Link to="/notifications" onClick={() => setShowNotif(false)} style={{ color: G1, fontSize: 12, fontWeight: 800, textDecoration: 'none', fontFamily: BROWSER_FONT }}>Ver todas las notificaciones →</Link>
                                             </div>
                                         </div>
                                     )}
                                 </div>
-                                <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 4px' }}>|</span>
-                                <span style={{ ...linkStyle, color: G1, fontWeight: 700 }}>{user.first_name || user.username}</span>
-                                <button onClick={handleLogout} style={{ ...linkStyle, background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)' }}
-                                    onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-                                    onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}>
+                                <span style={{ color: 'rgba(255,255,255,0.18)', margin: '0 3px' }}>|</span>
+                                <span style={{ fontFamily: BROWSER_FONT, color: G1, fontWeight: 900, fontSize: 14, padding: '7px 5px' }}>{user.first_name || user.username}</span>
+                                <button onClick={handleLogout} style={{ fontFamily: BROWSER_FONT, fontSize: 14, fontWeight: 800, background: 'none', border: 'none', cursor: 'pointer', color: '#ffc36a', padding: '7px 5px' }}
+                                    onMouseEnter={e => e.currentTarget.style.color = O1}
+                                    onMouseLeave={e => e.currentTarget.style.color = '#ffc36a'}>
                                     Salir
                                 </button>
                             </>
