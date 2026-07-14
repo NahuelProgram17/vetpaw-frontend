@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getAppointments, markNotificationsSeen, getUnreadCount, getBirthdayCelebrations } from '../services/api'
 import InstallPWA from './InstallPWA'
+import NavIcon from './VetPawNavIcons'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const G1 = '#4CAF50'
@@ -151,30 +152,34 @@ export default function Navbar() {
 
     const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/')
 
+    const renderNavIcon = (name, active = false, compact = false, danger = false) => (
+        <NavIcon name={name} active={active} compact={compact} danger={danger} />
+    )
+
     // ── Links según rol ──
     const ownerLinks = [
-        { to: '/dashboard',    icon: '🏠', label: 'Mi panel' },
-        { to: '/pets',         icon: '🐾', label: 'Mascotas' },
-        { to: '/appointments', icon: '📅', label: 'Turnos' },
-        { to: '/history',      icon: '📋', label: 'Historial' },
-        { to: '/clinics',      icon: '🏥', label: 'Veterinarias' },
-        { to: '/mascotas-perdidas', icon: '🐾', label: 'Mascotas perdidas' },
-        { to: '/messages',     icon: '💬', label: 'Mensajes', badge: unreadMessages },
-        { to: '/profile',      icon: '👤', label: 'Mi perfil' },
-        { to: '/configuracion', icon: '⚙️', label: 'Configuración' },
+        { to: '/dashboard', icon: 'panel', label: 'Mi panel' },
+        { to: '/pets', icon: 'pets', label: 'Mascotas' },
+        { to: '/appointments', icon: 'appointments', label: 'Turnos' },
+        { to: '/history', icon: 'history', label: 'Historial' },
+        { to: '/clinics', icon: 'clinics', label: 'Veterinarias' },
+        { to: '/mascotas-perdidas', icon: 'lost', label: 'Mascotas perdidas' },
+        { to: '/messages', icon: 'messages', label: 'Mensajes', badge: unreadMessages },
+        { to: '/profile', icon: 'profile', label: 'Mi perfil' },
+        { to: '/configuracion', icon: 'settings', label: 'Configuración' },
     ]
 
     const clinicLinks = [
-        { to: '/clinic/dashboard', icon: '🏠', label: 'Mi panel' },
-        { to: '/messages',         icon: '💬', label: 'Mensajes', badge: unreadMessages },
-        { to: '/profile',          icon: '👤', label: 'Mi perfil' },
-        { to: '/configuracion',    icon: '⚙️', label: 'Configuración' },
+        { to: '/clinic/dashboard', icon: 'panel', label: 'Mi panel' },
+        { to: '/messages', icon: 'messages', label: 'Mensajes', badge: unreadMessages },
+        { to: '/profile', icon: 'profile', label: 'Mi perfil' },
+        { to: '/configuracion', icon: 'settings', label: 'Configuración' },
     ]
 
     const guestLinks = [
-        { to: '/clinics', icon: '🏥', label: 'Veterinarias' },
-        { to: '/mascotas-perdidas', icon: '🐾', label: 'Mascotas perdidas' },
-        { to: '/login',   icon: '🔐', label: 'Ingresar' },
+        { to: '/clinics', icon: 'clinics', label: 'Veterinarias' },
+        { to: '/mascotas-perdidas', icon: 'lost', label: 'Mascotas perdidas' },
+        { to: '/login', icon: 'login', label: 'Ingresar' },
     ]
 
     const sidebarLinks = !user ? guestLinks : user.role === 'clinic' ? clinicLinks : ownerLinks
@@ -283,14 +288,14 @@ export default function Navbar() {
                                 {user.first_name || user.username}
                             </p>
                             <p style={{ color: 'rgba(255,255,255,0.35)', fontFamily: FONT, fontSize: 11, marginTop: 2 }}>
-                                {user.role === 'clinic' ? '🏥 Clínica' : '🐾 Dueño/a'}
+                                {user.role === 'clinic' ? 'Clínica' : 'Dueño/a'}
                             </p>
                         </div>
                     )}
                     {user && sidebarCollapsed && (
                         <div style={{ padding: '12px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
                             <div style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, ${G1}, ${O1})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
-                                {user.role === 'clinic' ? '🏥' : '🐾'}
+                                {renderNavIcon(user.role === 'clinic' ? 'clinics' : 'pets', true, true)}
                             </div>
                         </div>
                     )}
@@ -330,7 +335,7 @@ export default function Navbar() {
                                         }
                                     }}
                                 >
-                                    <span style={{ fontSize: 18, flexShrink: 0 }}>{icon}</span>
+                                    <span style={{ flexShrink: 0 }}>{renderNavIcon(icon, active, sidebarCollapsed)}</span>
                                     {!sidebarCollapsed && (
                                         <>
                                             <span style={{ flex: 1 }}>{label}</span>
@@ -383,7 +388,7 @@ export default function Navbar() {
                                         }
                                     }}
                                 >
-                                    <span style={{ fontSize: 18 }}>🔔</span>
+                                    <span style={{ flexShrink: 0 }}>{renderNavIcon('notifications', active, sidebarCollapsed)}</span>
                                     {!sidebarCollapsed && <span style={{ flex: 1, textAlign: 'left' }}>Notificaciones</span>}
                                     {notifications.length > 0 && (
                                         <span style={{
@@ -435,7 +440,7 @@ export default function Navbar() {
                                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,107,107,0.15)'}
                                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,107,107,0.08)'}
                             >
-                                <span>🚪</span>
+                                {renderNavIcon('logout', false, sidebarCollapsed, true)}
                                 {!sidebarCollapsed && 'Cerrar sesión'}
                             </button>
                         ) : (
@@ -486,7 +491,7 @@ export default function Navbar() {
                         {!user ? (
                             <>
                                 <Link to="/clinics" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Veterinarias</Link>
-                                <Link to="/mascotas-perdidas" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>🐾 Mascotas perdidas</Link>
+                                <Link to="/mascotas-perdidas" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('lost', isActive('/mascotas-perdidas'), true)} Mascotas perdidas</Link>
                                 <InstallPWA />
                                 <Link to="/login" style={{ ...btnOutline, marginLeft: 8 }}
                                     onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
@@ -498,8 +503,8 @@ export default function Navbar() {
                         ) : user.role === 'clinic' ? (
                             <>
                                 <Link to="/clinic/dashboard" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi panel</Link>
-                                <Link to="/messages" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 5 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>
-                                    💬 Mensajes
+                                <Link to="/messages" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>
+                                    {renderNavIcon('messages', isActive('/messages'), true)} Mensajes
                                     {unreadMessages > 0 && (
                                         <span style={{ background: O1, color: '#fff', fontSize: 10, fontWeight: 800, width: 16, height: 16, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             {unreadMessages}
@@ -507,7 +512,7 @@ export default function Navbar() {
                                     )}
                                 </Link>
                                 <Link to="/profile" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi perfil</Link>
-                                <Link to="/configuracion" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>⚙️ Configuración</Link>
+                                <Link to="/configuracion" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('settings', isActive('/configuracion'), true)} Configuración</Link>
                                 <InstallPWA />
                                 <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 4px' }}>|</span>
                                 <span style={{ ...linkStyle, color: G1, fontWeight: 700 }}>{user.first_name || user.username}</span>
@@ -524,9 +529,9 @@ export default function Navbar() {
                                 <Link to="/appointments" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Turnos</Link>
                                 <Link to="/history" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Historial</Link>
                                 <Link to="/clinics" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Veterinarias</Link>
-                                <Link to="/mascotas-perdidas" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>🐾 Mascotas perdidas</Link>
-                                <Link to="/messages" style={{ ...linkStyle, position: 'relative', display: 'inline-flex', alignItems: 'center' }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>
-                                    💬
+                                <Link to="/mascotas-perdidas" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('lost', isActive('/mascotas-perdidas'), true)} Mascotas perdidas</Link>
+                                <Link to="/messages" style={{ ...linkStyle, position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>
+                                    {renderNavIcon('messages', isActive('/messages'), true)}
                                     {unreadMessages > 0 && (
                                         <span style={{ position: 'absolute', top: 2, right: 2, background: O1, color: '#fff', fontSize: 9, fontWeight: 800, width: 15, height: 15, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             {unreadMessages}
@@ -534,11 +539,11 @@ export default function Navbar() {
                                     )}
                                 </Link>
                                 <Link to="/profile" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>Mi perfil</Link>
-                                <Link to="/configuracion" style={linkStyle} onMouseEnter={linkHover} onMouseLeave={linkLeave}>⚙️ Configuración</Link>
+                                <Link to="/configuracion" style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }} onMouseEnter={linkHover} onMouseLeave={linkLeave}>{renderNavIcon('settings', isActive('/configuracion'), true)} Configuración</Link>
                                 <InstallPWA />
                                 <div style={{ position: 'relative' }} ref={notifRef}>
                                     <button onClick={handleOpenNotif} style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', fontSize: 16 }}>
-                                        🔔
+                                        {renderNavIcon('notifications', showNotif || isActive('/notifications'), true)}
                                         {notifications.length > 0 && (
                                             <span style={{ position: 'absolute', top: 2, right: 2, background: O1, color: '#fff', fontSize: 9, fontWeight: 800, width: 15, height: 15, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 {notifications.length}
@@ -585,7 +590,7 @@ export default function Navbar() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {user && (
                             <Link to="/messages" style={{ position: 'relative', fontSize: 20, textDecoration: 'none', padding: '4px 6px' }}>
-                                💬
+                                {renderNavIcon('messages', isActive('/messages'), true)}
                                 {unreadMessages > 0 && (
                                     <span style={{ position: 'absolute', top: 0, right: 0, background: O1, color: '#fff', fontSize: 9, fontWeight: 800, width: 14, height: 14, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         {unreadMessages}
@@ -661,7 +666,7 @@ export default function Navbar() {
                         <div style={{ padding: '8px 20px', flex: 1 }}>
                             {drawerLinks.map(({ to, icon, label, badge }) => (
                                 <Link key={to} to={to} style={drawerLink} onClick={() => setMenuOpen(false)}>
-                                    {icon && <span style={{ marginRight: 12, fontSize: 18 }}>{icon}</span>}
+                                    {icon && <span style={{ marginRight: 12, display: 'inline-flex' }}>{renderNavIcon(icon, isActive(to), true)}</span>}
                                     <span style={{ flex: 1 }}>{label}</span>
                                     {badge > 0 && (
                                         <span style={{ background: O1, color: '#fff', fontSize: 10, fontWeight: 800, borderRadius: 10, padding: '2px 7px' }}>{badge}</span>
