@@ -350,25 +350,38 @@ export default function Navbar() {
                             )
                         })}
 
-                        {/* Notificaciones (solo owner) */}
-                        {user?.role === 'owner' && (
-                            <div style={{ position: 'relative' }} ref={notifRef}>
-                                <button
-                                    onClick={handleOpenNotif}
+                        {/* Notificaciones (solo owner) — en la app abre la pantalla completa */}
+                        {user?.role === 'owner' && (() => {
+                            const active = isActive('/notifications')
+                            return (
+                                <Link
+                                    to="/notifications"
+                                    title={sidebarCollapsed ? 'Notificaciones' : ''}
                                     style={{
                                         display: 'flex', alignItems: 'center',
-                                        gap: 10, width: '100%',
+                                        gap: 10, width: '100%', boxSizing: 'border-box',
                                         padding: sidebarCollapsed ? '12px 0' : '10px 16px',
                                         justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-                                        background: 'transparent', border: 'none',
-                                        borderRight: '3px solid transparent',
-                                        color: 'rgba(255,255,255,0.55)',
-                                        fontFamily: FONT, fontWeight: 600, fontSize: 14,
+                                        textDecoration: 'none',
+                                        color: active ? '#fff' : 'rgba(255,255,255,0.55)',
+                                        background: active ? 'rgba(76,175,80,0.15)' : 'transparent',
+                                        borderRight: active ? `3px solid ${G1}` : '3px solid transparent',
+                                        fontFamily: FONT, fontWeight: active ? 700 : 600, fontSize: 14,
                                         cursor: 'pointer', transition: 'all 0.15s',
                                         position: 'relative',
                                     }}
-                                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#fff' }}
-                                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)' }}
+                                    onMouseEnter={e => {
+                                        if (!active) {
+                                            e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+                                            e.currentTarget.style.color = '#fff'
+                                        }
+                                    }}
+                                    onMouseLeave={e => {
+                                        if (!active) {
+                                            e.currentTarget.style.background = 'transparent'
+                                            e.currentTarget.style.color = 'rgba(255,255,255,0.55)'
+                                        }
+                                    }}
                                 >
                                     <span style={{ fontSize: 18 }}>🔔</span>
                                     {!sidebarCollapsed && <span style={{ flex: 1, textAlign: 'left' }}>Notificaciones</span>}
@@ -389,43 +402,9 @@ export default function Navbar() {
                                             {notifications.length}
                                         </span>
                                     )}
-                                </button>
-
-                                {/* Dropdown notificaciones */}
-                                {showNotif && (
-                                    <div style={{
-                                        position: 'fixed',
-                                        left: W + 8, top: 200,
-                                        width: 300,
-                                        background: '#0f1923',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        borderRadius: 18,
-                                        boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
-                                        overflow: 'hidden', zIndex: 300,
-                                    }}>
-                                        <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                                            <p style={{ color: '#fff', fontWeight: 800, fontSize: 14, fontFamily: FONT }}>Notificaciones</p>
-                                        </div>
-                                        {notifications.length === 0 ? (
-                                            <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>No tenés notificaciones nuevas</div>
-                                        ) : (
-                                            <div style={{ maxHeight: 280, overflowY: 'auto' }}>
-                                                {notifications.map(n => (
-                                                    <div key={n.notification_key || n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                                                        <p style={{ color: '#fff', fontSize: 15, fontWeight: 700, fontFamily: FONT }}>{statusLabel(n.status)} — {n.reason || 'Turno'}</p>
-                                                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>🐾 {n.pet_name} · {n.notification_type === 'birthday' ? '🎖️' : '🏥'} {n.clinic_name}</p>
-                                                        <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, marginTop: 2 }}>{new Date(n.requested_date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        <div style={{ padding: '10px 18px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                                            <Link to="/notifications" onClick={() => setShowNotif(false)} style={{ color: G1, fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: FONT }}>Ver todas las notificaciones →</Link>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                                </Link>
+                            )
+                        })()}
                     </nav>
 
                     {/* Footer sidebar */}
