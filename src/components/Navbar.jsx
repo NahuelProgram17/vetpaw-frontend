@@ -162,7 +162,7 @@ export default function Navbar() {
 
     // ── Links según rol ──
     const ownerLinks = [
-        { to: '/comunidad', icon: 'pets', label: 'Comunidad' },
+        { to: '/comunidad', icon: 'community', label: 'Comunidad' },
         { to: '/dashboard', icon: 'panel', label: 'Mi panel' },
         { to: '/pets', icon: 'pets', label: 'Mascotas' },
         { to: '/appointments', icon: 'appointments', label: 'Turnos' },
@@ -175,7 +175,7 @@ export default function Navbar() {
     ]
 
     const clinicLinks = [
-        { to: '/comunidad', icon: 'pets', label: 'Comunidad' },
+        { to: '/comunidad', icon: 'community', label: 'Comunidad' },
         { to: '/clinic/dashboard', icon: 'panel', label: 'Mi panel' },
         { to: '/messages', icon: 'messages', label: 'Mensajes', badge: unreadMessages },
         { to: '/profile', icon: 'profile', label: 'Mi perfil' },
@@ -183,7 +183,7 @@ export default function Navbar() {
     ]
 
     const guestLinks = [
-        { to: '/comunidad', icon: 'pets', label: 'Comunidad' },
+        { to: '/comunidad', icon: 'community', label: 'Comunidad' },
         { to: '/clinics', icon: 'clinics', label: 'Veterinarias' },
         { to: '/mascotas-perdidas', icon: 'lost', label: 'Mascotas perdidas' },
         { to: '/login', icon: 'login', label: 'Ingresar' },

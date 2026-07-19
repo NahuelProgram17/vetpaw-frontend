@@ -1,4 +1,5 @@
 import panelIcon from '../assets/vetpaw-nav-icons/panel.png'
+import communityIcon from '../assets/vetpaw-nav-icons/community.png'
 import petsIcon from '../assets/vetpaw-nav-icons/pets.png'
 import appointmentsIcon from '../assets/vetpaw-nav-icons/appointments.png'
 import historyIcon from '../assets/vetpaw-nav-icons/history.png'
@@ -11,6 +12,7 @@ import notificationsIcon from '../assets/vetpaw-nav-icons/notifications.png'
 import logoutIcon from '../assets/vetpaw-nav-icons/logout.png'
 
 const ICONS = {
+  community: communityIcon,
   panel: panelIcon,
   pets: petsIcon,
   appointments: appointmentsIcon,

@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getCommunityDiscover, getCommunityPosts } from '../services/api'
 import PostComposer from '../components/community/PostComposer'
 import PostCard from '../components/community/PostCard'
 import CommunityRightRail from '../components/community/CommunityRightRail'
+import communityHeroPets from '../assets/community/community-hero-pets.webp'
 import './Community.css'
 
 const FILTERS = [
@@ -76,32 +77,6 @@ export default function Community() {
     setTimeout(() => document.getElementById(`post-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120)
   }, [location.search, loading])
 
-  const privateLinks = useMemo(() => {
-    if (!user) return [
-      ['/register', '✨', 'Crear cuenta gratis'],
-      ['/login', '🔐', 'Ingresar'],
-      ['/como-funciona', '💡', 'Cómo funciona'],
-    ]
-    if (user.role === 'clinic') return [
-      ['/comunidad', '🌎', 'Comunidad'],
-      ['/clinic/dashboard', '📊', 'Panel veterinario'],
-      ['/messages', '💬', 'Mensajes'],
-      ['/profile', '👤', 'Perfil'],
-      ['/configuracion', '⚙️', 'Configuración'],
-    ]
-    return [
-      ['/comunidad', '🌎', 'Comunidad'],
-      ['/dashboard', '📊', 'Mi panel'],
-      ['/pets', '🐾', 'Mis mascotas'],
-      ['/appointments', '📅', 'Mis turnos'],
-      ['/history', '📋', 'Historial privado'],
-      ['/profile', '👤', 'Mi perfil'],
-      ['/configuracion', '⚙️', 'Configuración'],
-      ['/messages', '💬', 'Mensajes'],
-      ['/notifications', '🔔', 'Notificaciones'],
-    ]
-  }, [user])
-
   const openHashtag = (tag) => {
     const clean = String(tag || '').replace(/^#/, '').trim()
     if (!clean) return
@@ -125,26 +100,20 @@ export default function Community() {
   return (
     <main className="community-page">
       <div className="community-shell">
-        <aside className="community-left">
-          <div className="community-sticky">
-            <div className="community-left-card community-card">
-              <div className="community-left-title">Tu espacio VetPaw</div>
-              {privateLinks.map(([to, icon, label]) => (
-                <Link className={`community-left-link ${location.pathname === to ? 'active' : ''}`} to={to} key={to}><span className="emoji">{icon}</span>{label}</Link>
-              ))}
-              <div style={{ height: 1, background: 'rgba(255,255,255,.06)', margin: '10px 7px' }} />
-              <Link className="community-left-link" to="/mascotas-perdidas"><span className="emoji">🚨</span>Perdidos y encontrados</Link>
-              <Link className="community-left-link" to="/clinics"><span className="emoji">🏥</span>Veterinarias</Link>
-              {user?.username === 'jaime17' && <Link className="community-left-link" to="/comunidad/moderacion"><span className="emoji">🛡️</span>Moderación</Link>}
-            </div>
-          </div>
-        </aside>
-
         <section className="community-center">
           <div className="community-hero community-card">
-            <div className="community-kicker">VetPaw Comunidad</div>
-            <h1>La red social donde <span>cada mascota</span> tiene su historia.</h1>
-            <p>Compartí aventuras, dejá patitas, conocé otras mascotas y conectate con veterinarias. Los datos médicos y privados siguen siempre separados y protegidos.</p>
+            <div className="community-hero-visual" aria-hidden="true">
+              <img src={communityHeroPets} alt="" />
+            </div>
+            <div className="community-hero-copy">
+              <div className="community-kicker"><span>🐾</span> VetPaw Comunidad</div>
+              <h1>La red social donde <span className="hero-green">cada</span> <span className="hero-orange">mascota</span> tiene su historia.</h1>
+              <p>Compartí aventuras, dejá patitas, conocé otras mascotas y conectate con veterinarias. Los datos médicos y privados siguen siempre separados y protegidos.</p>
+              <div className="community-hero-chips">
+                <span>🛡️ Segura y privada</span>
+                <span>🐾 Comunidad de mascotas</span>
+              </div>
+            </div>
           </div>
 
           <PostComposer user={user} defaultPetId={defaultPetId} onCreated={(created) => { setPosts((rows) => [created, ...rows]); fetchDiscover() }} />
@@ -160,6 +129,9 @@ export default function Community() {
             {FILTERS.map(([value, label]) => (
               <button key={value} className={`filter-pill ${filter === value ? 'active' : ''}`} onClick={() => changeFilter(value)} title={!user && ['following', 'saved'].includes(value) ? 'Iniciá sesión para usar este filtro' : ''}>{label}</button>
             ))}
+            {user?.username === 'jaime17' && (
+              <Link className="filter-pill moderation-shortcut" to="/comunidad/moderacion">🛡️ Moderación</Link>
+            )}
           </div>
 
           {error && <div className="community-error">{error}</div>}
