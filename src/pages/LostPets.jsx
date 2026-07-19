@@ -8,6 +8,7 @@ import lostSearchIcon from "../assets/vetpaw-lost-icons/lost-search.png";
 import lostFoundIcon from "../assets/vetpaw-lost-icons/lost-found.png";
 import lostReportsIcon from "../assets/vetpaw-lost-icons/lost-reports.png";
 import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from "../utils/imageUpload";
+import ImageEditorModal from '../components/ImageEditorModal';
 
 // ───────────────────────── Tokens de diseño
 const BG = "#0a121d"
@@ -132,6 +133,7 @@ export default function LostPets() {
     const [contactValue, setContactValue] = useState('')
     const [fotoMascota, setFotoMascota] = useState(null)
     const [fotoPreview, setFotoPreview] = useState(null)
+    const [editorFile, setEditorFile] = useState(null)
 
     useEffect(() => () => revokeObjectUrl(fotoPreview), [fotoPreview])
     const [enviando, setEnviando] = useState(false)
@@ -180,13 +182,19 @@ export default function LostPets() {
         const file = e.target.files?.[0]
         if (!file) return
         try {
-            const prepared = await prepareImageForUpload(file, { maxMB: 5, maxDimension: 2048, label: 'La foto' })
-            setFotoMascota(prepared)
-            setFotoPreview((current) => replaceObjectUrl(current, prepared))
+            const prepared = await prepareImageForUpload(file, { maxMB: 5, maxDimension: 2400, label: 'La foto' })
+            setEditorFile(prepared)
         } catch (imageError) {
             alert(imageError.message || 'No pudimos preparar la foto.')
+        } finally {
             e.target.value = ''
         }
+    }
+
+    const applyEditedPhoto = async (editedFile) => {
+        setFotoMascota(editedFile)
+        setFotoPreview((current) => replaceObjectUrl(current, editedFile))
+        setEditorFile(null)
     }
 
     const handleReporte = async (e) => {
@@ -651,6 +659,15 @@ export default function LostPets() {
                 </div>
             )}
 
+            {editorFile && (
+                <ImageEditorModal
+                    file={editorFile}
+                    title="Ajustar foto del aviso"
+                    onCancel={() => setEditorFile(null)}
+                    onApply={applyEditedPhoto}
+                />
+            )}
+
             {/* ── Responsive ── */}
             <style>{`
 
@@ -769,6 +786,9 @@ export default function LostPets() {
                 @keyframes lpCardIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
                 .lp-card { animation: lpCardIn 0.3s ease both; transition: transform .18s, border-color .18s, box-shadow .18s; }
                 .lp-card:hover { transform: translateY(-3px); border-color: ${G2}40; box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+                .lp-card-photo { height: clamp(250px, 27vw, 320px); }
+                .lp-card-photo-main { transition: transform .22s ease; }
+                .lp-card:hover .lp-card-photo-main { transform: scale(1.015); }
                 .lp-shell select:focus, .lp-shell input:focus, .lp-shell textarea:focus { border-color: ${G2} !important; }
 
                 @media (max-width: 1100px) {
@@ -781,6 +801,7 @@ export default function LostPets() {
                     .lp-header h1 { font-size: 1.55rem !important; }
                     .lp-stats { grid-template-columns: 1fr !important; }
                     .lp-grid { grid-template-columns: 1fr !important; }
+                    .lp-card-photo { height: clamp(290px, 82vw, 440px); }
                     .lp-form-row { flex-direction: column !important; }
                     .lp-form-row > div { flex: 1 1 100% !important; }
                 }
@@ -815,15 +836,31 @@ function PetCard({ pet, onOpen }) {
 
     return (
         <div className="lp-card" onClick={onOpen} style={{ background: CARD, borderRadius: 16, overflow: 'hidden', border: `1.5px solid ${badgeColor}25`, cursor: 'pointer', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ height: 180, position: 'relative', overflow: 'hidden', background: CARD2 }}>
+            <div className="lp-card-photo" style={{ position: 'relative', overflow: 'hidden', background: '#07111f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {pet.photo_url ? (
-                    <img src={pet.photo_url} alt={pet.pet_name || 'Mascota'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <>
+                        <img
+                            src={pet.photo_url}
+                            alt=""
+                            aria-hidden="true"
+                            style={{ position: 'absolute', inset: -22, width: 'calc(100% + 44px)', height: 'calc(100% + 44px)', objectFit: 'cover', filter: 'blur(22px) brightness(.48) saturate(.85)', transform: 'scale(1.08)', opacity: .75 }}
+                        />
+                        <img
+                            className="lp-card-photo-main"
+                            src={pet.photo_url}
+                            alt={pet.pet_name || 'Mascota'}
+                            loading="lazy"
+                            style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block' }}
+                        />
+                        <div style={{ position: 'absolute', zIndex: 2, inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,.06), transparent 55%, rgba(0,0,0,.20))', pointerEvents: 'none' }} />
+                    </>
                 ) : (
-                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>{speciesEmoji(pet.species)}</div>
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 58 }}>{speciesEmoji(pet.species)}</div>
                 )}
-                <div style={{ position: 'absolute', top: 10, left: 10, background: badgeColor, color: '#fff', fontSize: 10, fontWeight: 900, letterSpacing: 1.2, padding: '4px 10px', borderRadius: 6, textTransform: 'uppercase' }}>
+                <div style={{ position: 'absolute', zIndex: 3, top: 10, left: 10, background: badgeColor, color: '#fff', fontSize: 10, fontWeight: 900, letterSpacing: 1.2, padding: '4px 10px', borderRadius: 6, textTransform: 'uppercase', boxShadow: '0 6px 18px rgba(0,0,0,.32)' }}>
                     {isLost ? 'Se busca' : 'Encontrada'}
                 </div>
+                {pet.photo_url && <div style={{ position: 'absolute', zIndex: 3, right: 10, bottom: 10, background: 'rgba(7,17,31,.78)', color: 'rgba(255,255,255,.84)', border: `1px solid ${BORDER}`, borderRadius: 999, padding: '5px 9px', fontSize: 10, fontWeight: 800, backdropFilter: 'blur(8px)' }}>🔍 Ver foto completa</div>}
             </div>
 
             <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>

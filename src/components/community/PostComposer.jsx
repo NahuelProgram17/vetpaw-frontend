@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { createCommunityPost, getPets } from '../../services/api'
 import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../../utils/imageUpload'
+import ImageEditorModal from '../ImageEditorModal'
 
 export default function PostComposer({ user, onCreated, defaultPetId = null }) {
   const [pets, setPets] = useState([])
@@ -11,6 +12,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
   const [preview, setPreview] = useState('')
   const [saving, setSaving] = useState(false)
   const [preparingImage, setPreparingImage] = useState(false)
+  const [editorFile, setEditorFile] = useState(null)
   const [error, setError] = useState('')
   const fileRef = useRef(null)
   const cameraRef = useRef(null)
@@ -48,14 +50,19 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
     if (!file) return
     setPreparingImage(true)
     try {
-      const prepared = await prepareImageForUpload(file, { maxMB: 5, maxDimension: 2048, label: 'La foto' })
-      setImage(prepared)
-      setPreview((current) => replaceObjectUrl(current, prepared))
+      const prepared = await prepareImageForUpload(file, { maxMB: 5, maxDimension: 2400, label: 'La foto' })
+      setEditorFile(prepared)
     } catch (imageError) {
       setError(imageError.message || 'No pudimos preparar la foto.')
     } finally {
       setPreparingImage(false)
     }
+  }
+
+  const applyEditedImage = async (editedFile) => {
+    setImage(editedFile)
+    setPreview((current) => replaceObjectUrl(current, editedFile))
+    setEditorFile(null)
   }
 
   const submit = async () => {
@@ -125,6 +132,15 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
         </div>
         <button className="community-button" disabled={saving || preparingImage || (user.role === 'owner' && !pets.length)} onClick={submit}>{preparingImage ? 'Preparando foto...' : saving ? 'Publicando...' : 'Publicar'}</button>
       </div>
+
+      {editorFile && (
+        <ImageEditorModal
+          file={editorFile}
+          title="Ajustar foto de la publicación"
+          onCancel={() => setEditorFile(null)}
+          onApply={applyEditedImage}
+        />
+      )}
     </div>
   )
 }
