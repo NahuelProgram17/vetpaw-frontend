@@ -312,3 +312,27 @@
   .pet-profile-body { grid-template-columns: 1fr; }
   .pet-cover { height: 210px; }
 }
+
+
+/* Cámara, hashtags y accesos rápidos del compositor */
+.composer-media-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.camera-button { border-color: rgba(76,175,80,.24); background: rgba(76,175,80,.10); color: var(--vp-green-soft); }
+.lost-report-button { text-decoration: none; border-color: rgba(255,96,75,.22); background: rgba(255,96,75,.08); color: #ffb4aa; }
+.hashtag-suggestions { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 10px; color: var(--vp-muted); font-size: 10px; }
+.hashtag-suggestions > span { font-weight: 800; }
+.hashtag-chip { border: 1px solid rgba(76,175,80,.18); background: rgba(76,175,80,.07); color: var(--vp-green-soft); border-radius: 999px; padding: 5px 8px; font-family: inherit; font-size: 9px; font-weight: 850; cursor: pointer; }
+.hashtag-chip:hover { color: #fff; border-color: rgba(255,152,0,.30); background: rgba(255,152,0,.10); }
+.post-hashtag { border: 0; padding: 0; margin: 0; background: transparent; color: var(--vp-green-soft); font: inherit; font-weight: 850; cursor: pointer; }
+.post-hashtag:hover { color: var(--vp-orange-soft); text-decoration: underline; }
+.hashtag-filter-banner { margin-bottom: 12px; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-color: rgba(76,175,80,.22); }
+.hashtag-filter-banner div { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; color: var(--vp-muted); font-size: 11px; }
+.hashtag-filter-banner strong { color: var(--vp-green-soft); font-size: 13px; }
+.hashtag-filter-banner button { border: 0; border-radius: 999px; padding: 7px 10px; background: rgba(255,152,0,.10); color: var(--vp-orange-soft); font-family: inherit; font-size: 10px; font-weight: 850; cursor: pointer; }
+
+@media (max-width: 600px) {
+  .composer-actions { align-items: stretch; }
+  .composer-media-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+  .composer-media-actions .lost-report-button { grid-column: 1 / -1; justify-content: center; }
+  .composer-actions > .community-button { width: 100%; }
+  .hashtag-filter-banner { align-items: flex-start; }
+}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getCommunityDiscover, getCommunityPosts } from '../services/api'
 import PostComposer from '../components/community/PostComposer'
@@ -19,8 +19,11 @@ const FILTERS = [
 export default function Community() {
   const { user } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const [filter, setFilter] = useState('all')
-  const defaultPetId = new URLSearchParams(location.search).get('mascota')
+  const searchParams = new URLSearchParams(location.search)
+  const defaultPetId = searchParams.get('mascota')
+  const hashtag = (searchParams.get('hashtag') || '').replace(/^#/, '').trim()
   const [posts, setPosts] = useState([])
   const [discover, setDiscover] = useState({ suggested_pets: [], clinics: [], lost_pets: [], birthdays: [] })
   const [page, setPage] = useState(1)
@@ -31,10 +34,11 @@ export default function Community() {
 
   const paramsFor = useCallback((selected, selectedPage = 1) => {
     const params = { page: selectedPage }
+    if (hashtag) params.hashtag = hashtag
     if (selected === 'following' || selected === 'saved') params.feed = selected
     else if (selected !== 'all') params.type = selected
     return params
-  }, [])
+  }, [hashtag])
 
   const fetchFeed = useCallback(async (selected, selectedPage = 1, append = false) => {
     append ? setMoreLoading(true) : setLoading(true)
@@ -98,6 +102,14 @@ export default function Community() {
     ]
   }, [user])
 
+  const openHashtag = (tag) => {
+    const clean = String(tag || '').replace(/^#/, '').trim()
+    if (!clean) return
+    navigate(`/comunidad?hashtag=${encodeURIComponent(clean)}`)
+  }
+
+  const clearHashtag = () => navigate('/comunidad')
+
   const changeFilter = (value) => {
     if (!user && ['following', 'saved'].includes(value)) return
     setFilter(value)
@@ -137,6 +149,13 @@ export default function Community() {
 
           <PostComposer user={user} defaultPetId={defaultPetId} onCreated={(created) => { setPosts((rows) => [created, ...rows]); fetchDiscover() }} />
 
+          {hashtag && (
+            <div className="hashtag-filter-banner community-card">
+              <div><span>Viendo publicaciones con</span><strong>#{hashtag}</strong></div>
+              <button type="button" onClick={clearHashtag}>Ver todo ✕</button>
+            </div>
+          )}
+
           <div className="community-toolbar community-card">
             {FILTERS.map(([value, label]) => (
               <button key={value} className={`filter-pill ${filter === value ? 'active' : ''}`} onClick={() => changeFilter(value)} title={!user && ['following', 'saved'].includes(value) ? 'Iniciá sesión para usar este filtro' : ''}>{label}</button>
@@ -147,7 +166,7 @@ export default function Community() {
           {loading ? (
             <div className="empty-feed community-card"><div className="icon">🐾</div><h3>Cargando la comunidad...</h3><p>Estamos reuniendo las últimas historias.</p></div>
           ) : posts.length ? (
-            posts.map((post) => <PostCard key={post.id} initialPost={post} user={user} onDeleted={removePost} onChanged={fetchDiscover} />)
+            posts.map((post) => <PostCard key={post.id} initialPost={post} user={user} onDeleted={removePost} onChanged={fetchDiscover} onHashtagClick={openHashtag} />)
           ) : (
             <div className="empty-feed community-card"><div className="icon">🐶</div><h3>Todavía no hay publicaciones acá</h3><p>{filter === 'following' ? 'Seguí mascotas para armar tu muro personalizado.' : filter === 'saved' ? 'Guardá publicaciones para encontrarlas fácilmente.' : 'Sé el primero en compartir algo con la comunidad VetPaw.'}</p></div>
           )}

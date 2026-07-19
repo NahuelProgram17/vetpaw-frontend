@@ -299,7 +299,7 @@ export default function Navbar() {
                         flexShrink: 0,
                     }}>
                         {!sidebarCollapsed && (
-                            <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+                            <Link to="/inicio-vetpaw" style={{ display: 'flex', alignItems: 'center' }}>
                                 <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 44, width: 'auto' }} />
                             </Link>
                         )}
@@ -525,7 +525,7 @@ export default function Navbar() {
                 position: 'sticky', top: 0, zIndex: 200,
                 backdropFilter: 'blur(12px)',
             }}>
-                <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+                <Link to="/inicio-vetpaw" style={{ display: 'flex', alignItems: 'center' }}>
                     <img src="/logo_vetpaw.png" alt="VetPaw" className="vp-nav-logo" style={{ height: 58, width: 'auto' }} />
                 </Link>
 

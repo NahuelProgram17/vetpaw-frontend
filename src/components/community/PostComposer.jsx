@@ -11,6 +11,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const fileRef = useRef(null)
+  const cameraRef = useRef(null)
 
   useEffect(() => {
     if (user?.role === 'owner') {
@@ -61,6 +62,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
       if (preview) URL.revokeObjectURL(preview)
       setPreview('')
       if (fileRef.current) fileRef.current.value = ''
+      if (cameraRef.current) cameraRef.current.value = ''
       onCreated?.(created)
     } catch (e) {
       const data = e.response?.data
@@ -68,6 +70,14 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
     } finally {
       setSaving(false)
     }
+  }
+
+  const addHashtag = (tag) => {
+    const cleanTag = tag.startsWith('#') ? tag : `#${tag}`
+    setText((current) => {
+      if (current.toLowerCase().includes(cleanTag.toLowerCase())) return current
+      return `${current}${current.trim() ? ' ' : ''}${cleanTag}`
+    })
   }
 
   const actorPhoto = user.role === 'owner' ? pets.find((p) => String(p.id) === pet)?.photo : user.avatar
@@ -90,11 +100,21 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
             <Link to="/pets/new" className="community-button-secondary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+ Crear mascota</Link>
           )
         ) : <div className="community-select" style={{ display: 'flex', alignItems: 'center' }}>🏥 Perfil veterinario</div>}
-        <textarea className="community-textarea" value={text} onChange={(e) => setText(e.target.value)} placeholder={user.role === 'clinic' ? 'Compartí un consejo, una novedad o una campaña...' : 'Una aventura, una foto, una anécdota...'} maxLength={3000} />
+        <textarea className="community-textarea" value={text} onChange={(e) => setText(e.target.value)} placeholder={user.role === 'clinic' ? 'Compartí un consejo, una novedad o una campaña... Podés usar #hashtags' : 'Una aventura, una foto, una anécdota... Podés usar #hashtags'} maxLength={3000} />
       </div>
-      {preview && <div className="composer-preview"><img src={preview} alt="Vista previa" /><button onClick={() => { setImage(null); setPreview(''); if (fileRef.current) fileRef.current.value = '' }}>✕</button></div>}
+      <div className="hashtag-suggestions" aria-label="Hashtags sugeridos">
+        <span>Hashtags:</span>
+        {['#MiMascota', '#Perros', '#Gatos', '#Adopción', '#Perdidos'].map((tag) => (
+          <button type="button" className="hashtag-chip" key={tag} onClick={() => addHashtag(tag)}>{tag}</button>
+        ))}
+      </div>
+      {preview && <div className="composer-preview"><img src={preview} alt="Vista previa" /><button onClick={() => { setImage(null); setPreview(''); if (fileRef.current) fileRef.current.value = ''; if (cameraRef.current) cameraRef.current.value = '' }}>✕</button></div>}
       <div className="composer-actions">
-        <label className="file-button">📷 Agregar foto<input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => chooseImage(e.target.files?.[0])} /></label>
+        <div className="composer-media-actions">
+          <label className="file-button">🖼️ Elegir foto<input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => chooseImage(e.target.files?.[0])} /></label>
+          <label className="file-button camera-button">📸 Sacar foto<input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => chooseImage(e.target.files?.[0])} /></label>
+          <Link className="file-button lost-report-button" to="/mascotas-perdidas">🚨 Reportar perdido/encontrado</Link>
+        </div>
         <button className="community-button" disabled={saving || (user.role === 'owner' && !pets.length)} onClick={submit}>{saving ? 'Publicando...' : 'Publicar'}</button>
       </div>
     </div>

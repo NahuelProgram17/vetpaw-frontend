@@ -35,7 +35,27 @@ const relativeTime = (value) => {
 
 const fallbackAvatar = (actor) => actor?.type === 'clinic' ? '🏥' : actor?.type === 'lost' ? '🔎' : '🐾'
 
-export default function PostCard({ initialPost, user, onDeleted, onChanged }) {
+
+const renderTextWithHashtags = (value, onHashtagClick) => {
+  if (!value) return null
+  const pieces = value.split(/(#[\p{L}\p{N}_-]{2,50})/gu)
+  return pieces.map((piece, index) => {
+    if (!piece.startsWith('#')) return piece
+    const tag = piece.slice(1)
+    return (
+      <button
+        type="button"
+        className="post-hashtag"
+        key={`${piece}-${index}`}
+        onClick={() => onHashtagClick?.(tag)}
+      >
+        {piece}
+      </button>
+    )
+  })
+}
+
+export default function PostCard({ initialPost, user, onDeleted, onChanged, onHashtagClick }) {
   const navigate = useNavigate()
   const [post, setPost] = useState(initialPost)
   const [commentsOpen, setCommentsOpen] = useState(false)
@@ -166,7 +186,7 @@ export default function PostCard({ initialPost, user, onDeleted, onChanged }) {
 
       <div className="post-copy">
         {badge && <div><span className={`post-type-badge ${badge[0]}`}>{badge[1]}</span></div>}
-        {post.text}
+        {renderTextWithHashtags(post.text, onHashtagClick)}
       </div>
 
       {post.lost_pet && (
