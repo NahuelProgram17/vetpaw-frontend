@@ -35,6 +35,9 @@ import LostPets from './pages/LostPets'
 import Configuracion from './pages/Configuracion'
 import Notifications from './pages/Notifications'
 import BirthdayCelebration from './components/BirthdayCelebration'
+import Community from './pages/Community'
+import PublicPetProfile from './pages/PublicPetProfile'
+import CommunityModeration from './pages/CommunityModeration'
 
 
 function App() {
@@ -46,7 +49,10 @@ function App() {
         <Navbar />
         <BirthdayCelebration />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Community />} />
+          <Route path="/comunidad" element={<Community />} />
+          <Route path="/inicio-vetpaw" element={<Home />} />
+          <Route path="/mascotas/:id" element={<PublicPetProfile />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<RegisterChoice />} />
           <Route path="/register/owner" element={<Register />} />
@@ -68,6 +74,7 @@ function App() {
           <Route path="/tips" element={<Tips />} />
           <Route path="/clinic/estadisticas" element={<ProtectedRoute role="clinic"><Estadisticas /></ProtectedRoute>} />
           <Route path="/admin-panel" element={<AdminPanel />} />
+          <Route path="/comunidad/moderacion" element={<ProtectedRoute><CommunityModeration /></ProtectedRoute>} />
 
           <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -151,7 +151,10 @@ export default function Navbar() {
         return s
     }
 
-    const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/')
+    const isActive = (path) => {
+        if (path === '/comunidad' && location.pathname === '/') return true
+        return location.pathname === path || location.pathname.startsWith(path + '/')
+    }
 
     const renderNavIcon = (name, active = false, compact = false, danger = false) => (
         <NavIcon name={name} active={active} compact={compact} danger={danger} />
@@ -159,6 +162,7 @@ export default function Navbar() {
 
     // ── Links según rol ──
     const ownerLinks = [
+        { to: '/comunidad', icon: 'pets', label: 'Comunidad' },
         { to: '/dashboard', icon: 'panel', label: 'Mi panel' },
         { to: '/pets', icon: 'pets', label: 'Mascotas' },
         { to: '/appointments', icon: 'appointments', label: 'Turnos' },
@@ -171,6 +175,7 @@ export default function Navbar() {
     ]
 
     const clinicLinks = [
+        { to: '/comunidad', icon: 'pets', label: 'Comunidad' },
         { to: '/clinic/dashboard', icon: 'panel', label: 'Mi panel' },
         { to: '/messages', icon: 'messages', label: 'Mensajes', badge: unreadMessages },
         { to: '/profile', icon: 'profile', label: 'Mi perfil' },
@@ -178,6 +183,7 @@ export default function Navbar() {
     ]
 
     const guestLinks = [
+        { to: '/comunidad', icon: 'pets', label: 'Comunidad' },
         { to: '/clinics', icon: 'clinics', label: 'Veterinarias' },
         { to: '/mascotas-perdidas', icon: 'lost', label: 'Mascotas perdidas' },
         { to: '/login', icon: 'login', label: 'Ingresar' },
@@ -527,6 +533,7 @@ export default function Navbar() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         {!user ? (
                             <>
+                                <Link to="/comunidad" style={browserLinkStyle('/comunidad', G1)} {...browserLinkEvents('/comunidad', G1)}>Comunidad</Link>
                                 <Link to="/clinics" style={browserLinkStyle('/clinics', G1)} {...browserLinkEvents('/clinics', G1)}>Veterinarias</Link>
                                 <Link to="/mascotas-perdidas" style={browserLinkStyle('/mascotas-perdidas', O1)} {...browserLinkEvents('/mascotas-perdidas', O1)}>Mascotas perdidas</Link>
                                 <InstallPWA />
@@ -539,6 +546,7 @@ export default function Navbar() {
                             </>
                         ) : user.role === 'clinic' ? (
                             <>
+                                <Link to="/comunidad" style={browserLinkStyle('/comunidad', O1)} {...browserLinkEvents('/comunidad', O1)}>Comunidad</Link>
                                 <Link to="/clinic/dashboard" style={browserLinkStyle('/clinic/dashboard', G1)} {...browserLinkEvents('/clinic/dashboard', G1)}>Mi panel</Link>
                                 <Link to="/messages" style={{ ...browserLinkStyle('/messages', O1), display: 'inline-flex', alignItems: 'center', gap: 6 }} {...browserLinkEvents('/messages', O1)}>
                                     Mensajes
@@ -561,10 +569,10 @@ export default function Navbar() {
                             </>
                         ) : (
                             <>
+                                <Link to="/comunidad" style={browserLinkStyle('/comunidad', G1)} {...browserLinkEvents('/comunidad', G1)}>Comunidad</Link>
                                 <Link to="/dashboard" style={browserLinkStyle('/dashboard', G1)} {...browserLinkEvents('/dashboard', G1)}>Mi panel</Link>
                                 <Link to="/pets" style={browserLinkStyle('/pets', O1)} {...browserLinkEvents('/pets', O1)}>Mascotas</Link>
                                 <Link to="/appointments" style={browserLinkStyle('/appointments', G1)} {...browserLinkEvents('/appointments', G1)}>Turnos</Link>
-                                <Link to="/history" style={browserLinkStyle('/history', O1)} {...browserLinkEvents('/history', O1)}>Historial</Link>
                                 <Link to="/clinics" style={browserLinkStyle('/clinics', G1)} {...browserLinkEvents('/clinics', G1)}>Veterinarias</Link>
                                 <Link to="/mascotas-perdidas" style={browserLinkStyle('/mascotas-perdidas', O1)} {...browserLinkEvents('/mascotas-perdidas', O1)}>Mascotas perdidas</Link>
                                 <Link to="/messages" style={{ ...browserLinkStyle('/messages', G1), display: 'inline-flex', alignItems: 'center', gap: 5 }} {...browserLinkEvents('/messages', G1)}>
@@ -575,8 +583,6 @@ export default function Navbar() {
                                         </span>
                                     )}
                                 </Link>
-                                <Link to="/profile" style={browserLinkStyle('/profile', O1)} {...browserLinkEvents('/profile', O1)}>Mi perfil</Link>
-                                <Link to="/configuracion" style={browserLinkStyle('/configuracion', G1)} {...browserLinkEvents('/configuracion', G1)}>Configuración</Link>
                                 <InstallPWA />
                                 <div style={{ position: 'relative' }} ref={notifRef}>
                                     <button
@@ -622,7 +628,7 @@ export default function Navbar() {
                                     )}
                                 </div>
                                 <span style={{ color: 'rgba(255,255,255,0.18)', margin: '0 3px' }}>|</span>
-                                <span style={{ fontFamily: BROWSER_FONT, color: G1, fontWeight: 900, fontSize: 14, padding: '7px 5px' }}>{user.first_name || user.username}</span>
+                                <Link to="/profile" style={{ fontFamily: BROWSER_FONT, color: G1, fontWeight: 900, fontSize: 14, padding: '7px 5px', textDecoration: 'none' }}>{user.first_name || user.username}</Link>
                                 <button onClick={handleLogout} style={{ fontFamily: BROWSER_FONT, fontSize: 14, fontWeight: 800, background: 'none', border: 'none', cursor: 'pointer', color: '#ffc36a', padding: '7px 5px' }}
                                     onMouseEnter={e => e.currentTarget.style.color = O1}
                                     onMouseLeave={e => e.currentTarget.style.color = '#ffc36a'}>

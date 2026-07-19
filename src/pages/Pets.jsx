@@ -498,6 +498,13 @@ export default function Pets() {
                                                         <span>Editar</span>
                                                     </button>
                                                     <button
+                                                        className="pet-menu-item"
+                                                        onClick={() => { setOpenMenuId(null); navigate(`/mascotas/${pet.id}`); }}
+                                                    >
+                                                        <span className="pet-menu-icon">🌎</span>
+                                                        <span>Perfil público</span>
+                                                    </button>
+                                                    <button
                                                         className="pet-menu-item danger"
                                                         onClick={() => { setOpenMenuId(null); setDeleteConfirm(pet.id); }}
                                                     >

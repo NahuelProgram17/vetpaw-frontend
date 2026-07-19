@@ -17,10 +17,11 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const original = error.config;
-        // Si es una ruta pública, no redirigir al login
-        const publicRoutes = ['/lost-pets/', '/lost-pets/create/']
-        const isPublic = publicRoutes.some(route => original.url?.includes(route))
-        if (isPublic) return Promise.reject(error)
+        // Las lecturas públicas pueden seguir funcionando aunque no haya sesión.
+        const publicGetRoutes = ['/lost-pets/', '/community/posts/', '/community/discover/', '/community/pets/']
+        const isPublicGet = original.method?.toLowerCase() === 'get'
+            && publicGetRoutes.some(route => original.url?.includes(route))
+        if (isPublicGet) return Promise.reject(error)
 
         if (error.response?.status === 401 && !original._retry) {
             original._retry = true;
@@ -203,5 +204,74 @@ export const markAllBirthdayCelebrationsRead = () =>
     api.post('/birthday-celebrations/mark-all-read/').then((r) => r.data);
 export const markBirthdayCardDownloaded = (id) =>
     api.post(`/birthday-celebrations/${id}/card-downloaded/`).then((r) => r.data);
+
+// ── VetPaw Comunidad ─────────────────────────────────
+export const getCommunityPosts = (params = {}) =>
+    api.get('/community/posts/', { params }).then((r) => r.data);
+
+export const getCommunityPost = (id) =>
+    api.get(`/community/posts/${id}/`).then((r) => r.data);
+
+export const createCommunityPost = ({ text, image, pet }) => {
+    const formData = new FormData();
+    if (text) formData.append('text', text);
+    if (image) formData.append('image', image);
+    if (pet) formData.append('pet', pet);
+    return api.post('/community/posts/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+};
+
+export const deleteCommunityPost = (id) =>
+    api.delete(`/community/posts/${id}/`);
+
+export const toggleCommunityReaction = (id) =>
+    api.post(`/community/posts/${id}/react/`).then((r) => r.data);
+
+export const toggleSavedCommunityPost = (id) =>
+    api.post(`/community/posts/${id}/save_post/`).then((r) => r.data);
+
+export const getCommunityComments = (postId) =>
+    api.get(`/community/posts/${postId}/comments/`).then((r) => r.data);
+
+export const addCommunityComment = (postId, text) =>
+    api.post(`/community/posts/${postId}/comments/`, { text }).then((r) => r.data);
+
+export const deleteCommunityComment = (id) =>
+    api.delete(`/community/comments/${id}/`);
+
+export const getCommunityDiscover = () =>
+    api.get('/community/discover/').then((r) => r.data);
+
+export const getPublicPetProfile = (petId) =>
+    api.get(`/community/pets/${petId}/`).then((r) => r.data);
+
+export const updatePublicPetProfile = (petId, data) => {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) formData.append(key, value);
+    });
+    return api.patch(`/community/pets/${petId}/`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+};
+
+export const togglePetFollow = (petId) =>
+    api.post(`/community/pets/${petId}/follow/`).then((r) => r.data);
+
+export const reportCommunityContent = (payload) =>
+    api.post('/community/reports/', payload).then((r) => r.data);
+
+export const getCommunityReports = (status = 'pending') =>
+    api.get('/community/reports/', { params: status ? { status } : {} }).then((r) => r.data);
+
+export const moderateCommunityReport = (id, decision, notes = '') =>
+    api.post(`/community/reports/${id}/moderate/`, { decision, notes }).then((r) => r.data);
+
+export const toggleBlockedCommunityUser = (userId) =>
+    api.post('/community/blocks/toggle/', { user_id: userId }).then((r) => r.data);
+
+export const getBlockedCommunityUsers = () =>
+    api.get('/community/blocks/').then((r) => r.data);
 
 export default api;
