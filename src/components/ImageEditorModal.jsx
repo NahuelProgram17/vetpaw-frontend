@@ -52,8 +52,15 @@ export default function ImageEditorModal({ file, onCancel, onApply, title = 'Aju
   useEffect(() => {
     const oldOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = oldOverflow }
-  }, [])
+    const handleEscape = (event) => {
+      if (event.key === 'Escape' && !saving) onCancel?.()
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => {
+      document.body.style.overflow = oldOverflow
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [onCancel, saving])
 
   const rotatedSize = useMemo(() => {
     if (!image) return { width: 1, height: 1 }

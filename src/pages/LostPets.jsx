@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import api from '../services/api'
 import ownerBg from "../assets/vetpaw-owner-bg.png";
 import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
@@ -145,6 +146,22 @@ export default function LostPets() {
     const formRef = useRef()
 
     useEffect(() => { fetchLostPets() }, [])
+
+    // El visor se monta fuera del contenedor de la página para que el navbar
+    // nunca tape la parte superior de la foto. Escape también lo cierra.
+    useEffect(() => {
+        if (!selectedPet) return undefined
+        const previousOverflow = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') setSelectedPet(null)
+        }
+        window.addEventListener('keydown', handleEscape)
+        return () => {
+            document.body.style.overflow = previousOverflow
+            window.removeEventListener('keydown', handleEscape)
+        }
+    }, [selectedPet])
 
     const fetchLostPets = async (prov = '') => {
         setLoading(true)
@@ -598,10 +615,31 @@ export default function LostPets() {
             </div>
 
             {/* ═════════════════════════════ MODAL ═════════════════════════════ */}
-            {selectedPet && (
-                <div onClick={() => setSelectedPet(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-                    <div onClick={e => e.stopPropagation()} style={{ background: CARD, borderRadius: 20, overflow: 'hidden', maxWidth: 520, width: '100%', maxHeight: '90vh', overflowY: 'auto', border: `2px solid ${selectedPet.report_type === 'lost' ? O2 + '50' : G2 + '50'}`, boxShadow: '0 32px 80px rgba(0,0,0,0.6)' }}>
-                        <div style={{ position: 'relative', height: 'clamp(300px, 52vh, 520px)', background: '#070d16', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {selectedPet && createPortal(
+                <div
+                    onClick={() => setSelectedPet(null)}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={`Detalles de ${selectedPet.pet_name || 'mascota'}`}
+                    style={{
+                        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)',
+                        backdropFilter: 'blur(7px)', zIndex: 10000,
+                        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+                        padding: '20px', overflowY: 'auto', overscrollBehavior: 'contain'
+                    }}
+                >
+                    <div
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                            background: CARD, borderRadius: 20, overflow: 'hidden',
+                            maxWidth: 560, width: '100%', margin: 'auto 0',
+                            maxHeight: 'calc(100dvh - 40px)', overflowY: 'auto',
+                            border: `2px solid ${selectedPet.report_type === 'lost' ? O2 + '50' : G2 + '50'}`,
+                            boxShadow: '0 32px 80px rgba(0,0,0,0.68)',
+                            scrollbarGutter: 'stable'
+                        }}
+                    >
+                        <div style={{ position: 'relative', minHeight: 300, height: 'clamp(320px, 56vh, 560px)', background: '#070d16', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {selectedPet.photo_url ? (
                                 <img
                                     src={selectedPet.photo_url}
@@ -611,14 +649,19 @@ export default function LostPets() {
                             ) : (
                                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 64 }}>{speciesEmoji(selectedPet.species)}</div>
                             )}
-                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.7))' }} />
-                            <div style={{ position: 'absolute', top: 14, left: 14, background: selectedPet.report_type === 'lost' ? O1 : G1, color: '#fff', fontSize: 11, fontWeight: 900, letterSpacing: 1.5, padding: '5px 12px', borderRadius: 6, textTransform: 'uppercase' }}>
+                            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(180deg, rgba(0,0,0,.12) 0%, transparent 28%, transparent 70%, rgba(0,0,0,.68) 100%)' }} />
+                            <div style={{ position: 'absolute', top: 14, left: 14, zIndex: 2, background: selectedPet.report_type === 'lost' ? O1 : G1, color: '#fff', fontSize: 11, fontWeight: 900, letterSpacing: 1.5, padding: '5px 12px', borderRadius: 6, textTransform: 'uppercase' }}>
                                 {selectedPet.report_type === 'lost' ? '🔍 Se busca' : '📍 Encontrada'}
                             </div>
                             {typeof selectedPet.days_left === 'number' && (
-                                <div style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(0,0,0,0.6)', color: G2, fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 99, border: `1px solid ${G2}50` }}>{selectedPet.days_left}d restantes</div>
+                                <div style={{ position: 'absolute', top: 14, right: 14, zIndex: 2, background: 'rgba(0,0,0,0.66)', color: G2, fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 99, border: `1px solid ${G2}50` }}>{selectedPet.days_left}d restantes</div>
                             )}
-                            <button onClick={() => setSelectedPet(null)} style={{ position: 'absolute', bottom: 14, right: 14, background: 'rgba(0,0,0,0.5)', border: `1px solid ${BORDER}`, color: '#fff', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: 14 }}>✕</button>
+                            <button
+                                onClick={() => setSelectedPet(null)}
+                                aria-label="Cerrar detalles"
+                                title="Cerrar (Esc)"
+                                style={{ position: 'absolute', bottom: 14, right: 14, zIndex: 3, background: 'rgba(0,0,0,0.58)', border: `1px solid ${BORDER}`, color: '#fff', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 15 }}
+                            >✕</button>
                         </div>
                         <div style={{ padding: '18px 22px 22px' }}>
                             {selectedPet.pet_name && (
@@ -656,7 +699,8 @@ export default function LostPets() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body,
             )}
 
             {editorFile && (
