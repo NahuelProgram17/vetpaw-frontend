@@ -418,7 +418,7 @@ export default function Pets() {
 
     const calcAge = (birth_date) => {
         if (!birth_date) return null;
-        const diff = Date.now() - new Date(birth_date).getTime();
+        const diff = Date.now() - new Date(`${birth_date}T12:00:00`).getTime();
         const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
         if (years < 1) {
             const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30.44));
@@ -427,6 +427,13 @@ export default function Pets() {
                 : `${months} mes${months > 1 ? 'es' : ''}`;
         }
         return `${years} año${years > 1 ? 's' : ''}`;
+    };
+
+    const formatBirthDate = (birth_date) => {
+        if (!birth_date) return null;
+        const [year, month, day] = birth_date.split('-');
+        if (!year || !month || !day) return birth_date;
+        return `${day}/${month}/${year}`;
     };
 
     return (
@@ -555,6 +562,11 @@ export default function Pets() {
                                             <div className="pet-stat-text">
                                                 <div className="pet-stat-value">{calcAge(pet.birth_date) || '—'}</div>
                                                 <div className="pet-stat-label">Edad</div>
+                                                {pet.birth_date && (
+                                                    <div className="pet-stat-birth-date">
+                                                        Nació el {formatBirthDate(pet.birth_date)}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="pet-stat-box">
@@ -1396,6 +1408,14 @@ export default function Pets() {
                     font-size: 0.7rem; color: rgba(255,255,255,0.45);
                     margin-top: 1px;
                 }
+                .pet-stat-birth-date {
+                    margin-top: 4px;
+                    color: #8bdc73;
+                    font-size: 0.66rem;
+                    font-weight: 700;
+                    line-height: 1.2;
+                    white-space: nowrap;
+                }
 
                 /* Chips (alimentación, hábitat, convivencia) */
                 .pet-chips-row {
@@ -1791,6 +1811,7 @@ export default function Pets() {
                     .pet-stat-icon { font-size: 1.05rem; width: 24px; height: 24px; }
                     .pet-stat-value { font-size: 0.85rem; }
                     .pet-stat-label { font-size: 0.68rem; }
+                    .pet-stat-birth-date { font-size: 0.62rem; }
 
                     /* Add CTA */
                     .add-pet-cta { padding: 16px 14px; gap: 12px; }
