@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { getPets, getAppointments } from "../services/api";
 import api from "../services/api";
 import VetPawLoader from '../components/VetPawLoader';
+import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../utils/imageUpload';
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif";
 const G1 = "#4CAF50";
@@ -56,9 +57,19 @@ export default function Profile() {
     };
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-    const handleAvatarChange = (e) => {
-        const file = e.target.files[0];
-        if (file) { setAvatarFile(file); setAvatarPreview(URL.createObjectURL(file)); setEditing(true); }
+    const handleAvatarChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setError('');
+        try {
+            const prepared = await prepareImageForUpload(file, { maxMB: 3, maxDimension: 1200, label: 'La foto de perfil' });
+            setAvatarFile(prepared);
+            setAvatarPreview((current) => replaceObjectUrl(current, prepared));
+            setEditing(true);
+        } catch (imageError) {
+            setError(imageError.message || 'No pudimos preparar la foto de perfil.');
+            e.target.value = '';
+        }
     };
     const handleEdit = () => { setEditing(true); setError(""); setSuccess(""); };
     const handleCancel = () => {
@@ -68,7 +79,7 @@ export default function Profile() {
             phone: profile?.phone || "", province: profile?.province || "",
             locality: profile?.locality || "", bio: profile?.bio || "", gender: profile?.gender || "other",
         });
-        setAvatarPreview(profile?.avatar || null); setAvatarFile(null);
+        setAvatarPreview((current) => { revokeObjectUrl(current); return profile?.avatar || null; }); setAvatarFile(null);
     };
     const handleSubmit = async (e) => {
         e.preventDefault(); setSaving(true); setError(""); setSuccess("");
@@ -170,7 +181,7 @@ export default function Profile() {
                                     {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "🧑"}
                                 </div>
                                 <label style={{ position: "absolute", bottom: 2, right: 2, width: 32, height: 32, borderRadius: "50%", background: `linear-gradient(135deg, ${G1}, ${O1})`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 14, border: "2px solid #0a121d" }}>
-                                    📷<input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: "none" }} />
+                                    📷<input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarChange} style={{ display: "none" }} />
                                 </label>
                             </div>
                             <div style={{ flex: 1 }}>

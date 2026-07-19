@@ -7,6 +7,7 @@ import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.p
 import lostSearchIcon from "../assets/vetpaw-lost-icons/lost-search.png";
 import lostFoundIcon from "../assets/vetpaw-lost-icons/lost-found.png";
 import lostReportsIcon from "../assets/vetpaw-lost-icons/lost-reports.png";
+import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from "../utils/imageUpload";
 
 // ───────────────────────── Tokens de diseño
 const BG = "#0a121d"
@@ -131,11 +132,14 @@ export default function LostPets() {
     const [contactValue, setContactValue] = useState('')
     const [fotoMascota, setFotoMascota] = useState(null)
     const [fotoPreview, setFotoPreview] = useState(null)
+
+    useEffect(() => () => revokeObjectUrl(fotoPreview), [fotoPreview])
     const [enviando, setEnviando] = useState(false)
     const [reporteEnviado, setReporteEnviado] = useState(false)
     const [errorEnvio, setErrorEnvio] = useState('')
 
     const fileRef = useRef()
+    const cameraRef = useRef()
     const formRef = useRef()
 
     useEffect(() => { fetchLostPets() }, [])
@@ -172,17 +176,17 @@ export default function LostPets() {
 
     const hasAnyFilter = !!(filterProvince || filterStatus || filterSpecies || filterSearch.trim())
 
-    const handleFoto = (e) => {
-        const file = e.target.files[0]
+    const handleFoto = async (e) => {
+        const file = e.target.files?.[0]
         if (!file) return
-        if (!file.type.includes('jpeg') && !file.name.endsWith('.jpg') && !file.type.includes('png')) {
-            alert('Solo se aceptan archivos JPG o PNG.'); return
+        try {
+            const prepared = await prepareImageForUpload(file, { maxMB: 5, maxDimension: 2048, label: 'La foto' })
+            setFotoMascota(prepared)
+            setFotoPreview((current) => replaceObjectUrl(current, prepared))
+        } catch (imageError) {
+            alert(imageError.message || 'No pudimos preparar la foto.')
+            e.target.value = ''
         }
-        if (file.size > 5 * 1024 * 1024) {
-            alert('La foto debe pesar menos de 5MB.'); return
-        }
-        setFotoMascota(file)
-        setFotoPreview(URL.createObjectURL(file))
     }
 
     const handleReporte = async (e) => {
@@ -211,7 +215,9 @@ export default function LostPets() {
             await api.post('/lost-pets/create/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
             setReporteEnviado(true)
             // Reset
-            setFotoMascota(null); setFotoPreview(null)
+            setFotoMascota(null); setFotoPreview((current) => { revokeObjectUrl(current); return null })
+            if (fileRef.current) fileRef.current.value = ''
+            if (cameraRef.current) cameraRef.current.value = ''
             setDescripcion(''); setContactValue('')
             setProvince(''); setLocality('')
             setPetName(''); setSpecies(''); setBreed(''); setIncidentDate('')
@@ -428,8 +434,8 @@ export default function LostPets() {
                                             <label style={lbl}>Foto de la mascota <span style={{ color: O2 }}>*</span></label>
                                             {fotoPreview ? (
                                                 <div style={{ position: 'relative' }}>
-                                                    <img src={fotoPreview} alt="Preview" style={{ width: '100%', height: 156, objectFit: 'cover', borderRadius: 11, border: `2px solid ${G2}` }} />
-                                                    <button type="button" onClick={() => { setFotoPreview(null); setFotoMascota(null) }} style={{ position: 'absolute', top: -8, right: -8, background: RED, color: '#fff', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: 11, fontWeight: 900 }}>✕</button>
+                                                    <img src={fotoPreview} alt="Preview" style={{ width: '100%', height: 190, objectFit: 'contain', objectPosition: 'center', background: '#07111f', borderRadius: 11, border: `2px solid ${G2}` }} />
+                                                    <button type="button" onClick={() => { setFotoPreview((current) => { revokeObjectUrl(current); return null }); setFotoMascota(null); if (fileRef.current) fileRef.current.value = ''; if (cameraRef.current) cameraRef.current.value = '' }} style={{ position: 'absolute', top: -8, right: -8, background: RED, color: '#fff', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: 11, fontWeight: 900 }}>✕</button>
                                                 </div>
                                             ) : (
                                                 <div onClick={() => fileRef.current?.click()}
@@ -439,7 +445,12 @@ export default function LostPets() {
                                                     <p style={{ fontSize: 10, color: MUTED3, margin: 0 }}>JPG, PNG – máx. 5MB</p>
                                                 </div>
                                             )}
-                                            <input ref={fileRef} type="file" accept=".jpg,.jpeg,.png" onChange={handleFoto} style={{ display: 'none' }} />
+                                            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                                                <button type="button" onClick={() => fileRef.current?.click()} style={{ flex: 1, border: `1px solid ${BORDER}`, borderRadius: 9, background: CARD2, color: MUTED2, padding: '8px 6px', fontFamily: FONT, fontWeight: 700, cursor: 'pointer' }}>🖼️ Elegir</button>
+                                                <button type="button" onClick={() => cameraRef.current?.click()} style={{ flex: 1, border: `1px solid ${G2}55`, borderRadius: 9, background: 'rgba(76,175,80,.09)', color: G2, padding: '8px 6px', fontFamily: FONT, fontWeight: 700, cursor: 'pointer' }}>📸 Cámara</button>
+                                            </div>
+                                            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFoto} style={{ display: 'none' }} />
+                                            <input ref={cameraRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={handleFoto} style={{ display: 'none' }} />
                                         </div>
 
                                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>

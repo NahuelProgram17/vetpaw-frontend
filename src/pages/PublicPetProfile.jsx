@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { getPublicPetProfile, togglePetFollow, updatePublicPetProfile } from '../services/api'
 import PostCard from '../components/community/PostCard'
 import './Community.css'
+import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../utils/imageUpload'
 
 export default function PublicPetProfile() {
   const { id } = useParams()
@@ -15,6 +16,8 @@ export default function PublicPetProfile() {
   const [bio, setBio] = useState('')
   const [isPublic, setIsPublic] = useState(true)
   const [cover, setCover] = useState(null)
+  const [coverPreview, setCoverPreview] = useState('')
+  const [formError, setFormError] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -32,6 +35,7 @@ export default function PublicPetProfile() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load()
   }, [load])
+  useEffect(() => () => revokeObjectUrl(coverPreview), [coverPreview])
 
   const follow = async () => {
     if (!user) { navigate('/login'); return }
@@ -39,20 +43,39 @@ export default function PublicPetProfile() {
     setProfile((p) => ({ ...p, following: data.following, followers_count: data.followers_count }))
   }
 
+  const chooseCover = async (file) => {
+    if (!file) return
+    setFormError('')
+    try {
+      const prepared = await prepareImageForUpload(file, { maxMB: 5, maxDimension: 2400, label: 'La portada' })
+      setCover(prepared)
+      setCoverPreview((current) => replaceObjectUrl(current, prepared))
+    } catch (imageError) {
+      setFormError(imageError.message || 'No pudimos preparar la portada.')
+    }
+  }
+
   const saveProfile = async () => {
     setSaving(true)
+    setFormError('')
     try {
       const data = await updatePublicPetProfile(id, { bio, is_public: isPublic, ...(cover ? { cover } : {}) })
       setProfile(data)
       setEditing(false)
       setCover(null)
+      revokeObjectUrl(coverPreview)
+      setCoverPreview('')
+    } catch (saveError) {
+      const data = saveError.response?.data
+      setFormError(data?.cover?.[0] || data?.detail || 'No se pudo guardar el perfil social.')
     } finally { setSaving(false) }
   }
 
   if (loading) return <div className="pet-public-page"><div className="empty-feed community-card pet-public-shell"><div className="icon">🐾</div><h3>Cargando perfil...</h3></div></div>
   if (error || !profile) return <div className="pet-public-page"><div className="empty-feed community-card pet-public-shell"><div className="icon">🔒</div><h3>{error}</h3><button className="community-button-secondary" onClick={() => navigate('/comunidad')}>Volver a la comunidad</button></div></div>
 
-  const coverStyle = profile.cover_url ? { backgroundImage: `url(${profile.cover_url})` } : {}
+  const visibleCover = coverPreview || profile.cover_url
+  const coverStyle = visibleCover ? { backgroundImage: `url(${visibleCover})` } : {}
   return (
     <main className="pet-public-page">
       <div className="pet-public-shell">
@@ -80,9 +103,10 @@ export default function PublicPetProfile() {
             <h3 style={{ marginTop: 0 }}>Editar perfil público</h3>
             <p className="composer-sub">Esto no modifica ni muestra el historial médico, vacunas, alergias ni datos privados.</p>
             <textarea className="community-textarea" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Contá cómo es, qué le gusta y alguna curiosidad..." maxLength={500} />
-            <label className="file-button" style={{ marginTop: 10 }}>🖼️ Cambiar portada<input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => setCover(e.target.files?.[0] || null)} /></label>
+            {formError && <div className="community-error">{formError}</div>}
+            <label className="file-button" style={{ marginTop: 10 }}>🖼️ Cambiar portada<input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => chooseCover(e.target.files?.[0])} /></label>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, color: 'rgba(255,255,255,.72)', fontSize: 11 }}><input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} /> Perfil visible en la comunidad</label>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}><button className="community-button-secondary" onClick={() => setEditing(false)}>Cancelar</button><button className="community-button" disabled={saving} onClick={saveProfile}>{saving ? 'Guardando...' : 'Guardar cambios'}</button></div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}><button className="community-button-secondary" onClick={() => { setEditing(false); setCover(null); revokeObjectUrl(coverPreview); setCoverPreview(''); setFormError('') }}>Cancelar</button><button className="community-button" disabled={saving} onClick={saveProfile}>{saving ? 'Guardando...' : 'Guardar cambios'}</button></div>
           </div>
         )}
 

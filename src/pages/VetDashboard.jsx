@@ -9,6 +9,7 @@ import {
 } from "../services/api";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { prepareImageForUpload } from "../utils/imageUpload";
 
 const STATUS = {
   pending: { label: "Pendiente", icon: "📅", className: "pending" },
@@ -623,13 +624,12 @@ export default function ClinicDashboard() {
   const handlePhotoUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (file.size > 3 * 1024 * 1024) return showMessage("error", "La foto no puede superar los 3MB.");
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return showMessage("error", "Solo se permiten imágenes JPG, PNG o WebP.");
-    const formData = new FormData();
-    formData.append("image", file);
-    if (photoCaption.trim()) formData.append("caption", photoCaption.trim());
     setPhotoUploading(true);
     try {
+      const prepared = await prepareImageForUpload(file, { maxMB: 3, maxDimension: 2000, label: 'La foto de la veterinaria' });
+      const formData = new FormData();
+      formData.append("image", prepared);
+      if (photoCaption.trim()) formData.append("caption", photoCaption.trim());
       await api.post("/clinic-photos/upload/", formData, { headers: { "Content-Type": "multipart/form-data" } });
       setPhotoCaption("");
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -637,7 +637,7 @@ export default function ClinicDashboard() {
       showMessage("success", "Foto subida correctamente.");
     } catch (error) {
       console.error(error);
-      showMessage("error", error.response?.data?.error || error.response?.data?.image?.[0] || "No se pudo subir la foto.");
+      showMessage("error", error.response?.data?.error || error.response?.data?.image?.[0] || error.message || "No se pudo subir la foto.");
     } finally {
       setPhotoUploading(false);
     }
@@ -658,13 +658,19 @@ export default function ClinicDashboard() {
   const handleClinicalPhotoUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file || !selectedPet) return;
-    if (file.size > 10 * 1024 * 1024) return showMessage("error", "El archivo clínico no puede superar los 10MB.");
-    const formData = new FormData();
-    formData.append("image", file);
-    formData.append("pet", selectedPet.id);
-    if (clinicalPhotoCaption.trim()) formData.append("caption", clinicalPhotoCaption.trim());
     setClinicalPhotoUploading(true);
     try {
+      let prepared = file;
+      const isPdf = file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf');
+      if (isPdf) {
+        if (file.size > 10 * 1024 * 1024) throw new Error('El PDF clínico no puede superar los 10 MB.');
+      } else {
+        prepared = await prepareImageForUpload(file, { maxMB: 10, maxDimension: 2400, label: 'La imagen clínica' });
+      }
+      const formData = new FormData();
+      formData.append("image", prepared);
+      formData.append("pet", selectedPet.id);
+      if (clinicalPhotoCaption.trim()) formData.append("caption", clinicalPhotoCaption.trim());
       await api.post("/clinical-photos/upload/", formData, { headers: { "Content-Type": "multipart/form-data" } });
       setClinicalPhotoCaption("");
       if (clinicalFileInputRef.current) clinicalFileInputRef.current.value = "";
@@ -672,7 +678,7 @@ export default function ClinicDashboard() {
       showMessage("success", "Archivo clínico subido.");
     } catch (error) {
       console.error(error);
-      showMessage("error", error.response?.data?.error || "No se pudo subir el archivo clínico.");
+      showMessage("error", error.response?.data?.error || error.message || "No se pudo subir el archivo clínico.");
     } finally {
       setClinicalPhotoUploading(false);
     }

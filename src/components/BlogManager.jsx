@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { getPosts, createPost, updatePost, deletePost } from '../services/api'
+import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../utils/imageUpload'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const G1 = '#4CAF50'
@@ -37,16 +38,23 @@ export default function BlogManager() {
     const resetForm = () => {
         setForm(emptyForm)
         setCoverFile(null)
-        setCoverPreview(null)
+        setCoverPreview((current) => { revokeObjectUrl(current); return null })
         setError('')
         if (fileRef.current) fileRef.current.value = ''
     }
 
-    const handleCover = (e) => {
-        const file = e.target.files[0]
+    const handleCover = async (e) => {
+        const file = e.target.files?.[0]
         if (!file) return
-        setCoverFile(file)
-        setCoverPreview(URL.createObjectURL(file))
+        setError('')
+        try {
+            const prepared = await prepareImageForUpload(file, { maxMB: 5, maxDimension: 2200, label: 'La portada' })
+            setCoverFile(prepared)
+            setCoverPreview((current) => replaceObjectUrl(current, prepared))
+        } catch (imageError) {
+            setError(imageError.message || 'No pudimos preparar la portada.')
+            e.target.value = ''
+        }
     }
 
     const editPost = (p) => {
@@ -147,7 +155,7 @@ export default function BlogManager() {
 
                     <div>
                         <label style={labelStyle}>Imagen de portada {form.id ? '(dejá vacío para no cambiarla)' : '(opcional)'}</label>
-                        <input ref={fileRef} type="file" accept="image/*" onChange={handleCover} style={{ ...inputStyle, padding: '9px 14px' }} />
+                        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleCover} style={{ ...inputStyle, padding: '9px 14px' }} />
                         {coverPreview && (
                             <img src={coverPreview} alt="preview" style={{ marginTop: 10, width: '100%', maxWidth: 360, borderRadius: 12, display: 'block', border: '1px solid rgba(255,255,255,0.1)' }} />
                         )}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { createCommunityPost, getPets } from '../../services/api'
+import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../../utils/imageUpload'
 
 export default function PostComposer({ user, onCreated, defaultPetId = null }) {
   const [pets, setPets] = useState([])
@@ -9,6 +10,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
   const [image, setImage] = useState(null)
   const [preview, setPreview] = useState('')
   const [saving, setSaving] = useState(false)
+  const [preparingImage, setPreparingImage] = useState(false)
   const [error, setError] = useState('')
   const fileRef = useRef(null)
   const cameraRef = useRef(null)
@@ -24,7 +26,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
     }
   }, [user, defaultPetId])
 
-  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
+  useEffect(() => () => revokeObjectUrl(preview), [preview])
 
   if (!user) {
     return (
@@ -41,13 +43,19 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
     )
   }
 
-  const chooseImage = (file) => {
+  const chooseImage = async (file) => {
     setError('')
     if (!file) return
-    if (file.size > 5 * 1024 * 1024) { setError('La foto no puede superar los 5 MB.'); return }
-    if (preview) URL.revokeObjectURL(preview)
-    setImage(file)
-    setPreview(URL.createObjectURL(file))
+    setPreparingImage(true)
+    try {
+      const prepared = await prepareImageForUpload(file, { maxMB: 5, maxDimension: 2048, label: 'La foto' })
+      setImage(prepared)
+      setPreview((current) => replaceObjectUrl(current, prepared))
+    } catch (imageError) {
+      setError(imageError.message || 'No pudimos preparar la foto.')
+    } finally {
+      setPreparingImage(false)
+    }
   }
 
   const submit = async () => {
@@ -59,7 +67,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
       const created = await createCommunityPost({ text: text.trim(), image, pet: user.role === 'owner' ? pet : null })
       setText('')
       setImage(null)
-      if (preview) URL.revokeObjectURL(preview)
+      revokeObjectUrl(preview)
       setPreview('')
       if (fileRef.current) fileRef.current.value = ''
       if (cameraRef.current) cameraRef.current.value = ''
@@ -108,14 +116,14 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
           <button type="button" className="hashtag-chip" key={tag} onClick={() => addHashtag(tag)}>{tag}</button>
         ))}
       </div>
-      {preview && <div className="composer-preview"><img src={preview} alt="Vista previa" /><button onClick={() => { setImage(null); setPreview(''); if (fileRef.current) fileRef.current.value = ''; if (cameraRef.current) cameraRef.current.value = '' }}>✕</button></div>}
+      {preview && <div className="composer-preview"><img src={preview} alt="Vista previa completa de la publicación" /><button type="button" onClick={() => { setImage(null); revokeObjectUrl(preview); setPreview(''); if (fileRef.current) fileRef.current.value = ''; if (cameraRef.current) cameraRef.current.value = '' }}>✕</button></div>}
       <div className="composer-actions">
         <div className="composer-media-actions">
-          <label className="file-button">🖼️ Elegir foto<input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => chooseImage(e.target.files?.[0])} /></label>
-          <label className="file-button camera-button">📸 Sacar foto<input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => chooseImage(e.target.files?.[0])} /></label>
+          <label className="file-button">🖼️ Elegir foto<input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { chooseImage(e.target.files?.[0]); e.target.value = '' }} /></label>
+          <label className="file-button camera-button">📸 Sacar foto<input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { chooseImage(e.target.files?.[0]); e.target.value = '' }} /></label>
           <Link className="file-button lost-report-button" to="/mascotas-perdidas">🚨 Reportar perdido/encontrado</Link>
         </div>
-        <button className="community-button" disabled={saving || (user.role === 'owner' && !pets.length)} onClick={submit}>{saving ? 'Publicando...' : 'Publicar'}</button>
+        <button className="community-button" disabled={saving || preparingImage || (user.role === 'owner' && !pets.length)} onClick={submit}>{preparingImage ? 'Preparando foto...' : saving ? 'Publicando...' : 'Publicar'}</button>
       </div>
     </div>
   )

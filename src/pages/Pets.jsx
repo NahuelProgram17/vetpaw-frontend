@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPets, createPet, updatePet, deletePet, createTreatment, deleteTreatment } from '../services/api';
+import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../utils/imageUpload';
 import ownerBg from "../assets/vetpaw-owner-bg.png";
 import VetPawLoader from "../components/VetPawLoader";
 import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
@@ -273,7 +274,7 @@ export default function Pets() {
     const openNew = () => {
         setEditingPet(null);
         setForm(EMPTY_FORM);
-        setPhotoPreview(null);
+        setPhotoPreview((current) => { revokeObjectUrl(current); return null; });
         setError('');
         setShowModal(true);
     };
@@ -307,7 +308,7 @@ export default function Pets() {
         setShowModal(false);
         setTemperamentOpen(false);
         setEditingPet(null);
-        setPhotoPreview(null);
+        setPhotoPreview((current) => { revokeObjectUrl(current); return null; });
         setError('');
     };
 
@@ -322,11 +323,17 @@ export default function Pets() {
         setTemperamentOpen(false);
     };
 
-    const handlePhotoChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setForm({ ...form, photo: file });
-            setPhotoPreview(URL.createObjectURL(file));
+    const handlePhotoChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setError('');
+        try {
+            const prepared = await prepareImageForUpload(file, { maxMB: 5, maxDimension: 2048, label: 'La foto de la mascota' });
+            setForm((current) => ({ ...current, photo: prepared }));
+            setPhotoPreview((current) => replaceObjectUrl(current, prepared));
+        } catch (imageError) {
+            setError(imageError.message || 'No pudimos preparar la foto.');
+            e.target.value = '';
         }
     };
 
@@ -891,7 +898,7 @@ export default function Pets() {
                                         📷 {photoPreview ? 'Cambiar foto' : 'Subir foto'}
                                         <input
                                             type="file"
-                                            accept="image/*"
+                                            accept="image/jpeg,image/png,image/webp"
                                             onChange={handlePhotoChange}
                                             className="photo-input-hidden"
                                         />
@@ -1723,7 +1730,7 @@ export default function Pets() {
 
                 /* ── Foto ── */
                 .photo-upload { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-                .photo-preview { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,107,107,0.3); }
+                .photo-preview { width: 110px; height: 110px; border-radius: 12px; object-fit: contain; object-position: center; background: #07111f; border: 2px solid rgba(255,107,107,0.3); }
                 .photo-label {
                     background: rgba(255,255,255,0.06); border: 1.5px dashed rgba(255,255,255,0.2);
                     border-radius: 10px; padding: 10px 18px; color: rgba(255,255,255,0.5);

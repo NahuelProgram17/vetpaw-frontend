@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import api from '../services/api'
+import { prepareImageForUpload } from '../utils/imageUpload'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const G1 = '#4CAF50'
@@ -139,6 +140,17 @@ export default function AdminLostPetsManager() {
     }
 
     const change = (key, value) => setForm(prev => ({ ...prev, [key]: value }))
+
+    const handlePhotoChange = async (file, input) => {
+        if (!file) return
+        try {
+            const prepared = await prepareImageForUpload(file, { maxMB: 5, maxDimension: 2048, label: 'La foto' })
+            setPhoto(prepared)
+        } catch (imageError) {
+            alert(imageError.message || 'No pudimos preparar la foto.')
+            if (input) input.value = ''
+        }
+    }
 
     const saveEdit = async (e) => {
         e.preventDefault()
@@ -299,7 +311,7 @@ export default function AdminLostPetsManager() {
                             <div><label style={labelStyle}>Tipo contacto</label><select style={inputStyle} value={form.contact_type} onChange={e => change('contact_type', e.target.value)}>{contactOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
                             <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Contacto</label><input style={inputStyle} value={form.contact_value} onChange={e => change('contact_value', e.target.value)} /></div>
                             <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Descripción</label><textarea style={{ ...inputStyle, minHeight: 110, resize: 'vertical' }} value={form.description} onChange={e => change('description', e.target.value)} /></div>
-                            <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Cambiar foto (opcional)</label><input type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)} style={inputStyle} /></div>
+                            <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Cambiar foto (opcional)</label><input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => handlePhotoChange(e.target.files?.[0], e.target)} style={inputStyle} /></div>
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>

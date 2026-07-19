@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { getAds, createAd, updateAd, deleteAd } from '../services/api'
+import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../utils/imageUpload'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const G1 = '#4CAF50'
@@ -37,16 +38,23 @@ export default function AdsManager() {
     const resetForm = () => {
         setForm(emptyForm)
         setImageFile(null)
-        setImagePreview(null)
+        setImagePreview((current) => { revokeObjectUrl(current); return null })
         setError('')
         if (fileRef.current) fileRef.current.value = ''
     }
 
-    const handleImage = (e) => {
-        const file = e.target.files[0]
+    const handleImage = async (e) => {
+        const file = e.target.files?.[0]
         if (!file) return
-        setImageFile(file)
-        setImagePreview(URL.createObjectURL(file))
+        setError('')
+        try {
+            const prepared = await prepareImageForUpload(file, { maxMB: 5, maxDimension: 1800, label: 'La imagen del anuncio' })
+            setImageFile(prepared)
+            setImagePreview((current) => replaceObjectUrl(current, prepared))
+        } catch (imageError) {
+            setError(imageError.message || 'No pudimos preparar la imagen.')
+            e.target.value = ''
+        }
     }
 
     const editAd = (ad) => {
@@ -162,7 +170,7 @@ export default function AdsManager() {
 
                     <div>
                         <label style={labelStyle}>Imagen del banner {form.id ? '(dejá vacío para no cambiarla)' : '*'}</label>
-                        <input ref={fileRef} type="file" accept="image/*" onChange={handleImage}
+                        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImage}
                             style={{ ...inputStyle, padding: '9px 14px' }} />
                         {imagePreview && (
                             <img src={imagePreview} alt="preview" style={{ marginTop: 10, width: '100%', maxWidth: 360, borderRadius: 12, display: 'block', border: '1px solid rgba(255,255,255,0.1)' }} />
