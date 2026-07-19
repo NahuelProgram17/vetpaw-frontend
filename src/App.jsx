@@ -82,6 +82,7 @@ function App() {
           <Route path="/terminos" element={<TerminosCondiciones />} />
           <Route path="/privacidad" element={<Privacidad />} />
           <Route path="/contacto" element={<Contacto />} />
+          <Route path="/contact" element={<Contacto />} />
           <Route path="/como-funciona" element={<ComoFunciona />} />
           <Route path="/sumar-veterinaria" element={<SumarVeterinaria />} />
           <Route path="/anunciar" element={<AnunciarVetPaw />} />

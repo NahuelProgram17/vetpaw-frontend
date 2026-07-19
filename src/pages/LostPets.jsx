@@ -590,7 +590,7 @@ export default function LostPets() {
                     <div style={cardSt}>
                         <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: TEXT, margin: 0, marginBottom: 4 }}>¿Necesitás más ayuda?</h4>
                         <p style={{ fontSize: 12, color: MUTED, margin: 0, marginBottom: 12 }}>Contactanos y te asesoramos.</p>
-                        <button onClick={() => navigate('/contact')} style={{ width: '100%', background: CARD2, border: `1px solid ${BORDER}`, color: TEXT, padding: '11px 14px', borderRadius: 11, fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: FONT, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                        <button onClick={() => navigate('/contacto')} style={{ width: '100%', background: CARD2, border: `1px solid ${BORDER}`, color: TEXT, padding: '11px 14px', borderRadius: 11, fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: FONT, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                             🎧 Contactar soporte
                         </button>
                     </div>
