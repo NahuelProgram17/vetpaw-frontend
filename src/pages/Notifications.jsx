@@ -14,6 +14,7 @@ import {
 import { downloadBirthdayCard, shareBirthdayCard } from '../utils/birthdayCard'
 import ownerBg from '../assets/vetpaw-owner-bg.png'
 import VetPawLoader from '../components/VetPawLoader'
+import PushNotificationSettings from '../components/PushNotificationSettings'
 
 const FONT = "'Plus Jakarta Sans','Nunito',sans-serif"
 
@@ -180,6 +181,8 @@ export default function Notifications() {
                         <p>Patitas, comentarios, nuevos seguidores y las novedades importantes de VetPaw quedan reunidas acá.</p>
                     </div>
                 </header>
+
+                <PushNotificationSettings />
 
                 {loading ? (
                     <VetPawLoader message="Cargando notificaciones..." subText="Buscando la actividad más reciente" fullScreen={false} />

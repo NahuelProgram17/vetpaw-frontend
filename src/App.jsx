@@ -6,6 +6,7 @@ import Navbar from './components/Navbar'
 import ScrollToTop from './components/ScrollToTop'
 import { RouteChangeLoader, VetPawLoader } from './components/VetPawLoader'
 import BirthdayCelebration from './components/BirthdayCelebration'
+import PushNotificationHandler from './components/PushNotificationHandler'
 
 const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
@@ -54,6 +55,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <ScrollToTop />
+        <PushNotificationHandler />
         <RouteChangeLoader />
         <Navbar />
         <BirthdayCelebration />

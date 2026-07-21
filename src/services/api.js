@@ -286,4 +286,22 @@ export const markCommunityNotificationRead = (id) =>
 export const markAllCommunityNotificationsRead = () =>
     api.post('/community/notifications/mark_all_read/').then((r) => r.data);
 
+
+// ── Notificaciones Web Push ──────────────────────────
+export const getPushConfig = () =>
+    api.get('/community/push/config/').then((r) => r.data);
+
+export const getPushSubscriptionStatus = (endpoint) =>
+    api.get('/community/push/status/', { params: { endpoint } }).then((r) => r.data);
+
+export const registerPushSubscription = (payload) =>
+    api.post('/community/push/subscribe/', payload).then((r) => r.data);
+
+export const disablePushSubscription = (endpoint) =>
+    api.post('/community/push/unsubscribe/', { endpoint }).then((r) => r.data);
+
+export const sendPushTest = (endpoint) =>
+    api.post('/community/push/test/', { endpoint }).then((r) => r.data);
+
+
 export default api;

@@ -29,6 +29,15 @@ export function AuthProvider({ children }) {
     }
 
     const logout = () => {
+        const endpoint = localStorage.getItem('vetpaw_push_endpoint')
+        const accessToken = localStorage.getItem('access_token')
+        if (endpoint && accessToken) {
+            api.post(
+                '/community/push/unsubscribe/',
+                { endpoint },
+                { headers: { Authorization: `Bearer ${accessToken}` } },
+            ).catch(() => {})
+        }
         localStorage.clear()
         setUser(null)
     }
