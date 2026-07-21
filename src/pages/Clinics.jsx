@@ -1,5 +1,5 @@
 // Clinics.jsx
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getClinics, joinClinic } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -90,7 +90,7 @@ function OwnerAlertPetIcon() {
 
 export default function Clinics() {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [clinics, setClinics] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -105,7 +105,22 @@ export default function Clinics() {
     const [lastUpdate, setLastUpdate] = useState(null);
     const [now, setNow] = useState(Date.now());
 
+    const fetchClinics = useCallback((lat, lon) => {
+        let url = '/clinics/';
+        if (lat && lon) url += `?lat=${lat}&lon=${lon}`;
+        api
+            .get(url)
+            .then((res) => {
+                setClinics(res.data.results ?? res.data);
+                setLastUpdate(Date.now());
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
+
     useEffect(() => {
+        if (authLoading) return;
+
         setLocationStatus('loading');
         navigator.geolocation.getCurrentPosition(
             (pos) => {
@@ -122,26 +137,13 @@ export default function Clinics() {
                 }
             },
         );
-    }, []);
+    }, [authLoading, fetchClinics, user?.latitude, user?.longitude]);
 
     // tic cada minuto para "Actualizado hace X min"
     useEffect(() => {
         const t = setInterval(() => setNow(Date.now()), 60000);
         return () => clearInterval(t);
     }, []);
-
-    const fetchClinics = (lat, lon) => {
-        let url = '/clinics/';
-        if (lat && lon) url += `?lat=${lat}&lon=${lon}`;
-        api
-            .get(url)
-            .then((res) => {
-                setClinics(res.data.results ?? res.data);
-                setLastUpdate(Date.now());
-            })
-            .catch(console.error)
-            .finally(() => setLoading(false));
-    };
 
     const fetchReviews = async (clinicId) => {
         if (reviewsByClinic[clinicId]) {

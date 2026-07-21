@@ -83,8 +83,8 @@ export default function MedicalHistory() {
     }, [selectedId]);
 
     const pet = useMemo(() => pets.find((p) => p.id === selectedId) || null, [pets, selectedId]);
-    const vaccines = pet?.vaccines ?? [];
-    const treatments = pet?.treatments ?? [];
+    const vaccines = useMemo(() => pet?.vaccines ?? [], [pet]);
+    const treatments = useMemo(() => pet?.treatments ?? [], [pet]);
     const petVisits = useMemo(() => visits.filter((v) => v.pet === selectedId).sort((a, b) => new Date(b.date) - new Date(a.date)), [visits, selectedId]);
     const petAppointments = useMemo(() => appointments.filter((a) => a.pet === selectedId), [appointments, selectedId]);
 

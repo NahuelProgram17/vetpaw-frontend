@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
@@ -23,14 +23,7 @@ export default function AdminPanel() {
     const [lastUpdate, setLastUpdate] = useState(null)
     const [tab, setTab] = useState('dashboard')
 
-    useEffect(() => {
-        if (authLoading) return
-        if (!user) { navigate('/login'); return }
-        if (!canAccessAdmin(user)) { navigate('/'); return }
-        fetchData()
-    }, [user, authLoading])
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setDataLoading(true)
         try {
             const res = await api.get('/users/admin-panel/')
@@ -41,7 +34,14 @@ export default function AdminPanel() {
         } finally {
             setDataLoading(false)
         }
-    }
+    }, [])
+
+    useEffect(() => {
+        if (authLoading) return
+        if (!user) { navigate('/login'); return }
+        if (!canAccessAdmin(user)) { navigate('/'); return }
+        fetchData()
+    }, [user, authLoading, navigate, fetchData])
 
     if (authLoading || dataLoading) return (
         <div style={{ minHeight: '100vh', background: DARK, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT }}>

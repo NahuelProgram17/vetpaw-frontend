@@ -1,5 +1,5 @@
 // Appointments.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getAppointments, createAppointment, updateAppointment, cancelAppointment, getPets, getClinics } from "../services/api";
 import api from "../services/api";
@@ -94,16 +94,7 @@ export default function Appointments() {
     const [reviewSuccess, setReviewSuccess] = useState("");
     const [reviewedAppts, setReviewedAppts] = useState(new Set());
 
-    useEffect(() => {
-        fetchAll();
-        const petId = searchParams.get("pet");
-        if (petId) {
-            setForm({ ...EMPTY_FORM, pet: parseInt(petId) });
-            setShowModal(true);
-        }
-    }, []);
-
-    const fetchAll = async () => {
+    const fetchAll = useCallback(async () => {
         try {
             const [a, p, c] = await Promise.all([getAppointments(), getPets(), getClinics()]);
             const appts = a.results ?? a;
@@ -115,7 +106,17 @@ export default function Appointments() {
             setReviewedAppts(reviewed);
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
-    };
+    }, []);
+
+    const petIdFromQuery = searchParams.get("pet");
+
+    useEffect(() => {
+        fetchAll();
+        if (petIdFromQuery) {
+            setForm({ ...EMPTY_FORM, pet: parseInt(petIdFromQuery, 10) });
+            setShowModal(true);
+        }
+    }, [fetchAll, petIdFromQuery]);
 
     const fetchSlots = async (clinicId, date, type) => {
         if (!clinicId || !date || !type) return;
