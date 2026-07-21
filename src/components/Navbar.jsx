@@ -275,6 +275,7 @@ export default function Navbar() {
     // ── Links según rol ──
     const ownerLinks = [
         { to: '/comunidad', icon: 'community', label: 'Comunidad' },
+        { to: '/explorar', icon: 'explore', label: 'Explorar' },
         { to: '/dashboard', icon: 'panel', label: 'Mi panel' },
         { to: '/pets', icon: 'pets', label: 'Mascotas' },
         { to: '/appointments', icon: 'appointments', label: 'Turnos' },
@@ -288,6 +289,7 @@ export default function Navbar() {
 
     const clinicLinks = [
         { to: '/comunidad', icon: 'community', label: 'Comunidad' },
+        { to: '/explorar', icon: 'explore', label: 'Explorar' },
         { to: '/clinic/dashboard', icon: 'panel', label: 'Mi panel' },
         { to: '/messages', icon: 'messages', label: 'Mensajes', badge: unreadMessages },
         { to: '/profile', icon: 'profile', label: 'Mi perfil' },
@@ -296,6 +298,7 @@ export default function Navbar() {
 
     const guestLinks = [
         { to: '/comunidad', icon: 'community', label: 'Comunidad' },
+        { to: '/explorar', icon: 'explore', label: 'Explorar' },
         { to: '/clinics', icon: 'clinics', label: 'Veterinarias' },
         { to: '/mascotas-perdidas', icon: 'lost', label: 'Mascotas perdidas' },
         { to: '/login', icon: 'login', label: 'Ingresar' },
@@ -646,6 +649,7 @@ export default function Navbar() {
                         {!user ? (
                             <>
                                 <Link to="/comunidad" style={browserLinkStyle('/comunidad', G1)} {...browserLinkEvents('/comunidad', G1)}>Comunidad</Link>
+                                <Link to="/explorar" style={browserLinkStyle('/explorar', O1)} {...browserLinkEvents('/explorar', O1)}>Explorar</Link>
                                 <Link to="/clinics" style={browserLinkStyle('/clinics', G1)} {...browserLinkEvents('/clinics', G1)}>Veterinarias</Link>
                                 <Link to="/mascotas-perdidas" style={browserLinkStyle('/mascotas-perdidas', O1)} {...browserLinkEvents('/mascotas-perdidas', O1)}>Mascotas perdidas</Link>
                                 <InstallPWA />
@@ -659,6 +663,7 @@ export default function Navbar() {
                         ) : user.role === 'clinic' ? (
                             <>
                                 <Link to="/comunidad" style={browserLinkStyle('/comunidad', O1)} {...browserLinkEvents('/comunidad', O1)}>Comunidad</Link>
+                                <Link to="/explorar" style={browserLinkStyle('/explorar', G1)} {...browserLinkEvents('/explorar', G1)}>Explorar</Link>
                                 <Link to="/clinic/dashboard" style={browserLinkStyle('/clinic/dashboard', G1)} {...browserLinkEvents('/clinic/dashboard', G1)}>Mi panel</Link>
                                 <Link to="/messages" style={{ ...browserLinkStyle('/messages', O1), display: 'inline-flex', alignItems: 'center', gap: 6 }} {...browserLinkEvents('/messages', O1)}>
                                     Mensajes
@@ -690,6 +695,7 @@ export default function Navbar() {
                         ) : (
                             <>
                                 <Link to="/comunidad" style={browserLinkStyle('/comunidad', G1)} {...browserLinkEvents('/comunidad', G1)}>Comunidad</Link>
+                                <Link to="/explorar" style={browserLinkStyle('/explorar', O1)} {...browserLinkEvents('/explorar', O1)}>Explorar</Link>
                                 <Link to="/dashboard" style={browserLinkStyle('/dashboard', G1)} {...browserLinkEvents('/dashboard', G1)}>Mi panel</Link>
                                 <Link to="/pets" style={browserLinkStyle('/pets', O1)} {...browserLinkEvents('/pets', O1)}>Mascotas</Link>
                                 <Link to="/appointments" style={browserLinkStyle('/appointments', G1)} {...browserLinkEvents('/appointments', G1)}>Turnos</Link>

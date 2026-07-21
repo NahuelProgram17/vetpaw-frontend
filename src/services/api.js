@@ -278,6 +278,9 @@ export const deleteCommunityComment = (id) =>
 export const getCommunityDiscover = () =>
     api.get('/community/discover/').then((r) => r.data);
 
+export const getCommunityExplore = (params = {}) =>
+    api.get('/community/explore/', { params }).then((r) => r.data);
+
 export const getPublicPetProfile = (petId) =>
     api.get(`/community/pets/${petId}/`).then((r) => r.data);
 

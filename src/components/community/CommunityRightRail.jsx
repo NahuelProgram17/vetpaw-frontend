@@ -17,7 +17,7 @@ export default function CommunityRightRail({ discover, user, onRefresh }) {
     <aside className="community-right">
       <div className="community-sticky">
         <section className="right-section community-card">
-          <div className="right-title"><span>🐾 Mascotas para conocer</span><Link to="/comunidad">Ver más</Link></div>
+          <div className="right-title"><span>🐾 Mascotas para conocer</span><Link to="/explorar?seccion=pets">Ver más</Link></div>
           {(discover.suggested_pets || []).slice(0, 4).map((pet) => (
             <div className="suggestion-row" key={pet.id}>
               {pet.photo ? <img className="suggestion-avatar" src={pet.photo} alt="" /> : <div className="suggestion-avatar">🐾</div>}
@@ -52,7 +52,7 @@ export default function CommunityRightRail({ discover, user, onRefresh }) {
         </section>
 
         <section className="right-section community-card">
-          <div className="right-title"><span>🏥 Veterinarias en VetPaw</span><Link to="/clinics">Todas</Link></div>
+          <div className="right-title"><span>🏥 Veterinarias en VetPaw</span><Link to="/explorar?seccion=clinics">Todas</Link></div>
           {(discover.clinics || []).slice(0, 4).map((clinic) => (
             <Link className="right-mini-card" to={`/clinicas/${clinic.slug}`} key={clinic.id}>
               {clinic.logo ? <img src={clinic.logo} alt="" /> : <div className="suggestion-avatar">{fallback('clinic')}</div>}

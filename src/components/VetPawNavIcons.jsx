@@ -60,17 +60,21 @@ export function NavIcon({ name, active = false, compact = false, danger = false 
         flexShrink: 0,
       }}
     >
-      <img
-        src={src}
-        alt=""
-        style={{
-          width: compact ? 22 : 24,
-          height: compact ? 22 : 24,
-          objectFit: 'contain',
-          display: 'block',
-          filter: danger ? 'saturate(1.02)' : 'none',
-        }}
-      />
+      {name === 'explore' ? (
+        <span aria-hidden="true" style={{ fontSize: compact ? 18 : 19, lineHeight: 1 }}>🔎</span>
+      ) : (
+        <img
+          src={src}
+          alt=""
+          style={{
+            width: compact ? 22 : 24,
+            height: compact ? 22 : 24,
+            objectFit: 'contain',
+            display: 'block',
+            filter: danger ? 'saturate(1.02)' : 'none',
+          }}
+        />
+      )}
     </span>
   )
 }

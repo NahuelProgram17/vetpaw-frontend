@@ -39,6 +39,7 @@ const LostPets = lazy(() => import('./pages/LostPets'))
 const Configuracion = lazy(() => import('./pages/Configuracion'))
 const Notifications = lazy(() => import('./pages/Notifications'))
 const Community = lazy(() => import('./pages/Community'))
+const Explore = lazy(() => import('./pages/Explore'))
 const PublicPetProfile = lazy(() => import('./pages/PublicPetProfile'))
 const CommunityModeration = lazy(() => import('./pages/CommunityModeration'))
 const NotFound = lazy(() => import('./pages/NotFound'))
@@ -63,6 +64,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Community />} />
             <Route path="/comunidad" element={<Community />} />
+            <Route path="/explorar" element={<Explore />} />
             <Route path="/inicio-vetpaw" element={<Home />} />
             <Route path="/mascotas/:id" element={<PublicPetProfile />} />
             <Route path="/login" element={<Login />} />
