@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getCommunityDiscover, getCommunityPosts } from '../services/api'
+import { getCommunityDiscover, getCommunityPost, getCommunityPosts } from '../services/api'
 import PostComposer from '../components/community/PostComposer'
 import PostCard from '../components/community/PostCard'
 import CommunityRightRail from '../components/community/CommunityRightRail'
@@ -25,6 +25,8 @@ export default function Community() {
   const [filter, setFilter] = useState('all')
   const searchParams = new URLSearchParams(location.search)
   const defaultPetId = searchParams.get('mascota')
+  const targetPostId = searchParams.get('publicacion')
+  const targetCommentId = searchParams.get('comentario')
   const hashtag = (searchParams.get('hashtag') || '').replace(/^#/, '').trim()
   const [posts, setPosts] = useState([])
   const [discover, setDiscover] = useState({ suggested_pets: [], clinics: [], lost_pets: [], birthdays: [] })
@@ -48,7 +50,18 @@ export default function Community() {
     try {
       const data = await getCommunityPosts(paramsFor(selected, selectedPage))
       const rows = data.results ?? data
-      setPosts((current) => append ? [...current, ...(Array.isArray(rows) ? rows : [])] : (Array.isArray(rows) ? rows : []))
+      let nextRows = Array.isArray(rows) ? rows : []
+
+      if (!append && targetPostId && !nextRows.some((post) => String(post.id) === String(targetPostId))) {
+        try {
+          const targetPost = await getCommunityPost(targetPostId)
+          nextRows = [targetPost, ...nextRows]
+        } catch {
+          // Si la publicación ya no existe o no es visible, mantenemos el muro normal.
+        }
+      }
+
+      setPosts((current) => append ? [...current, ...nextRows] : nextRows)
       setHasMore(Boolean(data.next))
       setPage(selectedPage)
     } catch (e) {
@@ -57,7 +70,7 @@ export default function Community() {
       setLoading(false)
       setMoreLoading(false)
     }
-  }, [paramsFor])
+  }, [paramsFor, targetPostId])
 
   const fetchDiscover = useCallback(async () => {
     try { setDiscover(await getCommunityDiscover()) } catch { /* la columna lateral no bloquea el muro */ }
@@ -73,10 +86,15 @@ export default function Community() {
   }, [user, fetchDiscover])
 
   useEffect(() => {
-    const id = new URLSearchParams(location.search).get('publicacion')
-    if (!id || loading) return
-    setTimeout(() => document.getElementById(`post-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120)
-  }, [location.search, loading])
+    if (!targetPostId || targetCommentId || loading) return undefined
+    const timer = window.setTimeout(() => {
+      document.getElementById(`post-${targetPostId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }, 180)
+    return () => window.clearTimeout(timer)
+  }, [loading, posts, targetCommentId, targetPostId])
 
   const openHashtag = (tag) => {
     const clean = String(tag || '').replace(/^#/, '').trim()
@@ -139,7 +157,17 @@ export default function Community() {
           {loading ? (
             <div className="empty-feed community-card"><div className="icon">🐾</div><h3>Cargando la comunidad...</h3><p>Estamos reuniendo las últimas historias.</p></div>
           ) : posts.length ? (
-            posts.map((post) => <PostCard key={post.id} initialPost={post} user={user} onDeleted={removePost} onChanged={fetchDiscover} onHashtagClick={openHashtag} />)
+            posts.map((post) => (
+              <PostCard
+                key={post.id}
+                initialPost={post}
+                user={user}
+                targetCommentId={String(post.id) === String(targetPostId) ? targetCommentId : null}
+                onDeleted={removePost}
+                onChanged={fetchDiscover}
+                onHashtagClick={openHashtag}
+              />
+            ))
           ) : (
             <div className="empty-feed community-card"><div className="icon">🐶</div><h3>Todavía no hay publicaciones acá</h3><p>{filter === 'following' ? 'Seguí mascotas para armar tu muro personalizado.' : filter === 'saved' ? 'Guardá publicaciones para encontrarlas fácilmente.' : 'Sé el primero en compartir algo con la comunidad VetPaw.'}</p></div>
           )}

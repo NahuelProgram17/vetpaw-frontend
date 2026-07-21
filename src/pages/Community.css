@@ -309,6 +309,9 @@
 .post-action.active { color: var(--vp-orange-soft); }
 .comments-area { border-top: 1px solid rgba(255,255,255,.055); padding: 12px 17px 16px; }
 .comment-item { display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: start; margin-bottom: 9px; }
+.comment-target-highlight { position: relative; margin: 0 -8px 9px; padding: 8px; border-radius: 14px; background: linear-gradient(90deg,rgba(76,175,80,.2),rgba(255,152,0,.12)); box-shadow: 0 0 0 1px rgba(118,220,126,.35), 0 10px 28px rgba(0,0,0,.18); animation: vetpaw-comment-focus 1.1s ease-in-out 2; }
+.comment-target-highlight .comment-bubble { background: rgba(255,255,255,.09); }
+@keyframes vetpaw-comment-focus { 0%,100% { transform: scale(1); } 50% { transform: scale(1.012); } }
 .comment-avatar { width: 30px; height: 30px; border-radius: 10px; object-fit: cover; background: rgba(76,175,80,.2); }
 .comment-bubble { border-radius: 12px; background: rgba(255,255,255,.045); padding: 8px 10px; color: rgba(255,255,255,.78); font-size: 11px; line-height: 1.45; }
 .comment-bubble strong { color: #fff; display: block; font-size: 10px; margin-bottom: 2px; }

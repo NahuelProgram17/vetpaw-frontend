@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   addCommunityComment,
@@ -55,7 +55,7 @@ const renderTextWithHashtags = (value, onHashtagClick) => {
   })
 }
 
-export default function PostCard({ initialPost, user, onDeleted, onChanged, onHashtagClick }) {
+export default function PostCard({ initialPost, user, targetCommentId, onDeleted, onChanged, onHashtagClick }) {
   const navigate = useNavigate()
   const [post, setPost] = useState(initialPost)
   const [commentsOpen, setCommentsOpen] = useState(false)
@@ -65,7 +65,54 @@ export default function PostCard({ initialPost, user, onDeleted, onChanged, onHa
   const [commentSaving, setCommentSaving] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [reportTarget, setReportTarget] = useState(null)
+  const [highlightedCommentId, setHighlightedCommentId] = useState(null)
+  const focusedCommentRef = useRef(null)
   const actor = post.actor || {}
+
+  useEffect(() => {
+    if (!targetCommentId) return undefined
+
+    let cancelled = false
+    focusedCommentRef.current = null
+    setCommentsOpen(true)
+    setCommentsLoading(true)
+
+    getCommunityComments(post.id)
+      .then((rows) => {
+        if (!cancelled) setComments(Array.isArray(rows) ? rows : [])
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setCommentsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [post.id, targetCommentId])
+
+  useEffect(() => {
+    const normalizedTarget = String(targetCommentId || '')
+    if (!normalizedTarget || commentsLoading || focusedCommentRef.current === normalizedTarget) return undefined
+    if (!comments.some((item) => String(item.id) === normalizedTarget)) return undefined
+
+    const focusTimer = window.setTimeout(() => {
+      const element = document.getElementById(`comment-${normalizedTarget}`)
+      if (!element) return
+      focusedCommentRef.current = normalizedTarget
+      setHighlightedCommentId(normalizedTarget)
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 220)
+
+    const clearTimer = window.setTimeout(() => {
+      setHighlightedCommentId((current) => current === normalizedTarget ? null : current)
+    }, 3800)
+
+    return () => {
+      window.clearTimeout(focusTimer)
+      window.clearTimeout(clearTimer)
+    }
+  }, [comments, commentsLoading, targetCommentId])
 
   const requireLogin = () => {
     if (!user) { navigate('/login'); return false }
@@ -213,7 +260,11 @@ export default function PostCard({ initialPost, user, onDeleted, onChanged, onHa
         <div className="comments-area">
           {commentsLoading && <div className="composer-sub">Cargando comentarios...</div>}
           {comments.map((item) => (
-            <div className="comment-item" key={item.id}>
+            <div
+              id={`comment-${item.id}`}
+              className={`comment-item ${String(item.id) === highlightedCommentId ? 'comment-target-highlight' : ''}`}
+              key={item.id}
+            >
               {item.author.avatar ? <img className="comment-avatar" src={item.author.avatar} alt="" /> : <div className="comment-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👤</div>}
               <div className="comment-bubble"><strong>{item.author.display_name}</strong>{item.text}</div>
               {item.can_delete ? <button className="comment-delete" onClick={() => removeComment(item.id)}>✕</button> : user ? <button className="comment-delete" onClick={() => setReportTarget({ comment: item.id })}>⚑</button> : null}

@@ -51,7 +51,7 @@ export default function Navbar() {
         if (!user) return
         try {
             const socialPromise = Promise.all([
-                getCommunityNotifications({ unread: true, page_size: 8 }),
+                getCommunityNotifications({ page_size: 8 }),
                 getCommunityNotificationsUnreadCount(),
             ])
 
@@ -69,7 +69,14 @@ export default function Navbar() {
                     target_url: item.target_url || '/comunidad',
                     is_read: item.is_read,
                 }))
-                setNotifications(normalized)
+                setNotifications(
+                    normalized
+                        .sort((a, b) => {
+                            if (Boolean(a.is_read) !== Boolean(b.is_read)) return a.is_read ? 1 : -1
+                            return new Date(b.requested_date || 0) - new Date(a.requested_date || 0)
+                        })
+                        .slice(0, 2)
+                )
                 setNotificationCount(socialUnread.unread || 0)
                 return
             }
@@ -103,6 +110,7 @@ export default function Navbar() {
                     message: `${item.reason || 'Turno'} · ${item.clinic_name}`,
                     meta: `🐾 ${item.pet_name}`,
                     target_url: '/appointments',
+                    is_read: false,
                 }))
             const birthdayNotifications = (Array.isArray(birthdays) ? birthdays : []).map((item) => ({
                 id: item.id,
@@ -113,11 +121,15 @@ export default function Navbar() {
                 meta: item.badge?.name || 'Insignia VetPaw',
                 requested_date: item.birthday_date,
                 target_url: '/notifications',
+                is_read: false,
             }))
 
             const combined = [...socialNotifications, ...birthdayNotifications, ...appointmentNotifications]
-                .sort((a, b) => new Date(b.requested_date || 0) - new Date(a.requested_date || 0))
-                .slice(0, 10)
+                .sort((a, b) => {
+                    if (Boolean(a.is_read) !== Boolean(b.is_read)) return a.is_read ? 1 : -1
+                    return new Date(b.requested_date || 0) - new Date(a.requested_date || 0)
+                })
+                .slice(0, 2)
             setNotifications(combined)
             setNotificationCount(
                 (socialUnread.unread || 0) + birthdayNotifications.length + appointmentNotifications.length
@@ -717,11 +729,21 @@ export default function Navbar() {
                                                 <p style={{ color: '#fff', fontWeight: 800, fontSize: 14, fontFamily: BROWSER_FONT }}>Notificaciones</p>
                                             </div>
                                             {notifications.length === 0 ? (
-                                                <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>No tenés notificaciones nuevas</div>
+                                                <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>Todavía no hay actividad para mostrar</div>
                                             ) : (
                                                 <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                                                     {notifications.map(n => (
-                                                        <button key={n.notification_key || n.id} onClick={() => handleNotificationClick(n)} style={{ width: '100%', padding: '12px 18px', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
+                                                        <button
+                                                            key={n.notification_key || n.id}
+                                                            onClick={() => handleNotificationClick(n)}
+                                                            style={{
+                                                                position: 'relative', width: '100%', padding: '12px 36px 12px 18px',
+                                                                border: 'none', borderBottom: '1px solid rgba(255,255,255,0.04)',
+                                                                background: n.is_read ? 'transparent' : 'linear-gradient(90deg,rgba(76,175,80,.13),rgba(255,152,0,.04))',
+                                                                textAlign: 'left', cursor: 'pointer',
+                                                            }}
+                                                        >
+                                                            {!n.is_read && <span aria-label="Nueva" title="Nueva" style={{ position: 'absolute', top: 16, right: 16, width: 9, height: 9, borderRadius: '50%', background: G1, boxShadow: '0 0 0 5px rgba(76,175,80,.12)' }} />}
                                                             <p style={{ color: '#fff', fontSize: 14, fontWeight: 800, fontFamily: BROWSER_FONT }}>{statusLabel(n.status)}</p>
                                                             <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: 12, marginTop: 3, lineHeight: 1.4 }}>{n.message}</p>
                                                             {n.meta && <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 11, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.meta}</p>}
@@ -855,14 +877,25 @@ export default function Navbar() {
                                 <p style={{ color: '#fff', fontWeight: 800, fontSize: 14, fontFamily: FONT }}>Notificaciones</p>
                             </div>
                             {notifications.length === 0 ? (
-                                <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>No tenés notificaciones nuevas</div>
+                                <div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>Todavía no hay actividad para mostrar</div>
                             ) : (
                                 <div style={{ maxHeight: 260, overflowY: 'auto' }}>
                                     {notifications.map(n => (
-                                        <button key={n.notification_key || n.id} onClick={() => handleNotificationClick(n)} style={{ width: '100%', padding: '12px 18px', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
+                                        <button
+                                            key={n.notification_key || n.id}
+                                            onClick={() => handleNotificationClick(n)}
+                                            style={{
+                                                position: 'relative', width: '100%', padding: '12px 36px 12px 18px',
+                                                border: 'none', borderBottom: '1px solid rgba(255,255,255,0.04)',
+                                                background: n.is_read ? 'transparent' : 'linear-gradient(90deg,rgba(76,175,80,.13),rgba(255,152,0,.04))',
+                                                textAlign: 'left', cursor: 'pointer',
+                                            }}
+                                        >
+                                            {!n.is_read && <span aria-label="Nueva" title="Nueva" style={{ position: 'absolute', top: 16, right: 16, width: 9, height: 9, borderRadius: '50%', background: G1, boxShadow: '0 0 0 5px rgba(76,175,80,.12)' }} />}
                                             <p style={{ color: '#fff', fontSize: 14, fontWeight: 800, fontFamily: FONT }}>{statusLabel(n.status)}</p>
                                             <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: 12, marginTop: 3, lineHeight: 1.4 }}>{n.message}</p>
                                             {n.meta && <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 11, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.meta}</p>}
+                                            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, marginTop: 3 }}>{notificationDate(n.requested_date)}</p>
                                         </button>
                                     ))}
                                 </div>
