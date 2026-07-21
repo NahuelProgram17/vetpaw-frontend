@@ -7,6 +7,7 @@ import PostCard from '../components/community/PostCard'
 import CommunityRightRail from '../components/community/CommunityRightRail'
 import communityHeroPets from '../assets/community/community-hero-pets.webp'
 import './Community.css'
+import { canModerateCommunity } from '../utils/permissions'
 
 const FILTERS = [
   ['all', '✨ Para vos'],
@@ -129,7 +130,7 @@ export default function Community() {
             {FILTERS.map(([value, label]) => (
               <button key={value} className={`filter-pill ${filter === value ? 'active' : ''}`} onClick={() => changeFilter(value)} title={!user && ['following', 'saved'].includes(value) ? 'Iniciá sesión para usar este filtro' : ''}>{label}</button>
             ))}
-            {user?.username === 'jaime17' && (
+            {canModerateCommunity(user) && (
               <Link className="filter-pill moderation-shortcut" to="/comunidad/moderacion">🛡️ Moderación</Link>
             )}
           </div>

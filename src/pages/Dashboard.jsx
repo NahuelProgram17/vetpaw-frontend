@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { canAccessAdmin } from '../utils/permissions';
 import { getPets, getAppointments, getClinics, getVaccines, markNotificationsSeen } from "../services/api";
 import ownerBg from "../assets/vetpaw-owner-bg.png";
 import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
@@ -168,7 +169,7 @@ export default function Dashboard() {
 
     // ───────────── Derived data
     const firstName = user?.first_name || user?.username || "Usuario";
-    const isAdmin = user?.username === "jaime17";
+    const isAdmin = canAccessAdmin(user);
 
     const now = new Date();
 

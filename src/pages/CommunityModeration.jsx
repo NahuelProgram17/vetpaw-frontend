@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getCommunityReports, moderateCommunityReport } from '../services/api'
+import { canModerateCommunity } from '../utils/permissions'
 import './Community.css'
 
 const filters = [
@@ -18,7 +19,7 @@ export default function CommunityModeration() {
   const [reports, setReports] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const allowed = user && (user.is_staff || user.is_superuser || user.username === 'jaime17')
+  const allowed = canModerateCommunity(user)
   const load = useCallback(async () => {
     setLoading(true)
     try {

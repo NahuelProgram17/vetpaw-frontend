@@ -1,8 +1,9 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import VetPawLoader from './VetPawLoader'
+import { canAccessAdmin, canModerateCommunity } from '../utils/permissions'
 
-export default function ProtectedRoute({ children, role }) {
+export default function ProtectedRoute({ children, role, permission }) {
     const { user, loading } = useAuth()
 
     if (loading) {
@@ -45,6 +46,14 @@ export default function ProtectedRoute({ children, role }) {
                 </div>
             </div>
         )
+    }
+
+    if (permission === 'admin' && !canAccessAdmin(user)) {
+        return <Navigate to="/" replace />
+    }
+
+    if (permission === 'moderator' && !canModerateCommunity(user)) {
+        return <Navigate to="/" replace />
     }
 
     if (role && user.role !== role) {

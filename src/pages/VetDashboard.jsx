@@ -1742,6 +1742,50 @@ function EmptyState({ icon, title, text, compact = false }) {
   return <div className={`vp-empty ${compact ? "compact" : ""}`}><div>{icon}</div><h3>{title}</h3><p>{text}</p></div>;
 }
 
+function Modal({ title, onClose, children }) {
+  return (
+    <div className="vp-modal-backdrop" role="presentation" onMouseDown={(event) => {
+      if (event.target === event.currentTarget) onClose();
+    }}>
+      <section className="vp-modal" role="dialog" aria-modal="true" aria-label={title}>
+        <header>
+          <h2>{title}</h2>
+          <button type="button" onClick={onClose} aria-label="Cerrar">×</button>
+        </header>
+        {children}
+      </section>
+    </div>
+  );
+}
+
+function VaccineModal({ vaccineForm, setVaccineForm, saving, onClose, onSubmit }) {
+  const set = (key, value) => setVaccineForm((prev) => ({ ...prev, [key]: value }));
+  return (
+    <Modal title="💉 Registrar vacuna" onClose={onClose}>
+      <form className="vp-modal-form" onSubmit={onSubmit}>
+        <p className="vp-modal-help">Completá los datos de la aplicación. Los campos marcados con * son obligatorios.</p>
+        <label>Vacuna *<input value={vaccineForm.name} onChange={(e) => set("name", e.target.value)} placeholder="Ej.: Antirrábica" required /></label>
+        <div className="form-grid">
+          <label>Fecha de aplicación<input type="date" value={vaccineForm.date_applied} onChange={(e) => set("date_applied", e.target.value)} /></label>
+          <label>Próxima dosis<input type="date" value={vaccineForm.next_dose} onChange={(e) => set("next_dose", e.target.value)} /></label>
+        </div>
+        <label>Lote<input value={vaccineForm.batch} onChange={(e) => set("batch", e.target.value)} placeholder="Opcional" /></label>
+        <div className="form-grid">
+          <label>Nombre veterinario *<input value={vaccineForm.vet_first_name} onChange={(e) => set("vet_first_name", e.target.value)} required /></label>
+          <label>Apellido *<input value={vaccineForm.vet_last_name} onChange={(e) => set("vet_last_name", e.target.value)} required /></label>
+        </div>
+        <label>Matrícula *<input value={vaccineForm.vet_license} onChange={(e) => set("vet_license", e.target.value)} required /></label>
+        <label>Clínica<input value={vaccineForm.vet_clinic_name} onChange={(e) => set("vet_clinic_name", e.target.value)} /></label>
+        <label>Observaciones<textarea rows="3" value={vaccineForm.notes} onChange={(e) => set("notes", e.target.value)} /></label>
+        <div className="modal-actions">
+          <button type="button" onClick={onClose}>Cancelar</button>
+          <button className="gradient" disabled={saving}>{saving ? "Guardando..." : "Guardar vacuna"}</button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 function VisitModal({ visitForm, setVisitForm, saving, onClose, onSubmit }) {
   const set = (key, value) => setVisitForm((prev) => ({ ...prev, [key]: value }));
   return (

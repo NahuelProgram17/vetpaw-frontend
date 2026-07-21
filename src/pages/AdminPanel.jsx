@@ -5,6 +5,7 @@ import api from '../services/api'
 import AdsManager from '../components/AdsManager'
 import BlogManager from '../components/BlogManager'
 import AdminLostPetsManager from '../components/AdminLostPetsManager'
+import { canAccessAdmin } from '../utils/permissions'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const G1 = '#4CAF50'
@@ -25,7 +26,7 @@ export default function AdminPanel() {
     useEffect(() => {
         if (authLoading) return
         if (!user) { navigate('/login'); return }
-        if (user.username !== 'jaime17') { navigate('/'); return }
+        if (!canAccessAdmin(user)) { navigate('/'); return }
         fetchData()
     }, [user, authLoading])
 
