@@ -11,9 +11,14 @@
 
     <!-- ═══ Iconos y PWA ═══ -->
     <link rel="icon" type="image/png" href="/logo_vetpaw.png" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#4CAF50" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="VetPaw" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
 
     <!-- ═══ Open Graph (WhatsApp, Facebook, LinkedIn, Telegram) ═══ -->
     <meta property="og:type" content="website" />
@@ -42,8 +47,16 @@
     <script type="module" src="/src/main.jsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js');
+        window.addEventListener('load', async () => {
+          try {
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+              scope: '/',
+              updateViaCache: 'none'
+            });
+            registration.update().catch(() => {});
+          } catch (error) {
+            console.error('No se pudo registrar el modo app de VetPaw:', error);
+          }
         });
       }
     </script>
