@@ -274,4 +274,16 @@ export const toggleBlockedCommunityUser = (userId) =>
 export const getBlockedCommunityUsers = () =>
     api.get('/community/blocks/').then((r) => r.data);
 
+export const getCommunityNotifications = (params = {}) =>
+    api.get('/community/notifications/', { params }).then((r) => r.data);
+
+export const getCommunityNotificationsUnreadCount = () =>
+    api.get('/community/notifications/unread_count/').then((r) => r.data);
+
+export const markCommunityNotificationRead = (id) =>
+    api.post(`/community/notifications/${id}/mark_read/`).then((r) => r.data);
+
+export const markAllCommunityNotificationsRead = () =>
+    api.post('/community/notifications/mark_all_read/').then((r) => r.data);
+
 export default api;

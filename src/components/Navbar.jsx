@@ -1,7 +1,15 @@
-import { useState, useEffect, useRef } from 'react'
+import { useCallback, useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getAppointments, markNotificationsSeen, getUnreadCount, getBirthdayCelebrations } from '../services/api'
+import {
+    getAppointments,
+    getBirthdayCelebrations,
+    getCommunityNotifications,
+    getCommunityNotificationsUnreadCount,
+    getUnreadCount,
+    markCommunityNotificationRead,
+    markNotificationsSeen,
+} from '../services/api'
 import InstallPWA from './InstallPWA'
 import NavIcon from './VetPawNavIcons'
 
@@ -29,6 +37,7 @@ export default function Navbar() {
     const navigate = useNavigate()
     const location = useLocation()
     const [notifications, setNotifications] = useState([])
+    const [notificationCount, setNotificationCount] = useState(0)
     const [unreadMessages, setUnreadMessages] = useState(0)
     const [showNotif, setShowNotif] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
@@ -37,6 +46,93 @@ export default function Navbar() {
     const notifRef = useRef(null)
     const isStandalone = useIsStandalone()
     const isPWADesktop = isStandalone && !isMobile
+
+    const fetchNotifications = useCallback(async () => {
+        if (!user) return
+        try {
+            const socialPromise = Promise.all([
+                getCommunityNotifications({ unread: true, page_size: 8 }),
+                getCommunityNotificationsUnreadCount(),
+            ])
+
+            if (user.role === 'clinic') {
+                const [socialData, socialUnread] = await socialPromise
+                const socialRows = socialData.results ?? socialData
+                const normalized = (Array.isArray(socialRows) ? socialRows : []).map((item) => ({
+                    id: item.id,
+                    notification_key: `community-${item.id}`,
+                    source: 'community',
+                    status: item.notification_type,
+                    message: item.message,
+                    meta: item.extra_text || item.actor?.display_name || 'Actividad de la comunidad',
+                    requested_date: item.created_at,
+                    target_url: item.target_url || '/comunidad',
+                    is_read: item.is_read,
+                }))
+                setNotifications(normalized)
+                setNotificationCount(socialUnread.unread || 0)
+                return
+            }
+
+            const [[socialData, socialUnread], appointmentData, birthdayData] = await Promise.all([
+                socialPromise,
+                getAppointments(),
+                getBirthdayCelebrations(true),
+            ])
+            const socialRows = socialData.results ?? socialData
+            const appts = appointmentData.results ?? appointmentData
+            const birthdays = birthdayData.results ?? birthdayData
+
+            const socialNotifications = (Array.isArray(socialRows) ? socialRows : []).map((item) => ({
+                id: item.id,
+                notification_key: `community-${item.id}`,
+                source: 'community',
+                status: item.notification_type,
+                message: item.message,
+                meta: item.extra_text || item.actor?.display_name || 'Actividad de la comunidad',
+                requested_date: item.created_at,
+                target_url: item.target_url || '/comunidad',
+                is_read: item.is_read,
+            }))
+            const appointmentNotifications = (Array.isArray(appts) ? appts : [])
+                .filter((item) => item.seen_by_owner === false)
+                .map((item) => ({
+                    ...item,
+                    source: 'appointment',
+                    notification_key: `appointment-${item.id}`,
+                    message: `${item.reason || 'Turno'} · ${item.clinic_name}`,
+                    meta: `🐾 ${item.pet_name}`,
+                    target_url: '/appointments',
+                }))
+            const birthdayNotifications = (Array.isArray(birthdays) ? birthdays : []).map((item) => ({
+                id: item.id,
+                source: 'birthday',
+                notification_key: `birthday-${item.id}`,
+                status: 'birthday',
+                message: `${item.pet_name} cumple ${item.age} año${item.age === 1 ? '' : 's'}`,
+                meta: item.badge?.name || 'Insignia VetPaw',
+                requested_date: item.birthday_date,
+                target_url: '/notifications',
+            }))
+
+            const combined = [...socialNotifications, ...birthdayNotifications, ...appointmentNotifications]
+                .sort((a, b) => new Date(b.requested_date || 0) - new Date(a.requested_date || 0))
+                .slice(0, 10)
+            setNotifications(combined)
+            setNotificationCount(
+                (socialUnread.unread || 0) + birthdayNotifications.length + appointmentNotifications.length
+            )
+        } catch (e) {
+            console.error(e)
+        }
+    }, [user])
+
+    const fetchUnreadMessages = useCallback(async () => {
+        try {
+            const data = await getUnreadCount()
+            setUnreadMessages(data.unread || 0)
+        } catch (e) { console.error(e) }
+    }, [])
 
     useEffect(() => {
         const onResize = () => setIsMobile(window.innerWidth < 768)
@@ -50,26 +146,33 @@ export default function Navbar() {
     }, [location.pathname])
 
     useEffect(() => {
-        if (user?.role === 'owner') {
+        if (!user) {
+            setNotifications([])
+            setNotificationCount(0)
+            setUnreadMessages(0)
+            return undefined
+        }
+
+        fetchNotifications()
+        fetchUnreadMessages()
+        const interval = setInterval(() => {
             fetchNotifications()
             fetchUnreadMessages()
-            const interval = setInterval(fetchUnreadMessages, 30000)
-            return () => clearInterval(interval)
-        }
-        if (user?.role === 'clinic') {
-            fetchUnreadMessages()
-            const interval = setInterval(fetchUnreadMessages, 30000)
-            return () => clearInterval(interval)
-        }
-    }, [user])
+        }, 30000)
+        return () => clearInterval(interval)
+    }, [user, fetchNotifications, fetchUnreadMessages])
 
     useEffect(() => {
-        const refreshBirthdays = () => {
-            if (user?.role === 'owner') fetchNotifications()
+        const refreshNotifications = () => {
+            if (user) fetchNotifications()
         }
-        window.addEventListener('vetpaw:birthday-updated', refreshBirthdays)
-        return () => window.removeEventListener('vetpaw:birthday-updated', refreshBirthdays)
-    }, [user?.role])
+        window.addEventListener('vetpaw:birthday-updated', refreshNotifications)
+        window.addEventListener('vetpaw:notifications-updated', refreshNotifications)
+        return () => {
+            window.removeEventListener('vetpaw:birthday-updated', refreshNotifications)
+            window.removeEventListener('vetpaw:notifications-updated', refreshNotifications)
+        }
+    }, [user, fetchNotifications])
 
     useEffect(() => {
         const handler = (e) => {
@@ -99,56 +202,53 @@ export default function Navbar() {
         }
     }, [isPWADesktop, sidebarCollapsed])
 
-    const fetchNotifications = async () => {
-        try {
-            const [appointmentData, birthdayData] = await Promise.all([
-                getAppointments(),
-                getBirthdayCelebrations(true),
-            ])
-            const appts = appointmentData.results ?? appointmentData
-            const birthdays = birthdayData.results ?? birthdayData
-            const appointmentNotifications = (Array.isArray(appts) ? appts : [])
-                .filter(a => a.seen_by_owner === false)
-                .map(a => ({ ...a, notification_type: 'appointment', notification_key: `appointment-${a.id}` }))
-            const birthdayNotifications = (Array.isArray(birthdays) ? birthdays : [])
-                .map(b => ({
-                    id: b.id,
-                    notification_type: 'birthday',
-                    notification_key: `birthday-${b.id}`,
-                    status: 'birthday',
-                    reason: `${b.pet_name} cumple ${b.age} año${b.age === 1 ? '' : 's'}`,
-                    pet_name: b.pet_name,
-                    clinic_name: b.badge?.name || 'Insignia VetPaw',
-                    requested_date: b.birthday_date,
-                }))
-            setNotifications([...birthdayNotifications, ...appointmentNotifications])
-        } catch (e) { console.error(e) }
-    }
 
-    const fetchUnreadMessages = async () => {
-        try {
-            const data = await getUnreadCount()
-            setUnreadMessages(data.unread || 0)
-        } catch (e) { console.error(e) }
-    }
 
     const handleOpenNotif = async () => {
-        setShowNotif(!showNotif)
-        if (!showNotif && notifications.length > 0) {
+        const opening = !showNotif
+        setShowNotif(opening)
+        if (opening && user?.role === 'owner' && notifications.some((item) => item.source === 'appointment')) {
             try {
                 await markNotificationsSeen()
-                setNotifications((items) => items.filter((item) => item.notification_type === 'birthday'))
-            } catch (e) { console.error(e) }
+                await fetchNotifications()
+            } catch (e) {
+                console.error(e)
+            }
         }
     }
 
     const handleLogout = () => { logout(); navigate('/'); setMenuOpen(false) }
 
-    const statusLabel = (s) => {
-        if (s === 'birthday') return '🎂 Cumpleaños'
-        if (s === 'confirmed') return '✅ Confirmado'
-        if (s === 'cancelled') return '❌ Cancelado'
-        return s
+    const statusLabel = (status) => {
+        if (status === 'reaction') return '🐾 Nueva patita'
+        if (status === 'comment') return '💬 Nuevo comentario'
+        if (status === 'follow') return '👥 Nuevo seguidor'
+        if (status === 'birthday') return '🎂 Cumpleaños'
+        if (status === 'confirmed') return '✅ Turno confirmado'
+        if (status === 'cancelled') return '❌ Turno cancelado'
+        return '🔔 Novedad VetPaw'
+    }
+
+    const handleNotificationClick = async (item) => {
+        try {
+            if (item.source === 'community' && !item.is_read) {
+                await markCommunityNotificationRead(item.id)
+            }
+        } catch (e) {
+            console.error(e)
+        } finally {
+            setShowNotif(false)
+            navigate(item.target_url || '/notifications')
+            window.dispatchEvent(new CustomEvent('vetpaw:notifications-updated'))
+            fetchNotifications()
+        }
+    }
+
+    const notificationDate = (value) => {
+        if (!value) return ''
+        const date = new Date(value)
+        if (Number.isNaN(date.getTime())) return ''
+        return date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })
     }
 
     const isActive = (path) => {
@@ -398,8 +498,8 @@ export default function Navbar() {
                             )
                         })}
 
-                        {/* Notificaciones (solo owner) — en la app abre la pantalla completa */}
-                        {user?.role === 'owner' && (() => {
+                        {/* Notificaciones sociales y de actividad */}
+                        {user && (() => {
                             const active = isActive('/notifications')
                             return (
                                 <Link
@@ -433,7 +533,7 @@ export default function Navbar() {
                                 >
                                     <span style={{ flexShrink: 0 }}>{renderNavIcon('notifications', active, sidebarCollapsed)}</span>
                                     {!sidebarCollapsed && <span style={{ flex: 1, textAlign: 'left' }}>Notificaciones</span>}
-                                    {notifications.length > 0 && (
+                                    {notificationCount > 0 && (
                                         <span style={{
                                             position: sidebarCollapsed ? 'absolute' : 'static',
                                             top: sidebarCollapsed ? 8 : 'auto',
@@ -447,7 +547,7 @@ export default function Navbar() {
                                             padding: sidebarCollapsed ? 0 : '2px 7px',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         }}>
-                                            {notifications.length}
+                                            {notificationCount}
                                         </span>
                                     )}
                                 </Link>
@@ -558,6 +658,14 @@ export default function Navbar() {
                                 </Link>
                                 <Link to="/profile" style={browserLinkStyle('/profile', G1)} {...browserLinkEvents('/profile', G1)}>Mi perfil</Link>
                                 <Link to="/configuracion" style={browserLinkStyle('/configuracion', O1)} {...browserLinkEvents('/configuracion', O1)}>Configuración</Link>
+                                <Link to="/notifications" style={{ ...browserLinkStyle('/notifications', G1), display: 'inline-flex', alignItems: 'center', gap: 5 }} {...browserLinkEvents('/notifications', G1)}>
+                                    Notificaciones
+                                    {notificationCount > 0 && (
+                                        <span style={{ background: O1, color: '#07131d', fontSize: 10, fontWeight: 900, minWidth: 17, height: 17, padding: '0 5px', borderRadius: 9, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {notificationCount}
+                                        </span>
+                                    )}
+                                </Link>
                                 <InstallPWA />
                                 <span style={{ color: 'rgba(255,255,255,0.18)', margin: '0 3px' }}>|</span>
                                 <span style={{ fontFamily: BROWSER_FONT, color: G1, fontWeight: 900, fontSize: 14, padding: '7px 6px' }}>{user.first_name || user.username}</span>
@@ -597,9 +705,9 @@ export default function Navbar() {
                                         {...browserLinkEvents('/notifications', O1)}
                                     >
                                         Notificaciones
-                                        {notifications.length > 0 && (
+                                        {notificationCount > 0 && (
                                             <span style={{ background: G1, color: '#07131d', fontSize: 10, fontWeight: 900, minWidth: 17, height: 17, padding: '0 5px', borderRadius: 9, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                {notifications.length}
+                                                {notificationCount}
                                             </span>
                                         )}
                                     </button>
@@ -613,11 +721,12 @@ export default function Navbar() {
                                             ) : (
                                                 <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                                                     {notifications.map(n => (
-                                                        <div key={n.notification_key || n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                                                            <p style={{ color: '#fff', fontSize: 15, fontWeight: 700, fontFamily: BROWSER_FONT }}>{statusLabel(n.status)} — {n.reason || 'Turno'}</p>
-                                                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>🐾 {n.pet_name} · {n.notification_type === 'birthday' ? '🎖️' : '🏥'} {n.clinic_name}</p>
-                                                            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, marginTop: 2 }}>{new Date(n.requested_date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-                                                        </div>
+                                                        <button key={n.notification_key || n.id} onClick={() => handleNotificationClick(n)} style={{ width: '100%', padding: '12px 18px', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
+                                                            <p style={{ color: '#fff', fontSize: 14, fontWeight: 800, fontFamily: BROWSER_FONT }}>{statusLabel(n.status)}</p>
+                                                            <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: 12, marginTop: 3, lineHeight: 1.4 }}>{n.message}</p>
+                                                            {n.meta && <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 11, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.meta}</p>}
+                                                            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, marginTop: 3 }}>{notificationDate(n.requested_date)}</p>
+                                                        </button>
                                                     ))}
                                                 </div>
                                             )}
@@ -651,12 +760,12 @@ export default function Navbar() {
                                 )}
                             </Link>
                         )}
-                        {user?.role === 'owner' && (
+                        {user && (
                             <button onClick={handleOpenNotif} style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, padding: '4px 6px' }}>
                                 {renderNavIcon('notifications', showNotif || isActive('/notifications'), true)}
-                                {notifications.length > 0 && (
+                                {notificationCount > 0 && (
                                     <span style={{ position: 'absolute', top: 0, right: 0, background: O1, color: '#fff', fontSize: 9, fontWeight: 800, width: 14, height: 14, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        {notifications.length}
+                                        {notificationCount}
                                     </span>
                                 )}
                             </button>
@@ -740,7 +849,7 @@ export default function Navbar() {
                             )}
                         </div>
                     </div>
-                    {user?.role === 'owner' && showNotif && (
+                    {user && showNotif && (
                         <div ref={notifRef} style={{ position: 'fixed', top: 72, right: 16, width: 'calc(100vw - 32px)', maxWidth: 340, background: '#0f1923', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, boxShadow: '0 16px 48px rgba(0,0,0,0.5)', overflow: 'hidden', zIndex: 300 }}>
                             <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                                 <p style={{ color: '#fff', fontWeight: 800, fontSize: 14, fontFamily: FONT }}>Notificaciones</p>
@@ -750,10 +859,11 @@ export default function Navbar() {
                             ) : (
                                 <div style={{ maxHeight: 260, overflowY: 'auto' }}>
                                     {notifications.map(n => (
-                                        <div key={n.notification_key || n.id} style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                                            <p style={{ color: '#fff', fontSize: 14, fontWeight: 700, fontFamily: FONT }}>{statusLabel(n.status)} — {n.reason || 'Turno'}</p>
-                                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>🐾 {n.pet_name} · {n.notification_type === 'birthday' ? '🎖️' : '🏥'} {n.clinic_name}</p>
-                                        </div>
+                                        <button key={n.notification_key || n.id} onClick={() => handleNotificationClick(n)} style={{ width: '100%', padding: '12px 18px', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
+                                            <p style={{ color: '#fff', fontSize: 14, fontWeight: 800, fontFamily: FONT }}>{statusLabel(n.status)}</p>
+                                            <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: 12, marginTop: 3, lineHeight: 1.4 }}>{n.message}</p>
+                                            {n.meta && <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 11, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.meta}</p>}
+                                        </button>
                                     ))}
                                 </div>
                             )}

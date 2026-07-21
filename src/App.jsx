@@ -80,7 +80,7 @@ function App() {
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/configuracion" element={<ProtectedRoute><Configuracion /></ProtectedRoute>} />
-            <Route path="/notifications" element={<ProtectedRoute role="owner"><Notifications /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/tips" element={<Tips />} />
             <Route path="/clinic/estadisticas" element={<ProtectedRoute role="clinic"><Estadisticas /></ProtectedRoute>} />
             <Route path="/admin-panel" element={<ProtectedRoute permission="admin"><AdminPanel /></ProtectedRoute>} />
