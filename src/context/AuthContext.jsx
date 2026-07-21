@@ -12,7 +12,11 @@ export function AuthProvider({ children }) {
         if (token) {
             api.get('/users/profile/')
                 .then(res => setUser(res.data))
-                .catch(() => localStorage.clear())
+                .catch(() => {
+                    localStorage.removeItem('access_token')
+                    localStorage.removeItem('refresh_token')
+                    setUser(null)
+                })
                 .finally(() => setLoading(false))
         } else {
             setLoading(false)

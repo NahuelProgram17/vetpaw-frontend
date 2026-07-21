@@ -1,48 +1,83 @@
 import axios from "axios";
 
+const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+const API_BASE_URL = `${API_ORIGIN}/api`;
+
 const api = axios.create({
-baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : "http://127.0.0.1:8000/api",
-headers: { "Content-Type": "application/json" },
+    baseURL: API_BASE_URL,
+    headers: { "Content-Type": "application/json" },
 });
 
-// Attach JWT token automatically
+const clearAuthTokens = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+};
+
+let refreshRequest = null;
+
+// Adjunta el JWT vigente en cada solicitud.
 api.interceptors.request.use((config) => {
-const token = localStorage.getItem("access_token");
-if (token) config.headers.Authorization = `Bearer ${token}`;
-return config;
+    const token = localStorage.getItem("access_token");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
 });
 
-// Auto refresh token on 401
+// Renueva el access token automáticamente cuando vence.
+// Se usa una única solicitud de refresh para evitar carreras si varias peticiones
+// reciben 401 al mismo tiempo al volver a abrir la app.
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
-        const original = error.config;
-        // Las lecturas públicas pueden seguir funcionando aunque no haya sesión.
-        const publicGetRoutes = ['/lost-pets/', '/community/posts/', '/community/discover/', '/community/pets/']
-        const isPublicGet = original.method?.toLowerCase() === 'get'
-            && publicGetRoutes.some(route => original.url?.includes(route))
-        if (isPublicGet) return Promise.reject(error)
+        const original = error.config || {};
+        const isUnauthorized = error.response?.status === 401;
+        const isRefreshRequest = String(original.url || "").includes("/users/token/refresh/");
 
-        if (error.response?.status === 401 && !original._retry) {
-            original._retry = true;
-            const refresh = localStorage.getItem("refresh_token");
-            if (refresh) {
-                try {
-                    const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/token/refresh/`, { refresh });
-                    const newAccess = res.data.access;
-                    localStorage.setItem("access_token", newAccess);
-                    original.headers.Authorization = `Bearer ${newAccess}`;
-                    return api(original);
-                } catch (e) {
-                    localStorage.clear();
-                    window.location.href = "/login";
-                }
-            } else {
-                localStorage.clear();
-                window.location.href = "/login";
-            }
+        if (!isUnauthorized || original._retry || isRefreshRequest) {
+            return Promise.reject(error);
         }
-        return Promise.reject(error);
+
+        const access = localStorage.getItem("access_token");
+        const refresh = localStorage.getItem("refresh_token");
+
+        // Un visitante sin sesión puede seguir usando las rutas públicas.
+        if (!access && !refresh) return Promise.reject(error);
+
+        original._retry = true;
+
+        if (!refresh) {
+            clearAuthTokens();
+            if (window.location.pathname !== "/login") {
+                window.location.replace("/login?session=expired");
+            }
+            return Promise.reject(error);
+        }
+
+        try {
+            if (!refreshRequest) {
+                refreshRequest = axios
+                    .post(`${API_BASE_URL}/users/token/refresh/`, { refresh })
+                    .then(({ data }) => {
+                        localStorage.setItem("access_token", data.access);
+                        return data.access;
+                    })
+                    .finally(() => {
+                        refreshRequest = null;
+                    });
+            }
+
+            const newAccess = await refreshRequest;
+            original.headers = {
+                ...(original.headers || {}),
+                Authorization: `Bearer ${newAccess}`,
+            };
+            return api(original);
+        } catch (refreshError) {
+            clearAuthTokens();
+            if (window.location.pathname !== "/login") {
+                window.location.replace("/login?session=expired");
+            }
+            return Promise.reject(refreshError);
+        }
     }
 );
 
