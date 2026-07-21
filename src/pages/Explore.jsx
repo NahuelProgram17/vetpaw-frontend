@@ -199,7 +199,7 @@ export default function Explore() {
         <header className="explore-hero">
           <div className="explore-hero-copy">
             <span className="explore-kicker">🔎 VetPaw Explorar</span>
-            <h1>Encontrá nuevas historias, mascotas y veterinarias.</h1>
+            <h1><span className="explore-title-green">Encontrá nuevas historias,</span> <span className="explore-title-orange">mascotas y veterinarias.</span></h1>
             <p>Buscá por nombre, raza, especie, localidad o hashtag. La información médica y los domicilios privados nunca aparecen acá.</p>
           </div>
           <div className="explore-hero-stat">
