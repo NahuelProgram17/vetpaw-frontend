@@ -1,10 +1,27 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getPublicPetProfile, togglePetFollow, updatePublicPetProfile } from '../services/api'
 import PostCard from '../components/community/PostCard'
-import './Community.css'
+import ProfileShareButton from '../components/community/ProfileShareButton'
+import SocialConnectionsModal from '../components/community/SocialConnectionsModal'
 import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../utils/imageUpload'
+import './Community.css'
+import './SocialProfile.css'
+
+const ageLabel = (birthDate) => {
+  if (!birthDate) return ''
+  const birth = new Date(`${birthDate}T12:00:00`)
+  const today = new Date()
+  let years = today.getFullYear() - birth.getFullYear()
+  const monthDiff = today.getMonth() - birth.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) years -= 1
+  if (years > 0) return `${years} año${years === 1 ? '' : 's'}`
+  const months = Math.max(0, (today.getFullYear() - birth.getFullYear()) * 12 + today.getMonth() - birth.getMonth())
+  return `${months} mes${months === 1 ? '' : 'es'}`
+}
+
+const dateLabel = (value) => value ? new Date(`${value}T12:00:00`).toLocaleDateString('es-AR') : ''
 
 export default function PublicPetProfile() {
   const { id } = useParams()
@@ -20,27 +37,42 @@ export default function PublicPetProfile() {
   const [formError, setFormError] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [tab, setTab] = useState('posts')
+  const [connections, setConnections] = useState(null)
+  const [lightbox, setLightbox] = useState(null)
 
   const load = useCallback(async () => {
     setLoading(true)
+    setError('')
     try {
       const data = await getPublicPetProfile(id)
       setProfile(data)
       setBio(data.bio || '')
       setIsPublic(data.is_public)
-    } catch { setError('Este perfil no está disponible.') }
-    finally { setLoading(false) }
+    } catch {
+      setError('Este perfil no está disponible.')
+    } finally {
+      setLoading(false)
+    }
   }, [id])
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    load()
-  }, [load])
+
+  useEffect(() => { load() }, [load])
   useEffect(() => () => revokeObjectUrl(coverPreview), [coverPreview])
+  useEffect(() => {
+    if (!lightbox) return undefined
+    const onKey = (event) => { if (event.key === 'Escape') setLightbox(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [lightbox])
+
+  const identifier = profile?.slug || profile?.id || id
+  const profilePath = profile?.profile_url || `/mascotas/${identifier}`
+  const closeConnections = useCallback(() => setConnections(null), [])
 
   const follow = async () => {
     if (!user) { navigate('/login'); return }
-    const data = await togglePetFollow(id)
-    setProfile((p) => ({ ...p, following: data.following, followers_count: data.followers_count }))
+    const data = await togglePetFollow(identifier)
+    setProfile((current) => ({ ...current, following: data.following, followers_count: data.followers_count }))
   }
 
   const chooseCover = async (file) => {
@@ -55,11 +87,21 @@ export default function PublicPetProfile() {
     }
   }
 
+  const cancelEdit = () => {
+    setEditing(false)
+    setCover(null)
+    revokeObjectUrl(coverPreview)
+    setCoverPreview('')
+    setFormError('')
+    setBio(profile?.bio || '')
+    setIsPublic(profile?.is_public ?? true)
+  }
+
   const saveProfile = async () => {
     setSaving(true)
     setFormError('')
     try {
-      const data = await updatePublicPetProfile(id, { bio, is_public: isPublic, ...(cover ? { cover } : {}) })
+      const data = await updatePublicPetProfile(identifier, { bio, is_public: isPublic, ...(cover ? { cover } : {}) })
       setProfile(data)
       setEditing(false)
       setCover(null)
@@ -68,63 +110,85 @@ export default function PublicPetProfile() {
     } catch (saveError) {
       const data = saveError.response?.data
       setFormError(data?.cover?.[0] || data?.detail || 'No se pudo guardar el perfil social.')
-    } finally { setSaving(false) }
+    } finally {
+      setSaving(false)
+    }
   }
 
-  if (loading) return <div className="pet-public-page"><div className="empty-feed community-card pet-public-shell"><div className="icon">🐾</div><h3>Cargando perfil...</h3></div></div>
-  if (error || !profile) return <div className="pet-public-page"><div className="empty-feed community-card pet-public-shell"><div className="icon">🔒</div><h3>{error}</h3><button className="community-button-secondary" onClick={() => navigate('/comunidad')}>Volver a la comunidad</button></div></div>
+  const gallery = useMemo(() => profile?.gallery || [], [profile])
+
+  if (loading) return <main className="social-profile-page"><div className="social-profile-shell social-empty">🐾 Cargando perfil...</div></main>
+  if (error || !profile) return <main className="social-profile-page"><div className="social-profile-shell social-card social-empty"><h2>{error}</h2><button className="social-action secondary" onClick={() => navigate('/comunidad')}>Volver a la comunidad</button></div></main>
 
   const visibleCover = coverPreview || profile.cover_url
-  const coverStyle = visibleCover ? { backgroundImage: `url(${visibleCover})` } : {}
+
   return (
-    <main className="pet-public-page">
-      <div className="pet-public-shell">
-        <div className="pet-cover" style={coverStyle} />
-        <div className="pet-profile-head">
-          {profile.photo ? <img className="pet-profile-photo" src={profile.photo} alt={profile.name} /> : <div className="pet-profile-photo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>🐾</div>}
-          <div className="pet-profile-main">
-            <h1>{profile.name}</h1>
-            <p>{profile.species_display}{profile.breed ? ` · ${profile.breed}` : ''}{profile.locality ? ` · ${profile.locality}` : ''}</p>
-            <div className="pet-profile-stats">
-              <div className="pet-profile-stat"><strong>{profile.posts_count}</strong><span>Publicaciones</span></div>
-              <div className="pet-profile-stat"><strong>{profile.followers_count}</strong><span>Seguidores</span></div>
+    <main className="social-profile-page">
+      <div className="social-profile-shell">
+        <section className="social-profile-hero">
+          <div className="social-cover">{visibleCover ? <img src={visibleCover} alt={`Portada de ${profile.name}`} /> : <span className="social-cover-fallback">🐾</span>}</div>
+          <div className="social-profile-head">
+            <div className="social-avatar">{profile.photo ? <img src={profile.photo} alt={profile.name} /> : '🐾'}</div>
+            <div className="social-title">
+              <h1>{profile.name}</h1>
+              <p className="social-subtitle">{profile.species_display}{profile.breed ? ` · ${profile.breed}` : ''}{profile.locality ? ` · ${profile.locality}` : ''}</p>
+              <div className="social-badges"><span className="social-badge">🐾 Mascota VetPaw</span>{profile.birth_date && <span className="social-badge orange">🎂 {ageLabel(profile.birth_date)}</span>}</div>
+            </div>
+            <div className="social-actions">
+              {profile.is_owner ? <>
+                <button className="social-action" onClick={() => navigate(`/comunidad?mascota=${profile.id}`)}>＋ Publicar como {profile.name}</button>
+                <button className="social-action secondary" onClick={() => setEditing((value) => !value)}>✏️ Editar perfil</button>
+              </> : <button className={`social-action ${profile.following ? 'following' : ''}`} onClick={follow}>{profile.following ? '✓ Siguiendo' : '＋ Seguir'}</button>}
+              <ProfileShareButton title={`${profile.name} en VetPaw`} text={`Conocé a ${profile.name} en VetPaw`} path={profilePath} />
             </div>
           </div>
-          {profile.is_owner ? (
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <button className="community-button" onClick={() => navigate(`/comunidad?mascota=${profile.id}`)}>✚ Publicar como {profile.name}</button>
-              <button className="community-button-secondary" onClick={() => setEditing((v) => !v)}>✏️ Editar perfil social</button>
-            </div>
-          ) : <button className="community-button" onClick={follow}>{profile.following ? 'Siguiendo' : 'Seguir mascota'}</button>}
-        </div>
-
-        {editing && (
-          <div className="community-card" style={{ padding: 18, marginBottom: 18 }}>
-            <h3 style={{ marginTop: 0 }}>Editar perfil público</h3>
-            <p className="composer-sub">Esto no modifica ni muestra el historial médico, vacunas, alergias ni datos privados.</p>
-            <textarea className="community-textarea" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Contá cómo es, qué le gusta y alguna curiosidad..." maxLength={500} />
-            {formError && <div className="community-error">{formError}</div>}
-            <label className="file-button" style={{ marginTop: 10 }}>🖼️ Cambiar portada<input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => chooseCover(e.target.files?.[0])} /></label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, color: 'rgba(255,255,255,.72)', fontSize: 11 }}><input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} /> Perfil visible en la comunidad</label>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}><button className="community-button-secondary" onClick={() => { setEditing(false); setCover(null); revokeObjectUrl(coverPreview); setCoverPreview(''); setFormError('') }}>Cancelar</button><button className="community-button" disabled={saving} onClick={saveProfile}>{saving ? 'Guardando...' : 'Guardar cambios'}</button></div>
+          <div className="social-stats">
+            <div className="social-stat"><strong>{profile.posts_count || 0}</strong><span>Publicaciones</span></div>
+            <div className="social-stat"><button onClick={() => setConnections('followers')}><strong>{profile.followers_count || 0}</strong><span>Seguidores</span></button></div>
+            <div className="social-stat"><button onClick={() => setConnections('following')}><strong>{profile.following_count || 0}</strong><span>Siguiendo</span></button></div>
+            <div className="social-stat"><strong>{profile.paws_count || 0}</strong><span>Patitas recibidas</span></div>
           </div>
-        )}
+        </section>
 
-        <div className="pet-profile-body">
-          <aside className="pet-about community-card">
-            <h3>Sobre {profile.name}</h3>
-            <p>{profile.bio || 'Su familia todavía no escribió su presentación.'}</p>
-            <div className="pet-fact"><span>Especie</span><strong>{profile.species_display}</strong></div>
-            {profile.breed && <div className="pet-fact"><span>Raza</span><strong>{profile.breed}</strong></div>}
-            {profile.temperament_display && <div className="pet-fact"><span>Personalidad</span><strong>{profile.temperament_display}</strong></div>}
-            {(profile.locality || profile.province) && <div className="pet-fact"><span>Zona</span><strong>{[profile.locality, profile.province].filter(Boolean).join(', ')}</strong></div>}
-            <div className="pet-fact"><span>Familia</span><strong>{profile.owner_display_name}</strong></div>
-          </aside>
-          <section>
-            {profile.recent_posts?.length ? profile.recent_posts.map((post) => <PostCard key={post.id} initialPost={post} user={user} onDeleted={(postId) => setProfile((p) => ({ ...p, recent_posts: p.recent_posts.filter((x) => x.id !== postId), posts_count: Math.max(0, p.posts_count - 1) }))} />) : <div className="empty-feed community-card"><div className="icon">📷</div><h3>Sin publicaciones todavía</h3><p>Cuando {profile.name} comparta una aventura, aparecerá acá.</p></div>}
-          </section>
+        {editing && <section className="social-card social-edit-card">
+          <h2>Editar perfil público</h2>
+          <p>El historial médico, vacunas, alergias y demás información privada nunca se muestran acá.</p>
+          <textarea value={bio} onChange={(event) => setBio(event.target.value)} placeholder="Contá cómo es, qué le gusta y alguna curiosidad..." maxLength={500} />
+          <label className="file-button" style={{ marginTop: 12 }}>🖼️ Cambiar portada<input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(event) => chooseCover(event.target.files?.[0])} /></label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, color: 'rgba(255,255,255,.72)', fontSize: 11 }}><input type="checkbox" checked={isPublic} onChange={(event) => setIsPublic(event.target.checked)} /> Perfil visible en la comunidad</label>
+          {formError && <div className="social-edit-error">{formError}</div>}
+          <div className="social-edit-actions"><button className="social-action secondary" onClick={cancelEdit}>Cancelar</button><button className="social-action" disabled={saving} onClick={saveProfile}>{saving ? 'Guardando...' : 'Guardar cambios'}</button></div>
+        </section>}
+
+        <div className="social-profile-grid">
+          <section className="social-card"><h2>Sobre {profile.name}</h2><p>{profile.bio || 'Su familia todavía no escribió su presentación.'}</p></section>
+          <aside className="social-card"><h2>Información</h2><div className="social-details">
+            <Detail label="Especie" value={profile.species_display} />
+            <Detail label="Raza" value={profile.breed} />
+            <Detail label="Personalidad" value={profile.temperament_display} />
+            <Detail label="Fecha de nacimiento" value={dateLabel(profile.birth_date)} />
+            <Detail label="Edad" value={ageLabel(profile.birth_date)} />
+            <Detail label="Zona" value={[profile.locality, profile.province].filter(Boolean).join(', ')} />
+            <Detail label="Familia" value={profile.owner_display_name} />
+          </div></aside>
         </div>
+
+        <div className="social-tabs">
+          <button className={tab === 'posts' ? 'active' : ''} onClick={() => setTab('posts')}>📸 Publicaciones</button>
+          <button className={tab === 'gallery' ? 'active' : ''} onClick={() => setTab('gallery')}>🖼️ Galería</button>
+        </div>
+
+        {tab === 'posts' ? <section className="social-post-list">
+          {profile.recent_posts?.length ? profile.recent_posts.map((post) => <PostCard key={post.id} initialPost={post} user={user} onDeleted={(postId) => setProfile((current) => ({ ...current, recent_posts: current.recent_posts.filter((item) => item.id !== postId), posts_count: Math.max(0, current.posts_count - 1), gallery: current.gallery.filter((item) => item.post_id !== postId) }))} />) : <div className="social-card social-empty">📷 Cuando {profile.name} comparta una aventura, aparecerá acá.</div>}
+        </section> : <section className="social-card">
+          {gallery.length ? <div className="social-gallery">{gallery.map((item) => <button type="button" className="social-gallery-item" key={item.post_id} onClick={() => setLightbox(item)}><img src={item.image_url} alt={item.text || `Foto de ${profile.name}`} /><span>{item.text || 'Publicación de VetPaw'}</span></button>)}</div> : <div className="social-empty">Todavía no hay fotos en la galería.</div>}
+        </section>}
       </div>
+
+      <SocialConnectionsModal open={Boolean(connections)} onClose={closeConnections} profileType="pet" identifier={identifier} initialKind={connections || 'followers'} profileName={profile.name} />
+      {lightbox && <div className="social-lightbox" onClick={() => setLightbox(null)}><button onClick={() => setLightbox(null)}>✕</button><img src={lightbox.image_url} alt={lightbox.text || profile.name} onClick={(event) => event.stopPropagation()} /></div>}
     </main>
   )
 }
+
+function Detail({ label, value }) { return value ? <div className="social-detail"><span>{label}</span><b>{value}</b></div> : null }

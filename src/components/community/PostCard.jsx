@@ -7,7 +7,7 @@ import {
   getCommunityComments,
   toggleBlockedCommunityUser,
   toggleCommunityReaction,
-  togglePetFollow,
+  toggleProfileFollow,
   toggleSavedCommunityPost,
 } from '../../services/api'
 import ReportModal from './ReportModal'
@@ -142,11 +142,12 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
   }
 
   const follow = async () => {
-    if (!requireLogin() || actor.type !== 'pet') return
+    const followable = ['pet', 'clinic', 'business', 'shelter'].includes(actor.type)
+    if (!requireLogin() || !followable) return
     const old = post.following_actor
     setPost((p) => ({ ...p, following_actor: !old }))
     try {
-      const data = await togglePetFollow(actor.id)
+      const data = await toggleProfileFollow(actor.type, actor.identifier || actor.id)
       setPost((p) => ({ ...p, following_actor: data.following }))
       onChanged?.()
     } catch { setPost((p) => ({ ...p, following_actor: old })) }
@@ -214,8 +215,8 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
             <Link to={actor.profile_url || '#'}>{actor.name || 'VetPaw'}</Link>
             {actor.verified && <span title="Perfil verificado" style={{ color: '#5ecfff', fontSize: 12 }}>●</span>}
-            {actor.type === 'pet' && user && actor.owner_user_id !== user.id && (
-              <button className={`mini-follow ${post.following_actor ? 'following' : ''}`} onClick={follow}>{post.following_actor ? 'Siguiendo' : 'Seguir'}</button>
+            {['pet', 'clinic', 'business', 'shelter'].includes(actor.type) && user && actor.owner_user_id !== user.id && (
+              <button type="button" className={`mini-follow ${post.following_actor ? 'following' : ''}`} onClick={follow}>{post.following_actor ? 'Siguiendo' : 'Seguir'}</button>
             )}
           </div>
           <div className="post-meta">{actor.subtitle}{post.locality ? `${actor.subtitle ? ' · ' : ''}${post.locality}` : ''} · {relativeTime(post.created_at)}</div>

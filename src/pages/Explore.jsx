@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
   getCommunityExplore,
-  togglePetFollow,
+  toggleProfileFollow,
 } from '../services/api'
 import PostCard from '../components/community/PostCard'
 import VetPawLoader from '../components/VetPawLoader'
@@ -165,22 +165,23 @@ export default function Explore() {
     navigate(item.target_url)
   }
 
-  const toggleFollow = async (pet) => {
+  const toggleFollow = async (item, profileType, resultKey) => {
     if (!user) {
       navigate('/login')
       return
     }
-    setFollowingBusy(pet.id)
+    const busyKey = `${profileType}-${item.id}`
+    setFollowingBusy(busyKey)
     try {
-      const result = await togglePetFollow(pet.id)
+      const result = await toggleProfileFollow(profileType, item.slug || item.id)
       setData((current) => ({
         ...current,
         results: {
           ...current.results,
-          pets: current.results.pets.map((item) => (
-            item.id === pet.id
-              ? { ...item, following: result.following, followers_count: result.followers_count }
-              : item
+          [resultKey]: (current.results[resultKey] || []).map((row) => (
+            row.id === item.id
+              ? { ...row, following: result.following, followers_count: result.followers_count }
+              : row
           )),
         },
       }))
@@ -363,7 +364,7 @@ function ExploreResults({ data, section, user, followingBusy, onFollow, onSectio
       {(isAll || section === 'pets') && results.pets.length > 0 && (
         <ResultSection title="🐾 Mascotas para conocer" total={data.counts?.pets} action={isAll ? () => onSection('pets') : null}>
           <div className="explore-pet-grid">
-            {results.pets.map((pet) => <PetResultCard key={pet.id} pet={pet} user={user} busy={followingBusy === pet.id} onFollow={onFollow} />)}
+            {results.pets.map((pet) => <PetResultCard key={pet.id} pet={pet} user={user} busy={followingBusy === `pet-${pet.id}`} onFollow={onFollow} />)}
           </div>
         </ResultSection>
       )}
@@ -381,7 +382,7 @@ function ExploreResults({ data, section, user, followingBusy, onFollow, onSectio
       {(isAll || section === 'clinics') && results.clinics.length > 0 && (
         <ResultSection title="🏥 Veterinarias verificadas" total={data.counts?.clinics} action={isAll ? () => onSection('clinics') : null}>
           <div className="explore-clinic-grid">
-            {results.clinics.map((clinic) => <ClinicResultCard key={clinic.id} clinic={clinic} />)}
+            {results.clinics.map((clinic) => <ClinicResultCard key={clinic.id} clinic={clinic} user={user} busy={followingBusy === `clinic-${clinic.id}`} onFollow={onFollow} />)}
           </div>
         </ResultSection>
       )}
@@ -389,7 +390,7 @@ function ExploreResults({ data, section, user, followingBusy, onFollow, onSectio
       {(isAll || section === 'businesses') && results.businesses.length > 0 && (
         <ResultSection title="🛍️ Negocios para mascotas" total={data.counts?.businesses} action={isAll ? () => onSection('businesses') : null}>
           <div className="explore-clinic-grid">
-            {results.businesses.map((item) => <PartnerResultCard key={item.id} item={item} kind="business" />)}
+            {results.businesses.map((item) => <PartnerResultCard key={item.id} item={item} kind="business" user={user} busy={followingBusy === `business-${item.id}`} onFollow={onFollow} />)}
           </div>
         </ResultSection>
       )}
@@ -397,7 +398,7 @@ function ExploreResults({ data, section, user, followingBusy, onFollow, onSectio
       {(isAll || section === 'shelters') && results.shelters.length > 0 && (
         <ResultSection title="🏠 Refugios y rescatistas" total={data.counts?.shelters} action={isAll ? () => onSection('shelters') : null}>
           <div className="explore-clinic-grid">
-            {results.shelters.map((item) => <PartnerResultCard key={item.id} item={item} kind="shelter" />)}
+            {results.shelters.map((item) => <PartnerResultCard key={item.id} item={item} kind="shelter" user={user} busy={followingBusy === `shelter-${item.id}`} onFollow={onFollow} />)}
           </div>
         </ResultSection>
       )}
@@ -446,7 +447,7 @@ function PetResultCard({ pet, user, busy, onFollow }) {
         <div className="explore-card-stats"><span>👥 {pet.followers_count}</span><span>📸 {pet.posts_count}</span></div>
       </div>
       {(!user || user.id !== pet.owner_user_id) && (
-        <button type="button" disabled={busy} className={pet.following ? 'following' : ''} onClick={() => onFollow(pet)}>
+        <button type="button" disabled={busy} className={pet.following ? 'following' : ''} onClick={() => onFollow(pet, 'pet', 'pets')}>
           {busy ? '...' : pet.following ? 'Siguiendo' : 'Seguir'}
         </button>
       )}
@@ -454,35 +455,44 @@ function PetResultCard({ pet, user, busy, onFollow }) {
   )
 }
 
-function ClinicResultCard({ clinic }) {
+function ClinicResultCard({ clinic, user, busy, onFollow }) {
+  const showFollow = !user || user.id !== clinic.owner_user_id
   return (
-    <Link className="explore-clinic-card" to={clinic.profile_url}>
-      <div className="explore-clinic-logo">{clinic.logo ? <img src={clinic.logo} alt={clinic.name} loading="lazy" /> : '🏥'}</div>
-      <div>
-        <div className="explore-verified"><strong>{clinic.name}</strong><span title="Veterinaria verificada">●</span></div>
-        <p>📍 {[clinic.locality, clinic.province].filter(Boolean).join(', ')}</p>
-        <small>{clinic.is_24h ? '🕐 Atención 24 horas' : '🩺 Perfil veterinario'} · {plural(clinic.posts_count, 'publicación', 'publicaciones')}</small>
-        {clinic.services?.length > 0 && <div className="explore-services">{clinic.services.slice(0, 3).map((service) => <span key={service}>{service}</span>)}</div>}
-      </div>
-      <b>›</b>
-    </Link>
+    <article className="explore-clinic-card social-result-card">
+      <Link className="explore-clinic-main" to={clinic.profile_url}>
+        <div className="explore-clinic-logo">{clinic.logo ? <img src={clinic.logo} alt={clinic.name} loading="lazy" /> : '🏥'}</div>
+        <div>
+          <div className="explore-verified"><strong>{clinic.name}</strong><span title="Veterinaria verificada">●</span></div>
+          <p>📍 {[clinic.locality, clinic.province].filter(Boolean).join(', ')}</p>
+          <small>{clinic.is_24h ? '🕐 Atención 24 horas' : '🩺 Perfil veterinario'} · {plural(clinic.posts_count, 'publicación', 'publicaciones')} · 👥 {clinic.followers_count || 0}</small>
+          {clinic.services?.length > 0 && <div className="explore-services">{clinic.services.slice(0, 3).map((service) => <span key={service}>{service}</span>)}</div>}
+        </div>
+        <b>›</b>
+      </Link>
+      {showFollow && <button type="button" disabled={busy} className={`explore-result-follow ${clinic.following ? 'following' : ''}`} onClick={() => onFollow(clinic, 'clinic', 'clinics')}>{busy ? '...' : clinic.following ? 'Siguiendo' : 'Seguir'}</button>}
+    </article>
   )
 }
 
-function PartnerResultCard({ item, kind }) {
+function PartnerResultCard({ item, kind, user, busy, onFollow }) {
   const isBusiness = kind === 'business'
+  const resultKey = isBusiness ? 'businesses' : 'shelters'
+  const showFollow = !user || user.id !== item.owner_user_id
   return (
-    <Link className="explore-clinic-card" to={item.profile_url}>
-      <div className="explore-clinic-logo">{item.logo ? <img src={item.logo} alt={item.name} loading="lazy" /> : isBusiness ? '🛍️' : '🏠'}</div>
-      <div>
-        <div className="explore-verified"><strong>{item.name}</strong>{item.is_verified && <span title="Perfil verificado">●</span>}</div>
-        <p>{item.type_display} · 📍 {[item.locality, item.province].filter(Boolean).join(', ')}</p>
-        <small>{isBusiness ? (item.is_24h ? '🕐 Atención 24 horas' : item.home_service ? '🏠 Atención a domicilio' : '🛍️ Negocio VetPaw') : item.capacity_status_display} · {plural(item.posts_count, 'publicación', 'publicaciones')}</small>
-        {isBusiness && item.services?.length > 0 && <div className="explore-services">{item.services.slice(0, 3).map((service) => <span key={service}>{service}</span>)}</div>}
-        {!isBusiness && <div className="explore-services">{item.accepting_animals && <span>Recibe animales</span>}{item.needs_foster_homes && <span>Busca tránsito</span>}{item.needs_volunteers && <span>Busca voluntarios</span>}</div>}
-      </div>
-      <b>›</b>
-    </Link>
+    <article className="explore-clinic-card social-result-card">
+      <Link className="explore-clinic-main" to={item.profile_url}>
+        <div className="explore-clinic-logo">{item.logo ? <img src={item.logo} alt={item.name} loading="lazy" /> : isBusiness ? '🛍️' : '🏠'}</div>
+        <div>
+          <div className="explore-verified"><strong>{item.name}</strong>{item.is_verified && <span title="Perfil verificado">●</span>}</div>
+          <p>{item.type_display} · 📍 {[item.locality, item.province].filter(Boolean).join(', ')}</p>
+          <small>{isBusiness ? (item.is_24h ? '🕐 Atención 24 horas' : item.home_service ? '🏠 Atención a domicilio' : '🛍️ Negocio VetPaw') : item.capacity_status_display} · {plural(item.posts_count, 'publicación', 'publicaciones')} · 👥 {item.followers_count || 0}</small>
+          {isBusiness && item.services?.length > 0 && <div className="explore-services">{item.services.slice(0, 3).map((service) => <span key={service}>{service}</span>)}</div>}
+          {!isBusiness && <div className="explore-services">{item.accepting_animals && <span>Recibe animales</span>}{item.needs_foster_homes && <span>Busca tránsito</span>}{item.needs_volunteers && <span>Busca voluntarios</span>}</div>}
+        </div>
+        <b>›</b>
+      </Link>
+      {showFollow && <button type="button" disabled={busy} className={`explore-result-follow ${item.following ? 'following' : ''}`} onClick={() => onFollow(item, kind, resultKey)}>{busy ? '...' : item.following ? 'Siguiendo' : 'Seguir'}</button>}
+    </article>
   )
 }
 

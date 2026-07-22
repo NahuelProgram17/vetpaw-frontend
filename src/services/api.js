@@ -336,6 +336,24 @@ export const updatePublicPetProfile = (petId, data) => {
 export const togglePetFollow = (petId) =>
     api.post(`/community/pets/${petId}/follow/`).then((r) => r.data);
 
+export const toggleProfileFollow = (profileType, identifier) =>
+    api.post(`/community/profiles/${profileType}/${identifier}/follow/`).then((r) => r.data);
+
+export const getProfileConnections = (profileType, identifier, kind = 'followers', page = 1) =>
+    api.get(`/community/profiles/${profileType}/${identifier}/connections/`, {
+        params: { kind, page, page_size: 20 },
+    }).then((r) => r.data);
+
+export const updateClinicSocialProfile = (slug, data) => {
+    const formData = new FormData();
+    Object.entries(data || {}).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) formData.append(key, value);
+    });
+    return api.patch(`/clinics/perfil/${slug}/`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+};
+
 export const reportCommunityContent = (payload) =>
     api.post('/community/reports/', payload).then((r) => r.data);
 

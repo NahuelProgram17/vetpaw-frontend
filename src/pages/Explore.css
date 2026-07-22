@@ -178,3 +178,4 @@
   .explore-clinic-card { grid-template-columns: 62px 1fr auto; }
   .explore-clinic-logo { width: 62px; height: 62px; }
 }
+.explore-clinic-card.social-result-card{display:block;padding:0;overflow:hidden}.explore-clinic-main{display:grid;grid-template-columns:74px 1fr auto;gap:13px;align-items:center;min-height:105px;padding:14px;color:inherit;text-decoration:none}.explore-clinic-main>b{color:#7ed986}.explore-result-follow{display:block;width:calc(100% - 28px);margin:0 14px 14px;height:34px;border:0;border-radius:10px;background:linear-gradient(135deg,#4caf50,#73c95c);color:#07131f;font:900 10px inherit;cursor:pointer}.explore-result-follow.following{background:rgba(255,255,255,.07);color:rgba(255,255,255,.58)}.explore-result-follow:disabled{opacity:.65;cursor:wait}@media(max-width:700px){.explore-clinic-main{grid-template-columns:62px 1fr auto}}
