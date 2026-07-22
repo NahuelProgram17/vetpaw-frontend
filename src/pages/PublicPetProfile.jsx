@@ -72,7 +72,7 @@ export default function PublicPetProfile() {
   const follow = async () => {
     if (!user) { navigate('/login'); return }
     const data = await togglePetFollow(identifier)
-    setProfile((current) => ({ ...current, following: data.following, followers_count: data.followers_count }))
+    setProfile((current) => ({ ...current, following: data.following, follow_request_pending: Boolean(data.requested), followers_count: data.followers_count }))
   }
 
   const chooseCover = async (file) => {
@@ -132,23 +132,32 @@ export default function PublicPetProfile() {
             <div className="social-title">
               <h1>{profile.name}</h1>
               <p className="social-subtitle">{profile.species_display}{profile.breed ? ` · ${profile.breed}` : ''}{profile.locality ? ` · ${profile.locality}` : ''}</p>
-              <div className="social-badges"><span className="social-badge">🐾 Mascota VetPaw</span>{profile.birth_date && <span className="social-badge orange">🎂 {ageLabel(profile.birth_date)}</span>}</div>
+              <div className="social-badges"><span className="social-badge">🐾 Mascota VetPaw</span>{(profile.age || profile.birth_date) && <span className="social-badge orange">🎂 {profile.age !== null && profile.age !== undefined ? `${profile.age} año${profile.age === 1 ? '' : 's'}` : ageLabel(profile.birth_date)}</span>}</div>
             </div>
             <div className="social-actions">
               {profile.is_owner ? <>
                 <button className="social-action" onClick={() => navigate(`/comunidad?mascota=${profile.id}`)}>＋ Publicar como {profile.name}</button>
                 <button className="social-action secondary" onClick={() => setEditing((value) => !value)}>✏️ Editar perfil</button>
-              </> : <button className={`social-action ${profile.following ? 'following' : ''}`} onClick={follow}>{profile.following ? '✓ Siguiendo' : '＋ Seguir'}</button>}
+              </> : <button className={`social-action ${profile.following ? 'following' : ''}`} onClick={follow}>{profile.following ? '✓ Siguiendo' : profile.follow_request_pending ? '⏳ Solicitud enviada' : profile.is_public ? '＋ Seguir' : '🔒 Solicitar seguir'}</button>}
               <ProfileShareButton title={`${profile.name} en VetPaw`} text={`Conocé a ${profile.name} en VetPaw`} path={profilePath} />
             </div>
           </div>
           <div className="social-stats">
-            <div className="social-stat"><strong>{profile.posts_count || 0}</strong><span>Publicaciones</span></div>
-            <div className="social-stat"><button onClick={() => setConnections('followers')}><strong>{profile.followers_count || 0}</strong><span>Seguidores</span></button></div>
-            <div className="social-stat"><button onClick={() => setConnections('following')}><strong>{profile.following_count || 0}</strong><span>Siguiendo</span></button></div>
-            <div className="social-stat"><strong>{profile.paws_count || 0}</strong><span>Patitas recibidas</span></div>
+            <div className="social-stat"><strong>{profile.posts_count ?? '—'}</strong><span>Publicaciones</span></div>
+            <div className="social-stat">{profile.followers_count === null ? <><strong>—</strong><span>Seguidores privados</span></> : <button onClick={() => setConnections('followers')}><strong>{profile.followers_count || 0}</strong><span>Seguidores</span></button>}</div>
+            <div className="social-stat">{profile.following_count === null ? <><strong>—</strong><span>Seguidos privados</span></> : <button onClick={() => setConnections('following')}><strong>{profile.following_count || 0}</strong><span>Siguiendo</span></button>}</div>
+            <div className="social-stat"><strong>{profile.paws_count ?? '—'}</strong><span>Patitas recibidas</span></div>
           </div>
         </section>
+
+        {!profile.access_granted && !profile.is_owner && (
+          <section className="social-card private-profile-lock">
+            <div className="lock-icon">🔒</div>
+            <h2>Este perfil es privado</h2>
+            <p>Podés ver la presentación básica de {profile.name}. Para ver publicaciones, galería y actividad, enviá una solicitud y esperá que su familia la acepte.</p>
+            <button className={`social-action ${profile.follow_request_pending ? 'following' : ''}`} onClick={follow}>{profile.follow_request_pending ? 'Cancelar solicitud' : 'Solicitar seguir'}</button>
+          </section>
+        )}
 
         {editing && <section className="social-card social-edit-card">
           <h2>Editar perfil público</h2>
@@ -160,6 +169,7 @@ export default function PublicPetProfile() {
           <div className="social-edit-actions"><button className="social-action secondary" onClick={cancelEdit}>Cancelar</button><button className="social-action" disabled={saving} onClick={saveProfile}>{saving ? 'Guardando...' : 'Guardar cambios'}</button></div>
         </section>}
 
+        {(profile.access_granted || profile.is_owner) && <>
         <div className="social-profile-grid">
           <section className="social-card"><h2>Sobre {profile.name}</h2><p>{profile.bio || 'Su familia todavía no escribió su presentación.'}</p></section>
           <aside className="social-card"><h2>Información</h2><div className="social-details">
@@ -167,7 +177,7 @@ export default function PublicPetProfile() {
             <Detail label="Raza" value={profile.breed} />
             <Detail label="Personalidad" value={profile.temperament_display} />
             <Detail label="Fecha de nacimiento" value={dateLabel(profile.birth_date)} />
-            <Detail label="Edad" value={ageLabel(profile.birth_date)} />
+            <Detail label="Edad" value={profile.age !== null && profile.age !== undefined ? `${profile.age} año${profile.age === 1 ? '' : 's'}` : ageLabel(profile.birth_date)} />
             <Detail label="Zona" value={[profile.locality, profile.province].filter(Boolean).join(', ')} />
             <Detail label="Familia" value={profile.owner_display_name} />
           </div></aside>
@@ -183,6 +193,7 @@ export default function PublicPetProfile() {
         </section> : <section className="social-card">
           {gallery.length ? <div className="social-gallery">{gallery.map((item) => <button type="button" className="social-gallery-item" key={item.post_id} onClick={() => setLightbox(item)}><img src={item.image_url} alt={item.text || `Foto de ${profile.name}`} /><span>{item.text || 'Publicación de VetPaw'}</span></button>)}</div> : <div className="social-empty">Todavía no hay fotos en la galería.</div>}
         </section>}
+        </>}
       </div>
 
       <SocialConnectionsModal open={Boolean(connections)} onClose={closeConnections} profileType="pet" identifier={identifier} initialKind={connections || 'followers'} profileName={profile.name} />

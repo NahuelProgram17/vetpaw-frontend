@@ -286,20 +286,22 @@ export const getCommunityPosts = (params = {}) =>
 export const getCommunityPost = (id) =>
     api.get(`/community/posts/${id}/`).then((r) => r.data);
 
-export const createCommunityPost = ({ text, image, pet }) => {
+export const createCommunityPost = ({ text, image, pet, commentPermission }) => {
     const formData = new FormData();
     if (text) formData.append('text', text);
     if (image) formData.append('image', image);
     if (pet) formData.append('pet', pet);
+    if (commentPermission) formData.append('comment_permission', commentPermission);
     return api.post('/community/posts/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     }).then((r) => r.data);
 };
 
-export const updateCommunityPost = (id, { text, image } = {}) => {
+export const updateCommunityPost = (id, { text, image, commentPermission } = {}) => {
     const formData = new FormData();
     if (text !== undefined) formData.append('text', text);
     if (image !== undefined && image !== null) formData.append('image', image);
+    if (commentPermission !== undefined) formData.append('comment_permission', commentPermission);
     return api.patch(`/community/posts/${id}/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     }).then((r) => r.data);
@@ -334,6 +336,9 @@ export const deleteCommunityComment = (id) =>
 
 export const toggleCommunityCommentReaction = (id) =>
     api.post(`/community/comments/${id}/react/`).then((r) => r.data);
+
+export const hideCommunityComment = (id) =>
+    api.post(`/community/comments/${id}/hide/`).then((r) => r.data);
 
 export const getCommunityMentionSuggestions = (query) =>
     api.get('/community/mentions/', { params: { q: query } }).then((r) => r.data);
@@ -392,6 +397,51 @@ export const toggleBlockedCommunityUser = (userId) =>
 
 export const getBlockedCommunityUsers = () =>
     api.get('/community/blocks/').then((r) => r.data);
+
+
+
+// ── Privacidad y control de Comunidad ───────────────
+export const getCommunityPrivacy = () =>
+    api.get('/community/privacy/').then((r) => r.data);
+
+export const updateCommunityPrivacy = (payload) =>
+    api.patch('/community/privacy/settings/', payload).then((r) => r.data);
+
+export const updatePetCommunityVisibility = (petId, isPublic) =>
+    api.patch(`/community/privacy/pets/${petId}/`, { is_public: isPublic }).then((r) => r.data);
+
+export const getCommunityFollowRequests = (kind = 'received') =>
+    api.get('/community/follow-requests/', { params: { kind } }).then((r) => r.data);
+
+export const acceptCommunityFollowRequest = (id) =>
+    api.post(`/community/follow-requests/${id}/accept/`).then((r) => r.data);
+
+export const rejectCommunityFollowRequest = (id) =>
+    api.post(`/community/follow-requests/${id}/reject/`).then((r) => r.data);
+
+export const cancelCommunityFollowRequest = (id) =>
+    api.post(`/community/follow-requests/${id}/cancel/`).then((r) => r.data);
+
+export const getPetCommunityFollowers = (petId) =>
+    api.get('/community/privacy/followers/', { params: { pet_id: petId } }).then((r) => r.data);
+
+export const removePetCommunityFollower = (petId, followerId) =>
+    api.post('/community/privacy/remove-follower/', { pet_id: petId, follower_id: followerId }).then((r) => r.data);
+
+export const getMutedCommunityUsers = () =>
+    api.get('/community/mutes/').then((r) => r.data);
+
+export const toggleMutedCommunityUser = (userId) =>
+    api.post('/community/mutes/toggle/', { user_id: userId }).then((r) => r.data);
+
+export const getHiddenCommunityPosts = () =>
+    api.get('/community/hidden-posts/').then((r) => r.data);
+
+export const hideCommunityPost = (postId, reason = 'hidden') =>
+    api.post('/community/hidden-posts/hide/', { post_id: postId, reason }).then((r) => r.data);
+
+export const restoreHiddenCommunityPost = (id) =>
+    api.post(`/community/hidden-posts/${id}/restore/`).then((r) => r.data);
 
 export const getCommunityNotifications = (params = {}) =>
     api.get('/community/notifications/', { params }).then((r) => r.data);

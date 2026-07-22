@@ -40,6 +40,7 @@ const ClinicProfile = lazy(() => import('./pages/ClinicProfile'))
 const AdminPanel = lazy(() => import('./pages/AdminPanel'))
 const LostPets = lazy(() => import('./pages/LostPets'))
 const Configuracion = lazy(() => import('./pages/Configuracion'))
+const CommunityPrivacy = lazy(() => import('./pages/CommunityPrivacy'))
 const Notifications = lazy(() => import('./pages/Notifications'))
 const Community = lazy(() => import('./pages/Community'))
 const Explore = lazy(() => import('./pages/Explore'))
@@ -91,6 +92,7 @@ function App() {
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/configuracion" element={<ProtectedRoute><Configuracion /></ProtectedRoute>} />
+            <Route path="/configuracion/privacidad" element={<ProtectedRoute><CommunityPrivacy /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/tips" element={<Tips />} />
             <Route path="/clinic/estadisticas" element={<ProtectedRoute role="clinic"><Estadisticas /></ProtectedRoute>} />

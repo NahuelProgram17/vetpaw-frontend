@@ -116,6 +116,20 @@ export default function Configuracion() {
                             </button>
                         </section>
 
+                        {/* ─── Privacidad de Comunidad ─── */}
+                        <section style={cardSt}>
+                            <h2 style={sectionTitle}>
+                                <span style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(76,175,80,0.12)", border: `1px solid ${G2}40`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🛡️</span>
+                                Privacidad y seguridad
+                            </h2>
+                            <p style={{ fontSize: 13, color: MUTED2, lineHeight: 1.6, margin: 0, marginBottom: 14 }}>
+                                Administrá perfiles privados, solicitudes, comentarios, bloqueos, silencios y contenido oculto.
+                            </p>
+                            <button onClick={() => navigate("/configuracion/privacidad")} style={{ ...gradBtn, width: "100%" }}>
+                                🔒 Abrir privacidad de Comunidad
+                            </button>
+                        </section>
+
                         {/* ─── Seguridad ─── */}
                         <section style={cardSt}>
                             <h2 style={sectionTitle}>
@@ -199,7 +213,7 @@ export default function Configuracion() {
 
                 {/* ── Footer info ── */}
                 <div style={{ marginTop: 8, textAlign: "center", fontSize: 12, color: MUTED3 }}>
-                    Más opciones (notificaciones, privacidad, contacto de emergencia) van a estar disponibles próximamente.
+                    Tu privacidad de Comunidad se administra desde una pantalla centralizada y protegida.
                 </div>
             </div>
 

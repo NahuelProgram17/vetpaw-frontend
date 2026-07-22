@@ -107,6 +107,7 @@ export default function OrganizationProfile({ kind }) {
               {profile.can_edit ? <>
                 <button type="button" className="social-action" onClick={() => navigate('/comunidad')}>＋ Publicar</button>
                 <Link className="social-action secondary" to={isBusiness ? '/business/dashboard' : '/shelter/dashboard'}>✏️ Editar perfil</Link>
+                <Link className="social-action secondary" to="/configuracion/privacidad">🛡️ Privacidad</Link>
               </> : canFollow && <button type="button" disabled={followingBusy} className={`social-action ${profile.following ? 'following' : ''}`} onClick={follow}>{followingBusy ? 'Guardando...' : profile.following ? '✓ Siguiendo' : '＋ Seguir'}</button>}
               <ProfileShareButton title={`${profile.name} en VetPaw`} text={`Conocé ${isBusiness ? 'este negocio' : 'este refugio'} dentro de VetPaw`} path={profilePath} />
             </div>

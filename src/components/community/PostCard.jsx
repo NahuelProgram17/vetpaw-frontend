@@ -5,8 +5,11 @@ import {
   deleteCommunityComment,
   deleteCommunityPost,
   getCommunityComments,
+  hideCommunityComment,
+  hideCommunityPost,
   registerCommunityShare,
   toggleBlockedCommunityUser,
+  toggleMutedCommunityUser,
   toggleCommunityCommentReaction,
   toggleCommunityReaction,
   toggleProfileFollow,
@@ -87,6 +90,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
   const [highlightedCommentId, setHighlightedCommentId] = useState(null)
   const [editingPost, setEditingPost] = useState(false)
   const [editPostText, setEditPostText] = useState(initialPost.text || '')
+  const [editPostPermission, setEditPostPermission] = useState(initialPost.comment_permission || 'everyone')
   const [postSaving, setPostSaving] = useState(false)
   const [replyingTo, setReplyingTo] = useState(null)
   const [replyText, setReplyText] = useState('')
@@ -172,7 +176,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
     setPost((current) => ({ ...current, following_actor: !old }))
     try {
       const data = await toggleProfileFollow(actor.type, actor.identifier || actor.id)
-      setPost((current) => ({ ...current, following_actor: data.following }))
+      setPost((current) => ({ ...current, following_actor: data.following, follow_request_pending: Boolean(data.requested) }))
       onChanged?.()
     } catch { setPost((current) => ({ ...current, following_actor: old })) }
   }
@@ -269,6 +273,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
   const startPostEdit = () => {
     setMenuOpen(false)
     setEditPostText(post.text || '')
+    setEditPostPermission(post.comment_permission || 'everyone')
     setEditingPost(true)
   }
 
@@ -277,7 +282,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
     if (!editPostText.trim() && !post.image_url) return
     setPostSaving(true)
     try {
-      const updated = await updateCommunityPost(post.id, { text: editPostText.trim() })
+      const updated = await updateCommunityPost(post.id, { text: editPostText.trim(), commentPermission: editPostPermission })
       setPost(updated)
       setEditingPost(false)
     } finally { setPostSaving(false) }
@@ -295,6 +300,30 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
     if (!actor.owner_user_id || !window.confirm(`¿Bloquear a ${actor.name}? Ya no verás su contenido.`)) return
     await toggleBlockedCommunityUser(actor.owner_user_id)
     onDeleted?.(post.id, true, actor.owner_user_id)
+  }
+
+  const muteUser = async () => {
+    setMenuOpen(false)
+    if (!actor.owner_user_id) return
+    await toggleMutedCommunityUser(actor.owner_user_id)
+    onDeleted?.(post.id, true, actor.owner_user_id)
+  }
+
+  const hidePost = async (reason = 'hidden') => {
+    setMenuOpen(false)
+    await hideCommunityPost(post.id, reason)
+    onDeleted?.(post.id)
+  }
+
+  const hideComment = async (id) => {
+    if (!window.confirm('¿Ocultar este comentario de tu publicación?')) return
+    await hideCommunityComment(id)
+    const target = findComment(comments, id)
+    const removedCount = 1 + (target?.parent ? 0 : (target?.replies?.length || 0))
+    setComments((rows) => rows
+      .filter((item) => String(item.id) !== String(id))
+      .map((item) => ({ ...item, replies: (item.replies || []).filter((reply) => String(reply.id) !== String(id)) })))
+    setPost((current) => ({ ...current, comments_count: Math.max(0, current.comments_count - removedCount) }))
   }
 
   const share = async () => {
@@ -341,7 +370,8 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
                 <button type="button" className={item.reacted_by_me ? 'active' : ''} onClick={() => reactComment(item)}>🐾 {item.reactions_count || ''}</button>
                 {!isReply && <button type="button" onClick={() => startReply(item)}>Responder</button>}
                 {item.can_edit && <button type="button" onClick={() => startCommentEdit(item)}>Editar</button>}
-                {item.can_delete ? <button type="button" onClick={() => removeComment(item.id)}>Eliminar</button> : user ? <button type="button" onClick={() => setReportTarget({ comment: item.id })}>Reportar</button> : null}
+                {item.can_hide && !item.can_edit && <button type="button" className="moderate" onClick={() => hideComment(item.id)}>Ocultar</button>}
+                {item.can_delete && (item.can_edit || !item.can_hide) ? <button type="button" onClick={() => removeComment(item.id)}>Eliminar</button> : user && !item.can_hide ? <button type="button" onClick={() => setReportTarget({ comment: item.id })}>Reportar</button> : null}
               </div>
             </>
           )}
@@ -371,7 +401,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
             <Link to={actor.profile_url || '#'}>{actor.name || 'VetPaw'}</Link>
             {actor.verified && <span title="Perfil verificado" className="verified-dot">●</span>}
             {['pet', 'clinic', 'business', 'shelter'].includes(actor.type) && user && actor.owner_user_id !== user.id && (
-              <button type="button" className={`mini-follow ${post.following_actor ? 'following' : ''}`} onClick={follow}>{post.following_actor ? 'Siguiendo' : 'Seguir'}</button>
+              <button type="button" className={`mini-follow ${post.following_actor ? 'following' : ''}`} onClick={follow}>{post.following_actor ? 'Siguiendo' : post.follow_request_pending ? 'Solicitud enviada' : 'Seguir'}</button>
             )}
           </div>
           <div className="post-meta">{actor.subtitle}{post.locality ? `${actor.subtitle ? ' · ' : ''}${post.locality}` : ''} · {relativeTime(post.created_at)}{post.is_edited ? ' · Editado' : ''}</div>
@@ -382,6 +412,9 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
             <div className="post-menu-panel">
               <button onClick={() => { setMenuOpen(false); share() }}>↗ Compartir</button>
               {post.can_edit && <button onClick={startPostEdit}>✏️ Editar publicación</button>}
+              {user && !post.can_delete && <button onClick={() => hidePost('hidden')}>🙈 Ocultar publicación</button>}
+              {user && !post.can_delete && <button className="warning" onClick={() => hidePost('not_interested')}>✦ No me interesa</button>}
+              {user && !post.can_delete && actor.owner_user_id && <button onClick={muteUser}>🔇 Silenciar usuario</button>}
               {user && !post.can_delete && <button onClick={() => { setMenuOpen(false); setReportTarget({ post: post.id }) }}>⚑ Reportar publicación</button>}
               {user && !post.can_delete && actor.owner_user_id && <button onClick={blockUser}>⊘ Bloquear usuario</button>}
               {post.can_delete && <button className="danger" onClick={removePost}>🗑 Eliminar publicación</button>}
@@ -393,6 +426,11 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
       {editingPost ? (
         <form className="post-edit-panel" onSubmit={submitPostEdit}>
           <MentionTextarea multiline value={editPostText} onChange={setEditPostText} className="community-textarea" maxLength={3000} autoFocus />
+          <select className="post-privacy-select" value={editPostPermission} onChange={(event) => setEditPostPermission(event.target.value)}>
+            <option value="everyone">Todos pueden comentar</option>
+            <option value="followers">Solo seguidores</option>
+            <option value="none">Comentarios desactivados</option>
+          </select>
           <div className="community-modal-actions">
             <button type="button" className="community-button-secondary" onClick={() => setEditingPost(false)}>Cancelar</button>
             <button type="submit" className="community-button" disabled={postSaving || (!editPostText.trim() && !post.image_url)}>{postSaving ? 'Guardando...' : 'Guardar cambios'}</button>
@@ -424,7 +462,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
       </div>
       <div className="post-actions">
         <button className={`post-action ${post.reacted_by_me ? 'active' : ''}`} onClick={react}><span>🐾</span> {post.reacted_by_me ? 'Te gusta' : 'Patita'}</button>
-        <button className="post-action" onClick={openComments}><span>💬</span> Comentar</button>
+        <button className="post-action" onClick={openComments} disabled={!post.comments_enabled}><span>💬</span> {post.comments_enabled ? 'Comentar' : 'Comentarios cerrados'}</button>
         <button className="post-action" onClick={share}><span>↗</span> Compartir</button>
         <button className={`post-action ${post.saved_by_me ? 'active' : ''}`} onClick={save}><span>🔖</span> {post.saved_by_me ? 'Guardado' : 'Guardar'}</button>
       </div>
@@ -433,10 +471,12 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
         <div className="comments-area">
           {commentsLoading && <div className="composer-sub">Cargando comentarios...</div>}
           {comments.map((item) => renderComment(item))}
-          <form className="comment-form" onSubmit={addComment}>
-            <MentionTextarea value={comment} onChange={setComment} className="community-input" placeholder={user ? 'Escribí un comentario... Usá @ para mencionar' : 'Iniciá sesión para comentar'} disabled={!user || commentSaving} maxLength={1000} />
-            <button className="community-button" disabled={!user || commentSaving || !comment.trim()}>{commentSaving ? '...' : 'Enviar'}</button>
-          </form>
+          {post.comments_enabled ? (
+            <form className="comment-form" onSubmit={addComment}>
+              <MentionTextarea value={comment} onChange={setComment} className="community-input" placeholder={user ? 'Escribí un comentario... Usá @ para mencionar' : 'Iniciá sesión para comentar'} disabled={!user || commentSaving} maxLength={1000} />
+              <button className="community-button" disabled={!user || commentSaving || !comment.trim()}>{commentSaving ? '...' : 'Enviar'}</button>
+            </form>
+          ) : <div className="post-comments-disabled">🔒 El autor desactivó los comentarios en esta publicación.</div>}
         </div>
       )}
       {reportTarget && <ReportModal target={reportTarget} onClose={() => setReportTarget(null)} />}

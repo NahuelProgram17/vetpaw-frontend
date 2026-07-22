@@ -32,6 +32,7 @@ export default function ClinicProfile() {
   const [followingBusy, setFollowingBusy] = useState(false)
   const [editing, setEditing] = useState(false)
   const [description, setDescription] = useState('')
+  const [showPublicAddress, setShowPublicAddress] = useState(true)
   const [cover, setCover] = useState(null)
   const [coverPreview, setCoverPreview] = useState('')
   const [saving, setSaving] = useState(false)
@@ -44,6 +45,7 @@ export default function ClinicProfile() {
       const response = await api.get(`/clinics/perfil/${slug}/`)
       setClinic(response.data)
       setDescription(response.data.description || '')
+      setShowPublicAddress(response.data.show_public_address !== false)
     } catch {
       setError('No encontramos esta veterinaria o el perfil ya no está disponible.')
     } finally {
@@ -87,6 +89,7 @@ export default function ClinicProfile() {
   const cancelEdit = () => {
     setEditing(false)
     setDescription(clinic?.description || '')
+    setShowPublicAddress(clinic?.show_public_address !== false)
     setCover(null)
     revokeObjectUrl(coverPreview)
     setCoverPreview('')
@@ -97,9 +100,10 @@ export default function ClinicProfile() {
     setSaving(true)
     setFormError('')
     try {
-      const data = await updateClinicSocialProfile(clinic.slug, { description, ...(cover ? { cover } : {}) })
+      const data = await updateClinicSocialProfile(clinic.slug, { description, show_public_address: showPublicAddress, ...(cover ? { cover } : {}) })
       setClinic(data)
       setDescription(data.description || '')
+      setShowPublicAddress(data.show_public_address !== false)
       setEditing(false)
       setCover(null)
       revokeObjectUrl(coverPreview)
@@ -145,7 +149,7 @@ export default function ClinicProfile() {
                 <button type="button" className="social-action secondary" onClick={() => setEditing((value) => !value)}>✏️ Editar perfil</button>
               </> : canFollow && <button type="button" disabled={followingBusy} className={`social-action ${clinic.following ? 'following' : ''}`} onClick={follow}>{followingBusy ? 'Guardando...' : clinic.following ? '✓ Siguiendo' : '＋ Seguir'}</button>}
               <ProfileShareButton title={`${clinic.name} en VetPaw`} text={`Conocé esta veterinaria dentro de VetPaw`} path={profilePath} />
-              <button type="button" className="social-action" onClick={() => user ? navigate(`/appointments/new?clinic=${clinic.id}`) : navigate('/login')}>📅 Sacar turno</button>
+              {clinic.allow_appointment_requests !== false && <button type="button" className="social-action" onClick={() => user ? navigate(`/appointments/new?clinic=${clinic.id}`) : navigate('/login')}>📅 Sacar turno</button>}
             </div>
           </div>
           <div className="social-stats">
@@ -161,6 +165,8 @@ export default function ClinicProfile() {
           <p>Estos cambios modifican únicamente lo que ve la comunidad. Los pacientes y datos médicos permanecen privados.</p>
           <textarea value={description} onChange={(event) => setDescription(event.target.value.slice(0, 3000))} placeholder="Contá qué distingue a la veterinaria, su equipo y forma de atención..." />
           <label className="file-button" style={{ marginTop: 12 }}>🖼️ Cambiar portada<input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(event) => chooseCover(event.target.files?.[0])} /></label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, color: 'rgba(255,255,255,.72)', fontSize: 12 }}><input type="checkbox" checked={showPublicAddress} onChange={(event) => setShowPublicAddress(event.target.checked)} /> Mostrar la dirección exacta en el perfil público</label>
+          <button type="button" className="social-action secondary" style={{ marginTop: 10 }} onClick={() => navigate('/configuracion/privacidad')}>🛡️ Más opciones de privacidad</button>
           {formError && <div className="social-edit-error">{formError}</div>}
           <div className="social-edit-actions"><button type="button" className="social-action secondary" onClick={cancelEdit}>Cancelar</button><button type="button" className="social-action" disabled={saving} onClick={saveProfile}>{saving ? 'Guardando...' : 'Guardar cambios'}</button></div>
         </section>}
@@ -182,7 +188,7 @@ export default function ClinicProfile() {
             </div>
             <div className="social-contact-stack">
               {clinic.phone && <a className="social-action secondary" href={`tel:${clinic.phone}`}>📞 Llamar</a>}
-              <button type="button" className="social-action" onClick={() => user ? navigate(`/appointments/new?clinic=${clinic.id}`) : navigate('/login')}>📅 Solicitar turno</button>
+              {clinic.allow_appointment_requests !== false && <button type="button" className="social-action" onClick={() => user ? navigate(`/appointments/new?clinic=${clinic.id}`) : navigate('/login')}>📅 Solicitar turno</button>}
             </div>
           </aside>
         </div>

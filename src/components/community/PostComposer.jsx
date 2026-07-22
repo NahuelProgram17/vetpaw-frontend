@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { createCommunityPost, getPets } from '../../services/api'
+import { createCommunityPost, getCommunityPrivacy, getPets } from '../../services/api'
 import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../../utils/imageUpload'
 import ImageEditorModal from '../ImageEditorModal'
 import MentionTextarea from './MentionTextarea'
@@ -15,6 +15,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
   const [preparingImage, setPreparingImage] = useState(false)
   const [editorFile, setEditorFile] = useState(null)
   const [error, setError] = useState('')
+  const [commentPermission, setCommentPermission] = useState('everyone')
   const fileRef = useRef(null)
   const cameraRef = useRef(null)
 
@@ -28,6 +29,14 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
       }).catch(() => setPets([]))
     }
   }, [user, defaultPetId])
+
+
+  useEffect(() => {
+    if (!user) return
+    getCommunityPrivacy()
+      .then((data) => setCommentPermission(data?.settings?.default_comment_permission || 'everyone'))
+      .catch(() => setCommentPermission('everyone'))
+  }, [user])
 
   useEffect(() => () => revokeObjectUrl(preview), [preview])
 
@@ -72,7 +81,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
     setSaving(true)
     setError('')
     try {
-      const created = await createCommunityPost({ text: text.trim(), image, pet: user.role === 'owner' ? pet : null })
+      const created = await createCommunityPost({ text: text.trim(), image, pet: user.role === 'owner' ? pet : null, commentPermission })
       setText('')
       setImage(null)
       revokeObjectUrl(preview)
@@ -122,6 +131,17 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
           )
         ) : <div className="community-select" style={{ display: 'flex', alignItems: 'center' }}>{roleMeta[user.role]?.icon} {roleMeta[user.role]?.label}</div>}
         <MentionTextarea multiline className="community-textarea" value={text} onChange={setText} placeholder={user.role === 'owner' ? 'Una aventura, una foto, una anécdota... Usá #hashtags o @ para mencionar' : roleMeta[user.role]?.placeholder} maxLength={3000} />
+      </div>
+      <div className="composer-privacy-row">
+        <label>
+          <span>💬 Comentarios</span>
+          <select className="community-select" value={commentPermission} onChange={(event) => setCommentPermission(event.target.value)}>
+            <option value="everyone">Todos pueden comentar</option>
+            <option value="followers">Solo seguidores</option>
+            <option value="none">Comentarios desactivados</option>
+          </select>
+        </label>
+        <Link to="/configuracion/privacidad" className="composer-privacy-link">Administrar privacidad</Link>
       </div>
       <div className="hashtag-suggestions" aria-label="Hashtags sugeridos">
         <span>Hashtags:</span>
