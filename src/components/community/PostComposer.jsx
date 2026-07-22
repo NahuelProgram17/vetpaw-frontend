@@ -141,7 +141,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
             <option value="none">Comentarios desactivados</option>
           </select>
         </label>
-        <Link to="/configuracion/privacidad" className="composer-privacy-link">Administrar privacidad</Link>
+        <Link to="/configuracion/privacidad" className="composer-privacy-link">🔒 Administrar privacidad</Link>
       </div>
       <div className="hashtag-suggestions" aria-label="Hashtags sugeridos">
         <span>Hashtags:</span>

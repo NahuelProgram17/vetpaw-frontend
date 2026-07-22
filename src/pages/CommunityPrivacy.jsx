@@ -212,7 +212,7 @@ export default function CommunityPrivacy() {
       <div className="privacy-shell">
         <header className="privacy-header">
           <div><span className="privacy-kicker">Tu espacio, tus reglas</span><h1>Privacidad <em>y seguridad</em></h1><p>Elegí qué mostrar, quién puede seguirte y qué contenido querés ver.</p></div>
-          <Link to="/configuracion" className="privacy-back">← Configuración</Link>
+          <Link to="/comunidad" className="privacy-back">← Volver a la Comunidad</Link>
         </header>
 
         {message && <div className="privacy-message success">✓ {message}</div>}

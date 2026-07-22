@@ -630,8 +630,14 @@ export default function Pets() {
                                             : 'Sin vacunas registradas'}
                                     </div>
 
-                                    {/* 3 botones de acción */}
+                                    {/* Botones de acción */}
                                     <div className="pet-actions-row">
+                                        <button
+                                            className="pet-btn pet-btn-profile"
+                                            onClick={() => navigate(`/mascotas/${pet.id}`)}
+                                        >
+                                            🌎 Ver perfil público
+                                        </button>
                                         <button
                                             className="pet-btn pet-btn-ghost"
                                             onClick={() => navigate(`/history?pet=${pet.id}`)}
@@ -1464,7 +1470,7 @@ export default function Pets() {
                 /* Botones de acción */
                 .pet-actions-row {
                     display: grid;
-                    grid-template-columns: 1fr 1fr 1fr;
+                    grid-template-columns: repeat(4, minmax(0, 1fr));
                     gap: 9px;
                     margin-top: 2px;
                 }
@@ -1480,6 +1486,17 @@ export default function Pets() {
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
+                }
+                .pet-btn-profile {
+                    background: linear-gradient(135deg, rgba(76,175,80,0.22), rgba(255,152,0,0.18));
+                    border: 1.5px solid rgba(102,187,106,0.58);
+                    color: #fff;
+                    box-shadow: inset 0 0 0 1px rgba(255,152,0,0.08);
+                }
+                .pet-btn-profile:hover {
+                    transform: translateY(-1px);
+                    border-color: #FF9800;
+                    box-shadow: 0 7px 20px rgba(76,175,80,0.2);
                 }
                 .pet-btn-ghost {
                     background: transparent;
@@ -1778,6 +1795,10 @@ export default function Pets() {
                 /* ══════════════════════════════
                 RESPONSIVE — TABLET (≤900px)
                 ══════════════════════════════ */
+                @media (max-width: 1200px) {
+                    .pet-actions-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                }
+
                 @media (max-width: 900px) {
                     .pet-row { flex-direction: column; gap: 14px; }
                     .pet-photo-side { width: 100%; }
