@@ -15,6 +15,8 @@ const FILTERS = [
   ['birthday', '🎂 Cumpleaños'],
   ['lost', '🚨 Perdidos'],
   ['clinic', '🏥 Veterinarias'],
+  ['business', '🛍️ Negocios'],
+  ['shelter', '🏠 Refugios'],
   ['saved', '🔖 Guardados'],
 ]
 
@@ -29,7 +31,7 @@ export default function Community() {
   const targetCommentId = searchParams.get('comentario')
   const hashtag = (searchParams.get('hashtag') || '').replace(/^#/, '').trim()
   const [posts, setPosts] = useState([])
-  const [discover, setDiscover] = useState({ suggested_pets: [], clinics: [], lost_pets: [], birthdays: [] })
+  const [discover, setDiscover] = useState({ suggested_pets: [], clinics: [], businesses: [], shelters: [], lost_pets: [], birthdays: [] })
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(true)

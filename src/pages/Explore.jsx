@@ -14,6 +14,8 @@ const TABS = [
   ['pets', '🐾 Mascotas'],
   ['posts', '📸 Publicaciones'],
   ['clinics', '🏥 Veterinarias'],
+  ['businesses', '🛍️ Negocios'],
+  ['shelters', '🏠 Refugios'],
   ['hashtags', '#️⃣ Hashtags'],
   ['lost', '🚨 Perdidos'],
 ]
@@ -22,6 +24,8 @@ const EMPTY_RESULTS = {
   pets: [],
   posts: [],
   clinics: [],
+  businesses: [],
+  shelters: [],
   hashtags: [],
   lost_pets: [],
 }
@@ -29,6 +33,8 @@ const EMPTY_RESULTS = {
 const TYPE_LABELS = {
   pet: 'Mascota',
   clinic: 'Veterinaria',
+  business: 'Negocio',
+  shelter: 'Refugio',
   hashtag: 'Hashtag',
   post: 'Publicación',
 }
@@ -53,13 +59,18 @@ export default function Explore() {
   const [province, setProvince] = useState(searchParams.get('provincia') || '')
   const [sort, setSort] = useState(searchParams.get('orden') || 'popular')
   const [only24h, setOnly24h] = useState(searchParams.get('24h') === '1')
+  const [businessType, setBusinessType] = useState(searchParams.get('rubro') || '')
+  const [shelterType, setShelterType] = useState(searchParams.get('tipo_refugio') || '')
+  const [acceptingAnimals, setAcceptingAnimals] = useState(searchParams.get('recibe') === '1')
   const [data, setData] = useState({
-    counts: { pets: 0, posts: 0, clinics: 0, hashtags: 0, lost: 0 },
+    counts: { pets: 0, posts: 0, clinics: 0, businesses: 0, shelters: 0, hashtags: 0, lost: 0 },
     results: EMPTY_RESULTS,
     suggestions: [],
     trending_hashtags: [],
     popular_localities: [],
     species_options: [],
+    business_type_options: [],
+    shelter_type_options: [],
     pagination: null,
   })
   const [loading, setLoading] = useState(true)
@@ -82,9 +93,12 @@ export default function Explore() {
     province: province || undefined,
     sort,
     is_24h: only24h || undefined,
+    business_type: businessType || undefined,
+    shelter_type: shelterType || undefined,
+    accepting_animals: acceptingAnimals || undefined,
     page: requestedPage,
     page_size: 12,
-  }), [debouncedQuery, section, species, locality, province, sort, only24h])
+  }), [debouncedQuery, section, species, locality, province, sort, only24h, businessType, shelterType, acceptingAnimals])
 
   const syncUrl = useCallback(() => {
     const next = {}
@@ -95,8 +109,11 @@ export default function Explore() {
     if (province) next.provincia = province
     if (sort !== 'popular') next.orden = sort
     if (only24h) next['24h'] = '1'
+    if (businessType) next.rubro = businessType
+    if (shelterType) next.tipo_refugio = shelterType
+    if (acceptingAnimals) next.recibe = '1'
     setSearchParams(next, { replace: true })
-  }, [debouncedQuery, section, species, locality, province, sort, only24h, setSearchParams])
+  }, [debouncedQuery, section, species, locality, province, sort, only24h, businessType, shelterType, acceptingAnimals, setSearchParams])
 
   const load = useCallback(async (requestedPage = 1, append = false) => {
     append ? setMoreLoading(true) : setLoading(true)
@@ -137,6 +154,9 @@ export default function Explore() {
     setLocality('')
     setProvince('')
     setOnly24h(false)
+    setBusinessType('')
+    setShelterType('')
+    setAcceptingAnimals(false)
     setSort('popular')
   }
 
@@ -190,7 +210,7 @@ export default function Explore() {
     [data.counts],
   )
 
-  const filtersActive = Boolean(species || locality || province || only24h || sort !== 'popular')
+  const filtersActive = Boolean(species || locality || province || only24h || businessType || shelterType || acceptingAnimals || sort !== 'popular')
   const suggestionsVisible = searchFocused && debouncedQuery.length >= 2 && data.suggestions?.length > 0
 
   return (
@@ -199,7 +219,7 @@ export default function Explore() {
         <header className="explore-hero">
           <div className="explore-hero-copy">
             <span className="explore-kicker">🔎 VetPaw Explorar</span>
-            <h1><span className="explore-title-green">Encontrá nuevas historias,</span> <span className="explore-title-orange">mascotas y veterinarias.</span></h1>
+            <h1><span className="explore-title-green">Encontrá nuevas historias,</span> <span className="explore-title-orange">mascotas y perfiles.</span></h1>
             <p>Buscá por nombre, raza, especie, localidad o hashtag. La información médica y los domicilios privados nunca aparecen acá.</p>
           </div>
           <div className="explore-hero-stat">
@@ -217,7 +237,7 @@ export default function Explore() {
               onChange={(event) => setQuery(event.target.value.slice(0, 80))}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => window.setTimeout(() => setSearchFocused(false), 160)}
-              placeholder="Buscá mascotas, veterinarias, publicaciones o #hashtags"
+              placeholder="Buscá mascotas, veterinarias, negocios, refugios o #hashtags"
               aria-label="Buscar en VetPaw"
             />
             {query && <button type="button" onClick={() => { setQuery(''); inputRef.current?.focus() }}>✕</button>}
@@ -227,7 +247,7 @@ export default function Explore() {
             <div className="explore-suggestions">
               {data.suggestions.map((item) => (
                 <button type="button" key={`${item.kind}-${item.id}`} onMouseDown={() => openSuggestion(item)}>
-                  {item.image ? <img src={item.image} alt="" /> : <span className="explore-suggestion-icon">{item.kind === 'hashtag' ? '#️⃣' : item.kind === 'clinic' ? '🏥' : item.kind === 'post' ? '📸' : '🐾'}</span>}
+                  {item.image ? <img src={item.image} alt="" /> : <span className="explore-suggestion-icon">{item.kind === 'hashtag' ? '#️⃣' : item.kind === 'clinic' ? '🏥' : item.kind === 'business' ? '🛍️' : item.kind === 'shelter' ? '🏠' : item.kind === 'post' ? '📸' : '🐾'}</span>}
                   <span><strong>{item.title}</strong><small>{TYPE_LABELS[item.kind]} · {item.subtitle}</small></span>
                   <b>›</b>
                 </button>
@@ -255,9 +275,12 @@ export default function Explore() {
               <option value="popular">Más populares</option>
               <option value="recent">Más recientes</option>
             </select>
-            {(section === 'clinics' || section === 'all') && (
+            {(section === 'businesses' || section === 'all') && <select value={businessType} onChange={(event) => setBusinessType(event.target.value)}><option value="">Todos los rubros</option>{(data.business_type_options || []).map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select>}
+            {(section === 'shelters' || section === 'all') && <select value={shelterType} onChange={(event) => setShelterType(event.target.value)}><option value="">Todos los refugios</option>{(data.shelter_type_options || []).map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select>}
+            {(section === 'clinics' || section === 'businesses' || section === 'all') && (
               <label className="explore-check"><input type="checkbox" checked={only24h} onChange={(event) => setOnly24h(event.target.checked)} /> Atención 24 h</label>
             )}
+            {(section === 'shelters' || section === 'all') && <label className="explore-check"><input type="checkbox" checked={acceptingAnimals} onChange={(event) => setAcceptingAnimals(event.target.checked)} /> Recibe animales</label>}
             {filtersActive && <button type="button" className="explore-clear" onClick={clearFilters}>Limpiar filtros</button>}
           </div>
         </section>
@@ -286,7 +309,7 @@ export default function Explore() {
         {error && <div className="explore-error">{error}</div>}
 
         {loading ? (
-          <VetPawLoader message="Explorando VetPaw..." subText="Buscando mascotas, publicaciones y veterinarias" fullScreen={false} />
+          <VetPawLoader message="Explorando VetPaw..." subText="Buscando mascotas, publicaciones y perfiles" fullScreen={false} />
         ) : (
           <ExploreResults
             data={data}
@@ -319,9 +342,11 @@ function ExploreResults({ data, section, user, followingBusy, onFollow, onSectio
   const empty = section === 'pets' ? !results.pets.length
     : section === 'posts' ? !results.posts.length
       : section === 'clinics' ? !results.clinics.length
-        : section === 'hashtags' ? !results.hashtags.length
-          : section === 'lost' ? !results.lost_pets.length
-            : !results.pets.length && !results.posts.length && !results.clinics.length && !results.hashtags.length && !results.lost_pets.length
+        : section === 'businesses' ? !results.businesses.length
+          : section === 'shelters' ? !results.shelters.length
+            : section === 'hashtags' ? !results.hashtags.length
+              : section === 'lost' ? !results.lost_pets.length
+                : !results.pets.length && !results.posts.length && !results.clinics.length && !results.businesses.length && !results.shelters.length && !results.hashtags.length && !results.lost_pets.length
 
   if (empty) {
     return (
@@ -357,6 +382,22 @@ function ExploreResults({ data, section, user, followingBusy, onFollow, onSectio
         <ResultSection title="🏥 Veterinarias verificadas" total={data.counts?.clinics} action={isAll ? () => onSection('clinics') : null}>
           <div className="explore-clinic-grid">
             {results.clinics.map((clinic) => <ClinicResultCard key={clinic.id} clinic={clinic} />)}
+          </div>
+        </ResultSection>
+      )}
+
+      {(isAll || section === 'businesses') && results.businesses.length > 0 && (
+        <ResultSection title="🛍️ Negocios para mascotas" total={data.counts?.businesses} action={isAll ? () => onSection('businesses') : null}>
+          <div className="explore-clinic-grid">
+            {results.businesses.map((item) => <PartnerResultCard key={item.id} item={item} kind="business" />)}
+          </div>
+        </ResultSection>
+      )}
+
+      {(isAll || section === 'shelters') && results.shelters.length > 0 && (
+        <ResultSection title="🏠 Refugios y rescatistas" total={data.counts?.shelters} action={isAll ? () => onSection('shelters') : null}>
+          <div className="explore-clinic-grid">
+            {results.shelters.map((item) => <PartnerResultCard key={item.id} item={item} kind="shelter" />)}
           </div>
         </ResultSection>
       )}
@@ -422,6 +463,23 @@ function ClinicResultCard({ clinic }) {
         <p>📍 {[clinic.locality, clinic.province].filter(Boolean).join(', ')}</p>
         <small>{clinic.is_24h ? '🕐 Atención 24 horas' : '🩺 Perfil veterinario'} · {plural(clinic.posts_count, 'publicación', 'publicaciones')}</small>
         {clinic.services?.length > 0 && <div className="explore-services">{clinic.services.slice(0, 3).map((service) => <span key={service}>{service}</span>)}</div>}
+      </div>
+      <b>›</b>
+    </Link>
+  )
+}
+
+function PartnerResultCard({ item, kind }) {
+  const isBusiness = kind === 'business'
+  return (
+    <Link className="explore-clinic-card" to={item.profile_url}>
+      <div className="explore-clinic-logo">{item.logo ? <img src={item.logo} alt={item.name} loading="lazy" /> : isBusiness ? '🛍️' : '🏠'}</div>
+      <div>
+        <div className="explore-verified"><strong>{item.name}</strong>{item.is_verified && <span title="Perfil verificado">●</span>}</div>
+        <p>{item.type_display} · 📍 {[item.locality, item.province].filter(Boolean).join(', ')}</p>
+        <small>{isBusiness ? (item.is_24h ? '🕐 Atención 24 horas' : item.home_service ? '🏠 Atención a domicilio' : '🛍️ Negocio VetPaw') : item.capacity_status_display} · {plural(item.posts_count, 'publicación', 'publicaciones')}</small>
+        {isBusiness && item.services?.length > 0 && <div className="explore-services">{item.services.slice(0, 3).map((service) => <span key={service}>{service}</span>)}</div>}
+        {!isBusiness && <div className="explore-services">{item.accepting_animals && <span>Recibe animales</span>}{item.needs_foster_homes && <span>Busca tránsito</span>}{item.needs_volunteers && <span>Busca voluntarios</span>}</div>}
       </div>
       <b>›</b>
     </Link>

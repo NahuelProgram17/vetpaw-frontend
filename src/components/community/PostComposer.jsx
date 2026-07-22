@@ -95,13 +95,18 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
     })
   }
 
+  const roleMeta = {
+    clinic: { name: user.profile_name || 'Tu veterinaria', icon: '🏥', label: 'Perfil veterinario', placeholder: 'Compartí un consejo, una novedad o una campaña... Podés usar #hashtags' },
+    business: { name: user.profile_name || 'Tu negocio', icon: '🛍️', label: 'Perfil del negocio', placeholder: 'Compartí servicios, novedades, promociones o consejos... Podés usar #hashtags' },
+    shelter: { name: user.profile_name || 'Tu refugio', icon: '🏠', label: 'Perfil del refugio', placeholder: 'Compartí adopciones, rescates, campañas o pedidos de ayuda... Podés usar #hashtags' },
+  }
   const actorPhoto = user.role === 'owner' ? pets.find((p) => String(p.id) === pet)?.photo : user.avatar
-  const actorName = user.role === 'owner' ? pets.find((p) => String(p.id) === pet)?.name : 'Tu veterinaria'
+  const actorName = user.role === 'owner' ? pets.find((p) => String(p.id) === pet)?.name : roleMeta[user.role]?.name
 
   return (
     <div className="community-composer community-card">
       <div className="composer-header">
-        {actorPhoto ? <img className="composer-avatar" src={actorPhoto} alt="" /> : <div className="composer-avatar">{user.role === 'clinic' ? '🏥' : '🐾'}</div>}
+        {actorPhoto ? <img className="composer-avatar" src={actorPhoto} alt="" /> : <div className="composer-avatar">{user.role === 'owner' ? '🐾' : roleMeta[user.role]?.icon || '🐾'}</div>}
         <div><div className="composer-title">¿Qué querés compartir hoy?</div><div className="composer-sub">Publicás como {actorName || 'tu mascota'}.</div></div>
       </div>
       {error && <div className="community-error">{error}</div>}
@@ -114,12 +119,12 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
           ) : (
             <Link to="/pets/new" className="community-button-secondary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+ Crear mascota</Link>
           )
-        ) : <div className="community-select" style={{ display: 'flex', alignItems: 'center' }}>🏥 Perfil veterinario</div>}
-        <textarea className="community-textarea" value={text} onChange={(e) => setText(e.target.value)} placeholder={user.role === 'clinic' ? 'Compartí un consejo, una novedad o una campaña... Podés usar #hashtags' : 'Una aventura, una foto, una anécdota... Podés usar #hashtags'} maxLength={3000} />
+        ) : <div className="community-select" style={{ display: 'flex', alignItems: 'center' }}>{roleMeta[user.role]?.icon} {roleMeta[user.role]?.label}</div>}
+        <textarea className="community-textarea" value={text} onChange={(e) => setText(e.target.value)} placeholder={user.role === 'owner' ? 'Una aventura, una foto, una anécdota... Podés usar #hashtags' : roleMeta[user.role]?.placeholder} maxLength={3000} />
       </div>
       <div className="hashtag-suggestions" aria-label="Hashtags sugeridos">
         <span>Hashtags:</span>
-        {['#MiMascota', '#Perros', '#Gatos', '#Adopción', '#Perdidos'].map((tag) => (
+        {(user.role === 'business' ? ['#NegociosVetPaw', '#Servicios', '#Mascotas', '#Promociones', '#Consejos'] : user.role === 'shelter' ? ['#Adopción', '#Rescate', '#Tránsito', '#Donaciones', '#Urgente'] : ['#MiMascota', '#Perros', '#Gatos', '#Adopción', '#Perdidos']).map((tag) => (
           <button type="button" className="hashtag-chip" key={tag} onClick={() => addHashtag(tag)}>{tag}</button>
         ))}
       </div>

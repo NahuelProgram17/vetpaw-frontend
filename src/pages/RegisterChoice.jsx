@@ -54,6 +54,24 @@ export default function RegisterChoice() {
 
                         <span className="choice-arrow clinic-arrow">›</span>
                     </button>
+
+                    <button className="choice-btn business" onClick={() => navigate("/register/business")}>
+                        <span className="choice-icon-bubble business-bubble"><span className="choice-role-emoji">🛍️</span></span>
+                        <span className="choice-copy">
+                            <span className="choice-label">Tengo un negocio para mascotas</span>
+                            <span className="choice-desc">Peluquería, petshop, alimentos, hospedaje, paseos y otros servicios</span>
+                        </span>
+                        <span className="choice-arrow">›</span>
+                    </button>
+
+                    <button className="choice-btn shelter" onClick={() => navigate("/register/shelter")}>
+                        <span className="choice-icon-bubble shelter-bubble"><span className="choice-role-emoji">🏠</span></span>
+                        <span className="choice-copy">
+                            <span className="choice-label">Soy refugio o rescatista</span>
+                            <span className="choice-desc">Publicá adopciones, pedidos de tránsito, campañas y casos urgentes</span>
+                        </span>
+                        <span className="choice-arrow">›</span>
+                    </button>
                 </div>
 
                 <p className="auth-switch">
@@ -304,6 +322,10 @@ export default function RegisterChoice() {
         .choice-btn.owner:hover { border-color: rgba(103, 224, 84, .98); box-shadow: 0 20px 48px rgba(76,175,80,.16); }
         .choice-btn.clinic { border-color: rgba(255,152,0,.42); }
         .choice-btn.clinic:hover { border-color: rgba(255, 174, 0, .95); box-shadow: 0 20px 48px rgba(255,152,0,.16); }
+        .choice-btn.business { border-color: rgba(65,190,160,.45); }
+        .choice-btn.business:hover { border-color: rgba(65,220,180,.95); box-shadow: 0 20px 48px rgba(65,190,160,.16); }
+        .choice-btn.shelter { border-color: rgba(255,193,77,.45); }
+        .choice-btn.shelter:hover { border-color: rgba(255,205,100,.95); box-shadow: 0 20px 48px rgba(255,193,77,.16); }
 
         .choice-icon-bubble {
             width: 96px;
@@ -319,6 +341,9 @@ export default function RegisterChoice() {
         }
         .owner-bubble { box-shadow: inset 0 0 30px rgba(76,175,80,.14), 0 12px 30px rgba(0,0,0,.25); }
         .clinic-bubble { box-shadow: inset 0 0 30px rgba(255,152,0,.13), 0 12px 30px rgba(0,0,0,.25); }
+        .business-bubble { box-shadow: inset 0 0 30px rgba(65,190,160,.16), 0 12px 30px rgba(0,0,0,.25); }
+        .shelter-bubble { box-shadow: inset 0 0 30px rgba(255,193,77,.16), 0 12px 30px rgba(0,0,0,.25); }
+        .choice-role-emoji { font-size: 48px; filter: drop-shadow(0 8px 14px rgba(0,0,0,.26)); }
 
         .choice-custom-icon {
             width: 72px;

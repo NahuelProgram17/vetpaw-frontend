@@ -51,6 +51,25 @@ export default function CommunityRightRail({ discover, user, onRefresh }) {
           {!discover.lost_pets?.length && <div className="composer-sub">No hay avisos activos en este momento.</div>}
         </section>
 
+
+        {(discover.businesses?.length > 0 || discover.shelters?.length > 0) && (
+          <section className="right-section community-card">
+            <div className="right-title"><span>🤝 Ecosistema VetPaw</span><Link to="/explorar">Explorar</Link></div>
+            {(discover.businesses || []).slice(0, 2).map((item) => (
+              <Link className="right-mini-card" to={`/negocios/${item.slug}`} key={`business-${item.id}`}>
+                {item.logo ? <img src={item.logo} alt="" /> : <div className="suggestion-avatar">🛍️</div>}
+                <div><strong>{item.name}</strong><span>{item.type_display} · {item.locality}</span></div>
+              </Link>
+            ))}
+            {(discover.shelters || []).slice(0, 2).map((item) => (
+              <Link className="right-mini-card" to={`/refugios/${item.slug}`} key={`shelter-${item.id}`}>
+                {item.logo ? <img src={item.logo} alt="" /> : <div className="suggestion-avatar">🏠</div>}
+                <div><strong>{item.name}</strong><span>{item.capacity_status_display} · {item.locality}</span></div>
+              </Link>
+            ))}
+          </section>
+        )}
+
         <section className="right-section community-card">
           <div className="right-title"><span>🏥 Veterinarias en VetPaw</span><Link to="/explorar?seccion=clinics">Todas</Link></div>
           {(discover.clinics || []).slice(0, 4).map((clinic) => (

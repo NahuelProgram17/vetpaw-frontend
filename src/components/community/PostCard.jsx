@@ -16,6 +16,8 @@ const typeMeta = {
   birthday: ['birthday', '🎂 Cumpleaños'],
   lost: ['lost', '🚨 Perdidos y encontrados'],
   clinic: ['clinic', '✅ Veterinaria'],
+  business: ['business', '🛍️ Negocio de mascotas'],
+  shelter: ['shelter', '🏠 Refugio o rescatista'],
   adoption: ['', '🏡 Adopción'],
 }
 
@@ -33,7 +35,7 @@ const relativeTime = (value) => {
   return date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })
 }
 
-const fallbackAvatar = (actor) => actor?.type === 'clinic' ? '🏥' : actor?.type === 'lost' ? '🔎' : '🐾'
+const fallbackAvatar = (actor) => actor?.type === 'clinic' ? '🏥' : actor?.type === 'business' ? '🛍️' : actor?.type === 'shelter' ? '🏠' : actor?.type === 'lost' ? '🔎' : '🐾'
 
 
 const renderTextWithHashtags = (value, onHashtagClick) => {

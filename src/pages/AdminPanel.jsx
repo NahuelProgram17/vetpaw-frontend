@@ -60,7 +60,8 @@ export default function AdminPanel() {
 
     if (!data) return null
 
-    const { global: g, new_users_by_day, appts_by_day, appts_by_status, top_clinics, last_users, security, pending_clinics = [] } = data
+    const { global: g, new_users_by_day, appts_by_day, appts_by_status, top_clinics, last_users, security, pending_clinics = [], pending_profiles = [] } = data
+    const pendingCount = pending_clinics.length + pending_profiles.length
 
     const StatCard = ({ icon, label, value, sub, color = G1 }) => (
         <div style={{ background: CARD, border: `1px solid rgba(255,255,255,0.07)`, borderRadius: 16, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -105,24 +106,33 @@ export default function AdminPanel() {
     const maxAppts = Math.max(...appts_by_day.map(d => d.count), 1)
     const maxUsers = Math.max(...new_users_by_day.map(d => d.count), 1)
 
-    const handleApprove = async (userId, name) => {
-        if (!window.confirm(`¿Aprobar la clínica "${name}"? Va a poder iniciar sesión inmediatamente.`)) return
+    const handleApprove = async (userId, name, role = 'clinic') => {
+        const labels = { clinic: 'veterinaria', business: 'negocio', shelter: 'refugio' }
+        if (!window.confirm(`¿Aprobar ${labels[role] || 'el perfil'} "${name}"? Va a poder iniciar sesión inmediatamente.`)) return
         try {
-            await api.post(`/users/admin/approve-clinic/${userId}/`)
+            await api.post(`/users/admin/approve-profile/${userId}/`)
             await fetchData()
         } catch {
             alert('No se pudo aprobar. Intentá de nuevo.')
         }
     }
 
-    const handleReject = async (userId, name) => {
-        if (!window.confirm(`¿Rechazar y ELIMINAR la solicitud de "${name}"? Esta acción no se puede deshacer.`)) return
+    const handleReject = async (userId, name, role = 'clinic') => {
+        const labels = { clinic: 'la veterinaria', business: 'el negocio', shelter: 'el refugio' }
+        if (!window.confirm(`¿Rechazar y ELIMINAR ${labels[role] || 'el perfil'} "${name}"? Esta acción no se puede deshacer.`)) return
         try {
-            await api.post(`/users/admin/reject-clinic/${userId}/`)
+            await api.post(`/users/admin/reject-profile/${userId}/`)
             await fetchData()
         } catch {
             alert('No se pudo rechazar. Intentá de nuevo.')
         }
+    }
+
+    const roleMeta = {
+        owner: { label: 'Dueño', icon: '🐾', color: G1 },
+        clinic: { label: 'Clínica', icon: '🏥', color: '#6bcaff' },
+        business: { label: 'Negocio', icon: '🛍️', color: '#45c7a4' },
+        shelter: { label: 'Refugio', icon: '🏠', color: '#ffb84d' },
     }
 
     return (
@@ -145,7 +155,7 @@ export default function AdminPanel() {
                 <div style={{ display: 'flex', gap: 10, marginBottom: 28, borderBottom: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
                     {[
                         { k: 'dashboard', l: '📊 Dashboard' },
-                        { k: 'pending',   l: `🏥 Pendientes${pending_clinics.length > 0 ? ` (${pending_clinics.length})` : ''}` },
+                        { k: 'pending',   l: `✅ Pendientes${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
                         { k: 'lostPets',  l: `🔍 Mascotas perdidas${g.total_lost_active > 0 ? ` (${g.total_lost_active})` : ''}` },
                         { k: 'ads',       l: '📢 Anuncios' },
                         { k: 'blog',      l: '📝 Blog' },
@@ -153,7 +163,7 @@ export default function AdminPanel() {
                         <button key={t.k} onClick={() => setTab(t.k)}
                             style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: FONT, fontWeight: 800, fontSize: 14, padding: '10px 4px', color: tab === t.k ? '#fff' : 'rgba(255,255,255,0.4)', borderBottom: `3px solid ${tab === t.k ? G1 : 'transparent'}`, marginBottom: -1, position: 'relative' }}>
                             {t.l}
-                            {t.k === 'pending' && pending_clinics.length > 0 && tab !== 'pending' && (
+                            {t.k === 'pending' && pendingCount > 0 && tab !== 'pending' && (
                                 <span style={{ position: 'absolute', top: 4, right: -6, width: 8, height: 8, borderRadius: '50%', background: '#ff6b6b' }} />
                             )}
                         </button>
@@ -167,12 +177,12 @@ export default function AdminPanel() {
                 {tab === 'lostPets' && <AdminLostPetsManager />}
 
                 {tab === 'pending' && (<>
-                    <SectionTitle>🏥 Veterinarias pendientes de aprobación</SectionTitle>
-                    {pending_clinics.length === 0 ? (
+                    <SectionTitle>✅ Perfiles profesionales pendientes de aprobación</SectionTitle>
+                    {pendingCount === 0 ? (
                         <div style={{ background: CARD, border: `1px solid rgba(255,255,255,0.07)`, borderRadius: 16, padding: '40px 24px', textAlign: 'center' }}>
                             <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
                             <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.7)', fontWeight: 700, marginBottom: 6 }}>No hay solicitudes pendientes</p>
-                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Cuando una clínica se registre te va a aparecer acá para aprobarla o rechazarla.</p>
+                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Cuando una veterinaria, negocio o refugio se registre va a aparecer acá para aprobarlo o rechazarlo.</p>
                         </div>
                     ) : (
                         <div style={{ display: 'grid', gap: 14 }}>
@@ -191,14 +201,35 @@ export default function AdminPanel() {
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                                        <button onClick={() => handleReject(c.user_id, c.clinic_name)}
+                                        <button onClick={() => handleReject(c.user_id, c.clinic_name, 'clinic')}
                                             style={{ background: 'transparent', border: '1.5px solid rgba(255,107,107,0.4)', color: '#ff6b6b', borderRadius: 10, padding: '9px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: FONT }}>
                                             ✕ Rechazar
                                         </button>
-                                        <button onClick={() => handleApprove(c.user_id, c.clinic_name)}
+                                        <button onClick={() => handleApprove(c.user_id, c.clinic_name, 'clinic')}
                                             style={{ background: `linear-gradient(135deg, ${G1}, #66BB6A)`, border: 'none', color: '#fff', borderRadius: 10, padding: '9px 22px', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: FONT, boxShadow: '0 4px 14px rgba(76,175,80,0.25)' }}>
                                             ✓ Aprobar
                                         </button>
+                                    </div>
+                                </div>
+                            ))}
+                            {pending_profiles.map((item) => (
+                                <div key={item.user_id} style={{ background: CARD, border: `1px solid ${item.role === 'business' ? 'rgba(69,199,164,.3)' : 'rgba(255,184,77,.3)'}`, borderRadius: 16, padding: 20 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+                                        <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                                                <span style={{ fontSize: 11, fontWeight: 800, color: item.role === 'business' ? '#72e1c2' : '#ffd07a', background: item.role === 'business' ? 'rgba(69,199,164,.12)' : 'rgba(255,184,77,.12)', padding: '3px 10px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: 1 }}>{item.role === 'business' ? '🛍️ Negocio' : '🏠 Refugio'}</span>
+                                                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{item.date_joined}</span>
+                                            </div>
+                                            <h3 style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 4 }}>{item.name}</h3>
+                                            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 5 }}>{item.profile_type}</p>
+                                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>👤 {item.username} · ✉️ {item.email}</p>
+                                            {(item.whatsapp || item.phone) && <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>💬 {item.whatsapp || item.phone}</p>}
+                                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>📍 {item.locality || '—'}, {item.province || '—'}</p>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                        <button onClick={() => handleReject(item.user_id, item.name, item.role)} style={{ background: 'transparent', border: '1.5px solid rgba(255,107,107,0.4)', color: '#ff6b6b', borderRadius: 10, padding: '9px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: FONT }}>✕ Rechazar</button>
+                                        <button onClick={() => handleApprove(item.user_id, item.name, item.role)} style={{ background: `linear-gradient(135deg, ${G1}, #66BB6A)`, border: 'none', color: '#fff', borderRadius: 10, padding: '9px 22px', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: FONT }}>✓ Aprobar</button>
                                     </div>
                                 </div>
                             ))}
@@ -212,6 +243,8 @@ export default function AdminPanel() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14, marginBottom: 32 }}>
                     <StatCard icon="👤" label="Dueños totales" value={g.total_owners} sub={`+${g.new_owners_week} esta semana`} color={G1} />
                     <StatCard icon="🏥" label="Clínicas totales" value={g.total_clinics} sub={`+${g.new_clinics_week} esta semana`} color="#6bcaff" />
+                    <StatCard icon="🛍️" label="Negocios" value={g.total_businesses || 0} sub={`+${g.new_businesses_week || 0} esta semana`} color="#45c7a4" />
+                    <StatCard icon="🏠" label="Refugios" value={g.total_shelters || 0} sub={`+${g.new_shelters_week || 0} esta semana`} color="#ffb84d" />
                     <StatCard icon="🐾" label="Mascotas" value={g.total_pets} color={O1} />
                     <StatCard icon="📅" label="Turnos totales" value={g.total_appts} sub={`+${g.new_appts_week} esta semana`} color="#6bffb8" />
                     <StatCard icon="🔍" label="Mascotas perdidas activas" value={g.total_lost_active} color="#ff6b6b" />
@@ -285,8 +318,8 @@ export default function AdminPanel() {
                         rows={last_users.map(u => [
                             u.username,
                             u.email,
-                            <span style={{ color: u.role === 'clinic' ? '#6bcaff' : G1, fontWeight: 700 }}>
-                                {u.role === 'clinic' ? '🏥 Clínica' : '🐾 Dueño'}
+                            <span style={{ color: (roleMeta[u.role] || roleMeta.owner).color, fontWeight: 700 }}>
+                                {(roleMeta[u.role] || roleMeta.owner).icon} {(roleMeta[u.role] || roleMeta.owner).label}
                             </span>,
                             u.date_joined,
                         ])}

@@ -13,6 +13,9 @@ const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
 const RegisterChoice = lazy(() => import('./pages/RegisterChoice'))
 const RegisterClinic = lazy(() => import('./pages/RegisterClinic'))
+const RegisterOrganization = lazy(() => import('./pages/RegisterOrganization'))
+const OrganizationDashboard = lazy(() => import('./pages/OrganizationDashboard'))
+const OrganizationProfile = lazy(() => import('./pages/OrganizationProfile'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Pets = lazy(() => import('./pages/Pets'))
 const Appointments = lazy(() => import('./pages/Appointments'))
@@ -71,9 +74,13 @@ function App() {
             <Route path="/register" element={<RegisterChoice />} />
             <Route path="/register/owner" element={<Register />} />
             <Route path="/register/clinic" element={<RegisterClinic />} />
+            <Route path="/register/business" element={<RegisterOrganization />} />
+            <Route path="/register/shelter" element={<RegisterOrganization />} />
             <Route path="/clinics" element={<Clinics />} />
             <Route path="/mascotas-perdidas" element={<LostPets />} />
             <Route path="/clinicas/:slug" element={<ClinicProfile />} />
+            <Route path="/negocios/:slug" element={<OrganizationProfile kind="business" />} />
+            <Route path="/refugios/:slug" element={<OrganizationProfile kind="shelter" />} />
 
             <Route path="/dashboard" element={<ProtectedRoute role="owner"><Dashboard /></ProtectedRoute>} />
             <Route path="/pets" element={<ProtectedRoute role="owner"><Pets /></ProtectedRoute>} />
@@ -91,6 +98,8 @@ function App() {
             <Route path="/comunidad/moderacion" element={<ProtectedRoute permission="moderator"><CommunityModeration /></ProtectedRoute>} />
 
             <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
+            <Route path="/business/dashboard" element={<ProtectedRoute role="business"><OrganizationDashboard kind="business" /></ProtectedRoute>} />
+            <Route path="/shelter/dashboard" element={<ProtectedRoute role="shelter"><OrganizationDashboard kind="shelter" /></ProtectedRoute>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:uidb64/:token" element={<ResetPassword />} />
             <Route path="/terminos" element={<TerminosCondiciones />} />

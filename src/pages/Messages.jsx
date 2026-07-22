@@ -109,6 +109,12 @@ export default function Messages() {
     const fetchContactsAndAppointments = async () => {
         setContactsLoading(true);
         try {
+            if (!isOwner && !isClinic) {
+                setContacts([]);
+                setAppointments([]);
+                return;
+            }
+
             const apptReq = api.get("/appointments/");
 
             if (isOwner) {

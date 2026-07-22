@@ -55,7 +55,7 @@ export default function Navbar() {
                 getCommunityNotificationsUnreadCount(),
             ])
 
-            if (user.role === 'clinic') {
+            if (user.role !== 'owner') {
                 const [socialData, socialUnread] = await socialPromise
                 const socialRows = socialData.results ?? socialData
                 const normalized = (Array.isArray(socialRows) ? socialRows : []).map((item) => ({
@@ -296,6 +296,29 @@ export default function Navbar() {
         { to: '/configuracion', icon: 'settings', label: 'Configuración' },
     ]
 
+    const businessLinks = [
+        { to: '/comunidad', icon: 'community', label: 'Comunidad' },
+        { to: '/explorar', icon: 'explore', label: 'Explorar' },
+        { to: '/business/dashboard', icon: 'panel', label: 'Mi negocio' },
+        { to: '/messages', icon: 'messages', label: 'Mensajes', badge: unreadMessages },
+        { to: '/profile', icon: 'profile', label: 'Mi cuenta' },
+        { to: '/configuracion', icon: 'settings', label: 'Configuración' },
+    ]
+
+    const shelterLinks = [
+        { to: '/comunidad', icon: 'community', label: 'Comunidad' },
+        { to: '/explorar', icon: 'explore', label: 'Explorar' },
+        { to: '/shelter/dashboard', icon: 'panel', label: 'Mi refugio' },
+        { to: '/messages', icon: 'messages', label: 'Mensajes', badge: unreadMessages },
+        { to: '/profile', icon: 'profile', label: 'Mi cuenta' },
+        { to: '/configuracion', icon: 'settings', label: 'Configuración' },
+    ]
+
+    const roleLinks = { owner: ownerLinks, clinic: clinicLinks, business: businessLinks, shelter: shelterLinks }
+    const rolePanelPath = { owner: '/dashboard', clinic: '/clinic/dashboard', business: '/business/dashboard', shelter: '/shelter/dashboard' }
+    const roleLabel = { owner: 'Dueño/a', clinic: 'Clínica', business: 'Negocio', shelter: 'Refugio' }
+    const roleIconName = { owner: 'pets', clinic: 'clinics', business: 'explore', shelter: 'lost' }
+
     const guestLinks = [
         { to: '/comunidad', icon: 'community', label: 'Comunidad' },
         { to: '/explorar', icon: 'explore', label: 'Explorar' },
@@ -304,7 +327,7 @@ export default function Navbar() {
         { to: '/login', icon: 'login', label: 'Ingresar' },
     ]
 
-    const sidebarLinks = !user ? guestLinks : user.role === 'clinic' ? clinicLinks : ownerLinks
+    const sidebarLinks = !user ? guestLinks : (roleLinks[user.role] || ownerLinks)
 
     // ── Estilos compartidos ──
     const linkStyle = {
@@ -380,7 +403,7 @@ export default function Navbar() {
         transition: 'color .15s',
     }
 
-    const drawerLinks = !user ? guestLinks : user.role === 'clinic' ? clinicLinks : ownerLinks
+    const drawerLinks = !user ? guestLinks : (roleLinks[user.role] || ownerLinks)
 
     // ══════════════════════════════════════════
     // PWA DESKTOP — Sidebar izquierdo
@@ -443,17 +466,17 @@ export default function Navbar() {
                             flexShrink: 0,
                         }}>
                             <p style={{ color: G1, fontFamily: FONT, fontWeight: 800, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {user.first_name || user.username}
+                                {user.profile_name || user.first_name || user.username}
                             </p>
                             <p style={{ color: 'rgba(255,255,255,0.35)', fontFamily: FONT, fontSize: 11, marginTop: 2 }}>
-                                {user.role === 'clinic' ? 'Clínica' : 'Dueño/a'}
+                                {roleLabel[user.role] || 'Usuario'}
                             </p>
                         </div>
                     )}
                     {user && sidebarCollapsed && (
                         <div style={{ padding: '12px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
                             <div style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, ${G1}, ${O1})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
-                                {renderNavIcon(user.role === 'clinic' ? 'clinics' : 'pets', true, true)}
+                                {renderNavIcon(roleIconName[user.role] || 'profile', true, true)}
                             </div>
                         </div>
                     )}
@@ -660,11 +683,11 @@ export default function Navbar() {
                                 </Link>
                                 <Link to="/register" style={{ ...btnGradient, marginLeft: 6, fontFamily: BROWSER_FONT, fontWeight: 900 }}>Registrarme</Link>
                             </>
-                        ) : user.role === 'clinic' ? (
+                        ) : user.role !== 'owner' ? (
                             <>
                                 <Link to="/comunidad" style={browserLinkStyle('/comunidad', O1)} {...browserLinkEvents('/comunidad', O1)}>Comunidad</Link>
                                 <Link to="/explorar" style={browserLinkStyle('/explorar', G1)} {...browserLinkEvents('/explorar', G1)}>Explorar</Link>
-                                <Link to="/clinic/dashboard" style={browserLinkStyle('/clinic/dashboard', G1)} {...browserLinkEvents('/clinic/dashboard', G1)}>Mi panel</Link>
+                                <Link to={rolePanelPath[user.role]} style={browserLinkStyle(rolePanelPath[user.role], G1)} {...browserLinkEvents(rolePanelPath[user.role], G1)}>Mi panel</Link>
                                 <Link to="/messages" style={{ ...browserLinkStyle('/messages', O1), display: 'inline-flex', alignItems: 'center', gap: 6 }} {...browserLinkEvents('/messages', O1)}>
                                     Mensajes
                                     {unreadMessages > 0 && (
@@ -685,7 +708,7 @@ export default function Navbar() {
                                 </Link>
                                 <InstallPWA />
                                 <span style={{ color: 'rgba(255,255,255,0.18)', margin: '0 3px' }}>|</span>
-                                <span style={{ fontFamily: BROWSER_FONT, color: G1, fontWeight: 900, fontSize: 14, padding: '7px 6px' }}>{user.first_name || user.username}</span>
+                                <span style={{ fontFamily: BROWSER_FONT, color: G1, fontWeight: 900, fontSize: 14, padding: '7px 6px' }}>{user.profile_name || user.first_name || user.username}</span>
                                 <button onClick={handleLogout} style={{ fontFamily: BROWSER_FONT, fontSize: 14, fontWeight: 800, background: 'none', border: 'none', cursor: 'pointer', color: '#ffc36a', padding: '7px 7px' }}
                                     onMouseEnter={e => e.currentTarget.style.color = O1}
                                     onMouseLeave={e => e.currentTarget.style.color = '#ffc36a'}>
@@ -765,7 +788,7 @@ export default function Navbar() {
                                     )}
                                 </div>
                                 <span style={{ color: 'rgba(255,255,255,0.18)', margin: '0 3px' }}>|</span>
-                                <Link to="/profile" style={{ fontFamily: BROWSER_FONT, color: G1, fontWeight: 900, fontSize: 14, padding: '7px 5px', textDecoration: 'none' }}>{user.first_name || user.username}</Link>
+                                <Link to="/profile" style={{ fontFamily: BROWSER_FONT, color: G1, fontWeight: 900, fontSize: 14, padding: '7px 5px', textDecoration: 'none' }}>{user.profile_name || user.first_name || user.username}</Link>
                                 <button onClick={handleLogout} style={{ fontFamily: BROWSER_FONT, fontSize: 14, fontWeight: 800, background: 'none', border: 'none', cursor: 'pointer', color: '#ffc36a', padding: '7px 5px' }}
                                     onMouseEnter={e => e.currentTarget.style.color = O1}
                                     onMouseLeave={e => e.currentTarget.style.color = '#ffc36a'}>
@@ -845,8 +868,8 @@ export default function Navbar() {
                         <div style={{ height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
                             {user ? (
                                 <div>
-                                    <p style={{ color: G1, fontFamily: FONT, fontWeight: 800, fontSize: 15 }}>{user.first_name || user.username}</p>
-                                    <p style={{ color: 'rgba(255,255,255,0.35)', fontFamily: FONT, fontSize: 12, marginTop: 2 }}>{user.role === 'clinic' ? 'Clínica' : 'Dueño/a'}</p>
+                                    <p style={{ color: G1, fontFamily: FONT, fontWeight: 800, fontSize: 15 }}>{user.profile_name || user.first_name || user.username}</p>
+                                    <p style={{ color: 'rgba(255,255,255,0.35)', fontFamily: FONT, fontSize: 12, marginTop: 2 }}>{roleLabel[user.role] || 'Usuario'}</p>
                                 </div>
                             ) : (
                                 <img src="/logo_vetpaw.png" alt="VetPaw" style={{ height: 44 }} />

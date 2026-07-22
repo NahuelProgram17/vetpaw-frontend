@@ -12,8 +12,8 @@ export default function ProtectedRoute({ children, role, permission }) {
 
     if (!user) return <Navigate to="/login" replace />
 
-    // Clínica no aprobada — mostrar página de espera
-    if (user.role === 'clinic' && !user.is_approved) {
+    // Perfiles profesionales pendientes de aprobación
+    if (['clinic', 'business', 'shelter'].includes(user.role) && !user.is_approved) {
         return (
             <div style={{
                 minHeight: '100vh', background: '#1a1a2e',
@@ -25,7 +25,7 @@ export default function ProtectedRoute({ children, role, permission }) {
                     borderRadius: '24px', padding: '48px 40px', maxWidth: '480px', textAlign: 'center',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px'
                 }}>
-                    <span style={{ fontSize: '4rem' }}>🏥</span>
+                    <span style={{ fontSize: '4rem' }}>{user.role === 'clinic' ? '🏥' : user.role === 'business' ? '🛍️' : '🏠'}</span>
                     <h1 style={{
                         fontFamily: "'Fraunces', serif", fontSize: '1.8rem', fontWeight: 700,
                         fontStyle: 'italic', color: '#fff', letterSpacing: '-1px'
@@ -33,7 +33,7 @@ export default function ProtectedRoute({ children, role, permission }) {
                         Cuenta pendiente de aprobación
                     </h1>
                     <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1rem', lineHeight: 1.6 }}>
-                        Tu clínica está siendo verificada por el equipo de VetPaw. 
+                        Tu {user.role === 'clinic' ? 'veterinaria' : user.role === 'business' ? 'negocio' : 'refugio'} está siendo verificado por el equipo de VetPaw. 
                         Te avisaremos por email cuando esté habilitada.
                     </p>
                     <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem' }}>
@@ -57,7 +57,8 @@ export default function ProtectedRoute({ children, role, permission }) {
     }
 
     if (role && user.role !== role) {
-        return <Navigate to={user.role === 'clinic' ? '/clinic/dashboard' : '/dashboard'} replace />
+        const homeByRole = { clinic: '/clinic/dashboard', business: '/business/dashboard', shelter: '/shelter/dashboard', owner: '/dashboard' }
+        return <Navigate to={homeByRole[user.role] || '/'} replace />
     }
 
     return children

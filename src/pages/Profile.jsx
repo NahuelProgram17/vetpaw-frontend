@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getPets, getAppointments } from "../services/api";
 import api from "../services/api";
@@ -123,7 +124,15 @@ export default function Profile() {
         return { pct, missing };
     }, [profile]);
 
-    const roleLabel = profile?.role === "clinic" ? "Veterinaria" : "Dueño/a de mascota";
+    const roleMeta = {
+        owner: { label: "Dueño/a de mascota", icon: "🐾", panel: "/dashboard" },
+        clinic: { label: "Veterinaria", icon: "🏥", panel: "/clinic/dashboard" },
+        business: { label: "Negocio para mascotas", icon: "🛍️", panel: "/business/dashboard" },
+        shelter: { label: "Refugio o rescatista", icon: "🏠", panel: "/shelter/dashboard" },
+    };
+    const currentRole = roleMeta[profile?.role] || roleMeta.owner;
+    const roleLabel = currentRole.label;
+    const isOwner = profile?.role === "owner";
     const card = { background: CARD, border: `1.5px solid ${BORDER}`, borderRadius: 18 };
 
     if (loading) return <VetPawLoader message="Cargando perfil..." subText="Preparando tus datos" />;
@@ -186,7 +195,7 @@ export default function Profile() {
                             </div>
                             <div style={{ flex: 1 }}>
                                 <h1 style={{ fontSize: 26, fontWeight: 900, marginBottom: 4 }}>{fullName}</h1>
-                                <p style={{ color: MUTED2, fontSize: 14, marginBottom: 12 }}>🐾 {roleLabel}</p>
+                                <p style={{ color: MUTED2, fontSize: 14, marginBottom: 12 }}>{currentRole.icon} {roleLabel}</p>
                                 <div style={{ display: "flex", gap: 16, flexWrap: "wrap", fontSize: 12.5, color: MUTED2 }}>
                                     <span>✉️ {profile?.email}</span>
                                     {profile?.phone && <span>📞 {profile.phone}</span>}
@@ -196,12 +205,17 @@ export default function Profile() {
                         </div>
                         {/* stats */}
                         <div className="pf-stats">
-                            {[
+                            {(isOwner ? [
                                 { label: "Miembro desde", value: fmtDate(profile?.created_at) },
                                 { label: "Mascotas", value: stats.pets },
                                 { label: "Turnos completados", value: stats.done },
                                 { label: "Vacunas cargadas", value: stats.vacc },
-                            ].map((s, i) => (
+                            ] : [
+                                { label: "Miembro desde", value: fmtDate(profile?.created_at) },
+                                { label: "Perfil profesional", value: `${profile?.profile_completion || 0}%` },
+                                { label: "Estado", value: profile?.is_approved ? "Activo" : "Pendiente" },
+                                { label: "Espacio", value: currentRole.icon },
+                            ]).map((s, i) => (
                                 <div key={i} style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "12px 18px", flex: "1 1 120px", textAlign: "center" }}>
                                     <div style={{ fontSize: 18, fontWeight: 900, color: G2 }}>{s.value}</div>
                                     <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>{s.label}</div>
@@ -212,18 +226,23 @@ export default function Profile() {
 
                     {/* completitud */}
                     <div style={{ ...card, padding: 22, display: "flex", flexDirection: "column" }}>
-                        <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 14 }}>Perfil {completion.pct}% completo</div>
+                        <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 14 }}>Perfil {isOwner ? completion.pct : (profile?.profile_completion || 0)}% completo</div>
                         <div style={{ height: 10, borderRadius: 99, background: CARD2, overflow: "hidden", marginBottom: 16 }}>
-                            <div style={{ width: `${completion.pct}%`, height: "100%", background: `linear-gradient(90deg, ${G1}, ${O1})`, transition: "width .4s" }} />
+                            <div style={{ width: `${isOwner ? completion.pct : (profile?.profile_completion || 0)}%`, height: "100%", background: `linear-gradient(90deg, ${G1}, ${O1})`, transition: "width .4s" }} />
                         </div>
                         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 9 }}>
-                            {completion.missing.length ? completion.missing.slice(0, 3).map((m, i) => (
+                            {isOwner ? (completion.missing.length ? completion.missing.slice(0, 3).map((m, i) => (
                                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 12.5, color: MUTED2 }}>
                                     <span style={{ width: 18, height: 18, borderRadius: "50%", border: `1.5px solid ${MUTED}`, flexShrink: 0 }} />
                                     {m.label}
                                 </div>
                             )) : (
                                 <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13, color: G2 }}>✅ ¡Tu perfil está completo!</div>
+                            )) : (
+                                <div style={{ display: "grid", gap: 8, fontSize: 12.5, color: MUTED2 }}>
+                                    <span>Completá fotos, descripción, servicios y datos públicos desde tu panel.</span>
+                                    <Link to={currentRole.panel} style={{ color: G2, fontWeight: 800, textDecoration: "none" }}>Ir al panel profesional →</Link>
+                                </div>
                             )}
                         </div>
                         {!editing && <button onClick={handleEdit} style={{ marginTop: 16, background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontWeight: 800, fontSize: 14, padding: "12px 0", borderRadius: 12, border: "none", cursor: "pointer", fontFamily: FONT }}>✏️ Editar perfil</button>}
@@ -250,21 +269,27 @@ export default function Profile() {
 
                         {/* Resumen de actividad */}
                         <div style={{ ...card, padding: 22 }}>
-                            <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16 }}>📊 Resumen de actividad</h2>
-                            <div className="pf-act">
-                                {[
-                                    { ic: "📅", c: G1, value: stats.done, label: "Turnos realizados" },
-                                    { ic: "💉", c: O1, value: stats.vacc, label: "Vacunas cargadas" },
-                                    { ic: "⏳", c: BLUE, value: stats.pending, label: "Turnos pendientes" },
-                                ].map((a, i) => (
-                                    <div key={i} style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "18px 14px", textAlign: "center" }}>
-                                        <div style={{ width: 42, height: 42, borderRadius: 12, background: `${a.c}22`, border: `1px solid ${a.c}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, margin: "0 auto 10px" }}>{a.ic}</div>
-                                        <div style={{ fontSize: 22, fontWeight: 900, color: a.c }}>{a.value}</div>
-                                        <div style={{ fontSize: 11.5, color: MUTED, marginTop: 3 }}>{a.label}</div>
-                                    </div>
-                                ))}
-                            </div>
-                            <a href="/history" style={{ display: "block", textAlign: "center", marginTop: 16, padding: "12px 0", borderRadius: 12, border: `1px solid ${G1}55`, color: G2, fontWeight: 700, fontSize: 13, textDecoration: "none" }}>Ver historial completo →</a>
+                            <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16 }}>{isOwner ? "📊 Resumen de actividad" : `${currentRole.icon} Tu espacio en VetPaw`}</h2>
+                            {isOwner ? <>
+                                <div className="pf-act">
+                                    {[
+                                        { ic: "📅", c: G1, value: stats.done, label: "Turnos realizados" },
+                                        { ic: "💉", c: O1, value: stats.vacc, label: "Vacunas cargadas" },
+                                        { ic: "⏳", c: BLUE, value: stats.pending, label: "Turnos pendientes" },
+                                    ].map((a, i) => (
+                                        <div key={i} style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "18px 14px", textAlign: "center" }}>
+                                            <div style={{ width: 42, height: 42, borderRadius: 12, background: `${a.c}22`, border: `1px solid ${a.c}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, margin: "0 auto 10px" }}>{a.ic}</div>
+                                            <div style={{ fontSize: 22, fontWeight: 900, color: a.c }}>{a.value}</div>
+                                            <div style={{ fontSize: 11.5, color: MUTED, marginTop: 3 }}>{a.label}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <Link to="/history" style={{ display: "block", textAlign: "center", marginTop: 16, padding: "12px 0", borderRadius: 12, border: `1px solid ${G1}55`, color: G2, fontWeight: 700, fontSize: 13, textDecoration: "none" }}>Ver historial completo →</Link>
+                            </> : <>
+                                <p style={{ color: MUTED2, fontSize: 13, lineHeight: 1.65, marginBottom: 16 }}>Administrá el perfil público, las fotos, servicios o actividades y las publicaciones de {profile?.profile_name || "tu organización"}.</p>
+                                <Link to={currentRole.panel} style={{ display: "block", textAlign: "center", padding: "12px 0", borderRadius: 12, background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontWeight: 800, fontSize: 13, textDecoration: "none" }}>Abrir mi panel →</Link>
+                                {profile?.profile_url && <Link to={profile.profile_url} style={{ display: "block", textAlign: "center", marginTop: 10, padding: "11px 0", borderRadius: 12, border: `1px solid ${G1}55`, color: G2, fontWeight: 700, fontSize: 13, textDecoration: "none" }}>Ver perfil público →</Link>}
+                            </>}
                         </div>
                     </div>
                 ) : (

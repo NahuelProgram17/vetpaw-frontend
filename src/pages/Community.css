@@ -298,6 +298,8 @@
 .post-type-badge.lost { color: #ffb3a8; border-color: rgba(255,96,75,.25); background: rgba(255,96,75,.11); }
 .post-type-badge.birthday { color: var(--vp-orange-soft); border-color: rgba(255,152,0,.24); background: rgba(255,152,0,.1); }
 .post-type-badge.clinic { color: #7ad7ff; border-color: rgba(73,188,238,.25); background: rgba(73,188,238,.1); }
+.post-type-badge.business { color: #7be2c5; border-color: rgba(69,199,164,.3); background: rgba(69,199,164,.11); }
+.post-type-badge.shelter { color: #ffd07a; border-color: rgba(255,184,77,.3); background: rgba(255,184,77,.11); }
 .post-image-wrap { background: #09121a; display: flex; align-items: center; justify-content: center; border-top: 1px solid rgba(255,255,255,.04); border-bottom: 1px solid rgba(255,255,255,.04); }
 .post-image { width: 100%; height: auto; max-height: 660px; display: block; object-fit: contain; object-position: center; margin: 0 auto; background: #09121a; }
 .lost-info { margin: 0 17px 15px; padding: 13px; border-radius: 15px; background: rgba(255,91,71,.075); border: 1px solid rgba(255,91,71,.16); display: grid; gap: 5px; font-size: 11px; color: rgba(255,255,255,.68); }

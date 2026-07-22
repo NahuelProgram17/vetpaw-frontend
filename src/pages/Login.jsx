@@ -20,11 +20,13 @@ export default function Login() {
         setLoading(true);
         try {
             const userData = await login(form.username, form.password);
-            if (userData?.role === "clinic") {
-                navigate("/clinic/dashboard");
-            } else {
-                navigate("/dashboard");
-            }
+            const destinations = {
+                owner: "/dashboard",
+                clinic: "/clinic/dashboard",
+                business: "/business/dashboard",
+                shelter: "/shelter/dashboard",
+            };
+            navigate(destinations[userData?.role] || "/comunidad");
         } catch (err) {
             const data = err.response?.data;
             const msg = data?.detail || "Credenciales incorrectas. Intentá de nuevo.";

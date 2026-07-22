@@ -199,6 +199,45 @@ export const markNoShow = (id) => api.patch(`/appointments/${id}/mark_no_show/`)
 export const getClinics = () => api.get("/clinics/").then((r) => r.data);
 export const joinClinic = (id) => api.post(`/clinics/${id}/join/`).then((r) => r.data);
 
+
+// ── Negocios y refugios VetPaw ──────────────────────
+const buildPartnerForm = (profileData) => {
+    const formData = new FormData();
+    Object.entries(profileData || {}).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
+        if (typeof File !== 'undefined' && value instanceof File) {
+            formData.append(key, value);
+        } else if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
+            formData.append(key, JSON.stringify(value));
+        } else {
+            formData.append(key, value);
+        }
+    });
+    return formData;
+};
+
+export const getBusinesses = (params = {}) =>
+    api.get('/businesses/', { params }).then((r) => r.data);
+export const getBusinessProfile = (slug) =>
+    api.get(`/businesses/${slug}/`).then((r) => r.data);
+export const getMyBusinessProfile = () =>
+    api.get('/businesses/me/').then((r) => r.data);
+export const updateMyBusinessProfile = (profileData) =>
+    api.patch('/businesses/me/', buildPartnerForm(profileData), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+
+export const getShelters = (params = {}) =>
+    api.get('/shelters/', { params }).then((r) => r.data);
+export const getShelterProfile = (slug) =>
+    api.get(`/shelters/${slug}/`).then((r) => r.data);
+export const getMyShelterProfile = () =>
+    api.get('/shelters/me/').then((r) => r.data);
+export const updateMyShelterProfile = (profileData) =>
+    api.patch('/shelters/me/', buildPartnerForm(profileData), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+
 // ── Visits ────────────────────────────────────────────
 export const getVisits = () => api.get("/visits/").then((r) => r.data);
 export const createVisit = (visit) => api.post("/visits/", visit).then((r) => r.data);
