@@ -45,6 +45,9 @@ const socialIcon = (type) => {
     if (type === 'reaction') return '🐾'
     if (type === 'comment') return '💬'
     if (type === 'follow') return '👥'
+    if (type === 'comment_reaction') return '🐾'
+    if (type === 'reply') return '↩️'
+    if (type === 'mention') return '📣'
     return '🔔'
 }
 

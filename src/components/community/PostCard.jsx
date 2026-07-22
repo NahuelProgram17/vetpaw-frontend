@@ -1,15 +1,20 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   addCommunityComment,
   deleteCommunityComment,
   deleteCommunityPost,
   getCommunityComments,
+  registerCommunityShare,
   toggleBlockedCommunityUser,
+  toggleCommunityCommentReaction,
   toggleCommunityReaction,
   toggleProfileFollow,
   toggleSavedCommunityPost,
+  updateCommunityComment,
+  updateCommunityPost,
 } from '../../services/api'
+import MentionTextarea from './MentionTextarea'
 import ReportModal from './ReportModal'
 
 const typeMeta = {
@@ -37,23 +42,35 @@ const relativeTime = (value) => {
 
 const fallbackAvatar = (actor) => actor?.type === 'clinic' ? '🏥' : actor?.type === 'business' ? '🛍️' : actor?.type === 'shelter' ? '🏠' : actor?.type === 'lost' ? '🔎' : '🐾'
 
+const flattenComments = (rows) => rows.flatMap((item) => [item, ...(item.replies || [])])
 
-const renderTextWithHashtags = (value, onHashtagClick) => {
+const updateCommentTree = (rows, id, updater) => rows.map((item) => {
+  if (String(item.id) === String(id)) return updater(item)
+  const replies = (item.replies || []).map((reply) => String(reply.id) === String(id) ? updater(reply) : reply)
+  return replies === item.replies ? item : { ...item, replies }
+})
+
+const findComment = (rows, id) => flattenComments(rows).find((item) => String(item.id) === String(id))
+
+const renderRichText = (value, onHashtagClick, onMentionClick) => {
   if (!value) return null
-  const pieces = value.split(/(#[\p{L}\p{N}_-]{2,50})/gu)
+  const pieces = value.split(/(#[\p{L}\p{N}_-]{2,50}|@[\w.+-]{3,150})/gu)
   return pieces.map((piece, index) => {
-    if (!piece.startsWith('#')) return piece
-    const tag = piece.slice(1)
-    return (
-      <button
-        type="button"
-        className="post-hashtag"
-        key={`${piece}-${index}`}
-        onClick={() => onHashtagClick?.(tag)}
-      >
-        {piece}
-      </button>
-    )
+    if (piece.startsWith('#')) {
+      return (
+        <button type="button" className="post-hashtag" key={`${piece}-${index}`} onClick={() => onHashtagClick?.(piece.slice(1))}>
+          {piece}
+        </button>
+      )
+    }
+    if (piece.startsWith('@')) {
+      return (
+        <button type="button" className="post-mention" key={`${piece}-${index}`} onClick={() => onMentionClick?.(piece.slice(1))}>
+          {piece}
+        </button>
+      )
+    }
+    return piece
   })
 }
 
@@ -68,8 +85,17 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
   const [menuOpen, setMenuOpen] = useState(false)
   const [reportTarget, setReportTarget] = useState(null)
   const [highlightedCommentId, setHighlightedCommentId] = useState(null)
+  const [editingPost, setEditingPost] = useState(false)
+  const [editPostText, setEditPostText] = useState(initialPost.text || '')
+  const [postSaving, setPostSaving] = useState(false)
+  const [replyingTo, setReplyingTo] = useState(null)
+  const [replyText, setReplyText] = useState('')
+  const [editingCommentId, setEditingCommentId] = useState(null)
+  const [editCommentText, setEditCommentText] = useState('')
+  const [commentActionBusy, setCommentActionBusy] = useState(null)
   const focusedCommentRef = useRef(null)
   const actor = post.actor || {}
+  const allComments = useMemo(() => flattenComments(comments), [comments])
 
   useEffect(() => {
     if (!targetCommentId) return undefined
@@ -88,15 +114,13 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
         if (!cancelled) setCommentsLoading(false)
       })
 
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [post.id, targetCommentId])
 
   useEffect(() => {
     const normalizedTarget = String(targetCommentId || '')
     if (!normalizedTarget || commentsLoading || focusedCommentRef.current === normalizedTarget) return undefined
-    if (!comments.some((item) => String(item.id) === normalizedTarget)) return undefined
+    if (!allComments.some((item) => String(item.id) === normalizedTarget)) return undefined
 
     const focusTimer = window.setTimeout(() => {
       const element = document.getElementById(`comment-${normalizedTarget}`)
@@ -114,7 +138,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
       window.clearTimeout(focusTimer)
       window.clearTimeout(clearTimer)
     }
-  }, [comments, commentsLoading, targetCommentId])
+  }, [allComments, commentsLoading, targetCommentId])
 
   const requireLogin = () => {
     if (!user) { navigate('/login'); return false }
@@ -124,62 +148,139 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
   const react = async () => {
     if (!requireLogin()) return
     const old = post
-    setPost((p) => ({ ...p, reacted_by_me: !p.reacted_by_me, reactions_count: p.reactions_count + (p.reacted_by_me ? -1 : 1) }))
+    setPost((current) => ({ ...current, reacted_by_me: !current.reacted_by_me, reactions_count: current.reactions_count + (current.reacted_by_me ? -1 : 1) }))
     try {
       const data = await toggleCommunityReaction(post.id)
-      setPost((p) => ({ ...p, reacted_by_me: data.reacted, reactions_count: data.reactions_count }))
+      setPost((current) => ({ ...current, reacted_by_me: data.reacted, reactions_count: data.reactions_count }))
     } catch { setPost(old) }
   }
 
   const save = async () => {
     if (!requireLogin()) return
     const old = post.saved_by_me
-    setPost((p) => ({ ...p, saved_by_me: !old }))
+    setPost((current) => ({ ...current, saved_by_me: !old }))
     try {
       const data = await toggleSavedCommunityPost(post.id)
-      setPost((p) => ({ ...p, saved_by_me: data.saved }))
-    } catch { setPost((p) => ({ ...p, saved_by_me: old })) }
+      setPost((current) => ({ ...current, saved_by_me: data.saved }))
+    } catch { setPost((current) => ({ ...current, saved_by_me: old })) }
   }
 
   const follow = async () => {
     const followable = ['pet', 'clinic', 'business', 'shelter'].includes(actor.type)
     if (!requireLogin() || !followable) return
     const old = post.following_actor
-    setPost((p) => ({ ...p, following_actor: !old }))
+    setPost((current) => ({ ...current, following_actor: !old }))
     try {
       const data = await toggleProfileFollow(actor.type, actor.identifier || actor.id)
-      setPost((p) => ({ ...p, following_actor: data.following }))
+      setPost((current) => ({ ...current, following_actor: data.following }))
       onChanged?.()
-    } catch { setPost((p) => ({ ...p, following_actor: old })) }
+    } catch { setPost((current) => ({ ...current, following_actor: old })) }
   }
 
   const openComments = async () => {
     const next = !commentsOpen
     setCommentsOpen(next)
-    if (next && post.comments_count > comments.length) {
+    if (next && post.comments_count > allComments.length) {
       setCommentsLoading(true)
       try { setComments(await getCommunityComments(post.id)) } finally { setCommentsLoading(false) }
     }
   }
 
-  const addComment = async (e) => {
-    e.preventDefault()
+  const addComment = async (event) => {
+    event.preventDefault()
     if (!requireLogin() || !comment.trim()) return
     setCommentSaving(true)
     try {
       const created = await addCommunityComment(post.id, comment.trim())
       setComments((rows) => [...rows, created])
-      setPost((p) => ({ ...p, comments_count: p.comments_count + 1 }))
+      setPost((current) => ({ ...current, comments_count: current.comments_count + 1 }))
       setComment('')
       setCommentsOpen(true)
     } finally { setCommentSaving(false) }
   }
 
+  const startReply = (item) => {
+    if (!requireLogin()) return
+    setReplyingTo(item.id)
+    setReplyText('')
+    setEditingCommentId(null)
+  }
+
+  const submitReply = async (event, parentId) => {
+    event.preventDefault()
+    if (!replyText.trim()) return
+    setCommentActionBusy(`reply-${parentId}`)
+    try {
+      const created = await addCommunityComment(post.id, replyText.trim(), parentId)
+      setComments((rows) => rows.map((item) => String(item.id) === String(parentId)
+        ? { ...item, replies: [...(item.replies || []), created], replies_count: (item.replies_count || 0) + 1 }
+        : item))
+      setPost((current) => ({ ...current, comments_count: current.comments_count + 1 }))
+      setReplyingTo(null)
+      setReplyText('')
+    } finally { setCommentActionBusy(null) }
+  }
+
+  const startCommentEdit = (item) => {
+    setEditingCommentId(item.id)
+    setEditCommentText(item.text)
+    setReplyingTo(null)
+  }
+
+  const submitCommentEdit = async (event, id) => {
+    event.preventDefault()
+    if (!editCommentText.trim()) return
+    setCommentActionBusy(`edit-${id}`)
+    try {
+      const updated = await updateCommunityComment(id, editCommentText.trim())
+      setComments((rows) => updateCommentTree(rows, id, (current) => ({ ...current, ...updated, replies: updated.replies ?? current.replies })))
+      setEditingCommentId(null)
+      setEditCommentText('')
+    } finally { setCommentActionBusy(null) }
+  }
+
+  const reactComment = async (item) => {
+    if (!requireLogin()) return
+    const old = item
+    setComments((rows) => updateCommentTree(rows, item.id, (current) => ({
+      ...current,
+      reacted_by_me: !current.reacted_by_me,
+      reactions_count: current.reactions_count + (current.reacted_by_me ? -1 : 1),
+    })))
+    try {
+      const data = await toggleCommunityCommentReaction(item.id)
+      setComments((rows) => updateCommentTree(rows, item.id, (current) => ({ ...current, reacted_by_me: data.reacted, reactions_count: data.reactions_count })))
+    } catch {
+      setComments((rows) => updateCommentTree(rows, item.id, () => old))
+    }
+  }
+
   const removeComment = async (id) => {
-    if (!window.confirm('¿Eliminar este comentario?')) return
+    const target = findComment(comments, id)
+    if (!target || !window.confirm('¿Eliminar este comentario?')) return
     await deleteCommunityComment(id)
-    setComments((rows) => rows.filter((item) => item.id !== id))
-    setPost((p) => ({ ...p, comments_count: Math.max(0, p.comments_count - 1) }))
+    const removedCount = 1 + (target.parent ? 0 : (target.replies?.length || 0))
+    setComments((rows) => rows
+      .filter((item) => String(item.id) !== String(id))
+      .map((item) => ({ ...item, replies: (item.replies || []).filter((reply) => String(reply.id) !== String(id)) })))
+    setPost((current) => ({ ...current, comments_count: Math.max(0, current.comments_count - removedCount) }))
+  }
+
+  const startPostEdit = () => {
+    setMenuOpen(false)
+    setEditPostText(post.text || '')
+    setEditingPost(true)
+  }
+
+  const submitPostEdit = async (event) => {
+    event.preventDefault()
+    if (!editPostText.trim() && !post.image_url) return
+    setPostSaving(true)
+    try {
+      const updated = await updateCommunityPost(post.id, { text: editPostText.trim() })
+      setPost(updated)
+      setEditingPost(false)
+    } finally { setPostSaving(false) }
   }
 
   const removePost = async () => {
@@ -201,31 +302,86 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
     const data = { title: `${actor.name} en VetPaw`, text: post.text || 'Mirá esta publicación de VetPaw', url }
     try {
       if (navigator.share) await navigator.share(data)
-      else { await navigator.clipboard.writeText(url); alert('Enlace copiado.') }
-    } catch { /* cancelado */ }
+      else {
+        await navigator.clipboard.writeText(url)
+        window.alert('Enlace copiado.')
+      }
+      const result = await registerCommunityShare(post.id)
+      setPost((current) => ({ ...current, shares_count: result.shares_count }))
+    } catch { /* compartir cancelado o portapapeles no disponible */ }
   }
 
+  const openMention = (username) => navigate(`/explorar?q=${encodeURIComponent(username)}`)
   const badge = typeMeta[post.post_type]
+
+  const renderComment = (item, isReply = false) => (
+    <div className={`comment-thread ${isReply ? 'comment-reply-thread' : ''}`} key={item.id}>
+      <div
+        id={`comment-${item.id}`}
+        className={`comment-item ${isReply ? 'comment-reply' : ''} ${String(item.id) === highlightedCommentId ? 'comment-target-highlight' : ''}`}
+      >
+        {item.author.avatar ? <img className="comment-avatar" src={item.author.avatar} alt="" /> : <div className="comment-avatar comment-avatar-fallback">👤</div>}
+        <div className="comment-main">
+          {editingCommentId === item.id ? (
+            <form className="comment-edit-form" onSubmit={(event) => submitCommentEdit(event, item.id)}>
+              <MentionTextarea multiline value={editCommentText} onChange={setEditCommentText} className="community-textarea comment-edit-input" maxLength={1000} autoFocus />
+              <div className="comment-inline-actions">
+                <button type="button" onClick={() => setEditingCommentId(null)}>Cancelar</button>
+                <button type="submit" disabled={commentActionBusy === `edit-${item.id}` || !editCommentText.trim()}>Guardar</button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <div className="comment-bubble">
+                <strong>{item.author.display_name}</strong>
+                <span>{renderRichText(item.text, onHashtagClick, openMention)}</span>
+              </div>
+              <div className="comment-tools">
+                <span>{relativeTime(item.created_at)}{item.is_edited ? ' · Editado' : ''}</span>
+                <button type="button" className={item.reacted_by_me ? 'active' : ''} onClick={() => reactComment(item)}>🐾 {item.reactions_count || ''}</button>
+                {!isReply && <button type="button" onClick={() => startReply(item)}>Responder</button>}
+                {item.can_edit && <button type="button" onClick={() => startCommentEdit(item)}>Editar</button>}
+                {item.can_delete ? <button type="button" onClick={() => removeComment(item.id)}>Eliminar</button> : user ? <button type="button" onClick={() => setReportTarget({ comment: item.id })}>Reportar</button> : null}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {!isReply && (item.replies || []).map((reply) => renderComment(reply, true))}
+
+      {!isReply && replyingTo === item.id && (
+        <form className="reply-form" onSubmit={(event) => submitReply(event, item.id)}>
+          <MentionTextarea value={replyText} onChange={setReplyText} className="community-input" placeholder={`Responder a ${item.author.display_name}...`} maxLength={1000} autoFocus />
+          <div className="comment-inline-actions">
+            <button type="button" onClick={() => { setReplyingTo(null); setReplyText('') }}>Cancelar</button>
+            <button type="submit" disabled={commentActionBusy === `reply-${item.id}` || !replyText.trim()}>Responder</button>
+          </div>
+        </form>
+      )}
+    </div>
+  )
 
   return (
     <article className="post-card community-card" id={`post-${post.id}`}>
       <div className="post-head">
         {actor.photo ? <img className="post-avatar" src={actor.photo} alt={actor.name} /> : <div className="post-avatar">{fallbackAvatar(actor)}</div>}
         <div className="post-author">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+          <div className="post-author-line">
             <Link to={actor.profile_url || '#'}>{actor.name || 'VetPaw'}</Link>
-            {actor.verified && <span title="Perfil verificado" style={{ color: '#5ecfff', fontSize: 12 }}>●</span>}
+            {actor.verified && <span title="Perfil verificado" className="verified-dot">●</span>}
             {['pet', 'clinic', 'business', 'shelter'].includes(actor.type) && user && actor.owner_user_id !== user.id && (
               <button type="button" className={`mini-follow ${post.following_actor ? 'following' : ''}`} onClick={follow}>{post.following_actor ? 'Siguiendo' : 'Seguir'}</button>
             )}
           </div>
-          <div className="post-meta">{actor.subtitle}{post.locality ? `${actor.subtitle ? ' · ' : ''}${post.locality}` : ''} · {relativeTime(post.created_at)}</div>
+          <div className="post-meta">{actor.subtitle}{post.locality ? `${actor.subtitle ? ' · ' : ''}${post.locality}` : ''} · {relativeTime(post.created_at)}{post.is_edited ? ' · Editado' : ''}</div>
         </div>
         <div className="post-menu">
-          <button className="post-menu-button" onClick={() => setMenuOpen((v) => !v)}>⋯</button>
+          <button className="post-menu-button" onClick={() => setMenuOpen((value) => !value)}>⋯</button>
           {menuOpen && (
             <div className="post-menu-panel">
               <button onClick={() => { setMenuOpen(false); share() }}>↗ Compartir</button>
+              {post.can_edit && <button onClick={startPostEdit}>✏️ Editar publicación</button>}
               {user && !post.can_delete && <button onClick={() => { setMenuOpen(false); setReportTarget({ post: post.id }) }}>⚑ Reportar publicación</button>}
               {user && !post.can_delete && actor.owner_user_id && <button onClick={blockUser}>⊘ Bloquear usuario</button>}
               {post.can_delete && <button className="danger" onClick={removePost}>🗑 Eliminar publicación</button>}
@@ -234,10 +390,20 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
         </div>
       </div>
 
-      <div className="post-copy">
-        {badge && <div><span className={`post-type-badge ${badge[0]}`}>{badge[1]}</span></div>}
-        {renderTextWithHashtags(post.text, onHashtagClick)}
-      </div>
+      {editingPost ? (
+        <form className="post-edit-panel" onSubmit={submitPostEdit}>
+          <MentionTextarea multiline value={editPostText} onChange={setEditPostText} className="community-textarea" maxLength={3000} autoFocus />
+          <div className="community-modal-actions">
+            <button type="button" className="community-button-secondary" onClick={() => setEditingPost(false)}>Cancelar</button>
+            <button type="submit" className="community-button" disabled={postSaving || (!editPostText.trim() && !post.image_url)}>{postSaving ? 'Guardando...' : 'Guardar cambios'}</button>
+          </div>
+        </form>
+      ) : (
+        <div className="post-copy">
+          {badge && <div><span className={`post-type-badge ${badge[0]}`}>{badge[1]}</span></div>}
+          {renderRichText(post.text, onHashtagClick, openMention)}
+        </div>
+      )}
 
       {post.lost_pet && (
         <div className="lost-info">
@@ -245,13 +411,17 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
           <span>📍 {post.lost_pet.locality || 'Sin localidad'}, {post.lost_pet.province || 'Argentina'}</span>
           {post.lost_pet.incident_date && <span>📅 Fecha: {new Date(`${post.lost_pet.incident_date}T12:00:00`).toLocaleDateString('es-AR')}</span>}
           <span>☎ {post.lost_pet.contact_value}</span>
-          <Link to="/mascotas-perdidas" style={{ color: '#ffb3a8', fontWeight: 800, marginTop: 3 }}>Ver aviso completo →</Link>
+          <Link to="/mascotas-perdidas" className="lost-link">Ver aviso completo →</Link>
         </div>
       )}
 
       {post.image_url && <div className="post-image-wrap"><img className="post-image" src={post.image_url} alt={`Publicación de ${actor.name}`} loading="lazy" /></div>}
 
-      <div className="post-stats"><span>🐾 {post.reactions_count} patitas</span><span>{post.comments_count} comentarios</span></div>
+      <div className="post-stats">
+        <span>🐾 {post.reactions_count} patitas</span>
+        <span>{post.comments_count} comentarios</span>
+        <span>↗ {post.shares_count || 0} compartidas</span>
+      </div>
       <div className="post-actions">
         <button className={`post-action ${post.reacted_by_me ? 'active' : ''}`} onClick={react}><span>🐾</span> {post.reacted_by_me ? 'Te gusta' : 'Patita'}</button>
         <button className="post-action" onClick={openComments}><span>💬</span> Comentar</button>
@@ -262,19 +432,9 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
       {(commentsOpen || comments.length > 0) && (
         <div className="comments-area">
           {commentsLoading && <div className="composer-sub">Cargando comentarios...</div>}
-          {comments.map((item) => (
-            <div
-              id={`comment-${item.id}`}
-              className={`comment-item ${String(item.id) === highlightedCommentId ? 'comment-target-highlight' : ''}`}
-              key={item.id}
-            >
-              {item.author.avatar ? <img className="comment-avatar" src={item.author.avatar} alt="" /> : <div className="comment-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👤</div>}
-              <div className="comment-bubble"><strong>{item.author.display_name}</strong>{item.text}</div>
-              {item.can_delete ? <button className="comment-delete" onClick={() => removeComment(item.id)}>✕</button> : user ? <button className="comment-delete" onClick={() => setReportTarget({ comment: item.id })}>⚑</button> : null}
-            </div>
-          ))}
+          {comments.map((item) => renderComment(item))}
           <form className="comment-form" onSubmit={addComment}>
-            <input className="community-input" value={comment} onChange={(e) => setComment(e.target.value)} placeholder={user ? 'Escribí un comentario...' : 'Iniciá sesión para comentar'} disabled={!user || commentSaving} maxLength={1000} />
+            <MentionTextarea value={comment} onChange={setComment} className="community-input" placeholder={user ? 'Escribí un comentario... Usá @ para mencionar' : 'Iniciá sesión para comentar'} disabled={!user || commentSaving} maxLength={1000} />
             <button className="community-button" disabled={!user || commentSaving || !comment.trim()}>{commentSaving ? '...' : 'Enviar'}</button>
           </form>
         </div>

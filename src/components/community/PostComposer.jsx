@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { createCommunityPost, getPets } from '../../services/api'
 import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../../utils/imageUpload'
 import ImageEditorModal from '../ImageEditorModal'
+import MentionTextarea from './MentionTextarea'
 
 export default function PostComposer({ user, onCreated, defaultPetId = null }) {
   const [pets, setPets] = useState([])
@@ -120,7 +121,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
             <Link to="/pets/new" className="community-button-secondary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+ Crear mascota</Link>
           )
         ) : <div className="community-select" style={{ display: 'flex', alignItems: 'center' }}>{roleMeta[user.role]?.icon} {roleMeta[user.role]?.label}</div>}
-        <textarea className="community-textarea" value={text} onChange={(e) => setText(e.target.value)} placeholder={user.role === 'owner' ? 'Una aventura, una foto, una anécdota... Podés usar #hashtags' : roleMeta[user.role]?.placeholder} maxLength={3000} />
+        <MentionTextarea multiline className="community-textarea" value={text} onChange={setText} placeholder={user.role === 'owner' ? 'Una aventura, una foto, una anécdota... Usá #hashtags o @ para mencionar' : roleMeta[user.role]?.placeholder} maxLength={3000} />
       </div>
       <div className="hashtag-suggestions" aria-label="Hashtags sugeridos">
         <span>Hashtags:</span>

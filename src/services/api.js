@@ -296,8 +296,20 @@ export const createCommunityPost = ({ text, image, pet }) => {
     }).then((r) => r.data);
 };
 
+export const updateCommunityPost = (id, { text, image } = {}) => {
+    const formData = new FormData();
+    if (text !== undefined) formData.append('text', text);
+    if (image !== undefined && image !== null) formData.append('image', image);
+    return api.patch(`/community/posts/${id}/`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+};
+
 export const deleteCommunityPost = (id) =>
     api.delete(`/community/posts/${id}/`);
+
+export const registerCommunityShare = (id) =>
+    api.post(`/community/posts/${id}/share/`).then((r) => r.data);
 
 export const toggleCommunityReaction = (id) =>
     api.post(`/community/posts/${id}/react/`).then((r) => r.data);
@@ -308,11 +320,23 @@ export const toggleSavedCommunityPost = (id) =>
 export const getCommunityComments = (postId) =>
     api.get(`/community/posts/${postId}/comments/`).then((r) => r.data);
 
-export const addCommunityComment = (postId, text) =>
-    api.post(`/community/posts/${postId}/comments/`, { text }).then((r) => r.data);
+export const addCommunityComment = (postId, text, parentId = null) =>
+    api.post(`/community/posts/${postId}/comments/`, {
+        text,
+        ...(parentId ? { parent_id: parentId } : {}),
+    }).then((r) => r.data);
+
+export const updateCommunityComment = (id, text) =>
+    api.patch(`/community/comments/${id}/`, { text }).then((r) => r.data);
 
 export const deleteCommunityComment = (id) =>
     api.delete(`/community/comments/${id}/`);
+
+export const toggleCommunityCommentReaction = (id) =>
+    api.post(`/community/comments/${id}/react/`).then((r) => r.data);
+
+export const getCommunityMentionSuggestions = (query) =>
+    api.get('/community/mentions/', { params: { q: query } }).then((r) => r.data);
 
 export const getCommunityDiscover = () =>
     api.get('/community/discover/').then((r) => r.data);
