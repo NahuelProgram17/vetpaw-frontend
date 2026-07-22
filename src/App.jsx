@@ -44,6 +44,9 @@ const CommunityPrivacy = lazy(() => import('./pages/CommunityPrivacy'))
 const Notifications = lazy(() => import('./pages/Notifications'))
 const Community = lazy(() => import('./pages/Community'))
 const Explore = lazy(() => import('./pages/Explore'))
+const Adoptions = lazy(() => import('./pages/Adoptions'))
+const AdoptionDetail = lazy(() => import('./pages/AdoptionDetail'))
+const ShelterAdoptions = lazy(() => import('./pages/ShelterAdoptions'))
 const PublicPetProfile = lazy(() => import('./pages/PublicPetProfile'))
 const CommunityModeration = lazy(() => import('./pages/CommunityModeration'))
 const NotFound = lazy(() => import('./pages/NotFound'))
@@ -69,6 +72,8 @@ function App() {
             <Route path="/" element={<Community />} />
             <Route path="/comunidad" element={<Community />} />
             <Route path="/explorar" element={<Explore />} />
+            <Route path="/adopciones" element={<Adoptions />} />
+            <Route path="/adopciones/:id" element={<AdoptionDetail />} />
             <Route path="/inicio-vetpaw" element={<Home />} />
             <Route path="/mascotas/:id" element={<PublicPetProfile />} />
             <Route path="/login" element={<Login />} />
@@ -102,6 +107,7 @@ function App() {
             <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
             <Route path="/business/dashboard" element={<ProtectedRoute role="business"><OrganizationDashboard kind="business" /></ProtectedRoute>} />
             <Route path="/shelter/dashboard" element={<ProtectedRoute role="shelter"><OrganizationDashboard kind="shelter" /></ProtectedRoute>} />
+            <Route path="/refugio/adopciones" element={<ProtectedRoute role="shelter"><ShelterAdoptions /></ProtectedRoute>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:uidb64/:token" element={<ResetPassword />} />
             <Route path="/terminos" element={<TerminosCondiciones />} />

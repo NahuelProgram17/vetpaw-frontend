@@ -474,3 +474,18 @@ export const sendPushTest = (endpoint) =>
 
 
 export default api;
+
+// ── Adopciones ───────────────────────────────────────
+const buildAdoptionForm = (data = {}) => { const f=new FormData(); Object.entries(data).forEach(([k,v])=>{ if(v===undefined||v===null||v==='') return; f.append(k,v) }); return f }
+export const getAdoptions=(params={})=>api.get('/adoptions/',{params}).then(r=>r.data)
+export const getAdoption=(id)=>api.get(`/adoptions/${id}/`).then(r=>r.data)
+export const createAdoption=(data)=>api.post('/adoptions/',buildAdoptionForm(data),{headers:{'Content-Type':'multipart/form-data'}}).then(r=>r.data)
+export const updateAdoption=(id,data)=>api.patch(`/adoptions/${id}/`,buildAdoptionForm(data),{headers:{'Content-Type':'multipart/form-data'}}).then(r=>r.data)
+export const deleteAdoption=(id)=>api.delete(`/adoptions/${id}/`)
+export const shareAdoption=(id)=>api.post(`/adoptions/${id}/share/`).then(r=>r.data)
+export const applyForAdoption=(id,data)=>api.post(`/adoptions/${id}/apply/`,data).then(r=>r.data)
+export const offerAdoptionHelp=(id,data)=>api.post(`/adoptions/${id}/help/`,data).then(r=>r.data)
+export const getMyAdoptionApplications=()=>api.get('/adoptions/applications/mine/').then(r=>r.data)
+export const getShelterApplications=()=>api.get('/adoptions/shelter/applications/').then(r=>r.data)
+export const updateAdoptionApplication=(id,data)=>api.patch(`/adoptions/applications/${id}/status/`,data).then(r=>r.data)
+export const getShelterHelpOffers=()=>api.get('/adoptions/shelter/help-offers/').then(r=>r.data)

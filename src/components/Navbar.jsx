@@ -279,6 +279,7 @@ export default function Navbar() {
     const ownerLinks = [
         { to: '/comunidad', icon: 'community', label: 'Comunidad' },
         { to: '/explorar', icon: 'explore', label: 'Explorar' },
+        { to: '/adopciones', icon: 'adoptions', label: 'Adopciones' },
         { to: '/dashboard', icon: 'panel', label: 'Mi panel' },
         { to: '/pets', icon: 'pets', label: 'Mascotas' },
         { to: '/appointments', icon: 'appointments', label: 'Turnos' },
@@ -293,6 +294,7 @@ export default function Navbar() {
     const clinicLinks = [
         { to: '/comunidad', icon: 'community', label: 'Comunidad' },
         { to: '/explorar', icon: 'explore', label: 'Explorar' },
+        { to: '/adopciones', icon: 'adoptions', label: 'Adopciones' },
         { to: '/clinic/dashboard', icon: 'panel', label: 'Mi panel' },
         { to: '/messages', icon: 'messages', label: 'Mensajes', badge: unreadMessages },
         { to: '/profile', icon: 'profile', label: 'Mi perfil' },
@@ -302,6 +304,7 @@ export default function Navbar() {
     const businessLinks = [
         { to: '/comunidad', icon: 'community', label: 'Comunidad' },
         { to: '/explorar', icon: 'explore', label: 'Explorar' },
+        { to: '/adopciones', icon: 'adoptions', label: 'Adopciones' },
         { to: '/business/dashboard', icon: 'panel', label: 'Mi negocio' },
         { to: '/messages', icon: 'messages', label: 'Mensajes', badge: unreadMessages },
         { to: '/profile', icon: 'profile', label: 'Mi cuenta' },
@@ -311,7 +314,9 @@ export default function Navbar() {
     const shelterLinks = [
         { to: '/comunidad', icon: 'community', label: 'Comunidad' },
         { to: '/explorar', icon: 'explore', label: 'Explorar' },
+        { to: '/adopciones', icon: 'adoptions', label: 'Adopciones' },
         { to: '/shelter/dashboard', icon: 'panel', label: 'Mi refugio' },
+        { to: '/refugio/adopciones', icon: 'adoptions', label: 'Gestionar adopciones' },
         { to: '/messages', icon: 'messages', label: 'Mensajes', badge: unreadMessages },
         { to: '/profile', icon: 'profile', label: 'Mi cuenta' },
         { to: '/configuracion', icon: 'settings', label: 'Configuración' },
@@ -325,6 +330,7 @@ export default function Navbar() {
     const guestLinks = [
         { to: '/comunidad', icon: 'community', label: 'Comunidad' },
         { to: '/explorar', icon: 'explore', label: 'Explorar' },
+        { to: '/adopciones', icon: 'adoptions', label: 'Adopciones' },
         { to: '/clinics', icon: 'clinics', label: 'Veterinarias' },
         { to: '/mascotas-perdidas', icon: 'lost', label: 'Mascotas perdidas' },
         { to: '/login', icon: 'login', label: 'Ingresar' },
@@ -676,6 +682,7 @@ export default function Navbar() {
                             <>
                                 <Link to="/comunidad" style={browserLinkStyle('/comunidad', G1)} {...browserLinkEvents('/comunidad', G1)}>Comunidad</Link>
                                 <Link to="/explorar" style={browserLinkStyle('/explorar', O1)} {...browserLinkEvents('/explorar', O1)}>Explorar</Link>
+                                <Link to="/adopciones" style={browserLinkStyle('/adopciones', G1)} {...browserLinkEvents('/adopciones', G1)}>Adopciones</Link>
                                 <Link to="/clinics" style={browserLinkStyle('/clinics', G1)} {...browserLinkEvents('/clinics', G1)}>Veterinarias</Link>
                                 <Link to="/mascotas-perdidas" style={browserLinkStyle('/mascotas-perdidas', O1)} {...browserLinkEvents('/mascotas-perdidas', O1)}>Mascotas perdidas</Link>
                                 <InstallPWA />
@@ -690,6 +697,7 @@ export default function Navbar() {
                             <>
                                 <Link to="/comunidad" style={browserLinkStyle('/comunidad', O1)} {...browserLinkEvents('/comunidad', O1)}>Comunidad</Link>
                                 <Link to="/explorar" style={browserLinkStyle('/explorar', G1)} {...browserLinkEvents('/explorar', G1)}>Explorar</Link>
+                                <Link to="/adopciones" style={browserLinkStyle('/adopciones', O1)} {...browserLinkEvents('/adopciones', O1)}>Adopciones</Link>
                                 <Link to={rolePanelPath[user.role]} style={browserLinkStyle(rolePanelPath[user.role], G1)} {...browserLinkEvents(rolePanelPath[user.role], G1)}>Mi panel</Link>
                                 <Link to="/messages" style={{ ...browserLinkStyle('/messages', O1), display: 'inline-flex', alignItems: 'center', gap: 6 }} {...browserLinkEvents('/messages', O1)}>
                                     Mensajes
@@ -722,6 +730,7 @@ export default function Navbar() {
                             <>
                                 <Link to="/comunidad" style={browserLinkStyle('/comunidad', G1)} {...browserLinkEvents('/comunidad', G1)}>Comunidad</Link>
                                 <Link to="/explorar" style={browserLinkStyle('/explorar', O1)} {...browserLinkEvents('/explorar', O1)}>Explorar</Link>
+                                <Link to="/adopciones" style={browserLinkStyle('/adopciones', G1)} {...browserLinkEvents('/adopciones', G1)}>Adopciones</Link>
                                 <Link to="/dashboard" style={browserLinkStyle('/dashboard', G1)} {...browserLinkEvents('/dashboard', G1)}>Mi panel</Link>
                                 <Link to="/pets" style={browserLinkStyle('/pets', O1)} {...browserLinkEvents('/pets', O1)}>Mascotas</Link>
                                 <Link to="/appointments" style={browserLinkStyle('/appointments', G1)} {...browserLinkEvents('/appointments', G1)}>Turnos</Link>

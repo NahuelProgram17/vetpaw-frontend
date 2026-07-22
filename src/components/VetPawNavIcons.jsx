@@ -60,8 +60,8 @@ export function NavIcon({ name, active = false, compact = false, danger = false 
         flexShrink: 0,
       }}
     >
-      {name === 'explore' ? (
-        <span aria-hidden="true" style={{ fontSize: compact ? 18 : 19, lineHeight: 1 }}>🔎</span>
+      {name === 'explore' || name === 'adoptions' ? (
+        <span aria-hidden="true" style={{ fontSize: compact ? 18 : 19, lineHeight: 1 }}>{name === 'adoptions' ? '🏠' : '🔎'}</span>
       ) : (
         <img
           src={src}
