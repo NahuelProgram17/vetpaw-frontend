@@ -453,6 +453,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
         </div>
       )}
 
+      {post.commerce_link && <button type="button" className="post-commerce-link" onClick={() => navigate(post.commerce_link.url)}><span>🛍️</span><div><b>{post.commerce_link.title}</b><small>{post.commerce_link.action}</small></div><strong>→</strong></button>}
       {post.image_url && <div className="post-image-wrap"><img className="post-image" src={post.image_url} alt={`Publicación de ${actor.name}`} loading="lazy" /></div>}
 
       <div className="post-stats">

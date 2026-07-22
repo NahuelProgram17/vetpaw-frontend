@@ -60,6 +60,9 @@ export default function Explore() {
   const [sort, setSort] = useState(searchParams.get('orden') || 'popular')
   const [only24h, setOnly24h] = useState(searchParams.get('24h') === '1')
   const [businessType, setBusinessType] = useState(searchParams.get('rubro') || '')
+  const [businessHomeService, setBusinessHomeService] = useState(searchParams.get('domicilio') === '1')
+  const [businessReservations, setBusinessReservations] = useState(searchParams.get('reservas') === '1')
+  const [businessPromotions, setBusinessPromotions] = useState(searchParams.get('promociones') === '1')
   const [shelterType, setShelterType] = useState(searchParams.get('tipo_refugio') || '')
   const [acceptingAnimals, setAcceptingAnimals] = useState(searchParams.get('recibe') === '1')
   const [data, setData] = useState({
@@ -94,11 +97,14 @@ export default function Explore() {
     sort,
     is_24h: only24h || undefined,
     business_type: businessType || undefined,
+    home_service: businessHomeService || undefined,
+    accepts_reservations: businessReservations || undefined,
+    has_promotions: businessPromotions || undefined,
     shelter_type: shelterType || undefined,
     accepting_animals: acceptingAnimals || undefined,
     page: requestedPage,
     page_size: 12,
-  }), [debouncedQuery, section, species, locality, province, sort, only24h, businessType, shelterType, acceptingAnimals])
+  }), [debouncedQuery, section, species, locality, province, sort, only24h, businessType, businessHomeService, businessReservations, businessPromotions, shelterType, acceptingAnimals])
 
   const syncUrl = useCallback(() => {
     const next = {}
@@ -110,10 +116,13 @@ export default function Explore() {
     if (sort !== 'popular') next.orden = sort
     if (only24h) next['24h'] = '1'
     if (businessType) next.rubro = businessType
+    if (businessHomeService) next.domicilio = '1'
+    if (businessReservations) next.reservas = '1'
+    if (businessPromotions) next.promociones = '1'
     if (shelterType) next.tipo_refugio = shelterType
     if (acceptingAnimals) next.recibe = '1'
     setSearchParams(next, { replace: true })
-  }, [debouncedQuery, section, species, locality, province, sort, only24h, businessType, shelterType, acceptingAnimals, setSearchParams])
+  }, [debouncedQuery, section, species, locality, province, sort, only24h, businessType, businessHomeService, businessReservations, businessPromotions, shelterType, acceptingAnimals, setSearchParams])
 
   const load = useCallback(async (requestedPage = 1, append = false) => {
     append ? setMoreLoading(true) : setLoading(true)
@@ -155,6 +164,9 @@ export default function Explore() {
     setProvince('')
     setOnly24h(false)
     setBusinessType('')
+    setBusinessHomeService(false)
+    setBusinessReservations(false)
+    setBusinessPromotions(false)
     setShelterType('')
     setAcceptingAnimals(false)
     setSort('popular')
@@ -211,7 +223,7 @@ export default function Explore() {
     [data.counts],
   )
 
-  const filtersActive = Boolean(species || locality || province || only24h || businessType || shelterType || acceptingAnimals || sort !== 'popular')
+  const filtersActive = Boolean(species || locality || province || only24h || businessType || businessHomeService || businessReservations || businessPromotions || shelterType || acceptingAnimals || sort !== 'popular')
   const suggestionsVisible = searchFocused && debouncedQuery.length >= 2 && data.suggestions?.length > 0
 
   return (
@@ -281,6 +293,11 @@ export default function Explore() {
             {(section === 'clinics' || section === 'businesses' || section === 'all') && (
               <label className="explore-check"><input type="checkbox" checked={only24h} onChange={(event) => setOnly24h(event.target.checked)} /> Atención 24 h</label>
             )}
+            {(section === 'businesses' || section === 'all') && <>
+              <label className="explore-check"><input type="checkbox" checked={businessHomeService} onChange={(event) => setBusinessHomeService(event.target.checked)} /> A domicilio</label>
+              <label className="explore-check"><input type="checkbox" checked={businessReservations} onChange={(event) => setBusinessReservations(event.target.checked)} /> Con reservas</label>
+              <label className="explore-check"><input type="checkbox" checked={businessPromotions} onChange={(event) => setBusinessPromotions(event.target.checked)} /> Con promociones</label>
+            </>}
             {(section === 'shelters' || section === 'all') && <label className="explore-check"><input type="checkbox" checked={acceptingAnimals} onChange={(event) => setAcceptingAnimals(event.target.checked)} /> Recibe animales</label>}
             {filtersActive && <button type="button" className="explore-clear" onClick={clearFilters}>Limpiar filtros</button>}
           </div>
@@ -485,7 +502,7 @@ function PartnerResultCard({ item, kind, user, busy, onFollow }) {
         <div>
           <div className="explore-verified"><strong>{item.name}</strong>{item.is_verified && <span title="Perfil verificado">●</span>}</div>
           <p>{item.type_display} · 📍 {[item.locality, item.province].filter(Boolean).join(', ')}</p>
-          <small>{isBusiness ? (item.is_24h ? '🕐 Atención 24 horas' : item.home_service ? '🏠 Atención a domicilio' : '🛍️ Negocio VetPaw') : item.capacity_status_display} · {plural(item.posts_count, 'publicación', 'publicaciones')} · 👥 {item.followers_count || 0}</small>
+          <small>{isBusiness ? (item.is_24h ? '🕐 Atención 24 horas' : item.home_service ? '🏠 Atención a domicilio' : '🛍️ Negocio VetPaw') : item.capacity_status_display} · {isBusiness ? `${item.catalog_count || 0} en catálogo · ${item.promotions_count || 0} promos` : plural(item.posts_count, 'publicación', 'publicaciones')} · 👥 {item.followers_count || 0}</small>
           {isBusiness && item.services?.length > 0 && <div className="explore-services">{item.services.slice(0, 3).map((service) => <span key={service}>{service}</span>)}</div>}
           {!isBusiness && <div className="explore-services">{item.accepting_animals && <span>Recibe animales</span>}{item.needs_foster_homes && <span>Busca tránsito</span>}{item.needs_volunteers && <span>Busca voluntarios</span>}</div>}
         </div>

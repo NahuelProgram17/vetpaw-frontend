@@ -139,6 +139,7 @@ export default function OrganizationDashboard({ kind }) {
         <Check label="Envíos" checked={form.delivery} onChange={(v) => set('delivery', v)} />
         <Check label="Venta online dentro de VetPaw" checked={form.online_sales} onChange={(v) => set('online_sales', v)} />
         <Check label="Atención con turno" checked={form.appointment_required} onChange={(v) => set('appointment_required', v)} />
+        <Check label="Recibir reservas dentro de VetPaw" checked={Boolean(form.accepts_reservations)} onChange={(v) => set('accepts_reservations', v)} />
         <Check label="Atención 24 horas" checked={form.is_24h} onChange={(v) => set('is_24h', v)} />
       </div><div className="org-form-grid" style={{ marginTop: 14 }}><Field label="Rango de precios"><input value={form.price_range || ''} onChange={(e) => set('price_range', e.target.value)} placeholder="Ej: Económico / Medio" /></Field><Field label="Promociones" full><textarea value={form.promotions || ''} onChange={(e) => set('promotions', e.target.value)} /></Field></div></section>
       <ChoiceSection title="Métodos de pago" options={PAYMENT_METHODS} selected={form.payment_methods || []} onToggle={(value) => toggle('payment_methods', value)} />

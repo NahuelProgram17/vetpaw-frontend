@@ -47,6 +47,9 @@ const Explore = lazy(() => import('./pages/Explore'))
 const Adoptions = lazy(() => import('./pages/Adoptions'))
 const AdoptionDetail = lazy(() => import('./pages/AdoptionDetail'))
 const ShelterAdoptions = lazy(() => import('./pages/ShelterAdoptions'))
+const BusinessCommerce = lazy(() => import('./pages/BusinessCommerce'))
+const BusinessItemDetail = lazy(() => import('./pages/BusinessItemDetail'))
+const BusinessFavorites = lazy(() => import('./pages/BusinessFavorites'))
 const PublicPetProfile = lazy(() => import('./pages/PublicPetProfile'))
 const CommunityModeration = lazy(() => import('./pages/CommunityModeration'))
 const NotFound = lazy(() => import('./pages/NotFound'))
@@ -86,6 +89,7 @@ function App() {
             <Route path="/mascotas-perdidas" element={<LostPets />} />
             <Route path="/clinicas/:slug" element={<ClinicProfile />} />
             <Route path="/negocios/:slug" element={<OrganizationProfile kind="business" />} />
+            <Route path="/negocios/:slug/catalogo/:itemId" element={<BusinessItemDetail />} />
             <Route path="/refugios/:slug" element={<OrganizationProfile kind="shelter" />} />
 
             <Route path="/dashboard" element={<ProtectedRoute role="owner"><Dashboard /></ProtectedRoute>} />
@@ -106,6 +110,8 @@ function App() {
 
             <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
             <Route path="/business/dashboard" element={<ProtectedRoute role="business"><OrganizationDashboard kind="business" /></ProtectedRoute>} />
+            <Route path="/business/comercial" element={<ProtectedRoute role="business"><BusinessCommerce /></ProtectedRoute>} />
+            <Route path="/mis-favoritos" element={<ProtectedRoute role="owner"><BusinessFavorites /></ProtectedRoute>} />
             <Route path="/shelter/dashboard" element={<ProtectedRoute role="shelter"><OrganizationDashboard kind="shelter" /></ProtectedRoute>} />
             <Route path="/refugio/adopciones" element={<ProtectedRoute role="shelter"><ShelterAdoptions /></ProtectedRoute>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

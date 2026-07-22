@@ -489,3 +489,35 @@ export const getMyAdoptionApplications=()=>api.get('/adoptions/applications/mine
 export const getShelterApplications=()=>api.get('/adoptions/shelter/applications/').then(r=>r.data)
 export const updateAdoptionApplication=(id,data)=>api.patch(`/adoptions/applications/${id}/status/`,data).then(r=>r.data)
 export const getShelterHelpOffers=()=>api.get('/adoptions/shelter/help-offers/').then(r=>r.data)
+
+// ── Negocios: catálogo, promociones y reservas ───────
+const buildCommerceForm = (data = {}) => {
+    const form = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+        if (value === undefined || value === null || value === '') return
+        if (typeof File !== 'undefined' && value instanceof File) form.append(key, value)
+        else if (Array.isArray(value)) form.append(key, JSON.stringify(value))
+        else form.append(key, value)
+    })
+    return form
+}
+export const getBusinessCatalog = (params = {}) => api.get('/commerce/catalog/', { params }).then(r => r.data)
+export const getBusinessCatalogItem = id => api.get(`/commerce/catalog/${id}/`).then(r => r.data)
+export const createBusinessCatalogItem = data => api.post('/commerce/catalog/', buildCommerceForm(data), { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data)
+export const updateBusinessCatalogItem = (id, data) => api.patch(`/commerce/catalog/${id}/`, buildCommerceForm(data), { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data)
+export const deleteBusinessCatalogItem = id => api.delete(`/commerce/catalog/${id}/`)
+export const shareBusinessCatalogItem = id => api.post(`/commerce/catalog/${id}/share/`).then(r => r.data)
+export const getBusinessPromotions = (params = {}) => api.get('/commerce/promotions/', { params }).then(r => r.data)
+export const createBusinessPromotion = data => api.post('/commerce/promotions/', buildCommerceForm(data), { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data)
+export const updateBusinessPromotion = (id, data) => api.patch(`/commerce/promotions/${id}/`, buildCommerceForm(data), { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data)
+export const deleteBusinessPromotion = id => api.delete(`/commerce/promotions/${id}/`)
+export const shareBusinessPromotion = id => api.post(`/commerce/promotions/${id}/share/`).then(r => r.data)
+export const toggleBusinessFavorite = (target_type, target_id) => api.post('/commerce/favorites/toggle/', { target_type, target_id }).then(r => r.data)
+export const getBusinessFavorites = () => api.get('/commerce/favorites/').then(r => r.data)
+export const createBusinessInquiry = data => api.post('/commerce/inquiries/', data).then(r => r.data)
+export const getBusinessInquiries = () => api.get('/commerce/inquiries/').then(r => r.data)
+export const updateBusinessInquiry = (id, status) => api.patch(`/commerce/inquiries/${id}/`, { status }).then(r => r.data)
+export const createBusinessReservation = data => api.post('/commerce/reservations/', data).then(r => r.data)
+export const getBusinessReservations = () => api.get('/commerce/reservations/').then(r => r.data)
+export const updateBusinessReservationStatus = (id, data) => api.patch(`/commerce/reservations/${id}/status/`, data).then(r => r.data)
+export const getBusinessCommerceDashboard = () => api.get('/commerce/dashboard/').then(r => r.data)

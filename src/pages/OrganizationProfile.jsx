@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getBusinessProfile, getShelterProfile, toggleProfileFollow } from '../services/api'
+import { getBusinessProfile, getShelterProfile, toggleBusinessFavorite, toggleProfileFollow } from '../services/api'
 import PostCard from '../components/community/PostCard'
 import ProfileShareButton from '../components/community/ProfileShareButton'
 import SocialConnectionsModal from '../components/community/SocialConnectionsModal'
+import { CatalogCard, PromotionCard } from '../components/commerce/CommerceCards'
 import VetPawLoader from '../components/VetPawLoader'
 import './Community.css'
 import './SocialProfile.css'
+import './BusinessCommerce.css'
 
 const speciesLabels = {
   dog: '🐶 Perros', cat: '🐱 Gatos', rabbit: '🐰 Conejos', bird: '🦜 Aves',
@@ -74,6 +76,24 @@ export default function OrganizationProfile({ kind }) {
     }
   }
 
+  const favoriteBusiness = async () => {
+    if (!user) { navigate('/login'); return }
+    const data = await toggleBusinessFavorite('business', profile.id)
+    setProfile((current) => ({ ...current, is_favorite: data.favorite }))
+  }
+
+  const favoriteItem = async (item) => {
+    if (!user) { navigate('/login'); return }
+    const data = await toggleBusinessFavorite('catalog_item', item.id)
+    setProfile((current) => ({ ...current, catalog_preview: current.catalog_preview.map((entry) => entry.id === item.id ? { ...entry, is_favorite: data.favorite } : entry) }))
+  }
+
+  const favoritePromotion = async (promotion) => {
+    if (!user) { navigate('/login'); return }
+    const data = await toggleBusinessFavorite('promotion', promotion.id)
+    setProfile((current) => ({ ...current, active_promotions: current.active_promotions.map((entry) => entry.id === promotion.id ? { ...entry, is_favorite: data.favorite } : entry) }))
+  }
+
   const gallery = useMemo(() => profile?.gallery || [], [profile])
 
   if (loading) return <VetPawLoader message="Cargando perfil..." subText={isBusiness ? 'Preparando el negocio' : 'Preparando el refugio'} />
@@ -109,6 +129,7 @@ export default function OrganizationProfile({ kind }) {
                 <Link className="social-action secondary" to={isBusiness ? '/business/dashboard' : '/shelter/dashboard'}>✏️ Editar perfil</Link>
                 <Link className="social-action secondary" to="/configuracion/privacidad">🛡️ Privacidad</Link>
               </> : canFollow && <button type="button" disabled={followingBusy} className={`social-action ${profile.following ? 'following' : ''}`} onClick={follow}>{followingBusy ? 'Guardando...' : profile.following ? '✓ Siguiendo' : '＋ Seguir'}</button>}
+              {isBusiness && !profile.can_edit && <button type="button" className="social-action secondary" onClick={favoriteBusiness}>{profile.is_favorite ? '♥ Favorito' : '♡ Guardar negocio'}</button>}
               <ProfileShareButton title={`${profile.name} en VetPaw`} text={`Conocé ${isBusiness ? 'este negocio' : 'este refugio'} dentro de VetPaw`} path={profilePath} />
             </div>
           </div>
@@ -138,6 +159,7 @@ export default function OrganizationProfile({ kind }) {
               <Detail label="Animales" value={(profile.species || []).map((item) => speciesLabels[item] || item).join(', ') || 'Sin completar'} />
               {isBusiness ? <>
                 <Detail label="Atención" value={profile.appointment_required ? 'Con turno' : 'Consultar disponibilidad'} />
+                <Detail label="Reservas en VetPaw" value={yesNo(profile.accepts_reservations)} />
                 <Detail label="A domicilio" value={yesNo(profile.home_service)} />
                 <Detail label="Envíos" value={yesNo(profile.delivery)} />
                 <Detail label="Venta online" value={yesNo(profile.online_sales)} />
@@ -161,15 +183,18 @@ export default function OrganizationProfile({ kind }) {
         </div>
 
         <div className="social-tabs">
+          {isBusiness && <button type="button" className={tab === 'catalog' ? 'active' : ''} onClick={() => setTab('catalog')}>🛍️ Catálogo</button>}
+          {isBusiness && <button type="button" className={tab === 'promotions' ? 'active' : ''} onClick={() => setTab('promotions')}>🎁 Promociones</button>}
           <button type="button" className={tab === 'posts' ? 'active' : ''} onClick={() => setTab('posts')}>📸 Publicaciones</button>
           <button type="button" className={tab === 'gallery' ? 'active' : ''} onClick={() => setTab('gallery')}>🖼️ Galería</button>
         </div>
 
-        {tab === 'posts' ? <section className="social-post-list">
+        {tab === 'catalog' && <section className="commerce-grid">{profile.catalog_preview?.length ? profile.catalog_preview.map((item) => <CatalogCard key={item.id} item={item} onFavorite={favoriteItem} />) : <div className="social-card social-empty">Este negocio todavía no cargó productos o servicios.</div>}</section>}
+        {tab === 'promotions' && <section className="commerce-grid">{profile.active_promotions?.length ? profile.active_promotions.map((promotion) => <PromotionCard key={promotion.id} promotion={promotion} onFavorite={favoritePromotion} />) : <div className="social-card social-empty">No hay promociones activas en este momento.</div>}</section>}
+        {tab === 'posts' && <section className="social-post-list">
           {profile.recent_posts?.length ? profile.recent_posts.map((post) => <PostCard key={post.id} initialPost={post} user={user} onDeleted={(postId) => setProfile((current) => ({ ...current, recent_posts: current.recent_posts.filter((item) => item.id !== postId), posts_count: Math.max(0, current.posts_count - 1), gallery: current.gallery.filter((item) => item.post_id !== postId) }))} />) : <div className="social-card social-empty">📷 Las publicaciones de {profile.name} aparecerán acá.</div>}
-        </section> : <section className="social-card">
-          {gallery.length ? <div className="social-gallery">{gallery.map((item) => <button type="button" className="social-gallery-item" key={item.post_id} onClick={() => setLightbox(item)}><img src={item.image_url} alt={item.text || profile.name} /><span>{item.text || 'Publicación de VetPaw'}</span></button>)}</div> : <div className="social-empty">Todavía no hay fotos en la galería.</div>}
         </section>}
+        {tab === 'gallery' && <section className="social-card">{gallery.length ? <div className="social-gallery">{gallery.map((item) => <button type="button" className="social-gallery-item" key={item.post_id} onClick={() => setLightbox(item)}><img src={item.image_url} alt={item.text || profile.name} /><span>{item.text || 'Publicación de VetPaw'}</span></button>)}</div> : <div className="social-empty">Todavía no hay fotos en la galería.</div>}</section>}
       </div>
 
       <SocialConnectionsModal open={Boolean(connections)} onClose={() => setConnections(null)} profileType={kind} identifier={profile.slug || profile.id} initialKind={connections || 'followers'} profileName={profile.name} />
