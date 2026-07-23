@@ -140,7 +140,7 @@ export default function ClinicProfile() {
               <div className="social-badges">
                 <span className="social-badge blue">✓ Veterinaria VetPaw</span>
                 {clinic.is_24h && <span className="social-badge orange">🕐 Atención 24 horas</span>}
-                {clinic.has_schedule && <span className="social-badge">📅 Agenda disponible</span>}
+                {clinic.can_request_appointment && <span className="social-badge">📅 Agenda y turnos disponibles</span>}
               </div>
               <div className="clinic-rating">{clinic.rating_avg ? <>{stars(clinic.rating_avg)} <b>{clinic.rating_avg}</b><span>({clinic.reviews_count} reseñas)</span></> : <span>Sin reseñas todavía</span>}</div>
             </div>
@@ -151,7 +151,7 @@ export default function ClinicProfile() {
                 <button type="button" className="social-action secondary" onClick={() => setEditing((value) => !value)}>✏️ Editar perfil</button>
               </> : canFollow && <button type="button" disabled={followingBusy} className={`social-action ${clinic.following ? 'following' : ''}`} onClick={follow}>{followingBusy ? 'Guardando...' : clinic.following ? '✓ Siguiendo' : '＋ Seguir'}</button>}
               <ProfileShareButton title={`${clinic.name} en VetPaw`} text={`Conocé esta veterinaria dentro de VetPaw`} path={profilePath} />
-              {clinic.allow_appointment_requests !== false && <button type="button" className="social-action" onClick={() => user ? navigate(`/appointments/new?clinic=${clinic.id}`) : navigate('/login')}>📅 Sacar turno</button>}
+              {clinic.can_request_appointment && <button type="button" className="social-action" onClick={() => user ? navigate(`/appointments/new?clinic=${clinic.id}`) : navigate('/login')}>📅 Sacar turno</button>}
             </div>
           </div>
           <div className="social-stats">
@@ -186,11 +186,12 @@ export default function ClinicProfile() {
               <Detail label="Correo" value={clinic.email} />
               <Detail label="Miembros registrados" value={clinic.members_count ? String(clinic.members_count) : ''} />
               <Detail label="Atención 24 horas" value={clinic.is_24h ? 'Sí' : 'No'} />
-              <Detail label="Agenda VetPaw" value={clinic.has_schedule ? 'Disponible' : 'Consultar'} />
+              <Detail label="Agenda VetPaw" value={clinic.can_request_appointment ? 'Recibe turnos' : 'No disponible'} />
             </div>
             <div className="social-contact-stack">
               {clinic.phone && <a className="social-action secondary" href={`tel:${clinic.phone}`}>📞 Llamar</a>}
-              {clinic.allow_appointment_requests !== false && <button type="button" className="social-action" onClick={() => user ? navigate(`/appointments/new?clinic=${clinic.id}`) : navigate('/login')}>📅 Solicitar turno</button>}
+              {clinic.can_request_appointment && <button type="button" className="social-action" onClick={() => user ? navigate(`/appointments/new?clinic=${clinic.id}`) : navigate('/login')}>📅 Solicitar turno</button>}
+              {!clinic.can_request_appointment && <div className="clinic-appointment-unavailable">{clinic.appointment_unavailable_reason || 'Esta veterinaria no está recibiendo turnos en este momento.'}</div>}
             </div>
           </aside>
         </div>
@@ -205,7 +206,30 @@ export default function ClinicProfile() {
 
         {tab === 'posts' && <section className="social-post-list">{clinic.recent_posts?.length ? clinic.recent_posts.map((post) => <PostCard key={post.id} initialPost={post} user={user} onDeleted={(postId) => setClinic((current) => ({ ...current, recent_posts: current.recent_posts.filter((item) => item.id !== postId), posts_count: Math.max(0, current.posts_count - 1), gallery: current.gallery.filter((item) => item.post_id !== postId) }))} />) : <div className="social-card social-empty">📷 Las publicaciones de {clinic.name} aparecerán acá.</div>}</section>}
 
-        {tab === 'campaigns' && <section className="social-card">{clinic.upcoming_campaigns?.length ? <div className="clinic-profile-campaigns">{clinic.upcoming_campaigns.map((campaign) => <article className="clinic-profile-campaign-card" key={campaign.id}>{campaign.image_url && <img src={campaign.image_url} alt={campaign.title} />}<div><small>{campaign.campaign_type_display}</small><h3>{campaign.title}</h3><p>📅 {new Date(campaign.starts_at).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>{campaign.location && <p>📍 {campaign.location}</p>}<p>{campaign.is_free ? 'Actividad gratuita' : campaign.price ? `$${Number(campaign.price).toLocaleString('es-AR')}` : 'Consultar valor'}{campaign.remaining_slots !== null ? ` · ${campaign.remaining_slots} cupos` : ''}</p>{campaign.allow_booking && campaign.post_id && <button type="button" onClick={() => user ? navigate(`/appointments/new?clinic=${clinic.id}&source_post=${campaign.post_id}&campaign=${campaign.id}&reason=${encodeURIComponent(campaign.title)}`) : navigate('/login')}>Reservar en VetPaw</button>}</div></article>)}</div> : <div className="social-empty">No hay campañas próximas publicadas.</div>}</section>}
+        {tab === 'campaigns' && (
+          <section className="social-card">
+            {clinic.upcoming_campaigns?.length ? (
+              <>
+                <div className="clinic-community-info">ℹ️ Las campañas son informativas. Para solicitar atención usá el botón “Sacar turno” del perfil.</div>
+                <div className="clinic-profile-campaigns">
+                  {clinic.upcoming_campaigns.map((campaign) => (
+                    <article className="clinic-profile-campaign-card" key={campaign.id}>
+                      {campaign.image_url && <img src={campaign.image_url} alt={campaign.title} />}
+                      <div>
+                        <small>{campaign.campaign_type_display}</small>
+                        <h3>{campaign.title}</h3>
+                        <p>📅 {new Date(campaign.starts_at).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                        {campaign.location && <p>📍 {campaign.location}</p>}
+                        {campaign.species?.length > 0 && <p>🐾 Especies: {campaign.species.map((species) => serviceLabels[species] || species).join(', ')}</p>}
+                        <p>{campaign.is_free ? 'Actividad gratuita' : campaign.price ? `$${Number(campaign.price).toLocaleString('es-AR')}` : 'Consultar valor'}{campaign.capacity ? ` · Cupo informado: ${campaign.capacity}` : ''}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </>
+            ) : <div className="social-empty">No hay campañas próximas publicadas.</div>}
+          </section>
+        )}
 
         {tab === 'gallery' && <section className="social-card">{gallery.length ? <div className="social-gallery">{gallery.map((item) => <button type="button" className="social-gallery-item" key={item.post_id} onClick={() => setLightbox({ image_url: item.image_url, text: item.text })}><img src={item.image_url} alt={item.text || clinic.name} /><span>{item.text || 'Publicación de VetPaw'}</span></button>)}</div> : <div className="social-empty">Todavía no hay fotos en la galería social.</div>}</section>}
 

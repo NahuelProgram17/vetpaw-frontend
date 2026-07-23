@@ -1,7 +1,7 @@
 // Appointments.jsx
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
-import { getAppointments, createAppointment, updateAppointment, cancelAppointment, getPets, getClinics, getClinicCampaign } from "../services/api";
+import { useLocation, useSearchParams } from "react-router-dom";
+import { getAppointments, createAppointment, updateAppointment, cancelAppointment, getPets, getClinics } from "../services/api";
 import api from "../services/api";
 import ownerBg from "../assets/vetpaw-owner-bg.png";
 import dashboardAppointmentsIcon from "../assets/vetpaw-dashboard-icons/dashboard-appointments.png";
@@ -20,6 +20,18 @@ const STATUS_LABEL = {
 
 const EMPTY_FORM = { pet: "", clinic: "", requested_date: "", reason: "", appointment_type: "control" };
 
+const todayForDateInput = () => {
+    const now = new Date();
+    return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+};
+
+const apiErrorMessage = (data, fallback) => {
+    if (!data) return fallback;
+    if (typeof data === "string") return data;
+    if (data.error || data.detail) return data.error || data.detail;
+    const values = Object.values(data).flat().filter(Boolean);
+    return values.length ? values.join(" ") : fallback;
+};
 
 
 function OwnerPawIcon() {
@@ -65,6 +77,7 @@ function OwnerAlertPetIcon() {
 
 export default function Appointments() {
     const [searchParams] = useSearchParams();
+    const location = useLocation();
     const [appointments, setAppointments] = useState([]);
     const [pets, setPets] = useState([]);
     const [clinics, setClinics] = useState([]);
@@ -83,7 +96,6 @@ export default function Appointments() {
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [selectedDate, setSelectedDate] = useState("");
     const [clinicHasSchedule, setClinicHasSchedule] = useState(false);
-    const [campaignBooking, setCampaignBooking] = useState(null);
 
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [reviewAppt, setReviewAppt] = useState(null);
@@ -111,13 +123,12 @@ export default function Appointments() {
 
     const petIdFromQuery = searchParams.get("pet");
     const clinicIdFromQuery = searchParams.get("clinic");
-    const sourcePostIdFromQuery = searchParams.get("source_post");
-    const campaignIdFromQuery = searchParams.get("campaign");
     const reasonFromQuery = searchParams.get("reason") || "";
+    const isNewRoute = location.pathname.endsWith('/new');
 
     useEffect(() => {
         fetchAll();
-        if (petIdFromQuery || clinicIdFromQuery || sourcePostIdFromQuery) {
+        if (isNewRoute || petIdFromQuery || clinicIdFromQuery) {
             setForm({
                 ...EMPTY_FORM,
                 pet: petIdFromQuery ? parseInt(petIdFromQuery, 10) : "",
@@ -126,35 +137,30 @@ export default function Appointments() {
             });
             setShowModal(true);
         }
-        if (campaignIdFromQuery) {
-            getClinicCampaign(campaignIdFromQuery).then((campaign) => {
-                setCampaignBooking(campaign);
-                const dateValue = campaign.starts_at?.slice(0, 10) || "";
-                setSelectedDate(dateValue);
-                setClinicHasSchedule(false);
-                setForm((current) => ({
-                    ...current,
-                    clinic: campaign.clinic,
-                    requested_date: campaign.starts_at,
-                    reason: reasonFromQuery || campaign.title,
-                    appointment_type: campaign.campaign_type === 'vaccination' ? 'vaccine' : 'other',
-                }));
-            }).catch(() => setCampaignBooking(null));
-        }
-    }, [fetchAll, petIdFromQuery, clinicIdFromQuery, sourcePostIdFromQuery, campaignIdFromQuery, reasonFromQuery]);
+    }, [fetchAll, petIdFromQuery, clinicIdFromQuery, reasonFromQuery, isNewRoute]);
 
     const fetchSlots = async (clinicId, date, type) => {
         if (!clinicId || !date || !type) return;
+        const clinic = clinics.find((item) => String(item.id) === String(clinicId));
+        if (clinic && !clinic.can_request_appointment) {
+            setClinicHasSchedule(false);
+            setSlots([]);
+            setSelectedSlot(null);
+            setError(clinic.appointment_unavailable_reason || "Esta veterinaria no está recibiendo turnos en este momento.");
+            return;
+        }
         setSlotsLoading(true);
         setSlots([]);
         setSelectedSlot(null);
+        setError("");
         try {
             const res = await api.get(`/clinics/${clinicId}/slots/?date=${date}&type=${type}`);
             setSlots(res.data.slots || []);
             setClinicHasSchedule(true);
-        } catch {
+        } catch (requestError) {
             setClinicHasSchedule(false);
             setSlots([]);
+            setError(apiErrorMessage(requestError.response?.data, "No pudimos consultar la agenda de esta veterinaria."));
         } finally { setSlotsLoading(false); }
     };
 
@@ -165,7 +171,6 @@ export default function Appointments() {
         setSelectedSlot(null);
         setSelectedDate("");
         setClinicHasSchedule(false);
-        setCampaignBooking(null);
         setError("");
         setShowModal(true);
     };
@@ -177,7 +182,7 @@ export default function Appointments() {
             reason: appt.reason || "",
             appointment_type: appt.appointment_type || "control",
         });
-        setSlots([]); setSelectedSlot(null); setSelectedDate(""); setClinicHasSchedule(false); setCampaignBooking(null);
+        setSlots([]); setSelectedSlot(null); setSelectedDate(""); setClinicHasSchedule(false);
         setError(""); setShowModal(true);
     };
     const closeModal = () => { setShowModal(false); setEditingAppt(null); setError(""); };
@@ -189,25 +194,24 @@ export default function Appointments() {
         if (!form.pet || !form.clinic || !form.reason || !form.appointment_type) {
             setError("Mascota, clínica, tipo y motivo son obligatorios."); return;
         }
-        if (!campaignBooking && clinicHasSchedule && !selectedSlot) {
-            setError("Seleccioná un horario disponible."); return;
+        const selectedClinic = clinics.find((item) => String(item.id) === String(form.clinic));
+        if (!editingAppt && selectedClinic && !selectedClinic.can_request_appointment) {
+            setError(selectedClinic.appointment_unavailable_reason || "Esta veterinaria no está recibiendo turnos en este momento."); return;
         }
-        if (!campaignBooking && !clinicHasSchedule && !form.requested_date) {
-            setError("La fecha y hora son obligatorias."); return;
+        if (!editingAppt && !selectedSlot) {
+            setError("Elegí una fecha y un horario disponible."); return;
         }
         setSaving(true); setError("");
         try {
             const payload = {
                 ...form,
-                requested_date: campaignBooking?.starts_at || (clinicHasSchedule ? selectedSlot : form.requested_date),
-                ...(sourcePostIdFromQuery ? { source_post: parseInt(sourcePostIdFromQuery, 10) } : {}),
+                requested_date: editingAppt ? (selectedSlot || form.requested_date) : selectedSlot,
             };
             if (editingAppt) await updateAppointment(editingAppt.id, payload);
             else await createAppointment(payload);
             await fetchAll(); closeModal();
         } catch (err) {
-            const data = err.response?.data;
-            setError(data ? Object.values(data).flat().join(" ") : "Error al guardar.");
+            setError(apiErrorMessage(err.response?.data, "Error al guardar."));
         } finally { setSaving(false); }
     };
 
@@ -506,19 +510,22 @@ export default function Appointments() {
                             </div>
                             <div className="form-group">
                                 <label>Clínica *</label>
-                                <select name="clinic" value={form.clinic} disabled={Boolean(sourcePostIdFromQuery)} onChange={e => {
+                                <select name="clinic" value={form.clinic} onChange={e => {
                                     const id = parseInt(e.target.value) || "";
+                                    const selectedClinic = clinics.find((item) => String(item.id) === String(id));
                                     setForm({ ...form, clinic: id });
-                                    setSlots([]); setSelectedSlot(null); setClinicHasSchedule(false);
-                                    if (id && selectedDate && form.appointment_type) fetchSlots(id, selectedDate, form.appointment_type);
+                                    setSlots([]); setSelectedSlot(null); setClinicHasSchedule(false); setError("");
+                                    if (selectedClinic && !selectedClinic.can_request_appointment) {
+                                        setError(selectedClinic.appointment_unavailable_reason || "Esta veterinaria no está recibiendo turnos en este momento.");
+                                    } else if (id && selectedDate && form.appointment_type) fetchSlots(id, selectedDate, form.appointment_type);
                                 }}>
                                     <option value="">Seleccioná una clínica</option>
-                                    {clinics.map(c => <option key={c.id} value={c.id}>{c.name} {c.has_schedule ? "🗓" : ""}</option>)}
+                                    {clinics.map(c => <option key={c.id} value={c.id} disabled={!editingAppt && !c.can_request_appointment}>{c.name} {c.can_request_appointment ? "🗓" : "— turnos no disponibles"}</option>)}
                                 </select>
                             </div>
                             <div className="form-group">
                                 <label>Tipo de consulta *</label>
-                                <select name="appointment_type" value={form.appointment_type} disabled={Boolean(campaignBooking)} onChange={e => {
+                                <select name="appointment_type" value={form.appointment_type} onChange={e => {
                                     const type = e.target.value;
                                     setForm({ ...form, appointment_type: type });
                                     setSlots([]); setSelectedSlot(null);
@@ -534,16 +541,10 @@ export default function Appointments() {
                                 <label>Motivo *</label>
                                 <input name="reason" type="text" placeholder="Ej: Control anual, castración..." value={form.reason} onChange={handleChange} />
                             </div>
-                            {campaignBooking && (
-                                <div className="consent-box" style={{ borderColor: 'rgba(76,175,80,.35)' }}>
-                                    <span className="consent-icon">🏥</span>
-                                    <p><strong>{campaignBooking.title}</strong><br />{new Date(campaignBooking.starts_at).toLocaleString('es-AR', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}{campaignBooking.location ? ` · ${campaignBooking.location}` : ''}</p>
-                                </div>
-                            )}
-                            {!campaignBooking && <div className="form-group">
+                            <div className="form-group">
                                 <label>Fecha *</label>
                                 <input type="date"
-                                    min={new Date().toISOString().slice(0, 10)}
+                                    min={todayForDateInput()}
                                     value={selectedDate}
                                     onChange={e => {
                                         setSelectedDate(e.target.value);
@@ -552,17 +553,17 @@ export default function Appointments() {
                                         if (form.clinic && form.appointment_type) fetchSlots(form.clinic, e.target.value, form.appointment_type);
                                     }}
                                 />
-                            </div>}
+                            </div>
 
-                            {/* Slots disponibles si la clínica tiene agenda */}
-                            {!campaignBooking && selectedDate && clinicHasSchedule && (
+                            {/* Horarios de la agenda configurada */}
+                            {selectedDate && form.clinic && (
                                 <div className="form-group">
                                     <label>Horario disponible *</label>
                                     {slotsLoading ? (
                                         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>⏳ Buscando horarios...</p>
-                                    ) : slots.length === 0 ? (
+                                    ) : clinicHasSchedule && slots.length === 0 ? (
                                         <p style={{ color: '#ff9500', fontSize: '0.85rem' }}>⚠️ No hay horarios disponibles para ese día.</p>
-                                    ) : (
+                                    ) : clinicHasSchedule ? (
                                         <div className="slots-grid">
                                             {slots.map(slot => (
                                                 <button key={slot.datetime} type="button"
@@ -572,18 +573,9 @@ export default function Appointments() {
                                                 </button>
                                             ))}
                                         </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Hora manual si no tiene agenda */}
-                            {!campaignBooking && selectedDate && !clinicHasSchedule && (
-                                <div className="form-group">
-                                    <label>Hora *</label>
-                                    <input type="time"
-                                        value={form.requested_date?.slice(11, 16) || ""}
-                                        onChange={e => setForm({ ...form, requested_date: `${selectedDate}T${e.target.value}` })}
-                                    />
+                                    ) : !error ? (
+                                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>Elegí una veterinaria con agenda activa.</p>
+                                    ) : null}
                                 </div>
                             )}
 
@@ -595,8 +587,8 @@ export default function Appointments() {
                             )}
                             <div className="form-actions">
                                 <button type="button" className="btn-ghost" onClick={closeModal}>Cancelar</button>
-                                <button type="submit" className="btn-primary" disabled={saving}>
-                                    {saving ? "Guardando..." : editingAppt ? "Guardar cambios" : sourcePostIdFromQuery ? "Enviar solicitud 📅" : "Crear turno 📅"}
+                                <button type="submit" className="btn-primary" disabled={saving || (!editingAppt && !selectedSlot)}>
+                                    {saving ? "Guardando..." : editingAppt ? "Guardar cambios" : "Crear turno 📅"}
                                 </button>
                             </div>
                         </form>

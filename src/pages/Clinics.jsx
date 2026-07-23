@@ -482,6 +482,12 @@ export default function Clinics() {
                                             </span>
                                         </div>
                                     )}
+                                    {!clinic.can_request_appointment && (
+                                        <div className="clinic-detail" title={clinic.appointment_unavailable_reason || ''}>
+                                            <span className="detail-icon" style={{ color: '#ffb74d' }}>●</span>
+                                            <span>{clinic.appointment_unavailable_reason || 'Turnos no disponibles por el momento.'}</span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="card-actions">
@@ -493,10 +499,11 @@ export default function Clinics() {
                                     </button>
                                     <button
                                         className="btn-turno"
-                                        onClick={() => navigate('/appointments/new')}
-                                        disabled={!clinic.is_active}
+                                        onClick={() => navigate(`/appointments/new?clinic=${clinic.id}`)}
+                                        disabled={!clinic.can_request_appointment}
+                                        title={clinic.can_request_appointment ? 'Sacar turno en esta veterinaria' : (clinic.appointment_unavailable_reason || 'Turnos no disponibles')}
                                     >
-                                        <VPIcon src={dashboardAppointmentsIcon} className="btn-inline-img" /> Sacar turno
+                                        <VPIcon src={dashboardAppointmentsIcon} className="btn-inline-img" /> {clinic.can_request_appointment ? 'Sacar turno' : 'Turnos no disponibles'}
                                     </button>
                                     {user?.role === 'owner' && (
                                         clinic.is_member ? (

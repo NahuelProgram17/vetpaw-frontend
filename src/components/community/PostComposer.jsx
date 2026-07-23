@@ -125,7 +125,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
   }
 
   const roleMeta = {
-    clinic: { name: user.profile_name || 'Tu veterinaria', icon: '🏥', label: 'Perfil veterinario', placeholder: 'Compartí un consejo, una novedad o una campaña... Podés usar #hashtags' },
+    clinic: { name: user.profile_name || 'Tu veterinaria', icon: '🏥', label: 'Perfil veterinario', placeholder: 'Compartí un consejo, una campaña, un aviso o un servicio... Podés usar #hashtags' },
     business: { name: user.profile_name || 'Tu negocio', icon: '🛍️', label: 'Perfil del negocio', placeholder: 'Compartí servicios, novedades, promociones o consejos... Podés usar #hashtags' },
     shelter: { name: user.profile_name || 'Tu refugio', icon: '🏠', label: 'Perfil del refugio', placeholder: 'Compartí adopciones, rescates, campañas o pedidos de ayuda... Podés usar #hashtags' },
   }
@@ -158,10 +158,8 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
             <select className="community-select" value={clinicContentType} onChange={(event) => { setClinicContentType(event.target.value); if (event.target.value !== 'campaign') setClinicCampaignId('') }}>
               <option value="health_tip">Consejo veterinario</option>
               <option value="campaign">Campaña o evento</option>
-              <option value="availability">Turnos disponibles</option>
-              <option value="guard">Guardia y horarios</option>
-              <option value="service">Servicio veterinario</option>
               <option value="notice">Aviso importante</option>
+              <option value="service">Servicio veterinario</option>
             </select>
           </label>
           {clinicContentType === 'campaign' && (
@@ -189,7 +187,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
       </div>
       <div className="hashtag-suggestions" aria-label="Hashtags sugeridos">
         <span>Hashtags:</span>
-        {(user.role === 'clinic' ? ['#ConsejoVeterinario', '#SaludAnimal', '#Vacunación', '#Castración', '#Turnos'] : user.role === 'business' ? ['#NegociosVetPaw', '#Servicios', '#Mascotas', '#Promociones', '#Consejos'] : user.role === 'shelter' ? ['#Adopción', '#Rescate', '#Tránsito', '#Donaciones', '#Urgente'] : ['#MiMascota', '#Perros', '#Gatos', '#Adopción', '#Perdidos']).map((tag) => (
+        {(user.role === 'clinic' ? ['#ConsejoVeterinario', '#SaludAnimal', '#Vacunación', '#Castración', '#BienestarAnimal'] : user.role === 'business' ? ['#NegociosVetPaw', '#Servicios', '#Mascotas', '#Promociones', '#Consejos'] : user.role === 'shelter' ? ['#Adopción', '#Rescate', '#Tránsito', '#Donaciones', '#Urgente'] : ['#MiMascota', '#Perros', '#Gatos', '#Adopción', '#Perdidos']).map((tag) => (
           <button type="button" className="hashtag-chip" key={tag} onClick={() => addHashtag(tag)}>{tag}</button>
         ))}
       </div>

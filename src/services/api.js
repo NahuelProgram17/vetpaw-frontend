@@ -559,3 +559,7 @@ export const publishClinicCampaign = (id, text = '') =>
 export const getClinicCommunityStats = () =>
     api.get('/clinic-campaigns/stats/').then((r) => r.data);
 
+// ── Administración de planes veterinarios ─────────────
+export const updateClinicPlan = (clinicId, action, { days = 30, notes = '' } = {}) =>
+    api.post(`/users/admin/clinic-plan/${clinicId}/`, { action, days, notes }).then((r) => r.data);
+

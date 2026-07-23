@@ -21,7 +21,6 @@ const EMPTY = {
   species: [],
   price: '',
   is_free: true,
-  allow_booking: true,
   is_active: true,
   image: null,
 }
@@ -98,7 +97,6 @@ export default function ClinicCommunity() {
       species: item.species || [],
       price: item.price ?? '',
       is_free: item.is_free,
-      allow_booking: item.allow_booking,
       is_active: item.is_active,
       image: null,
     })
@@ -171,8 +169,8 @@ export default function ClinicCommunity() {
         <header className="clinic-community-hero">
           <div>
             <span className="clinic-community-kicker">🏥 Comunidad profesional VetPaw</span>
-            <h1>Campañas, consejos y turnos desde tu veterinaria</h1>
-            <p>Publicá información verificada, recibí solicitudes de turno y medí el alcance dentro de VetPaw.</p>
+            <h1>Campañas, consejos e información desde tu veterinaria</h1>
+            <p>Publicá contenido verificado y medí su alcance. La Comunidad es informativa: los turnos se gestionan desde la agenda normal de VetPaw.</p>
           </div>
           <div className="clinic-community-summary">
             <strong>{upcoming.length}</strong><span>campañas próximas</span>
@@ -219,9 +217,10 @@ export default function ClinicCommunity() {
                 <div>{speciesOptions.map(([value, label]) => <button type="button" key={value} className={form.species.includes(value) ? 'active' : ''} onClick={() => toggleSpecies(value)}>{label}</button>)}</div>
               </div>
 
+              <div className="clinic-community-info">ℹ️ El cupo es informativo. Para pedir un turno, los dueños deben ingresar al perfil de la veterinaria o a la sección Mis turnos.</div>
+
               <div className="clinic-checks">
                 <label><input type="checkbox" checked={form.is_free} onChange={(event) => change('is_free', event.target.checked)} /> Actividad gratuita</label>
-                <label><input type="checkbox" checked={form.allow_booking} onChange={(event) => change('allow_booking', event.target.checked)} /> Permitir reservas desde VetPaw</label>
                 <label><input type="checkbox" checked={form.is_active} onChange={(event) => change('is_active', event.target.checked)} /> Visible públicamente</label>
               </div>
 
@@ -229,7 +228,7 @@ export default function ClinicCommunity() {
             </form>
 
             <section className="clinic-campaign-list">
-              <div className="clinic-section-title"><div><span>📅</span><div><h2>Tus campañas</h2><p>Publicalas en el muro y recibí reservas.</p></div></div></div>
+              <div className="clinic-section-title"><div><span>📅</span><div><h2>Tus campañas</h2><p>Publicalas en el muro como información para la Comunidad.</p></div></div></div>
               {campaigns.length === 0 ? <div className="clinic-empty">Todavía no creaste campañas.</div> : campaigns.map((item) => (
                 <article className="clinic-campaign-row" key={item.id}>
                   {item.image_url ? <img src={item.image_url} alt="" /> : <div className="clinic-campaign-fallback">🏥</div>}
@@ -237,7 +236,7 @@ export default function ClinicCommunity() {
                     <div><span className="clinic-campaign-type">{item.campaign_type_display}</span>{!item.is_active && <span className="clinic-campaign-paused">Pausada</span>}</div>
                     <h3>{item.title}</h3>
                     <p>📅 {formatDate(item.starts_at)}{item.location ? ` · 📍 ${item.location}` : ''}</p>
-                    <small>{item.capacity ? `${item.appointments_count}/${item.capacity} reservas` : `${item.appointments_count} reservas`} · {item.is_free ? 'Gratis' : item.price ? `$${Number(item.price).toLocaleString('es-AR')}` : 'Consultar'}</small>
+                    <small>{item.capacity ? `Cupo informado: ${item.capacity}` : 'Sin cupo informado'} · {item.is_free ? 'Gratis' : item.price ? `$${Number(item.price).toLocaleString('es-AR')}` : 'Consultar'}</small>
                   </div>
                   <div className="clinic-campaign-actions">
                     <button onClick={() => publish(item)} disabled={busyId === `publish-${item.id}`}>{item.post_id ? 'Actualizar publicación' : 'Publicar en Comunidad'}</button>
@@ -256,11 +255,9 @@ export default function ClinicCommunity() {
               ['🐾', 'Patitas', stats?.reactions || 0],
               ['💬', 'Comentarios', stats?.comments || 0],
               ['↗', 'Compartidas', stats?.shares || 0],
-              ['📅', 'Turnos desde Comunidad', stats?.community_appointments || 0],
-              ['⏳', 'Turnos pendientes', stats?.community_appointments_pending || 0],
               ['🏥', 'Campañas activas', stats?.active_campaigns || 0],
             ].map(([icon, label, value]) => <article key={label}><span>{icon}</span><strong>{value}</strong><p>{label}</p></article>)}
-            <div className="clinic-stats-note">Estas estadísticas solo cuentan actividad pública de Comunidad. Los historiales médicos y datos de pacientes siguen completamente privados.</div>
+            <div className="clinic-stats-note">Estas estadísticas solo cuentan actividad pública de Comunidad. Las campañas son informativas y no crean turnos ni reservas. Los historiales médicos y datos de pacientes siguen completamente privados.</div>
           </section>
         )}
       </div>

@@ -30,6 +30,10 @@ const typeMeta = {
   adoption: ['', '🏡 Adopción'],
 }
 
+const clinicSpeciesLabels = {
+  dogs: 'Perros', cats: 'Gatos', rabbits: 'Conejos', birds: 'Aves', horses: 'Caballos', exotic: 'Exóticos',
+}
+
 const relativeTime = (value) => {
   if (!value) return ''
   const date = new Date(value)
@@ -463,18 +467,17 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
               <h4>{clinicContent.campaign.title}</h4>
               <p>📅 {new Date(clinicContent.campaign.starts_at).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
               {clinicContent.campaign.location && <p>📍 {clinicContent.campaign.location}</p>}
-              <p>{clinicContent.campaign.is_free ? 'Actividad gratuita' : clinicContent.campaign.price ? `$${Number(clinicContent.campaign.price).toLocaleString('es-AR')}` : 'Consultar valor'}{clinicContent.campaign.remaining_slots !== null ? ` · ${clinicContent.campaign.remaining_slots} cupos disponibles` : ''}</p>
+              {clinicContent.campaign.species?.length > 0 && <p>🐾 Especies: {clinicContent.campaign.species.map((species) => clinicSpeciesLabels[species] || species).join(', ')}</p>}
+              <p>{clinicContent.campaign.is_free ? 'Actividad gratuita' : clinicContent.campaign.price ? `$${Number(clinicContent.campaign.price).toLocaleString('es-AR')}` : 'Consultar valor'}{clinicContent.campaign.capacity ? ` · Cupo informado: ${clinicContent.campaign.capacity}` : ''}</p>
             </>
           )}
-          {clinicContent.can_request_appointment && (
-            <button type="button" className="clinic-post-cta" onClick={() => {
-              if (!user) { navigate('/login'); return }
-              if (user.role !== 'owner') { navigate(`/clinicas/${clinicContent.clinic_slug}`); return }
-              const params = new URLSearchParams({ clinic: String(clinicContent.clinic_id), source_post: String(post.id), reason: clinicContent.campaign?.title || post.text?.slice(0, 120) || 'Consulta desde la Comunidad' })
-              if (clinicContent.campaign?.id) params.set('campaign', String(clinicContent.campaign.id))
-              navigate(`/appointments/new?${params.toString()}`)
-            }}>{clinicContent.campaign ? '📅 Reservar lugar' : '📅 Solicitar turno'}</button>
-          )}
+          <p className="clinic-post-info">La Comunidad es informativa. Los turnos se gestionan únicamente desde las secciones de turnos de VetPaw.</p>
+          <div className="clinic-post-actions">
+            <button type="button" className="clinic-post-cta secondary" onClick={() => navigate(`/clinicas/${clinicContent.clinic_slug}`)}>Ver perfil de la veterinaria</button>
+            {(!user || user.role === 'owner') && (
+              <button type="button" className="clinic-post-cta" onClick={() => navigate(user ? '/appointments' : '/login')}>Ir al sistema de turnos</button>
+            )}
+          </div>
         </div>
       )}
 

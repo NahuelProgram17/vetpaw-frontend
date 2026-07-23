@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import api from '../services/api'
+import api, { updateClinicPlan } from '../services/api'
 import AdsManager from '../components/AdsManager'
 import BlogManager from '../components/BlogManager'
 import AdminLostPetsManager from '../components/AdminLostPetsManager'
@@ -14,6 +14,27 @@ const DARK = '#0f1923'
 const DARK2 = '#162032'
 const CARD = '#1a2535'
 
+const PLAN_META = {
+    inactive: { label: 'Sin plan', color: '#9aa8b6' },
+    trial: { label: 'Prueba gratis', color: '#6bcaff' },
+    active: { label: 'Plan activo', color: '#6bffb8' },
+    grace: { label: 'Período de gracia', color: '#ffd36b' },
+    expired: { label: 'Plan vencido', color: '#ff9a6b' },
+    suspended: { label: 'Plan suspendido', color: '#ff6b7c' },
+}
+
+const formatPlanDate = (value) => value
+    ? new Date(value).toLocaleString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : '—'
+
+const extractApiError = (data) => {
+    if (!data) return 'No se pudo completar la acción.'
+    if (typeof data === 'string') return data
+    if (data.error || data.detail) return data.error || data.detail
+    const first = Object.values(data).flat().find(Boolean)
+    return first || 'No se pudo completar la acción.'
+}
+
 export default function AdminPanel() {
     const { user, loading: authLoading } = useAuth()
     const navigate = useNavigate()
@@ -22,9 +43,12 @@ export default function AdminPanel() {
     const [error, setError] = useState('')
     const [lastUpdate, setLastUpdate] = useState(null)
     const [tab, setTab] = useState('dashboard')
+    const [planBusy, setPlanBusy] = useState('')
+    const [planMessage, setPlanMessage] = useState('')
 
     const fetchData = useCallback(async () => {
         setDataLoading(true)
+        setError('')
         try {
             const res = await api.get('/users/admin-panel/')
             setData(res.data)
@@ -60,7 +84,7 @@ export default function AdminPanel() {
 
     if (!data) return null
 
-    const { global: g, new_users_by_day, appts_by_day, appts_by_status, top_clinics, last_users, security, pending_clinics = [], pending_profiles = [] } = data
+    const { global: g, new_users_by_day, appts_by_day, appts_by_status, top_clinics, last_users, security, pending_clinics = [], pending_profiles = [], clinic_plans = [] } = data
     const pendingCount = pending_clinics.length + pending_profiles.length
 
     const StatCard = ({ icon, label, value, sub, color = G1 }) => (
@@ -128,6 +152,33 @@ export default function AdminPanel() {
         }
     }
 
+    const handleClinicPlan = async (clinic, action, options = {}) => {
+        if (!clinic?.clinic_id) return
+        const days = options.days ?? 30
+        const confirmations = {
+            approve_and_start_trial: `¿Aprobar “${clinic.name || clinic.clinic_name}” y activar su único mes gratis por 30 días?`,
+            start_trial: `¿Activar el único mes gratis de “${clinic.name}” por 30 días?`,
+            activate: `${clinic.plan_active ? '¿Extender' : '¿Activar'} el plan de “${clinic.name}” por ${days} días?`,
+            grace: `¿Otorgar ${days} días de gracia a “${clinic.name}”?`,
+            suspend: `¿Suspender el plan de “${clinic.name}”? Su perfil y la Comunidad seguirán visibles, pero no podrá usar agenda ni recibir turnos nuevos.`,
+            expire: `¿Marcar como vencido el plan de “${clinic.name}”?`,
+        }
+        if (!window.confirm(confirmations[action] || '¿Confirmar esta acción?')) return
+        const busyKey = `${clinic.clinic_id}-${action}`
+        setPlanBusy(busyKey)
+        setPlanMessage('')
+        try {
+            const result = await updateClinicPlan(clinic.clinic_id, action, { days, notes: options.notes || '' })
+            setPlanMessage(result.message || 'Plan actualizado correctamente.')
+            await fetchData()
+            if (action === 'approve_and_start_trial') setTab('plans')
+        } catch (requestError) {
+            setPlanMessage(`⚠️ ${extractApiError(requestError.response?.data)}`)
+        } finally {
+            setPlanBusy('')
+        }
+    }
+
     const roleMeta = {
         owner: { label: 'Dueño', icon: '🐾', color: G1 },
         clinic: { label: 'Clínica', icon: '🏥', color: '#6bcaff' },
@@ -156,6 +207,7 @@ export default function AdminPanel() {
                     {[
                         { k: 'dashboard', l: '📊 Dashboard' },
                         { k: 'pending',   l: `✅ Pendientes${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
+                        { k: 'plans',     l: '💳 Planes veterinarios' },
                         { k: 'lostPets',  l: `🔍 Mascotas perdidas${g.total_lost_active > 0 ? ` (${g.total_lost_active})` : ''}` },
                         { k: 'ads',       l: '📢 Anuncios' },
                         { k: 'blog',      l: '📝 Blog' },
@@ -206,8 +258,13 @@ export default function AdminPanel() {
                                             ✕ Rechazar
                                         </button>
                                         <button onClick={() => handleApprove(c.user_id, c.clinic_name, 'clinic')}
-                                            style={{ background: `linear-gradient(135deg, ${G1}, #66BB6A)`, border: 'none', color: '#fff', borderRadius: 10, padding: '9px 22px', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: FONT, boxShadow: '0 4px 14px rgba(76,175,80,0.25)' }}>
-                                            ✓ Aprobar
+                                            style={{ background: 'rgba(107,202,255,.12)', border: '1.5px solid rgba(107,202,255,.35)', color: '#9edcff', borderRadius: 10, padding: '9px 18px', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: FONT }}>
+                                            ✓ Aprobar sin activar plan
+                                        </button>
+                                        <button onClick={() => handleClinicPlan({ clinic_id: c.clinic_id, name: c.clinic_name }, 'approve_and_start_trial')}
+                                            disabled={!c.clinic_id || planBusy === `${c.clinic_id}-approve_and_start_trial`}
+                                            style={{ background: `linear-gradient(135deg, ${G1}, ${O1})`, border: 'none', color: '#fff', borderRadius: 10, padding: '9px 22px', fontWeight: 800, fontSize: 13, cursor: c.clinic_id ? 'pointer' : 'not-allowed', opacity: c.clinic_id ? 1 : .55, fontFamily: FONT, boxShadow: '0 4px 14px rgba(76,175,80,0.25)' }}>
+                                            {planBusy === `${c.clinic_id}-approve_and_start_trial` ? 'Activando...' : '🎁 Aprobar + 1 mes gratis'}
                                         </button>
                                     </div>
                                 </div>
@@ -233,6 +290,66 @@ export default function AdminPanel() {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    )}
+                </>)}
+
+                {tab === 'plans' && (<>
+                    <SectionTitle>💳 Planes veterinarios</SectionTitle>
+                    <div style={{ background: 'rgba(107,202,255,.08)', border: '1px solid rgba(107,202,255,.2)', borderRadius: 14, padding: '13px 16px', color: '#c5dced', fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>
+                        El perfil público y la Comunidad siguen gratis. La agenda, los turnos y las herramientas clínicas se habilitan únicamente con prueba, plan activo o período de gracia vigente.
+                    </div>
+                    {planMessage && <div style={{ background: planMessage.startsWith('⚠️') ? 'rgba(255,107,107,.1)' : 'rgba(76,175,80,.1)', border: `1px solid ${planMessage.startsWith('⚠️') ? 'rgba(255,107,107,.3)' : 'rgba(76,175,80,.3)'}`, color: planMessage.startsWith('⚠️') ? '#ff9da8' : '#9be89f', borderRadius: 12, padding: '11px 14px', marginBottom: 16, fontWeight: 700 }}>{planMessage}</div>}
+                    {clinic_plans.length === 0 ? (
+                        <div style={{ background: CARD, border: '1px solid rgba(255,255,255,.07)', borderRadius: 16, padding: 30, textAlign: 'center', color: 'rgba(255,255,255,.5)' }}>Todavía no hay veterinarias registradas.</div>
+                    ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))', gap: 14 }}>
+                            {clinic_plans.map((plan) => {
+                                const statusMeta = PLAN_META[plan.effective_plan_status] || PLAN_META.inactive
+                                const endValue = plan.effective_plan_status === 'grace' ? plan.grace_ends_at : plan.plan_ends_at
+                                const actionButton = (label, action, options = {}, style = {}) => {
+                                    const { disabled = false, ...buttonStyle } = style
+                                    const isBusy = planBusy === `${plan.clinic_id}-${action}`
+                                    return (
+                                        <button key={action} onClick={() => handleClinicPlan(plan, action, options)} disabled={isBusy || disabled}
+                                            style={{ border: '1px solid rgba(255,255,255,.12)', background: '#10283d', color: '#dceaf4', borderRadius: 9, padding: '8px 10px', fontWeight: 800, fontSize: 12, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? .45 : 1, ...buttonStyle }}>
+                                            {isBusy ? 'Procesando...' : label}
+                                        </button>
+                                    )
+                                }
+                                return (
+                                    <article key={plan.clinic_id} style={{ background: CARD, border: `1px solid ${statusMeta.color}33`, borderRadius: 16, padding: 18 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', marginBottom: 12 }}>
+                                            <div>
+                                                <h3 style={{ color: '#fff', fontSize: 17, margin: 0 }}>{plan.name}</h3>
+                                                <p style={{ color: 'rgba(255,255,255,.45)', fontSize: 12, margin: '4px 0 0' }}>@{plan.username} · {plan.locality || '—'}, {plan.province || '—'}</p>
+                                            </div>
+                                            <span style={{ background: `${statusMeta.color}18`, border: `1px solid ${statusMeta.color}55`, color: statusMeta.color, borderRadius: 999, padding: '5px 9px', fontSize: 11, fontWeight: 900, whiteSpace: 'nowrap' }}>{statusMeta.label}</span>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 12, color: 'rgba(255,255,255,.58)', marginBottom: 12 }}>
+                                            <span>Cuenta: <b style={{ color: plan.is_approved ? '#6bffb8' : '#ffd36b' }}>{plan.is_approved ? 'Aprobada' : 'Pendiente'}</b></span>
+                                            <span>Agenda: <b style={{ color: plan.has_schedule ? '#6bffb8' : '#ffd36b' }}>{plan.has_schedule ? 'Configurada' : 'Sin configurar'}</b></span>
+                                            <span>Inicio: <b>{formatPlanDate(plan.plan_started_at)}</b></span>
+                                            <span>Finaliza: <b>{formatPlanDate(endValue)}</b></span>
+                                            <span>Prueba utilizada: <b>{plan.trial_used ? 'Sí' : 'No'}</b></span>
+                                            <span>Recibe turnos: <b style={{ color: plan.can_receive_appointments ? '#6bffb8' : '#ff9a6b' }}>{plan.can_receive_appointments ? 'Sí' : 'No'}</b></span>
+                                        </div>
+                                        {plan.plan_notes && <p style={{ color: 'rgba(255,255,255,.42)', fontSize: 11, margin: '0 0 12px' }}>Nota: {plan.plan_notes}</p>}
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+                                            {!plan.is_approved ? (<>
+                                                <button onClick={() => handleApprove(plan.user_id, plan.name, 'clinic')} style={{ border: '1px solid rgba(107,202,255,.35)', background: 'rgba(107,202,255,.1)', color: '#9edcff', borderRadius: 9, padding: '8px 10px', fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>Aprobar sin plan</button>
+                                                {!plan.trial_used && actionButton('🎁 Aprobar + prueba', 'approve_and_start_trial')}
+                                            </>) : (<>
+                                                {!plan.trial_used && !plan.plan_active && actionButton('🎁 Iniciar prueba', 'start_trial')}
+                                                {actionButton(plan.plan_active ? '＋ Extender 30 días' : '✓ Activar 30 días', 'activate', { days: 30 })}
+                                                {actionButton('⏳ Gracia 5 días', 'grace', { days: 5 })}
+                                                {actionButton('⏸ Suspender', 'suspend', {}, { disabled: plan.effective_plan_status === 'suspended', color: '#ffb0b8' })}
+                                                {actionButton('⌛ Marcar vencido', 'expire', {}, { disabled: plan.effective_plan_status === 'expired', color: '#ffc08f' })}
+                                            </>)}
+                                        </div>
+                                    </article>
+                                )
+                            })}
                         </div>
                     )}
                 </>)}
