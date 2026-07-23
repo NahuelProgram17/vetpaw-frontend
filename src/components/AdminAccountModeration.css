@@ -1,0 +1,245 @@
+.account-moderation-panel {
+    color: #fff;
+    --moderation-card: #1a2535;
+    --moderation-border: rgba(255, 255, 255, 0.08);
+    --moderation-green: #66d071;
+    --moderation-orange: #ffad35;
+    --moderation-red: #ff697b;
+    --moderation-blue: #6bcaff;
+}
+
+.account-moderation-panel * { box-sizing: border-box; }
+
+.account-moderation-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 26px 28px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(107, 202, 255, 0.18);
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at 90% 20%, rgba(107, 202, 255, 0.15), transparent 35%),
+        linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(255, 152, 0, 0.07)),
+        var(--moderation-card);
+}
+
+.account-moderation-kicker {
+    display: inline-block;
+    margin-bottom: 7px;
+    color: var(--moderation-green);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+}
+
+.account-moderation-hero h2 { margin: 0 0 8px; font-size: clamp(23px, 3vw, 32px); }
+.account-moderation-hero p { max-width: 760px; margin: 0; color: rgba(255, 255, 255, 0.58); line-height: 1.6; }
+.account-moderation-hero-icon { font-size: 58px; filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35)); }
+
+.account-moderation-summary {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.account-moderation-summary-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 92px;
+    padding: 16px;
+    border: 1px solid var(--moderation-border);
+    border-radius: 16px;
+    background: var(--moderation-card);
+}
+
+.account-moderation-summary-card.warning { border-color: rgba(255, 173, 53, 0.25); }
+.account-moderation-summary-card.danger { border-color: rgba(255, 105, 123, 0.3); }
+.account-moderation-summary-card.success { border-color: rgba(102, 208, 113, 0.25); }
+.account-moderation-summary-card.muted { opacity: 0.88; }
+.account-moderation-summary-icon { font-size: 26px; }
+.account-moderation-summary-card strong { display: block; font-size: 25px; line-height: 1; }
+.account-moderation-summary-card span:last-child { display: block; margin-top: 6px; color: rgba(255, 255, 255, 0.48); font-size: 11px; line-height: 1.25; }
+
+.account-moderation-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 5px;
+    width: fit-content;
+    border: 1px solid var(--moderation-border);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.account-moderation-tabs button {
+    padding: 9px 15px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.52);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.account-moderation-tabs button.active { background: rgba(102, 208, 113, 0.14); color: #a6efad; }
+
+.account-moderation-alert {
+    margin-bottom: 16px;
+    padding: 12px 15px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.account-moderation-alert.success { color: #b4f4b9; background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.28); }
+.account-moderation-alert.error { color: #ffb4bd; background: rgba(255, 105, 123, 0.1); border: 1px solid rgba(255, 105, 123, 0.28); }
+
+.account-moderation-filters {
+    display: grid;
+    grid-template-columns: minmax(260px, 1.5fr) repeat(2, minmax(170px, 0.55fr));
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 16px;
+    border: 1px solid var(--moderation-border);
+    border-radius: 16px;
+    background: var(--moderation-card);
+}
+
+.account-moderation-filters.history-filters { grid-template-columns: repeat(2, minmax(220px, 320px)); }
+.account-moderation-filters label, .account-moderation-modal label { display: flex; flex-direction: column; gap: 7px; }
+.account-moderation-filters label > span, .account-moderation-modal label > span { color: rgba(255, 255, 255, 0.52); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; }
+.account-moderation-filters input,
+.account-moderation-filters select,
+.account-moderation-modal input,
+.account-moderation-modal select,
+.account-moderation-modal textarea {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-radius: 10px;
+    outline: none;
+    background: #101b29;
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+}
+
+.account-moderation-modal textarea { resize: vertical; min-height: 86px; }
+.account-moderation-filters input:focus,
+.account-moderation-filters select:focus,
+.account-moderation-modal input:focus,
+.account-moderation-modal select:focus,
+.account-moderation-modal textarea:focus { border-color: rgba(107, 202, 255, 0.7); box-shadow: 0 0 0 3px rgba(107, 202, 255, 0.08); }
+.account-moderation-search > div { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.account-moderation-search button { padding: 0 16px; border: 0; border-radius: 10px; color: #fff; background: linear-gradient(135deg, #4caf50, #ff9800); font: inherit; font-size: 12px; font-weight: 900; cursor: pointer; }
+
+.account-moderation-account-list, .account-moderation-history-list { display: grid; gap: 12px; }
+.account-moderation-account-card, .account-moderation-history-card {
+    padding: 18px;
+    border: 1px solid var(--moderation-border);
+    border-radius: 16px;
+    background: var(--moderation-card);
+}
+.account-moderation-account-card { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.account-moderation-account-main { display: flex; align-items: flex-start; gap: 14px; min-width: 0; }
+.account-moderation-avatar { display: grid; place-items: center; flex: 0 0 48px; width: 48px; height: 48px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; background: rgba(255, 255, 255, 0.04); font-size: 24px; }
+.account-moderation-account-copy { min-width: 0; }
+.account-moderation-account-heading { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.account-moderation-account-heading h3 { margin: 0; color: #fff; font-size: 17px; overflow-wrap: anywhere; }
+.account-moderation-account-copy > p { margin: 4px 0 7px; color: rgba(255, 255, 255, 0.52); font-size: 12px; overflow-wrap: anywhere; }
+.account-moderation-account-meta { display: flex; flex-wrap: wrap; gap: 7px 13px; color: rgba(255, 255, 255, 0.38); font-size: 11px; }
+
+.account-status-badge { display: inline-flex; align-items: center; padding: 4px 9px; border-radius: 999px; font-size: 10px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
+.account-status-badge.is-active { color: #9be8a2; background: rgba(76, 175, 80, 0.13); }
+.account-status-badge.is-suspended { color: #ffd080; background: rgba(255, 173, 53, 0.13); }
+.account-status-badge.is-banned { color: #ff9eaa; background: rgba(255, 105, 123, 0.14); }
+.account-status-badge.is-expired { color: #b9c4cf; background: rgba(185, 196, 207, 0.12); }
+.account-status-badge.is-revoked { color: #9bd9ff; background: rgba(107, 202, 255, 0.13); }
+
+.account-moderation-current-sanction { display: grid; gap: 3px; margin-top: 11px; padding: 10px 12px; max-width: 650px; border-left: 3px solid var(--moderation-orange); border-radius: 0 9px 9px 0; background: rgba(255, 173, 53, 0.07); }
+.account-moderation-current-sanction strong { color: #ffd58c; font-size: 11px; text-transform: uppercase; }
+.account-moderation-current-sanction span { color: rgba(255, 255, 255, 0.75); font-size: 12px; line-height: 1.45; }
+.account-moderation-current-sanction small { color: rgba(255, 255, 255, 0.42); }
+
+.account-moderation-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; flex: 0 0 auto; }
+.moderation-action { padding: 9px 13px; border-radius: 10px; font: inherit; font-size: 12px; font-weight: 900; cursor: pointer; }
+.moderation-action.suspend { color: #ffd58c; border: 1px solid rgba(255, 173, 53, 0.3); background: rgba(255, 173, 53, 0.08); }
+.moderation-action.ban { color: #ff9daa; border: 1px solid rgba(255, 105, 123, 0.32); background: rgba(255, 105, 123, 0.08); }
+.moderation-action.reactivate { color: #a8efae; border: 1px solid rgba(102, 208, 113, 0.32); background: rgba(102, 208, 113, 0.08); }
+.account-moderation-self-note { max-width: 175px; color: rgba(255, 255, 255, 0.37); font-size: 11px; text-align: right; }
+
+.account-moderation-empty { display: grid; place-items: center; min-height: 230px; padding: 30px; border: 1px solid var(--moderation-border); border-radius: 16px; background: var(--moderation-card); text-align: center; }
+.account-moderation-empty span { font-size: 42px; }
+.account-moderation-empty h3 { margin: 10px 0 5px; }
+.account-moderation-empty p { margin: 0; color: rgba(255, 255, 255, 0.42); font-size: 13px; }
+
+.account-moderation-history-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+.account-moderation-history-top h3 { margin: 6px 0 3px; }
+.account-moderation-history-top p { margin: 0; color: rgba(255, 255, 255, 0.44); font-size: 12px; }
+.history-kind { color: rgba(255, 255, 255, 0.62); font-size: 11px; font-weight: 900; letter-spacing: 0.6px; text-transform: uppercase; }
+.account-moderation-history-grid { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)); gap: 10px; margin-top: 16px; }
+.account-moderation-history-grid > div { padding: 11px; border-radius: 10px; background: rgba(255, 255, 255, 0.035); }
+.account-moderation-history-grid span { display: block; margin-bottom: 5px; color: rgba(255, 255, 255, 0.35); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.account-moderation-history-grid strong { color: rgba(255, 255, 255, 0.78); font-size: 12px; line-height: 1.4; }
+.history-note, .history-report, .history-revocation { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; color: rgba(255, 255, 255, 0.62); background: rgba(255, 255, 255, 0.035); font-size: 12px; line-height: 1.5; }
+.history-report { color: #ffc96c; }
+.history-revocation { display: grid; gap: 3px; border: 1px solid rgba(107, 202, 255, 0.16); color: #bce7ff; background: rgba(107, 202, 255, 0.06); }
+
+.account-moderation-pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
+.account-moderation-pagination span { color: rgba(255, 255, 255, 0.44); font-size: 12px; }
+.account-moderation-pagination button { padding: 8px 13px; border: 1px solid var(--moderation-border); border-radius: 9px; color: #fff; background: var(--moderation-card); font: inherit; font-size: 12px; cursor: pointer; }
+.account-moderation-pagination button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.account-moderation-modal-backdrop { position: fixed; inset: 0; z-index: 3000; display: grid; place-items: center; padding: 18px; background: rgba(2, 8, 15, 0.82); backdrop-filter: blur(7px); }
+.account-moderation-modal { position: relative; width: min(100%, 580px); max-height: calc(100vh - 36px); overflow-y: auto; padding: 27px; border: 1px solid rgba(255, 173, 53, 0.25); border-radius: 22px; background: #172231; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55); }
+.account-moderation-modal.danger { border-color: rgba(255, 105, 123, 0.35); }
+.account-moderation-modal-close { position: absolute; top: 12px; right: 14px; width: 34px; height: 34px; border: 0; border-radius: 50%; color: rgba(255, 255, 255, 0.58); background: rgba(255, 255, 255, 0.05); font-size: 24px; cursor: pointer; }
+.account-moderation-modal-icon { font-size: 38px; }
+.account-moderation-modal h3 { margin: 8px 0 6px; font-size: 22px; }
+.account-moderation-modal-subtitle { margin: 0 0 18px; color: rgba(255, 255, 255, 0.5); font-size: 13px; line-height: 1.55; }
+.account-moderation-modal form { display: grid; gap: 14px; }
+.account-moderation-modal label small { color: rgba(255, 255, 255, 0.36); font-size: 11px; }
+.account-moderation-modal-error { padding: 10px 12px; border-radius: 10px; color: #ffb6bf; background: rgba(255, 105, 123, 0.1); font-size: 12px; }
+.account-moderation-modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 4px; }
+.account-moderation-modal-actions button { padding: 10px 15px; border-radius: 10px; font: inherit; font-size: 12px; font-weight: 900; cursor: pointer; }
+.account-moderation-modal-actions .cancel { color: rgba(255, 255, 255, 0.65); border: 1px solid rgba(255, 255, 255, 0.12); background: transparent; }
+.account-moderation-modal-actions .confirm { color: #fff; border: 0; background: linear-gradient(135deg, #e49a2a, #ff697b); }
+.account-moderation-modal-actions .confirm.reactivate { background: linear-gradient(135deg, #4caf50, #66d071); }
+.account-moderation-modal-actions .confirm.ban { background: linear-gradient(135deg, #d7475c, #ff697b); }
+.account-moderation-modal-actions button:disabled { opacity: 0.55; cursor: wait; }
+.account-moderation-replace-note { margin: 12px 0 0; color: rgba(255, 255, 255, 0.35); font-size: 10px; text-align: center; }
+
+@media (max-width: 1100px) {
+    .account-moderation-summary { grid-template-columns: repeat(3, 1fr); }
+    .account-moderation-history-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 760px) {
+    .account-moderation-hero { align-items: flex-start; padding: 20px; }
+    .account-moderation-hero-icon { font-size: 42px; }
+    .account-moderation-summary { grid-template-columns: repeat(2, 1fr); }
+    .account-moderation-filters, .account-moderation-filters.history-filters { grid-template-columns: 1fr; }
+    .account-moderation-account-card { align-items: stretch; flex-direction: column; }
+    .account-moderation-actions { justify-content: flex-start; }
+    .account-moderation-self-note { max-width: none; text-align: left; }
+}
+
+@media (max-width: 520px) {
+    .account-moderation-hero-icon { display: none; }
+    .account-moderation-summary { grid-template-columns: 1fr; }
+    .account-moderation-tabs { width: 100%; }
+    .account-moderation-tabs button { flex: 1; padding-inline: 8px; }
+    .account-moderation-account-main { flex-direction: column; }
+    .account-moderation-history-grid { grid-template-columns: 1fr; }
+    .account-moderation-history-top { align-items: flex-start; flex-direction: column; }
+    .account-moderation-modal { padding: 24px 18px 20px; }
+    .account-moderation-modal-actions { flex-direction: column-reverse; }
+    .account-moderation-modal-actions button { width: 100%; }
+}

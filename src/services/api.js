@@ -29,8 +29,30 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const original = error.config || {};
+        const responseData = error.response?.data || {};
         const isUnauthorized = error.response?.status === 401;
         const isRefreshRequest = String(original.url || "").includes("/users/token/refresh/");
+        const sanctionCode = responseData?.code;
+        const isAccountSanction = sanctionCode === "account_suspended" || sanctionCode === "account_banned";
+
+        // Una sanción activa bloquea tanto nuevos inicios de sesión como tokens ya emitidos.
+        // Guardamos el motivo para que la pantalla de acceso pueda explicárselo claramente al usuario.
+        if (isUnauthorized && isAccountSanction) {
+            try {
+                sessionStorage.setItem("vetpaw_account_sanction", JSON.stringify({
+                    code: sanctionCode,
+                    detail: responseData.detail,
+                    sanction: responseData.account_sanction || null,
+                }));
+            } catch {
+                // Si el navegador no permite sessionStorage, el error igual se conserva en la respuesta.
+            }
+            clearAuthTokens();
+            if (window.location.pathname !== "/login") {
+                window.location.replace("/login?account=sanctioned");
+            }
+            return Promise.reject(error);
+        }
 
         if (!isUnauthorized || original._retry || isRefreshRequest) {
             return Promise.reject(error);
@@ -562,4 +584,13 @@ export const getClinicCommunityStats = () =>
 // ── Administración de planes veterinarios ─────────────
 export const updateClinicPlan = (clinicId, action, { days = 30, notes = '' } = {}) =>
     api.post(`/users/admin/clinic-plan/${clinicId}/`, { action, days, notes }).then((r) => r.data);
+// ── Moderación profesional de cuentas ─────────────────
+export const getModerationAccounts = (params = {}) =>
+    api.get('/users/admin/moderation/accounts/', { params }).then((r) => r.data);
+
+export const getAccountModerationHistory = (params = {}) =>
+    api.get('/users/admin/moderation/history/', { params }).then((r) => r.data);
+
+export const moderateAccount = (userId, payload) =>
+    api.post(`/users/admin/moderation/accounts/${userId}/`, payload).then((r) => r.data);
 

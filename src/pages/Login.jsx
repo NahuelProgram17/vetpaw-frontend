@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import loginVetpawBg from "../assets/login/login-vetpaw-bg.png";
@@ -9,7 +9,32 @@ export default function Login() {
 
     const [form, setForm] = useState({ username: "", password: "" });
     const [error, setError] = useState("");
+    const [sanction, setSanction] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        try {
+            const stored = sessionStorage.getItem("vetpaw_account_sanction");
+            if (!stored) return;
+            setSanction(JSON.parse(stored));
+            sessionStorage.removeItem("vetpaw_account_sanction");
+        } catch {
+            // La sesión puede bloquear el almacenamiento en algunos navegadores.
+        }
+    }, []);
+
+    const formatSanctionDate = (value) => {
+        if (!value) return "";
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return "";
+        return parsed.toLocaleString("es-AR", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    };
 
     const handleChange = (e) =>
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -17,6 +42,7 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+        setSanction(null);
         setLoading(true);
         try {
             const userData = await login(form.username, form.password);
@@ -29,8 +55,19 @@ export default function Login() {
             navigate(destinations[userData?.role] || "/comunidad");
         } catch (err) {
             const data = err.response?.data;
-            const msg = data?.detail || "Credenciales incorrectas. Intentá de nuevo.";
-            setError(msg);
+            if (data?.code === "account_suspended" || data?.code === "account_banned") {
+                setSanction({
+                    code: data.code,
+                    detail: data.detail,
+                    sanction: data.account_sanction || null,
+                });
+                setError("");
+            } else {
+                const msg = typeof data?.detail === "string"
+                    ? data.detail
+                    : "Credenciales incorrectas. Intentá de nuevo.";
+                setError(msg);
+            }
         } finally {
             setLoading(false);
         }
@@ -49,6 +86,23 @@ export default function Login() {
                 <div className="auth-divider"><span>🐾</span></div>
 
                 <h2 className="auth-title">Iniciá sesión</h2>
+
+                {sanction && (
+                    <div className={`auth-sanction ${sanction.code === "account_banned" ? "is-banned" : "is-suspended"}`}>
+                        <div className="auth-sanction-icon">{sanction.code === "account_banned" ? "⛔" : "⏳"}</div>
+                        <div>
+                            <strong>{sanction.code === "account_banned" ? "Cuenta expulsada" : "Cuenta suspendida"}</strong>
+                            <p>{sanction.sanction?.reason || sanction.detail || "Tu cuenta tiene una medida de moderación activa."}</p>
+                            {sanction.code === "account_suspended" && sanction.sanction?.ends_at && (
+                                <small>Podrás volver a ingresar el {formatSanctionDate(sanction.sanction.ends_at)}.</small>
+                            )}
+                            {sanction.code === "account_banned" && (
+                                <small>La medida permanece activa hasta que un administrador la revoque.</small>
+                            )}
+                            <a href="mailto:vetpaw.app@gmail.com">Contactar al equipo de VetPaw</a>
+                        </div>
+                    </div>
+                )}
 
                 {error && (
                     <div className="auth-error">
@@ -229,6 +283,43 @@ export default function Login() {
                     text-align: center;
                     text-shadow: 0 5px 18px rgba(0, 0, 0, 0.38);
                 }
+
+                .auth-sanction {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 12px;
+                    margin-bottom: 18px;
+                    padding: 14px;
+                    border: 1px solid rgba(255, 182, 72, 0.34);
+                    border-radius: 15px;
+                    background: rgba(255, 166, 0, 0.1);
+                    color: #fff;
+                }
+
+                .auth-sanction.is-banned {
+                    border-color: rgba(255, 92, 111, 0.38);
+                    background: rgba(255, 67, 91, 0.11);
+                }
+
+                .auth-sanction-icon {
+                    flex: 0 0 auto;
+                    font-size: 1.7rem;
+                    line-height: 1;
+                }
+
+                .auth-sanction strong {
+                    display: block;
+                    margin-bottom: 5px;
+                    color: #ffd58f;
+                    font-size: 0.9rem;
+                    font-weight: 900;
+                }
+
+                .auth-sanction.is-banned strong { color: #ffacb6; }
+                .auth-sanction p { margin: 0; color: rgba(255,255,255,.77); font-size: .82rem; line-height: 1.45; }
+                .auth-sanction small { display: block; margin-top: 7px; color: rgba(255,255,255,.52); font-size: .72rem; line-height: 1.4; }
+                .auth-sanction a { display: inline-block; margin-top: 8px; color: #7ce462; font-size: .75rem; font-weight: 900; text-decoration: none; }
+                .auth-sanction a:hover { text-decoration: underline; }
 
                 .auth-error {
                     display: flex;
