@@ -9,6 +9,7 @@ import VetPawLoader from '../components/VetPawLoader'
 import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../utils/imageUpload'
 import './Community.css'
 import './SocialProfile.css'
+import './ClinicCommunity.css'
 
 const serviceLabels = {
   dogs: '🐶 Perros', cats: '🐱 Gatos', rabbits: '🐰 Conejos', birds: '🦜 Aves', horses: '🐴 Caballos', exotic: '🦎 Exóticos',
@@ -146,6 +147,7 @@ export default function ClinicProfile() {
             <div className="social-actions">
               {clinic.can_edit ? <>
                 <button type="button" className="social-action" onClick={() => navigate('/comunidad')}>＋ Publicar</button>
+                <button type="button" className="social-action secondary" onClick={() => navigate('/clinic/comunidad')}>🏥 Comunidad profesional</button>
                 <button type="button" className="social-action secondary" onClick={() => setEditing((value) => !value)}>✏️ Editar perfil</button>
               </> : canFollow && <button type="button" disabled={followingBusy} className={`social-action ${clinic.following ? 'following' : ''}`} onClick={follow}>{followingBusy ? 'Guardando...' : clinic.following ? '✓ Siguiendo' : '＋ Seguir'}</button>}
               <ProfileShareButton title={`${clinic.name} en VetPaw`} text={`Conocé esta veterinaria dentro de VetPaw`} path={profilePath} />
@@ -195,12 +197,15 @@ export default function ClinicProfile() {
 
         <div className="social-tabs">
           <button type="button" className={tab === 'posts' ? 'active' : ''} onClick={() => setTab('posts')}>📸 Publicaciones</button>
+          <button type="button" className={tab === 'campaigns' ? 'active' : ''} onClick={() => setTab('campaigns')}>📅 Campañas</button>
           <button type="button" className={tab === 'gallery' ? 'active' : ''} onClick={() => setTab('gallery')}>🖼️ Galería social</button>
           <button type="button" className={tab === 'clinic-photos' ? 'active' : ''} onClick={() => setTab('clinic-photos')}>🏥 Fotos del local</button>
           <button type="button" className={tab === 'reviews' ? 'active' : ''} onClick={() => setTab('reviews')}>⭐ Reseñas</button>
         </div>
 
         {tab === 'posts' && <section className="social-post-list">{clinic.recent_posts?.length ? clinic.recent_posts.map((post) => <PostCard key={post.id} initialPost={post} user={user} onDeleted={(postId) => setClinic((current) => ({ ...current, recent_posts: current.recent_posts.filter((item) => item.id !== postId), posts_count: Math.max(0, current.posts_count - 1), gallery: current.gallery.filter((item) => item.post_id !== postId) }))} />) : <div className="social-card social-empty">📷 Las publicaciones de {clinic.name} aparecerán acá.</div>}</section>}
+
+        {tab === 'campaigns' && <section className="social-card">{clinic.upcoming_campaigns?.length ? <div className="clinic-profile-campaigns">{clinic.upcoming_campaigns.map((campaign) => <article className="clinic-profile-campaign-card" key={campaign.id}>{campaign.image_url && <img src={campaign.image_url} alt={campaign.title} />}<div><small>{campaign.campaign_type_display}</small><h3>{campaign.title}</h3><p>📅 {new Date(campaign.starts_at).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>{campaign.location && <p>📍 {campaign.location}</p>}<p>{campaign.is_free ? 'Actividad gratuita' : campaign.price ? `$${Number(campaign.price).toLocaleString('es-AR')}` : 'Consultar valor'}{campaign.remaining_slots !== null ? ` · ${campaign.remaining_slots} cupos` : ''}</p>{campaign.allow_booking && campaign.post_id && <button type="button" onClick={() => user ? navigate(`/appointments/new?clinic=${clinic.id}&source_post=${campaign.post_id}&campaign=${campaign.id}&reason=${encodeURIComponent(campaign.title)}`) : navigate('/login')}>Reservar en VetPaw</button>}</div></article>)}</div> : <div className="social-empty">No hay campañas próximas publicadas.</div>}</section>}
 
         {tab === 'gallery' && <section className="social-card">{gallery.length ? <div className="social-gallery">{gallery.map((item) => <button type="button" className="social-gallery-item" key={item.post_id} onClick={() => setLightbox({ image_url: item.image_url, text: item.text })}><img src={item.image_url} alt={item.text || clinic.name} /><span>{item.text || 'Publicación de VetPaw'}</span></button>)}</div> : <div className="social-empty">Todavía no hay fotos en la galería social.</div>}</section>}
 

@@ -59,6 +59,7 @@ export default function Explore() {
   const [province, setProvince] = useState(searchParams.get('provincia') || '')
   const [sort, setSort] = useState(searchParams.get('orden') || 'popular')
   const [only24h, setOnly24h] = useState(searchParams.get('24h') === '1')
+  const [clinicContentType, setClinicContentType] = useState(searchParams.get('contenido_vet') || '')
   const [businessType, setBusinessType] = useState(searchParams.get('rubro') || '')
   const [businessHomeService, setBusinessHomeService] = useState(searchParams.get('domicilio') === '1')
   const [businessReservations, setBusinessReservations] = useState(searchParams.get('reservas') === '1')
@@ -96,6 +97,7 @@ export default function Explore() {
     province: province || undefined,
     sort,
     is_24h: only24h || undefined,
+    clinic_content_type: clinicContentType || undefined,
     business_type: businessType || undefined,
     home_service: businessHomeService || undefined,
     accepts_reservations: businessReservations || undefined,
@@ -104,7 +106,7 @@ export default function Explore() {
     accepting_animals: acceptingAnimals || undefined,
     page: requestedPage,
     page_size: 12,
-  }), [debouncedQuery, section, species, locality, province, sort, only24h, businessType, businessHomeService, businessReservations, businessPromotions, shelterType, acceptingAnimals])
+  }), [debouncedQuery, section, species, locality, province, sort, only24h, clinicContentType, businessType, businessHomeService, businessReservations, businessPromotions, shelterType, acceptingAnimals])
 
   const syncUrl = useCallback(() => {
     const next = {}
@@ -115,6 +117,7 @@ export default function Explore() {
     if (province) next.provincia = province
     if (sort !== 'popular') next.orden = sort
     if (only24h) next['24h'] = '1'
+    if (clinicContentType) next.contenido_vet = clinicContentType
     if (businessType) next.rubro = businessType
     if (businessHomeService) next.domicilio = '1'
     if (businessReservations) next.reservas = '1'
@@ -122,7 +125,7 @@ export default function Explore() {
     if (shelterType) next.tipo_refugio = shelterType
     if (acceptingAnimals) next.recibe = '1'
     setSearchParams(next, { replace: true })
-  }, [debouncedQuery, section, species, locality, province, sort, only24h, businessType, businessHomeService, businessReservations, businessPromotions, shelterType, acceptingAnimals, setSearchParams])
+  }, [debouncedQuery, section, species, locality, province, sort, only24h, clinicContentType, businessType, businessHomeService, businessReservations, businessPromotions, shelterType, acceptingAnimals, setSearchParams])
 
   const load = useCallback(async (requestedPage = 1, append = false) => {
     append ? setMoreLoading(true) : setLoading(true)
@@ -163,6 +166,7 @@ export default function Explore() {
     setLocality('')
     setProvince('')
     setOnly24h(false)
+    setClinicContentType('')
     setBusinessType('')
     setBusinessHomeService(false)
     setBusinessReservations(false)
@@ -223,7 +227,7 @@ export default function Explore() {
     [data.counts],
   )
 
-  const filtersActive = Boolean(species || locality || province || only24h || businessType || businessHomeService || businessReservations || businessPromotions || shelterType || acceptingAnimals || sort !== 'popular')
+  const filtersActive = Boolean(species || locality || province || only24h || clinicContentType || businessType || businessHomeService || businessReservations || businessPromotions || shelterType || acceptingAnimals || sort !== 'popular')
   const suggestionsVisible = searchFocused && debouncedQuery.length >= 2 && data.suggestions?.length > 0
 
   return (
@@ -288,6 +292,7 @@ export default function Explore() {
               <option value="popular">Más populares</option>
               <option value="recent">Más recientes</option>
             </select>
+            {(section === 'posts' || section === 'all') && <select value={clinicContentType} onChange={(event) => setClinicContentType(event.target.value)}><option value="">Todo el contenido veterinario</option><option value="health_tip">Consejos veterinarios</option><option value="campaign">Campañas</option><option value="availability">Turnos disponibles</option><option value="guard">Guardias y horarios</option><option value="service">Servicios veterinarios</option><option value="notice">Avisos veterinarios</option></select>}
             {(section === 'businesses' || section === 'all') && <select value={businessType} onChange={(event) => setBusinessType(event.target.value)}><option value="">Todos los rubros</option>{(data.business_type_options || []).map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select>}
             {(section === 'shelters' || section === 'all') && <select value={shelterType} onChange={(event) => setShelterType(event.target.value)}><option value="">Todos los refugios</option>{(data.shelter_type_options || []).map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select>}
             {(section === 'clinics' || section === 'businesses' || section === 'all') && (

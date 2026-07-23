@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { createCommunityPost, getCommunityPrivacy, getPets } from '../../services/api'
+import '../../pages/ClinicCommunity.css'
+import { createCommunityPost, getClinicCampaigns, getCommunityPrivacy, getPets } from '../../services/api'
 import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../../utils/imageUpload'
 import ImageEditorModal from '../ImageEditorModal'
 import MentionTextarea from './MentionTextarea'
@@ -16,6 +17,9 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
   const [editorFile, setEditorFile] = useState(null)
   const [error, setError] = useState('')
   const [commentPermission, setCommentPermission] = useState('everyone')
+  const [clinicContentType, setClinicContentType] = useState('health_tip')
+  const [clinicCampaignId, setClinicCampaignId] = useState('')
+  const [clinicCampaigns, setClinicCampaigns] = useState([])
   const fileRef = useRef(null)
   const cameraRef = useRef(null)
 
@@ -30,6 +34,13 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
     }
   }, [user, defaultPetId])
 
+
+  useEffect(() => {
+    if (user?.role !== 'clinic') return
+    getClinicCampaigns({ mine: true, upcoming: true })
+      .then((data) => setClinicCampaigns(data.results ?? data ?? []))
+      .catch(() => setClinicCampaigns([]))
+  }, [user])
 
   useEffect(() => {
     if (!user) return
@@ -81,8 +92,16 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
     setSaving(true)
     setError('')
     try {
-      const created = await createCommunityPost({ text: text.trim(), image, pet: user.role === 'owner' ? pet : null, commentPermission })
+      const created = await createCommunityPost({
+        text: text.trim(),
+        image,
+        pet: user.role === 'owner' ? pet : null,
+        commentPermission,
+        clinicContentType: user.role === 'clinic' ? clinicContentType : null,
+        clinicCampaignId: user.role === 'clinic' && clinicContentType === 'campaign' ? clinicCampaignId : null,
+      })
       setText('')
+      setClinicCampaignId('')
       setImage(null)
       revokeObjectUrl(preview)
       setPreview('')
@@ -132,6 +151,31 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
         ) : <div className="community-select" style={{ display: 'flex', alignItems: 'center' }}>{roleMeta[user.role]?.icon} {roleMeta[user.role]?.label}</div>}
         <MentionTextarea multiline className="community-textarea" value={text} onChange={setText} placeholder={user.role === 'owner' ? 'Una aventura, una foto, una anécdota... Usá #hashtags o @ para mencionar' : roleMeta[user.role]?.placeholder} maxLength={3000} />
       </div>
+      {user.role === 'clinic' && (
+        <div className="clinic-composer-tools">
+          <label>
+            <span>🏥 Tipo de publicación</span>
+            <select className="community-select" value={clinicContentType} onChange={(event) => { setClinicContentType(event.target.value); if (event.target.value !== 'campaign') setClinicCampaignId('') }}>
+              <option value="health_tip">Consejo veterinario</option>
+              <option value="campaign">Campaña o evento</option>
+              <option value="availability">Turnos disponibles</option>
+              <option value="guard">Guardia y horarios</option>
+              <option value="service">Servicio veterinario</option>
+              <option value="notice">Aviso importante</option>
+            </select>
+          </label>
+          {clinicContentType === 'campaign' && (
+            <label>
+              <span>📅 Vincular campaña</span>
+              <select className="community-select" value={clinicCampaignId} onChange={(event) => setClinicCampaignId(event.target.value)}>
+                <option value="">Publicación general de campaña</option>
+                {clinicCampaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.title}</option>)}
+              </select>
+            </label>
+          )}
+          <Link className="clinic-community-shortcut" to="/clinic/comunidad">Gestionar campañas y estadísticas →</Link>
+        </div>
+      )}
       <div className="composer-privacy-row">
         <label>
           <span>💬 Comentarios</span>
@@ -145,7 +189,7 @@ export default function PostComposer({ user, onCreated, defaultPetId = null }) {
       </div>
       <div className="hashtag-suggestions" aria-label="Hashtags sugeridos">
         <span>Hashtags:</span>
-        {(user.role === 'business' ? ['#NegociosVetPaw', '#Servicios', '#Mascotas', '#Promociones', '#Consejos'] : user.role === 'shelter' ? ['#Adopción', '#Rescate', '#Tránsito', '#Donaciones', '#Urgente'] : ['#MiMascota', '#Perros', '#Gatos', '#Adopción', '#Perdidos']).map((tag) => (
+        {(user.role === 'clinic' ? ['#ConsejoVeterinario', '#SaludAnimal', '#Vacunación', '#Castración', '#Turnos'] : user.role === 'business' ? ['#NegociosVetPaw', '#Servicios', '#Mascotas', '#Promociones', '#Consejos'] : user.role === 'shelter' ? ['#Adopción', '#Rescate', '#Tránsito', '#Donaciones', '#Urgente'] : ['#MiMascota', '#Perros', '#Gatos', '#Adopción', '#Perdidos']).map((tag) => (
           <button type="button" className="hashtag-chip" key={tag} onClick={() => addHashtag(tag)}>{tag}</button>
         ))}
       </div>

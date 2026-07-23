@@ -286,12 +286,14 @@ export const getCommunityPosts = (params = {}) =>
 export const getCommunityPost = (id) =>
     api.get(`/community/posts/${id}/`).then((r) => r.data);
 
-export const createCommunityPost = ({ text, image, pet, commentPermission }) => {
+export const createCommunityPost = ({ text, image, pet, commentPermission, clinicContentType, clinicCampaignId }) => {
     const formData = new FormData();
     if (text) formData.append('text', text);
     if (image) formData.append('image', image);
     if (pet) formData.append('pet', pet);
     if (commentPermission) formData.append('comment_permission', commentPermission);
+    if (clinicContentType) formData.append('clinic_content_type', clinicContentType);
+    if (clinicCampaignId) formData.append('clinic_campaign_id', clinicCampaignId);
     return api.post('/community/posts/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     }).then((r) => r.data);
@@ -521,3 +523,39 @@ export const createBusinessReservation = data => api.post('/commerce/reservation
 export const getBusinessReservations = () => api.get('/commerce/reservations/').then(r => r.data)
 export const updateBusinessReservationStatus = (id, data) => api.patch(`/commerce/reservations/${id}/status/`, data).then(r => r.data)
 export const getBusinessCommerceDashboard = () => api.get('/commerce/dashboard/').then(r => r.data)
+
+// ── Veterinarias en Comunidad ─────────────────────────
+const buildClinicCampaignForm = (payload = {}) => {
+    const formData = new FormData();
+    Object.entries(payload).forEach(([key, value]) => {
+        if (value === undefined || value === null || value === '') return;
+        if (Array.isArray(value)) formData.append(key, JSON.stringify(value));
+        else formData.append(key, value);
+    });
+    return formData;
+};
+
+export const getClinicCampaigns = (params = {}) =>
+    api.get('/clinic-campaigns/', { params }).then((r) => r.data);
+
+export const getClinicCampaign = (id) =>
+    api.get(`/clinic-campaigns/${id}/`).then((r) => r.data);
+
+export const createClinicCampaign = (payload) =>
+    api.post('/clinic-campaigns/', buildClinicCampaignForm(payload), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+
+export const updateClinicCampaign = (id, payload) =>
+    api.patch(`/clinic-campaigns/${id}/`, buildClinicCampaignForm(payload), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+
+export const deleteClinicCampaign = (id) => api.delete(`/clinic-campaigns/${id}/`);
+
+export const publishClinicCampaign = (id, text = '') =>
+    api.post(`/clinic-campaigns/${id}/publish/`, { text }).then((r) => r.data);
+
+export const getClinicCommunityStats = () =>
+    api.get('/clinic-campaigns/stats/').then((r) => r.data);
+

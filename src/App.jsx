@@ -37,6 +37,7 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
 const Estadisticas = lazy(() => import('./pages/Estadisticas'))
 const ClinicProfile = lazy(() => import('./pages/ClinicProfile'))
+const ClinicCommunity = lazy(() => import('./pages/ClinicCommunity'))
 const AdminPanel = lazy(() => import('./pages/AdminPanel'))
 const LostPets = lazy(() => import('./pages/LostPets'))
 const Configuracion = lazy(() => import('./pages/Configuracion'))
@@ -109,6 +110,7 @@ function App() {
             <Route path="/comunidad/moderacion" element={<ProtectedRoute permission="moderator"><CommunityModeration /></ProtectedRoute>} />
 
             <Route path="/clinic/dashboard" element={<ProtectedRoute role="clinic"><VetDashboard /></ProtectedRoute>} />
+            <Route path="/clinic/comunidad" element={<ProtectedRoute role="clinic"><ClinicCommunity /></ProtectedRoute>} />
             <Route path="/business/dashboard" element={<ProtectedRoute role="business"><OrganizationDashboard kind="business" /></ProtectedRoute>} />
             <Route path="/business/comercial" element={<ProtectedRoute role="business"><BusinessCommerce /></ProtectedRoute>} />
             <Route path="/mis-favoritos" element={<ProtectedRoute role="owner"><BusinessFavorites /></ProtectedRoute>} />

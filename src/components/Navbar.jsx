@@ -238,6 +238,8 @@ export default function Navbar() {
         if (status === 'comment_reaction') return '🐾 Patita en tu comentario'
         if (status === 'reply') return '↩️ Nueva respuesta'
         if (status === 'mention') return '📣 Nueva mención'
+        if (status === 'clinic_appointment') return '📅 Nuevo turno desde Comunidad'
+        if (status === 'clinic_appointment_update') return '🏥 Turno veterinario actualizado'
         if (status === 'birthday') return '🎂 Cumpleaños'
         if (status === 'confirmed') return '✅ Turno confirmado'
         if (status === 'cancelled') return '❌ Turno cancelado'
@@ -297,6 +299,7 @@ export default function Navbar() {
         { to: '/explorar', icon: 'explore', label: 'Explorar' },
         { to: '/adopciones', icon: 'adoptions', label: 'Adopciones' },
         { to: '/clinic/dashboard', icon: 'panel', label: 'Mi panel' },
+        { to: '/clinic/comunidad', icon: 'community', label: 'Comunidad profesional' },
         { to: '/messages', icon: 'messages', label: 'Mensajes', badge: unreadMessages },
         { to: '/profile', icon: 'profile', label: 'Mi perfil' },
         { to: '/configuracion', icon: 'settings', label: 'Configuración' },

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import '../../pages/ClinicCommunity.css'
 import {
   addCommunityComment,
   deleteCommunityComment,
@@ -99,6 +100,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
   const [commentActionBusy, setCommentActionBusy] = useState(null)
   const focusedCommentRef = useRef(null)
   const actor = post.actor || {}
+  const clinicContent = post.clinic_content
   const allComments = useMemo(() => flattenComments(comments), [comments])
 
   useEffect(() => {
@@ -362,7 +364,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
           ) : (
             <>
               <div className="comment-bubble">
-                <strong>{item.author.display_name}</strong>
+                <strong>{item.author.display_name}</strong>{item.is_professional_answer && <span className="clinic-answer-badge">✓ Respuesta veterinaria</span>}
                 <span>{renderRichText(item.text, onHashtagClick, openMention)}</span>
               </div>
               <div className="comment-tools">
@@ -450,6 +452,29 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
           {post.lost_pet.incident_date && <span>📅 Fecha: {new Date(`${post.lost_pet.incident_date}T12:00:00`).toLocaleDateString('es-AR')}</span>}
           <span>☎ {post.lost_pet.contact_value}</span>
           <Link to="/mascotas-perdidas" className="lost-link">Ver aviso completo →</Link>
+        </div>
+      )}
+
+      {clinicContent && (
+        <div className="clinic-post-panel">
+          <span className="clinic-post-label">🏥 {clinicContent.label}{clinicContent.verified ? ' · Información verificada' : ''}</span>
+          {clinicContent.campaign && (
+            <>
+              <h4>{clinicContent.campaign.title}</h4>
+              <p>📅 {new Date(clinicContent.campaign.starts_at).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+              {clinicContent.campaign.location && <p>📍 {clinicContent.campaign.location}</p>}
+              <p>{clinicContent.campaign.is_free ? 'Actividad gratuita' : clinicContent.campaign.price ? `$${Number(clinicContent.campaign.price).toLocaleString('es-AR')}` : 'Consultar valor'}{clinicContent.campaign.remaining_slots !== null ? ` · ${clinicContent.campaign.remaining_slots} cupos disponibles` : ''}</p>
+            </>
+          )}
+          {clinicContent.can_request_appointment && (
+            <button type="button" className="clinic-post-cta" onClick={() => {
+              if (!user) { navigate('/login'); return }
+              if (user.role !== 'owner') { navigate(`/clinicas/${clinicContent.clinic_slug}`); return }
+              const params = new URLSearchParams({ clinic: String(clinicContent.clinic_id), source_post: String(post.id), reason: clinicContent.campaign?.title || post.text?.slice(0, 120) || 'Consulta desde la Comunidad' })
+              if (clinicContent.campaign?.id) params.set('campaign', String(clinicContent.campaign.id))
+              navigate(`/appointments/new?${params.toString()}`)
+            }}>{clinicContent.campaign ? '📅 Reservar lugar' : '📅 Solicitar turno'}</button>
+          )}
         </div>
       )}
 
