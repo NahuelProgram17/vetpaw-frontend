@@ -5,13 +5,13 @@ import api, { updateClinicPlan } from '../services/api'
 import AdsManager from '../components/AdsManager'
 import BlogManager from '../components/BlogManager'
 import AdminLostPetsManager from '../components/AdminLostPetsManager'
+import AdminInteractionStats from '../components/AdminInteractionStats'
 import { canAccessAdmin } from '../utils/permissions'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const G1 = '#4CAF50'
 const O1 = '#FF9800'
 const DARK = '#0f1923'
-const DARK2 = '#162032'
 const CARD = '#1a2535'
 
 const PLAN_META = {
@@ -53,7 +53,7 @@ export default function AdminPanel() {
             const res = await api.get('/users/admin-panel/')
             setData(res.data)
             setLastUpdate(new Date().toLocaleTimeString('es-AR'))
-        } catch (e) {
+        } catch {
             setError('Error cargando datos.')
         } finally {
             setDataLoading(false)
@@ -84,7 +84,19 @@ export default function AdminPanel() {
 
     if (!data) return null
 
-    const { global: g, new_users_by_day, appts_by_day, appts_by_status, top_clinics, last_users, security, pending_clinics = [], pending_profiles = [], clinic_plans = [] } = data
+    const {
+        global: g,
+        new_users_by_day = [],
+        appts_by_day = [],
+        appts_by_status = {},
+        top_clinics = [],
+        last_users = [],
+        security = [],
+        pending_clinics = [],
+        pending_profiles = [],
+        clinic_plans = [],
+        interaction_stats = null,
+    } = data
     const pendingCount = pending_clinics.length + pending_profiles.length
 
     const StatCard = ({ icon, label, value, sub, color = G1 }) => (
@@ -206,6 +218,7 @@ export default function AdminPanel() {
                 <div style={{ display: 'flex', gap: 10, marginBottom: 28, borderBottom: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
                     {[
                         { k: 'dashboard', l: '📊 Dashboard' },
+                        { k: 'interaction', l: '📈 Interacción' },
                         { k: 'pending',   l: `✅ Pendientes${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
                         { k: 'plans',     l: '💳 Planes veterinarios' },
                         { k: 'lostPets',  l: `🔍 Mascotas perdidas${g.total_lost_active > 0 ? ` (${g.total_lost_active})` : ''}` },
@@ -227,6 +240,8 @@ export default function AdminPanel() {
                 {tab === 'blog' && <BlogManager />}
 
                 {tab === 'lostPets' && <AdminLostPetsManager />}
+
+                {tab === 'interaction' && <AdminInteractionStats stats={interaction_stats} />}
 
                 {tab === 'pending' && (<>
                     <SectionTitle>✅ Perfiles profesionales pendientes de aprobación</SectionTitle>
