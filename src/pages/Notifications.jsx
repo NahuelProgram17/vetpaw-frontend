@@ -48,6 +48,9 @@ const socialIcon = (type) => {
     if (type === 'comment_reaction') return '🐾'
     if (type === 'reply') return '↩️'
     if (type === 'mention') return '📣'
+    if (type === 'adoption_application') return '🏡'
+    if (type === 'adoption_help_offer') return '🤝'
+    if (type === 'adoption_application_update') return '📋'
     return '🔔'
 }
 
@@ -181,7 +184,7 @@ export default function Notifications() {
                     <div>
                         <span className="notifications-kicker">🔔 Tu centro VetPaw</span>
                         <h1>Notificaciones y recuerdos</h1>
-                        <p>Patitas, comentarios, nuevos seguidores y las novedades importantes de VetPaw quedan reunidas acá.</p>
+                        <p>Patitas, comentarios, seguidores, adopciones y las novedades importantes de VetPaw quedan reunidas acá.</p>
                     </div>
                 </header>
 
@@ -193,7 +196,7 @@ export default function Notifications() {
                     <>
                         <section className="notification-section social-section">
                             <div className="section-heading">
-                                <div><span>🐾</span><div><h2>Actividad de la comunidad</h2><p>Interacciones con tus mascotas y publicaciones.</p></div></div>
+                                <div><span>🐾</span><div><h2>Actividad de la comunidad</h2><p>Interacciones con tus perfiles, publicaciones y solicitudes de adopción.</p></div></div>
                                 <div className="heading-actions">
                                     <b>{unreadSocial} nuevas</b>
                                     {unreadSocial > 0 && <button className="mark-read-button small" onClick={markAllSocialRead}>✓ Marcar todas como leídas</button>}
@@ -204,7 +207,7 @@ export default function Notifications() {
                                 <div className="empty-notifications">
                                     <span>🐾</span>
                                     <h3>Todavía no hay actividad social</h3>
-                                    <p>Cuando alguien deje una patita, comente una publicación o siga una mascota, lo vas a encontrar acá.</p>
+                                    <p>Cuando alguien interactúe con un perfil, una publicación o una adopción, lo vas a encontrar acá.</p>
                                 </div>
                             ) : (
                                 <div className="social-list">
@@ -224,7 +227,7 @@ export default function Notifications() {
                                             </div>
                                             <div className="social-copy">
                                                 <strong>{notification.message}</strong>
-                                                {notification.extra_text && <p>“{notification.extra_text}”</p>}
+                                                {notification.extra_text && !['adoption_application', 'adoption_help_offer', 'adoption_application_update'].includes(notification.notification_type) && <p>“{notification.extra_text}”</p>}
                                                 <time>{relativeTime(notification.created_at)}</time>
                                             </div>
                                             {!notification.is_read && <span className="social-new-dot" title="Sin leer" />}
