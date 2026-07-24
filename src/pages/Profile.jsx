@@ -21,6 +21,15 @@ const MUTED2 = "rgba(255,255,255,0.6)";
 
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—";
 
+const VERIFICATION_META = {
+    pending: { label: "Pendiente", icon: "⏳", color: "#ffd36b", background: "rgba(255,211,107,.09)", border: "rgba(255,211,107,.25)" },
+    in_review: { label: "En revisión", icon: "🔎", color: "#91dcff", background: "rgba(107,202,255,.09)", border: "rgba(107,202,255,.25)" },
+    corrections: { label: "Requiere correcciones", icon: "✏️", color: "#ffc36a", background: "rgba(255,152,0,.09)", border: "rgba(255,152,0,.25)" },
+    verified: { label: "Verificada", icon: "✅", color: "#91f2bd", background: "rgba(107,255,184,.09)", border: "rgba(107,255,184,.25)" },
+    rejected: { label: "Rechazada", icon: "✕", color: "#ff9daa", background: "rgba(255,107,124,.09)", border: "rgba(255,107,124,.25)" },
+    withdrawn: { label: "Verificación retirada", icon: "↩️", color: "#ff9daa", background: "rgba(255,107,124,.09)", border: "rgba(255,107,124,.25)" },
+};
+
 export default function Profile() {
     const { user } = useAuth();
     const [profile, setProfile] = useState(null);
@@ -133,6 +142,8 @@ export default function Profile() {
     const currentRole = roleMeta[profile?.role] || roleMeta.owner;
     const roleLabel = currentRole.label;
     const isOwner = profile?.role === "owner";
+    const verification = profile?.professional_verification || null;
+    const verificationMeta = VERIFICATION_META[verification?.status] || VERIFICATION_META.pending;
     const card = { background: CARD, border: `1.5px solid ${BORDER}`, borderRadius: 18 };
 
     if (loading) return <VetPawLoader message="Cargando perfil..." subText="Preparando tus datos" />;
@@ -286,6 +297,20 @@ export default function Profile() {
                                 </div>
                                 <Link to="/history" style={{ display: "block", textAlign: "center", marginTop: 16, padding: "12px 0", borderRadius: 12, border: `1px solid ${G1}55`, color: G2, fontWeight: 700, fontSize: 13, textDecoration: "none" }}>Ver historial completo →</Link>
                             </> : <>
+                                {verification && (
+                                    <div style={{ background: verificationMeta.background, border: `1px solid ${verificationMeta.border}`, borderRadius: 14, padding: 14, marginBottom: 14 }}>
+                                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+                                            <strong style={{ color: verificationMeta.color, fontSize: 13 }}>{verificationMeta.icon} Verificación: {verificationMeta.label}</strong>
+                                            {verification.verified_at && <span style={{ color: MUTED, fontSize: 10 }}>Desde {fmtDate(verification.verified_at)}</span>}
+                                        </div>
+                                        <p style={{ color: MUTED2, fontSize: 11.5, lineHeight: 1.55, margin: "8px 0 0" }}>
+                                            {verification.status === "verified"
+                                                ? "Tu insignia pública está activa. La aprobación de la cuenta, los planes y los turnos se administran por separado."
+                                                : verification.public_note || "El equipo de VetPaw todavía no finalizó la revisión de tu perfil profesional."}
+                                        </p>
+                                        {verification.verification_updated_at && <div style={{ color: MUTED, fontSize: 10, marginTop: 7 }}>Última actualización: {fmtDate(verification.verification_updated_at)}</div>}
+                                    </div>
+                                )}
                                 <p style={{ color: MUTED2, fontSize: 13, lineHeight: 1.65, marginBottom: 16 }}>Administrá el perfil público, las fotos, servicios o actividades y las publicaciones de {profile?.profile_name || "tu organización"}.</p>
                                 <Link to={currentRole.panel} style={{ display: "block", textAlign: "center", padding: "12px 0", borderRadius: 12, background: `linear-gradient(135deg, ${G1}, ${O1})`, color: "#fff", fontWeight: 800, fontSize: 13, textDecoration: "none" }}>Abrir mi panel →</Link>
                                 {profile?.profile_url && <Link to={profile.profile_url} style={{ display: "block", textAlign: "center", marginTop: 10, padding: "11px 0", borderRadius: 12, border: `1px solid ${G1}55`, color: G2, fontWeight: 700, fontSize: 13, textDecoration: "none" }}>Ver perfil público →</Link>}

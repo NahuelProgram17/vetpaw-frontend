@@ -615,3 +615,13 @@ export const getAbuseAccounts = (params = {}) =>
 export const reviewAbuseSignal = (signalId, payload) =>
     api.post(`/users/admin/abuse/signals/${signalId}/`, payload).then((r) => r.data);
 
+// ── Verificación profesional ─────────────────────────
+export const getProfessionalVerifications = (params = {}) =>
+    api.get('/users/admin/verifications/', { params }).then((r) => r.data);
+
+export const getProfessionalVerificationHistory = (params = {}) =>
+    api.get('/users/admin/verifications/history/', { params }).then((r) => r.data);
+
+export const updateProfessionalVerification = (userId, payload) =>
+    api.post(`/users/admin/verifications/${userId}/`, payload).then((r) => r.data);
+

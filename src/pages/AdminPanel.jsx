@@ -8,6 +8,7 @@ import AdminLostPetsManager from '../components/AdminLostPetsManager'
 import AdminInteractionStats from '../components/AdminInteractionStats'
 import AdminAccountModeration from '../components/AdminAccountModeration'
 import AdminAbuseProtection from '../components/AdminAbuseProtection'
+import AdminProfessionalVerification from '../components/AdminProfessionalVerification'
 import { canAccessAdmin } from '../utils/permissions'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
@@ -223,6 +224,7 @@ export default function AdminPanel() {
                         { k: 'interaction', l: '📈 Interacción' },
                         { k: 'accountModeration', l: '🛡️ Moderación de cuentas' },
                         { k: 'abuseProtection', l: '🚨 Protección anti-spam' },
+                        { k: 'professionalVerification', l: '✅ Verificación profesional' },
                         { k: 'pending',   l: `✅ Pendientes${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
                         { k: 'plans',     l: '💳 Planes veterinarios' },
                         { k: 'lostPets',  l: `🔍 Mascotas perdidas${g.total_lost_active > 0 ? ` (${g.total_lost_active})` : ''}` },
@@ -250,6 +252,8 @@ export default function AdminPanel() {
                 {tab === 'accountModeration' && <AdminAccountModeration currentUserId={user?.id} />}
 
                 {tab === 'abuseProtection' && <AdminAbuseProtection currentUserId={user?.id} />}
+
+                {tab === 'professionalVerification' && <AdminProfessionalVerification />}
 
                 {tab === 'pending' && (<>
                     <SectionTitle>✅ Perfiles profesionales pendientes de aprobación</SectionTitle>
