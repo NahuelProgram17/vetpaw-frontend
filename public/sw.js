@@ -1,55 +1,94 @@
-const CACHE_NAME = 'vetpaw-shell-v3'
+const SHELL_CACHE = 'vetpaw-shell-v4'
+const STATIC_CACHE = 'vetpaw-static-v4'
 const APP_SHELL_URL = '/'
+const CORE_ASSETS = ['/', '/manifest.json', '/logo_vetpaw.png', '/icon-192.png']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches.open(SHELL_CACHE)
       .then(async (cache) => {
-        try {
-          const response = await fetch(new Request(APP_SHELL_URL, { cache: 'reload' }))
-          if (response.ok) await cache.put(APP_SHELL_URL, response)
-        } catch (error) {
-          console.warn('No se pudo guardar la portada de VetPaw para uso sin conexión.', error)
-        }
+        await Promise.all(CORE_ASSETS.map(async (url) => {
+          try {
+            const response = await fetch(new Request(url, { cache: 'reload' }))
+            if (response.ok) await cache.put(url, response)
+          } catch (error) {
+            console.warn(`No se pudo guardar ${url} para uso sin conexión.`, error)
+          }
+        }))
       })
   )
   self.skipWaiting()
 })
 
 self.addEventListener('activate', (event) => {
+  const currentCaches = new Set([SHELL_CACHE, STATIC_CACHE])
   event.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
+          .filter((key) => key.startsWith('vetpaw-') && !currentCaches.has(key))
           .map((key) => caches.delete(key))
       ))
       .then(() => self.clients.claim())
   )
 })
 
+const offlineDocument = () => new Response(
+  "<!doctype html><html lang='es'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><meta name='theme-color' content='#4CAF50'><title>VetPaw sin conexión</title><body style='margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;font-family:system-ui;background:#071422;color:white;text-align:center'><main style='max-width:480px;padding:36px 28px;border:1px solid rgba(255,255,255,.12);border-radius:24px;background:#122033'><div style='font-size:56px'>📡</div><h1>VetPaw está sin conexión</h1><p style='color:rgba(255,255,255,.7);line-height:1.55'>La aplicación volverá a conectarse cuando recuperes internet. Las pantallas que ya abriste pueden seguir disponibles.</p><button onclick='location.reload()' style='border:0;border-radius:12px;padding:12px 18px;background:linear-gradient(135deg,#4CAF50,#FF9800);color:white;font-weight:800;cursor:pointer'>Reintentar</button></main></body></html>",
+  { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } }
+)
+
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET' || event.request.mode !== 'navigate') return
+  const request = event.request
+  if (request.method !== 'GET') return
+
+  const url = new URL(request.url)
+  if (url.origin !== self.location.origin) return
+  if (url.pathname.startsWith('/api/')) return
+
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone()
+            caches.open(SHELL_CACHE).then((cache) => {
+              cache.put(request, copy.clone())
+              cache.put(APP_SHELL_URL, copy)
+            })
+          }
+          return response
+        })
+        .catch(async () => {
+          return (await caches.match(request))
+            || (await caches.match(APP_SHELL_URL))
+            || offlineDocument()
+        })
+    )
+    return
+  }
+
+  const cacheableDestination = ['script', 'style', 'font', 'image'].includes(request.destination)
+  if (!cacheableDestination) return
 
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response.ok) {
-          const copy = response.clone()
-          caches.open(CACHE_NAME).then((cache) => cache.put(APP_SHELL_URL, copy))
-        }
-        return response
-      })
-      .catch(async () => {
-        const cached = await caches.match(APP_SHELL_URL)
-        if (cached) return cached
+    caches.match(request).then((cached) => {
+      const network = fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            caches.open(STATIC_CACHE).then((cache) => cache.put(request, response.clone()))
+          }
+          return response
+        })
+        .catch(() => cached || Response.error())
 
-        return new Response(
-          "<!doctype html><html lang='es'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>VetPaw sin conexión</title><body style='font-family:system-ui;background:#0a1520;color:white;text-align:center;padding:48px'><h1>VetPaw</h1><p>No hay conexión en este momento. Volvé a intentarlo cuando recuperes internet.</p></body></html>",
-          { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-        )
-      })
+      return cached || network
+    })
   )
+})
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting()
 })
 
 self.addEventListener('push', (event) => {

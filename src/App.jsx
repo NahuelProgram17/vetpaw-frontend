@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Navbar from './components/Navbar'
 import ScrollToTop from './components/ScrollToTop'
+import ConnectivityBanner from './components/ConnectivityBanner'
 import { RouteChangeLoader, VetPawLoader } from './components/VetPawLoader'
 
 const Home = lazy(() => import('./pages/Home'))
@@ -66,6 +67,8 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <a className="vp-skip-link" href="#vetpaw-main-content">Ir al contenido principal</a>
+        <ConnectivityBanner />
         <ScrollToTop />
         <Suspense fallback={null}>
           <PushNotificationHandler />
@@ -73,8 +76,9 @@ function App() {
         </Suspense>
         <RouteChangeLoader />
         <Navbar />
-        <Suspense fallback={pageFallback}>
-          <Routes>
+        <div id="vetpaw-main-content" tabIndex="-1">
+          <Suspense fallback={pageFallback}>
+            <Routes>
             <Route path="/" element={<Community />} />
             <Route path="/comunidad" element={<Community />} />
             <Route path="/explorar" element={<Explore />} />
@@ -130,8 +134,9 @@ function App() {
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+            </Routes>
+          </Suspense>
+        </div>
       </BrowserRouter>
     </AuthProvider>
   )

@@ -1,0 +1,199 @@
+.vp-skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 20000;
+  transform: translateY(-160%);
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #081524;
+  font: 900 14px 'Nunito', system-ui, sans-serif;
+  text-decoration: none;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .38);
+  transition: transform .16s ease;
+}
+
+.vp-skip-link:focus {
+  transform: translateY(0);
+}
+
+#vetpaw-main-content:focus {
+  outline: none;
+}
+
+:where(a, button, input, select, textarea, summary, [role="button"], [tabindex]):focus-visible {
+  outline: 3px solid #ffb000 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 2px rgba(8, 21, 36, .82) !important;
+}
+
+.vp-connectivity-banner {
+  position: fixed;
+  z-index: 15000;
+  top: 12px;
+  left: 50%;
+  width: min(720px, calc(100% - 24px));
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 184, 77, .42);
+  border-radius: 16px;
+  color: #fff;
+  background: rgba(20, 29, 43, .97);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, .42);
+  backdrop-filter: blur(12px);
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+
+.vp-connectivity-banner.is-recovered {
+  border-color: rgba(93, 219, 105, .52);
+}
+
+.vp-connectivity-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .08);
+  font-weight: 900;
+}
+
+.vp-connectivity-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vp-connectivity-copy strong {
+  font-size: 13px;
+  color: #fff;
+}
+
+.vp-connectivity-copy span,
+.vp-connectivity-copy small {
+  color: rgba(255, 255, 255, .72);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.vp-connectivity-copy small {
+  color: #ffc36a;
+  overflow-wrap: anywhere;
+}
+
+.vp-connectivity-banner button {
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #fff;
+  background: rgba(255, 255, 255, .08);
+  font: 900 12px 'Nunito', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.vp-fatal-error,
+.vp-auth-recovery {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px 18px;
+  color: #fff;
+  background: radial-gradient(circle at 50% 20%, rgba(76, 175, 80, .18), transparent 34%), #071422;
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+
+.vp-fatal-error-card,
+.vp-auth-recovery-card {
+  width: min(540px, 100%);
+  padding: clamp(28px, 6vw, 48px);
+  border: 1px solid rgba(255, 255, 255, .11);
+  border-radius: 26px;
+  text-align: center;
+  background: rgba(18, 31, 47, .94);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .42);
+}
+
+.vp-fatal-error-icon,
+.vp-auth-recovery-icon {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 52px;
+}
+
+.vp-fatal-error-kicker,
+.vp-auth-recovery-kicker {
+  margin: 0 0 9px;
+  color: #6fda55;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+}
+
+.vp-fatal-error h1,
+.vp-auth-recovery h1 {
+  margin: 0 0 12px;
+  font-size: clamp(1.7rem, 5vw, 2.35rem);
+}
+
+.vp-fatal-error p,
+.vp-auth-recovery p {
+  color: rgba(255, 255, 255, .68);
+  line-height: 1.55;
+}
+
+.vp-fatal-error-actions,
+.vp-auth-recovery-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.vp-fatal-error-actions button,
+.vp-fatal-error-actions a,
+.vp-auth-recovery-actions button,
+.vp-auth-recovery-actions a {
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #4caf50, #fb8c00);
+  font: 900 13px 'Nunito', system-ui, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.vp-fatal-error-actions a,
+.vp-auth-recovery-actions a {
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .06);
+}
+
+
+@media (max-width: 600px) {
+  .vp-connectivity-banner {
+    top: 8px;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .vp-connectivity-banner button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

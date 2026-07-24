@@ -21,6 +21,14 @@ test('una ruta protegida conserva el loader mientras se valida la sesión', () =
     assert.deepEqual(getProtectedRouteDecision({ loading: true }), { kind: 'loading' })
 })
 
+
+test('una falla temporal al verificar la sesión no expulsa al usuario', () => {
+    assert.deepEqual(
+        getProtectedRouteDecision({ user: null, authError: 'No hay conexión.' }),
+        { kind: 'auth_unavailable', message: 'No hay conexión.' },
+    )
+})
+
 test('un visitante sin sesión es enviado al login', () => {
     assert.deepEqual(getProtectedRouteDecision({ user: null }), { kind: 'redirect', to: '/login' })
 })

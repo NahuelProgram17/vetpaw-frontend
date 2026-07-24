@@ -14,8 +14,8 @@ export default function ForgotPassword() {
         try {
             await requestPasswordReset(email);
             setSent(true);
-        } catch {
-            setError("Hubo un error. Intentá de nuevo.");
+        } catch (err) {
+            setError(err.userMessage || "Hubo un error. Intentá de nuevo.");
         } finally { setLoading(false); }
     };
 
@@ -34,13 +34,14 @@ export default function ForgotPassword() {
                         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.88rem', marginBottom: 20, lineHeight: 1.6 }}>
                             Ingresá tu email y te enviaremos un link para restablecer tu contraseña.
                         </p>
-                        {error && <div className="auth-error"><span>⚠️</span> {error}</div>}
+                        {error && <div className="auth-error" role="alert" aria-live="assertive"><span>⚠️</span> {error}</div>}
                         <form onSubmit={handleSubmit} className="auth-form">
                             <div className="field-group">
-                                <label>Email</label>
+                                <label htmlFor="forgot-email">Email</label>
                                 <div className="input-wrapper">
                                     <span className="input-icon">✉️</span>
                                     <input
+                                        id="forgot-email" name="email" autoComplete="email"
                                         type="email" placeholder="tu@email.com"
                                         value={email} onChange={e => setEmail(e.target.value)}
                                         required

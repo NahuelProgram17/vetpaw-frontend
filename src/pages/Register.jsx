@@ -69,7 +69,7 @@ export default function Register() {
             const data = err.response?.data;
             const msg = data
                 ? Object.values(data).flat().join(" ")
-                : "Error al registrarse. Intentá de nuevo.";
+                : (err.userMessage || "Error al registrarse. Intentá de nuevo.");
             setError(msg);
             setStep(0);
         } finally {
@@ -103,7 +103,7 @@ export default function Register() {
                 )}
 
                 {error && (
-                    <div className="auth-error">
+                    <div className="auth-error" role="alert" aria-live="assertive">
                         <span>⚠️</span> {error}
                     </div>
                 )}
@@ -397,4 +397,4 @@ export default function Register() {
     `}</style>
         </div>
     );
-}
+}

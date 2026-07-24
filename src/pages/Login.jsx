@@ -37,6 +37,7 @@ export default function Login() {
             navigate(getHomeForRole(userData?.role));
         } catch (err) {
             const failure = parseLoginFailure(err.response?.data);
+            if (!failure.sanction && err.userMessage) failure.error = err.userMessage;
             setSanction(failure.sanction);
             setError(failure.error);
         } finally {
@@ -76,7 +77,7 @@ export default function Login() {
                 )}
 
                 {error && (
-                    <div className="auth-error">
+                    <div className="auth-error" role="alert" aria-live="assertive">
                         <span>⚠️</span> {error}
                     </div>
                 )}

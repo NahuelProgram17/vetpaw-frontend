@@ -17,8 +17,9 @@ export const isPendingProfessional = (user) => Boolean(
     user && PROFESSIONAL_ROLES.has(user.role) && !user.is_approved
 )
 
-export function getProtectedRouteDecision({ user, loading = false, role = '', permission = '' } = {}) {
+export function getProtectedRouteDecision({ user, loading = false, authError = '', role = '', permission = '' } = {}) {
     if (loading) return { kind: 'loading' }
+    if (authError) return { kind: 'auth_unavailable', message: authError }
     if (!user) return { kind: 'redirect', to: '/login' }
     if (isPendingProfessional(user)) return { kind: 'pending_approval', role: user.role }
 

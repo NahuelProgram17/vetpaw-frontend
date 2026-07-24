@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import useAccessibleDialog from "../hooks/useAccessibleDialog";
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif";
 const VETPAW_URL = "https://vetpaw.com.ar/";
@@ -27,7 +28,7 @@ export default function InstallPWA() {
     const [showModal, setShowModal] = useState(false);
     const [installed, setInstalled] = useState(false);
     const [copied, setCopied] = useState(false);
-    const modalRef = useRef(null);
+    const modalRef = useAccessibleDialog({ open: showModal, onClose: () => setShowModal(false) });
 
     useEffect(() => {
         if (isInStandaloneMode()) {
@@ -61,17 +62,11 @@ export default function InstallPWA() {
                 setShowModal(false);
             }
         };
-        const handleEscape = (event) => {
-            if (event.key === "Escape") setShowModal(false);
-        };
-
         document.addEventListener("pointerdown", handlePointerDown);
-        window.addEventListener("keydown", handleEscape);
         return () => {
             document.removeEventListener("pointerdown", handlePointerDown);
-            window.removeEventListener("keydown", handleEscape);
         };
-    }, [showModal]);
+    }, [showModal, modalRef]);
 
     if (installed) return null;
 
@@ -144,7 +139,9 @@ export default function InstallPWA() {
                         ref={modalRef}
                         role="dialog"
                         aria-modal="true"
-                        aria-label="Instalar VetPaw"
+                        tabIndex="-1"
+                        aria-labelledby="install-vetpaw-title"
+                        aria-describedby="install-vetpaw-description"
                         style={{
                             background: "#162032", borderRadius: "20px 20px 0 0",
                             width: "100%", maxWidth: 520, padding: "28px 24px 36px",
@@ -166,10 +163,10 @@ export default function InstallPWA() {
                         >✕</button>
 
                         <div style={{ fontSize: 40, textAlign: "center", marginBottom: 10 }}>🐾</div>
-                        <h2 style={{ fontFamily: FONT, fontSize: 20, fontWeight: 700, color: "#fff", textAlign: "center", margin: "0 0 6px" }}>
+                        <h2 id="install-vetpaw-title" style={{ fontFamily: FONT, fontSize: 20, fontWeight: 700, color: "#fff", textAlign: "center", margin: "0 0 6px" }}>
                             Instalá VetPaw
                         </h2>
-                        <p style={{ fontFamily: FONT, fontSize: 14, color: "rgba(255,255,255,0.58)", textAlign: "center", margin: "0 0 20px", lineHeight: 1.5 }}>
+                        <p id="install-vetpaw-description" style={{ fontFamily: FONT, fontSize: 14, color: "rgba(255,255,255,0.58)", textAlign: "center", margin: "0 0 20px", lineHeight: 1.5 }}>
                             {ios ? "En iPhone se agrega desde el menú de Safari." : "Tené VetPaw en tu pantalla de inicio y abrilo como una app."}
                         </p>
 

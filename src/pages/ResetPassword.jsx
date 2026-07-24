@@ -20,7 +20,7 @@ export default function ResetPassword() {
             setSuccess(true);
             setTimeout(() => navigate("/login"), 3000);
         } catch (err) {
-            setError(err.response?.data?.error || "El link expiró o ya fue usado.");
+            setError(err.response?.data?.error || err.userMessage || "El link expiró o ya fue usado.");
         } finally { setLoading(false); }
     };
 
@@ -39,7 +39,7 @@ export default function ResetPassword() {
                         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.88rem', marginBottom: 20, lineHeight: 1.6 }}>
                             Ingresá tu nueva contraseña.
                         </p>
-                        {error && <div className="auth-error"><span>⚠️</span> {error}</div>}
+                        {error && <div className="auth-error" role="alert" aria-live="assertive"><span>⚠️</span> {error}</div>}
                         <form onSubmit={handleSubmit} className="auth-form">
                             <div className="field-group">
                                 <label>Nueva contraseña</label>

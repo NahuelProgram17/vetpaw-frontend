@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getProfileConnections } from '../../services/api'
+import useAccessibleDialog from '../../hooks/useAccessibleDialog'
 
 const fallback = (type) => type === 'clinic' ? '🏥' : type === 'business' ? '🛍️' : type === 'shelter' ? '🏠' : type === 'user' ? '👤' : '🐾'
 
@@ -11,6 +12,7 @@ export default function SocialConnectionsModal({ open, onClose, profileType, ide
   const [next, setNext] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const dialogRef = useAccessibleDialog({ open, onClose })
 
   useEffect(() => {
     if (!open) return undefined
@@ -19,10 +21,8 @@ export default function SocialConnectionsModal({ open, onClose, profileType, ide
     setPage(1)
     setNext(null)
     setError('')
-    const onKey = (event) => { if (event.key === 'Escape') onClose?.() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, initialKind, onClose])
+    return undefined
+  }, [open, initialKind])
 
   useEffect(() => {
     if (!open || !profileType || !identifier) return undefined
@@ -52,9 +52,9 @@ export default function SocialConnectionsModal({ open, onClose, profileType, ide
 
   return (
     <div className="social-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose?.() }}>
-      <section className="social-modal" role="dialog" aria-modal="true" aria-label={`Conexiones de ${profileName}`}>
+      <section ref={dialogRef} tabIndex="-1" className="social-modal" role="dialog" aria-modal="true" aria-labelledby="social-connections-title" aria-describedby="social-connections-description">
         <header className="social-modal-head">
-          <div><h2>{profileName}</h2><p>Perfiles conectados dentro de VetPaw</p></div>
+          <div><h2 id="social-connections-title">{profileName}</h2><p id="social-connections-description">Perfiles conectados dentro de VetPaw</p></div>
           <button type="button" onClick={onClose} aria-label="Cerrar">✕</button>
         </header>
         <div className="social-modal-tabs">
@@ -75,8 +75,8 @@ export default function SocialConnectionsModal({ open, onClose, profileType, ide
               : <div className="social-connection-row" key={`${item.type}-${item.id}`}>{content}</div>
           })}
           {!loading && !rows.length && !error && <div className="social-modal-empty">Todavía no hay perfiles para mostrar.</div>}
-          {error && <div className="social-modal-empty error">{error}</div>}
-          {loading && <div className="social-modal-empty">Cargando...</div>}
+          {error && <div className="social-modal-empty error" role="alert" aria-live="assertive">{error}</div>}
+          {loading && <div className="social-modal-empty" role="status" aria-live="polite">Cargando...</div>}
         </div>
         {next && !loading && <button type="button" className="social-load-more" onClick={() => setPage(next)}>Ver más</button>}
       </section>

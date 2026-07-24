@@ -4,11 +4,28 @@ import VetPawLoader from './VetPawLoader'
 import { getProtectedRouteDecision } from '../utils/authFlow'
 
 export default function ProtectedRoute({ children, role, permission }) {
-    const { user, loading } = useAuth()
-    const decision = getProtectedRouteDecision({ user, loading, role, permission })
+    const { user, loading, authError, retryAuth } = useAuth()
+    const decision = getProtectedRouteDecision({ user, loading, authError, role, permission })
 
     if (decision.kind === 'loading') {
         return <VetPawLoader message="Cargando VetPaw..." subText="Verificando tu sesión" />
+    }
+
+    if (decision.kind === 'auth_unavailable') {
+        return (
+            <main className="vp-auth-recovery" role="alert" aria-live="assertive">
+                <div className="vp-auth-recovery-card">
+                    <span className="vp-auth-recovery-icon" aria-hidden="true">📡</span>
+                    <p className="vp-auth-recovery-kicker">TU SESIÓN NO SE CERRÓ</p>
+                    <h1>No pudimos verificar tu cuenta</h1>
+                    <p>{decision.message}</p>
+                    <div className="vp-auth-recovery-actions">
+                        <button type="button" onClick={retryAuth}>Reintentar conexión</button>
+                        <a href="/">Volver a Comunidad</a>
+                    </div>
+                </div>
+            </main>
+        )
     }
 
     if (decision.kind === 'redirect') {

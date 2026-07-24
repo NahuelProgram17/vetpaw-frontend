@@ -12,8 +12,10 @@ export function VetPawLoader({
   return (
     <div
       className={`vp-loader ${fullScreen ? "vp-loader-full" : "vp-loader-inline"} ${overlay ? "vp-loader-overlay" : ""}`}
+      role="status"
       aria-live="polite"
       aria-busy="true"
+      aria-label={`${message}. ${subText}`}
     >
       <div className="vp-loader-bg" />
 

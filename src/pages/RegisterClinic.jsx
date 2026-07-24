@@ -97,7 +97,7 @@ export default function RegisterClinic() {
         setStep(2);
     } catch (err) {
         const data = err.response?.data;
-        setError(data ? Object.values(data).flat().join(" ") : "Error al registrarse.");
+        setError(data ? Object.values(data).flat().join(" ") : (err.userMessage || "Error al registrarse."));
         setStep(0);
     } finally {
         setLoading(false);
@@ -128,7 +128,7 @@ export default function RegisterClinic() {
                     </div>
                 )}
 
-                {error && <div className="auth-error"><span>⚠️</span> {error}</div>}
+                {error && <div className="auth-error" role="alert" aria-live="assertive"><span>⚠️</span> {error}</div>}
 
                 {/* Step 0: Cuenta */}
                 {step === 0 && (
@@ -354,4 +354,4 @@ export default function RegisterClinic() {
     `}</style>
         </div>
     );
-}
+}

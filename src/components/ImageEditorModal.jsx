@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import useAccessibleDialog from '../hooks/useAccessibleDialog'
 
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"
 const GREEN = '#4CAF50'
@@ -31,6 +32,7 @@ export default function ImageEditorModal({ file, onCancel, onApply, title = 'Aju
   const [error, setError] = useState('')
   const canvasRef = useRef(null)
   const dragRef = useRef(null)
+  const dialogRef = useAccessibleDialog({ open: true, onClose: onCancel, closeOnEscape: !saving })
 
   useEffect(() => {
     if (!file) return undefined
@@ -48,19 +50,6 @@ export default function ImageEditorModal({ file, onCancel, onApply, title = 'Aju
     img.src = url
     return () => URL.revokeObjectURL(url)
   }, [file])
-
-  useEffect(() => {
-    const oldOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const handleEscape = (event) => {
-      if (event.key === 'Escape' && !saving) onCancel?.()
-    }
-    window.addEventListener('keydown', handleEscape)
-    return () => {
-      document.body.style.overflow = oldOverflow
-      window.removeEventListener('keydown', handleEscape)
-    }
-  }, [onCancel, saving])
 
   const rotatedSize = useMemo(() => {
     if (!image) return { width: 1, height: 1 }
@@ -255,18 +244,18 @@ export default function ImageEditorModal({ file, onCancel, onApply, title = 'Aju
   }
 
   return (
-    <div className="vp-image-editor-backdrop" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="vp-image-editor-modal">
+    <div className="vp-image-editor-backdrop" role="presentation">
+      <div ref={dialogRef} tabIndex="-1" className="vp-image-editor-modal" role="dialog" aria-modal="true" aria-labelledby="vp-image-editor-title" aria-describedby="vp-image-editor-description">
         <div className="vp-image-editor-header">
           <div>
             <div className="vp-image-editor-eyebrow">FOTO VETPAW</div>
-            <h2>{title}</h2>
-            <p>Arrastrá para centrar. También podés recortar, girar y acercar.</p>
+            <h2 id="vp-image-editor-title">{title}</h2>
+            <p id="vp-image-editor-description">Arrastrá para centrar. También podés recortar, girar y acercar.</p>
           </div>
           <button type="button" className="vp-image-editor-close" onClick={onCancel} aria-label="Cerrar">✕</button>
         </div>
 
-        {error && <div className="vp-image-editor-error">{error}</div>}
+        {error && <div className="vp-image-editor-error" role="alert" aria-live="assertive">{error}</div>}
 
         <div className="vp-image-editor-workspace">
           <div
@@ -276,7 +265,7 @@ export default function ImageEditorModal({ file, onCancel, onApply, title = 'Aju
             onPointerUp={pointerUp}
             onPointerCancel={pointerUp}
           >
-            {loading ? <div className="vp-image-editor-loading">Preparando imagen…</div> : <canvas ref={canvasRef} />}
+            {loading ? <div className="vp-image-editor-loading" role="status" aria-live="polite">Preparando imagen…</div> : <canvas ref={canvasRef} aria-label="Vista previa de la imagen editada" />}
           </div>
 
           <div className="vp-image-editor-controls">
@@ -309,7 +298,7 @@ export default function ImageEditorModal({ file, onCancel, onApply, title = 'Aju
                 <span className="vp-image-editor-label">Zoom</span>
                 <strong>{Math.round(zoom * 100)}%</strong>
               </div>
-              <input type="range" min="1" max="3" step="0.01" value={zoom} onChange={(event) => changeZoom(event.target.value)} />
+              <input aria-label="Nivel de zoom" type="range" min="1" max="3" step="0.01" value={zoom} onChange={(event) => changeZoom(event.target.value)} />
             </div>
 
             <button type="button" className="vp-image-editor-reset" onClick={reset}>Restablecer imagen</button>

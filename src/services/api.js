@@ -1,6 +1,11 @@
 import axios from "axios";
 import { buildAccountSanction, isAccountSanctionCode } from "../utils/authFlow";
 import { normalizeRateLimitResponse } from "../utils/apiErrors";
+import {
+    buildServiceStatusDetail,
+    normalizeApiFailure,
+    SERVICE_STATUS_EVENT,
+} from "../utils/serviceErrors";
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 const API_BASE_URL = `${API_ORIGIN}/api`;
@@ -50,6 +55,31 @@ const invalidateInFlightGets = (...urlPrefixes) => {
     }
 };
 
+const dispatchServiceFailure = (failure) => {
+    if (!failure.global || typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent(
+        SERVICE_STATUS_EVENT,
+        { detail: buildServiceStatusDetail(failure) },
+    ));
+};
+
+const enhanceApiError = (error) => {
+    const failure = normalizeApiFailure({
+        status: error.response?.status || 0,
+        data: error.response?.data || {},
+        headers: error.response?.headers || {},
+        code: error.code || '',
+        online: typeof navigator === 'undefined' ? true : navigator.onLine !== false,
+    });
+
+    error.userMessage = failure.message;
+    error.requestId = failure.requestId;
+    error.retryable = failure.retryable;
+    error.failureKind = failure.kind;
+    dispatchServiceFailure(failure);
+    return error;
+};
+
 // Adjunta el JWT vigente en cada solicitud.
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("access_token");
@@ -82,23 +112,23 @@ api.interceptors.response.use(
             if (window.location.pathname !== "/login") {
                 window.location.replace("/login?account=sanctioned");
             }
-            return Promise.reject(error);
+            return Promise.reject(enhanceApiError(error));
         }
 
         if (error.response?.status === 429) {
             error.response.data = normalizeRateLimitResponse(responseData);
-            return Promise.reject(error);
+            return Promise.reject(enhanceApiError(error));
         }
 
         if (!isUnauthorized || original._retry || isRefreshRequest) {
-            return Promise.reject(error);
+            return Promise.reject(enhanceApiError(error));
         }
 
         const access = localStorage.getItem("access_token");
         const refresh = localStorage.getItem("refresh_token");
 
         // Un visitante sin sesión puede seguir usando las rutas públicas.
-        if (!access && !refresh) return Promise.reject(error);
+        if (!access && !refresh) return Promise.reject(enhanceApiError(error));
 
         original._retry = true;
 
@@ -107,7 +137,7 @@ api.interceptors.response.use(
             if (window.location.pathname !== "/login") {
                 window.location.replace("/login?session=expired");
             }
-            return Promise.reject(error);
+            return Promise.reject(enhanceApiError(error));
         }
 
         try {
@@ -130,11 +160,15 @@ api.interceptors.response.use(
             };
             return api(original);
         } catch (refreshError) {
-            clearAuthTokens();
-            if (window.location.pathname !== "/login") {
-                window.location.replace("/login?session=expired");
+            const refreshStatus = refreshError.response?.status;
+            if (refreshStatus === 400 || refreshStatus === 401 || refreshStatus === 403) {
+                clearAuthTokens();
+                if (window.location.pathname !== "/login") {
+                    window.location.replace("/login?session=expired");
+                }
             }
-            return Promise.reject(refreshError);
+            // Un problema temporal de red no elimina los tokens ni cierra la sesión.
+            return Promise.reject(enhanceApiError(refreshError));
         }
     }
 );

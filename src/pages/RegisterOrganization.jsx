@@ -127,7 +127,7 @@ export default function RegisterOrganization() {
       setStep(2)
     } catch (requestError) {
       const data = requestError.response?.data
-      setError(data ? Object.values(data).flat().join(' ') : 'No pudimos completar el registro.')
+      setError(data ? Object.values(data).flat().join(' ') : (requestError.userMessage || 'No pudimos completar el registro.'))
     } finally {
       setLoading(false)
     }
@@ -145,7 +145,7 @@ export default function RegisterOrganization() {
           <div className={step === 1 ? 'active' : ''}><b>2</b><span>{isBusiness ? 'Negocio' : 'Refugio'}</span></div>
         </div>}
 
-        {error && <div className="org-error">⚠️ {error}</div>}
+        {error && <div className="org-error" role="alert" aria-live="assertive">⚠️ {error}</div>}
 
         {step === 0 && <div className="org-form">
           <Field label="Usuario" icon="👤"><input name="username" value={account.username} onChange={setAccountField} placeholder={isBusiness ? 'mi_petshop' : 'refugio_amigos'} /></Field>
