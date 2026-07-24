@@ -12,7 +12,7 @@ import {
     markBirthdayCardDownloaded,
 } from '../services/api'
 import { downloadBirthdayCard, shareBirthdayCard } from '../utils/birthdayCard'
-import ownerBg from '../assets/vetpaw-owner-bg.png'
+import ownerBg from '../assets/vetpaw-owner-bg.webp'
 import VetPawLoader from '../components/VetPawLoader'
 import PushNotificationSettings from '../components/PushNotificationSettings'
 import { getCommunityNotificationIcon, getCommunityNotificationTarget } from '../utils/communityNotifications'
@@ -209,7 +209,7 @@ export default function Notifications() {
                                         >
                                             <div className="social-avatar-wrap">
                                                 {notification.actor?.avatar
-                                                    ? <img src={notification.actor.avatar} alt="" />
+                                                    ? <img src={notification.actor.avatar} alt="" loading="lazy" decoding="async" />
                                                     : <span>{getCommunityNotificationIcon(notification.notification_type)}</span>}
                                                 <i>{getCommunityNotificationIcon(notification.notification_type)}</i>
                                             </div>
@@ -251,7 +251,7 @@ export default function Notifications() {
                                                 <article key={celebration.id} className={`birthday-memory ${!celebration.is_read ? 'unread' : ''}`}>
                                                     {!celebration.is_read && <span className="new-dot">NUEVO</span>}
                                                     <div className="memory-photo-wrap">
-                                                        {celebration.pet_photo ? <img src={celebration.pet_photo} alt={celebration.pet_name} /> : <div>🐾</div>}
+                                                        {celebration.pet_photo ? <img src={celebration.pet_photo} alt={celebration.pet_name} loading="lazy" decoding="async" /> : <div>🐾</div>}
                                                         <span className="memory-badge-emoji">{celebration.badge?.emoji || '🎖️'}</span>
                                                     </div>
                                                     <div className="memory-content">

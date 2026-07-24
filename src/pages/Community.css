@@ -281,7 +281,7 @@
 }
 .filter-pill.active { color: #fff; border-color: rgba(76,175,80,.35); background: linear-gradient(135deg, rgba(76,175,80,.2), rgba(255,152,0,.12)); }
 
-.post-card { margin-bottom: 16px; overflow: hidden; }
+.post-card { margin-bottom: 16px; overflow: hidden; content-visibility: auto; contain-intrinsic-size: 640px; }
 .post-head { padding: 16px 17px 12px; display: flex; align-items: center; gap: 11px; }
 .post-author { flex: 1; min-width: 0; }
 .post-author a { color: #fff; text-decoration: none; font-size: 13px; font-weight: 900; }

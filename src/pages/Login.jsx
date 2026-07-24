@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import loginVetpawBg from "../assets/login/login-vetpaw-bg.png";
+import loginVetpawBg from "../assets/login/login-vetpaw-bg.webp";
 import { formatSanctionDate, getHomeForRole, parseLoginFailure } from "../utils/authFlow";
 
 export default function Login() {

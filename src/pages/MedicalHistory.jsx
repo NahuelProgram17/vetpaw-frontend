@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getVisits, getPets, getAppointments } from "../services/api";
 import api from "../services/api";
-import ownerBg from "../assets/vetpaw-owner-bg.png";
+import ownerBg from "../assets/vetpaw-owner-bg.webp";
 import VetPawLoader from '../components/VetPawLoader';
 
 import healthHeartIcon from "../assets/vetpaw-icons/health-heart.png";

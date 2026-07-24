@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPets, createPet, updatePet, deletePet, createTreatment, deleteTreatment } from '../services/api';
 import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../utils/imageUpload';
-import ownerBg from "../assets/vetpaw-owner-bg.png";
+import ownerBg from "../assets/vetpaw-owner-bg.webp";
 import VetPawLoader from "../components/VetPawLoader";
 import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
 import DogFriendlyIcon from "../assets/vetpaw-temperament-icons/dog/friendly.png";

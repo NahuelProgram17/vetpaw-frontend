@@ -460,7 +460,7 @@ function PetResultCard({ pet, user, busy, onFollow }) {
   return (
     <article className="explore-pet-card">
       <Link to={pet.profile_url} className="explore-pet-photo">
-        {pet.photo ? <img src={pet.photo} alt={pet.name} loading="lazy" /> : <span>🐾</span>}
+        {pet.photo ? <img src={pet.photo} alt={pet.name} loading="lazy" decoding="async" /> : <span>🐾</span>}
       </Link>
       <div className="explore-pet-info">
         <Link to={pet.profile_url}>{pet.name}</Link>
@@ -482,7 +482,7 @@ function ClinicResultCard({ clinic, user, busy, onFollow }) {
   return (
     <article className="explore-clinic-card social-result-card">
       <Link className="explore-clinic-main" to={clinic.profile_url}>
-        <div className="explore-clinic-logo">{clinic.logo ? <img src={clinic.logo} alt={clinic.name} loading="lazy" /> : '🏥'}</div>
+        <div className="explore-clinic-logo">{clinic.logo ? <img src={clinic.logo} alt={clinic.name} loading="lazy" decoding="async" /> : '🏥'}</div>
         <div>
           <div className="explore-verified"><strong>{clinic.name}</strong><span title="Veterinaria verificada">●</span></div>
           <p>📍 {[clinic.locality, clinic.province].filter(Boolean).join(', ')}</p>
@@ -503,7 +503,7 @@ function PartnerResultCard({ item, kind, user, busy, onFollow }) {
   return (
     <article className="explore-clinic-card social-result-card">
       <Link className="explore-clinic-main" to={item.profile_url}>
-        <div className="explore-clinic-logo">{item.logo ? <img src={item.logo} alt={item.name} loading="lazy" /> : isBusiness ? '🛍️' : '🏠'}</div>
+        <div className="explore-clinic-logo">{item.logo ? <img src={item.logo} alt={item.name} loading="lazy" decoding="async" /> : isBusiness ? '🛍️' : '🏠'}</div>
         <div>
           <div className="explore-verified"><strong>{item.name}</strong>{item.is_verified && <span title="Perfil verificado">●</span>}</div>
           <p>{item.type_display} · 📍 {[item.locality, item.province].filter(Boolean).join(', ')}</p>
@@ -521,7 +521,7 @@ function PartnerResultCard({ item, kind, user, busy, onFollow }) {
 function LostResultCard({ item }) {
   return (
     <Link className="explore-lost-card" to={item.target_url}>
-      <div>{item.photo ? <img src={item.photo} alt={item.pet_name} loading="lazy" /> : <span>🔎</span>}</div>
+      <div>{item.photo ? <img src={item.photo} alt={item.pet_name} loading="lazy" decoding="async" /> : <span>🔎</span>}</div>
       <section>
         <strong>{item.report_type === 'lost' ? 'Se busca' : 'Encontrada'}: {item.pet_name}</strong>
         <p>{item.species_display}{item.breed ? ` · ${item.breed}` : ''}</p>

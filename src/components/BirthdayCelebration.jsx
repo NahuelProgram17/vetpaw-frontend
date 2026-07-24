@@ -5,7 +5,6 @@ import {
     openBirthdayGift,
     markBirthdayCardDownloaded,
 } from '../services/api'
-import { downloadBirthdayCard, shareBirthdayCard } from '../utils/birthdayCard'
 
 const confettiColors = ['#4CAF50', '#FF9800', '#FFD54F', '#7CE0FF', '#F48FB1']
 const confettiPieces = Array.from({ length: 54 }, (_, index) => ({
@@ -87,6 +86,7 @@ export default function BirthdayCelebration() {
         setBusy(true)
         setMessage('Preparando tu tarjeta…')
         try {
+            const { downloadBirthdayCard } = await import('../utils/birthdayCard')
             await downloadBirthdayCard(current)
             await markBirthdayCardDownloaded(current.id).catch(() => {})
             setMessage('¡Tarjeta descargada! Ya podés compartirla donde quieras 💚')
@@ -102,6 +102,7 @@ export default function BirthdayCelebration() {
         setBusy(true)
         setMessage('Preparando la sorpresa…')
         try {
+            const { shareBirthdayCard } = await import('../utils/birthdayCard')
             const result = await shareBirthdayCard(current)
             await markBirthdayCardDownloaded(current.id).catch(() => {})
             setMessage(result === 'shared' ? '¡Gracias por compartir este momento! 🐾' : 'La tarjeta se descargó para que puedas compartirla.')
@@ -142,7 +143,7 @@ export default function BirthdayCelebration() {
                         <div className="birthday-kicker">🎉 Sorpresa VetPaw</div>
                         <div className="birthday-photo-wrap">
                             {current.pet_photo ? (
-                                <img src={current.pet_photo} alt={current.pet_name} className="birthday-photo" />
+                                <img src={current.pet_photo} alt={current.pet_name} className="birthday-photo" decoding="async" />
                             ) : (
                                 <div className="birthday-photo birthday-photo-placeholder">🐾</div>
                             )}

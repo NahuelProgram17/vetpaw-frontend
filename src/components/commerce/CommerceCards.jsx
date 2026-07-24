@@ -4,7 +4,7 @@ const money = value => value === null || value === undefined || value === '' ? '
 
 export function CatalogCard({ item, onFavorite, ownerActions }) {
   return <article className="commerce-card">
-    <div className="commerce-card-media">{item.image_url ? <img src={item.image_url} alt={item.title} /> : <span>{item.item_type === 'service' ? '✂️' : '🛍️'}</span>}</div>
+    <div className="commerce-card-media">{item.image_url ? <img src={item.image_url} alt={item.title} loading="lazy" decoding="async" /> : <span>{item.item_type === 'service' ? '✂️' : '🛍️'}</span>}</div>
     <div className="commerce-card-body">
       <div className="commerce-card-kicker">{item.item_type_display} · {item.category_display}</div>
       <h3>{item.title}</h3><p>{item.description}</p>
@@ -17,7 +17,7 @@ export function CatalogCard({ item, onFavorite, ownerActions }) {
 
 export function PromotionCard({ promotion, onFavorite, ownerActions }) {
   return <article className="commerce-card promotion">
-    <div className="commerce-card-media">{promotion.image_url ? <img src={promotion.image_url} alt={promotion.title} /> : <span>🎁</span>}</div>
+    <div className="commerce-card-media">{promotion.image_url ? <img src={promotion.image_url} alt={promotion.title} loading="lazy" decoding="async" /> : <span>🎁</span>}</div>
     <div className="commerce-card-body"><div className="commerce-card-kicker">Promoción · hasta {new Date(promotion.ends_at).toLocaleDateString('es-AR')}</div><h3>{promotion.title}</h3><p>{promotion.description}</p><div className="commerce-price">{promotion.previous_price && <del>{money(promotion.previous_price)}</del>} {promotion.promotional_price && <strong>{money(promotion.promotional_price)}</strong>}</div><div className="commerce-actions">{promotion.catalog_item && <Link to={`/negocios/${promotion.business_slug}/catalogo/${promotion.catalog_item}`}>Ver detalle</Link>}{onFavorite && <button type="button" onClick={() => onFavorite(promotion)}>{promotion.is_favorite ? '♥ Guardada' : '♡ Guardar'}</button>}{ownerActions}</div></div>
   </article>
 }

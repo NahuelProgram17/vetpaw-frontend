@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import ownerBg from "../assets/vetpaw-owner-bg.png";
-import dogRunner from "../assets/vetpaw-loader-dog.png";
+import ownerBg from "../assets/vetpaw-owner-bg.webp";
+import dogRunner from "../assets/vetpaw-loader-dog.webp";
 
 export function VetPawLoader({
   message = "Cargando VetPaw...",

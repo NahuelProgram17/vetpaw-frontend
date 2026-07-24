@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { getAppointments, createAppointment, updateAppointment, cancelAppointment, getPets, getClinics } from "../services/api";
 import api from "../services/api";
-import ownerBg from "../assets/vetpaw-owner-bg.png";
+import ownerBg from "../assets/vetpaw-owner-bg.webp";
 import dashboardAppointmentsIcon from "../assets/vetpaw-dashboard-icons/dashboard-appointments.png";
 import appointmentUpcomingIcon from "../assets/vetpaw-appointment-icons/appointment-upcoming.png";
 import appointmentPastIcon from "../assets/vetpaw-appointment-icons/appointment-past.png";

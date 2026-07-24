@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import ownerIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
 import clinicIcon from "../assets/vetpaw-dashboard-icons/dashboard-clinics.png";
-import registerDogBg from "../assets/register/register-dog-side.png";
-import registerCatBg from "../assets/register/register-cat-side.png";
+import registerDogBg from "../assets/register/register-dog-side.webp";
+import registerCatBg from "../assets/register/register-cat-side.webp";
 
 export default function RegisterChoice() {
     const navigate = useNavigate();

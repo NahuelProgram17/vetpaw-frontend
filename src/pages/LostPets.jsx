@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import api from '../services/api'
-import ownerBg from "../assets/vetpaw-owner-bg.png";
+import ownerBg from "../assets/vetpaw-owner-bg.webp";
 import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
 import lostSearchIcon from "../assets/vetpaw-lost-icons/lost-search.png";
 import lostFoundIcon from "../assets/vetpaw-lost-icons/lost-found.png";

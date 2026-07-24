@@ -65,7 +65,7 @@ export default function SocialConnectionsModal({ open, onClose, profileType, ide
           {rows.map((item) => {
             const content = (
               <>
-                {item.photo ? <img src={item.photo} alt="" /> : <span className="social-connection-avatar">{fallback(item.type)}</span>}
+                {item.photo ? <img src={item.photo} alt="" loading="lazy" decoding="async" /> : <span className="social-connection-avatar">{fallback(item.type)}</span>}
                 <span className="social-connection-copy"><strong>{item.name}</strong><small>{item.subtitle || 'Perfil de VetPaw'}</small></span>
                 {item.verified && <span className="social-verified" title="Perfil verificado">✓</span>}
               </>

@@ -5,8 +5,6 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Navbar from './components/Navbar'
 import ScrollToTop from './components/ScrollToTop'
 import { RouteChangeLoader, VetPawLoader } from './components/VetPawLoader'
-import BirthdayCelebration from './components/BirthdayCelebration'
-import PushNotificationHandler from './components/PushNotificationHandler'
 
 const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
@@ -54,6 +52,8 @@ const BusinessFavorites = lazy(() => import('./pages/BusinessFavorites'))
 const PublicPetProfile = lazy(() => import('./pages/PublicPetProfile'))
 const CommunityModeration = lazy(() => import('./pages/CommunityModeration'))
 const NotFound = lazy(() => import('./pages/NotFound'))
+const BirthdayCelebration = lazy(() => import('./components/BirthdayCelebration'))
+const PushNotificationHandler = lazy(() => import('./components/PushNotificationHandler'))
 
 const pageFallback = (
   <VetPawLoader
@@ -67,10 +67,12 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <ScrollToTop />
-        <PushNotificationHandler />
+        <Suspense fallback={null}>
+          <PushNotificationHandler />
+          <BirthdayCelebration />
+        </Suspense>
         <RouteChangeLoader />
         <Navbar />
-        <BirthdayCelebration />
         <Suspense fallback={pageFallback}>
           <Routes>
             <Route path="/" element={<Community />} />

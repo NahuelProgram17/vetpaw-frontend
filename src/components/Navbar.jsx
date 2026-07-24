@@ -41,7 +41,7 @@ export default function Navbar() {
     const [unreadMessages, setUnreadMessages] = useState(0)
     const [showNotif, setShowNotif] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+    const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches)
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
     const notifRef = useRef(null)
     const isStandalone = useIsStandalone()
@@ -147,9 +147,10 @@ export default function Navbar() {
     }, [])
 
     useEffect(() => {
-        const onResize = () => setIsMobile(window.innerWidth < 768)
-        window.addEventListener('resize', onResize)
-        return () => window.removeEventListener('resize', onResize)
+        const media = window.matchMedia('(max-width: 767px)')
+        const onChange = (event) => setIsMobile(event.matches)
+        media.addEventListener('change', onChange)
+        return () => media.removeEventListener('change', onChange)
     }, [])
 
     useEffect(() => {
@@ -165,13 +166,31 @@ export default function Navbar() {
             return undefined
         }
 
-        fetchNotifications()
-        fetchUnreadMessages()
-        const interval = setInterval(() => {
+        let interval = null
+        const refresh = () => {
+            if (document.visibilityState !== 'visible') return
             fetchNotifications()
             fetchUnreadMessages()
-        }, 30000)
-        return () => clearInterval(interval)
+        }
+        const startPolling = () => {
+            if (interval) window.clearInterval(interval)
+            refresh()
+            interval = window.setInterval(refresh, 30000)
+        }
+        const handleVisibility = () => {
+            if (document.visibilityState === 'visible') startPolling()
+            else if (interval) {
+                window.clearInterval(interval)
+                interval = null
+            }
+        }
+
+        startPolling()
+        document.addEventListener('visibilitychange', handleVisibility)
+        return () => {
+            if (interval) window.clearInterval(interval)
+            document.removeEventListener('visibilitychange', handleVisibility)
+        }
     }, [user, fetchNotifications, fetchUnreadMessages])
 
     useEffect(() => {

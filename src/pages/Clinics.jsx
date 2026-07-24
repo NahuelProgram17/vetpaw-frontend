@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { joinClinic } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import ownerBg from "../assets/vetpaw-owner-bg.png";
+import ownerBg from "../assets/vetpaw-owner-bg.webp";
 import dashboardClinicsIcon from "../assets/vetpaw-dashboard-icons/dashboard-clinics.png";
 import dashboardAppointmentsIcon from "../assets/vetpaw-dashboard-icons/dashboard-appointments.png";
 import dashboardNextAppointmentIcon from "../assets/vetpaw-dashboard-icons/dashboard-next-appointment.png";

@@ -355,7 +355,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
         id={`comment-${item.id}`}
         className={`comment-item ${isReply ? 'comment-reply' : ''} ${String(item.id) === highlightedCommentId ? 'comment-target-highlight' : ''}`}
       >
-        {item.author.avatar ? <img className="comment-avatar" src={item.author.avatar} alt="" /> : <div className="comment-avatar comment-avatar-fallback">👤</div>}
+        {item.author.avatar ? <img className="comment-avatar" src={item.author.avatar} alt="" loading="lazy" decoding="async" /> : <div className="comment-avatar comment-avatar-fallback">👤</div>}
         <div className="comment-main">
           {editingCommentId === item.id ? (
             <form className="comment-edit-form" onSubmit={(event) => submitCommentEdit(event, item.id)}>
@@ -401,7 +401,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
   return (
     <article className="post-card community-card" id={`post-${post.id}`}>
       <div className="post-head">
-        {actor.photo ? <img className="post-avatar" src={actor.photo} alt={actor.name} /> : <div className="post-avatar">{fallbackAvatar(actor)}</div>}
+        {actor.photo ? <img className="post-avatar" src={actor.photo} alt={actor.name} decoding="async" /> : <div className="post-avatar">{fallbackAvatar(actor)}</div>}
         <div className="post-author">
           <div className="post-author-line">
             <Link to={actor.profile_url || '#'}>{actor.name || 'VetPaw'}</Link>
@@ -482,7 +482,7 @@ export default function PostCard({ initialPost, user, targetCommentId, onDeleted
       )}
 
       {post.commerce_link && <button type="button" className="post-commerce-link" onClick={() => navigate(post.commerce_link.url)}><span>🛍️</span><div><b>{post.commerce_link.title}</b><small>{post.commerce_link.action}</small></div><strong>→</strong></button>}
-      {post.image_url && <div className="post-image-wrap"><img className="post-image" src={post.image_url} alt={`Publicación de ${actor.name}`} loading="lazy" /></div>}
+      {post.image_url && <div className="post-image-wrap"><img className="post-image" src={post.image_url} alt={`Publicación de ${actor.name}`} loading="lazy" decoding="async" /></div>}
 
       <div className="post-stats">
         <span>🐾 {post.reactions_count} patitas</span>

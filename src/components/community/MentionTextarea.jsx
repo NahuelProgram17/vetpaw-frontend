@@ -100,7 +100,7 @@ export default function MentionTextarea({
           {!loading && !rows.length && <div className="mention-empty">No encontramos perfiles con ese nombre.</div>}
           {!loading && rows.map((item) => (
             <button type="button" key={item.username} onMouseDown={(event) => event.preventDefault()} onClick={() => choose(item)}>
-              {item.avatar ? <img src={item.avatar} alt="" /> : <span className="mention-avatar">🐾</span>}
+              {item.avatar ? <img src={item.avatar} alt="" loading="lazy" decoding="async" /> : <span className="mention-avatar">🐾</span>}
               <span><strong>{item.display_name}</strong><small>@{item.username}</small></span>
             </button>
           ))}

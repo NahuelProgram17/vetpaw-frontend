@@ -17,6 +17,39 @@ const clearAuthTokens = () => {
 
 let refreshRequest = null;
 
+// Agrupa solicitudes GET idénticas que ocurren al mismo tiempo.
+// Esto evita que Navbar y una pantalla recién abierta pidan los mismos datos
+// por duplicado, sin conservar respuestas viejas ni cambiar la API pública.
+const inFlightGets = new Map();
+
+const stableParamsKey = (params = {}) =>
+    Object.entries(params || {})
+        .filter(([, value]) => value !== undefined && value !== null)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, value]) => `${key}:${JSON.stringify(value)}`)
+        .join('|');
+
+const dedupedGet = (url, config = {}) => {
+    const authScope = localStorage.getItem('access_token') || 'guest';
+    const key = `${authScope.slice(-24)}::${url}::${stableParamsKey(config.params)}`;
+    const current = inFlightGets.get(key);
+    if (current) return current;
+
+    const request = api.get(url, config)
+        .then((response) => response.data)
+        .finally(() => inFlightGets.delete(key));
+    inFlightGets.set(key, request);
+    return request;
+};
+
+const invalidateInFlightGets = (...urlPrefixes) => {
+    for (const key of inFlightGets.keys()) {
+        if (urlPrefixes.some((prefix) => key.includes(`::${prefix}`))) {
+            inFlightGets.delete(key);
+        }
+    }
+};
+
 // Adjunta el JWT vigente en cada solicitud.
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("access_token");
@@ -135,10 +168,10 @@ return data;
 };
 
 // ── Profile ───────────────────────────────────────────
-export const getProfile = () => api.get("/users/profile/").then((r) => r.data);
+export const getProfile = () => dedupedGet("/users/profile/");
 
 // ── Pets ──────────────────────────────────────────────
-export const getPets = () => api.get("/pets/").then((r) => r.data);
+export const getPets = () => dedupedGet("/pets/");
 
 export const createPet = (petData) => {
 const formData = new FormData();
@@ -147,6 +180,7 @@ Object.entries(petData).forEach(([key, value]) => {
     formData.append(key, value);
     }
 });
+invalidateInFlightGets('/pets/');
 return api.post("/pets/", formData, {
     headers: { "Content-Type": "multipart/form-data" },
 }).then((r) => r.data);
@@ -159,15 +193,16 @@ Object.entries(petData).forEach(([key, value]) => {
     formData.append(key, value);
     }
 });
+invalidateInFlightGets('/pets/');
 return api.patch(`/pets/${id}/`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
 }).then((r) => r.data);
 };
 
-export const deletePet = (id) => api.delete(`/pets/${id}/`);
+export const deletePet = (id) => { invalidateInFlightGets('/pets/'); return api.delete(`/pets/${id}/`); };
 
 // ── Anuncios / publicidades ───────────────────────────
-export const getActiveAds = () => api.get("/ads/active/").then((r) => r.data);
+export const getActiveAds = () => dedupedGet("/ads/active/");
 export const getAds = () => api.get("/ads/").then((r) => r.data);
 
 // Registra un click de un anuncio (sin bloquear: si falla, no pasa nada)
@@ -210,19 +245,19 @@ export const updatePost = (id, postData) =>
 export const deletePost = (id) => api.delete(`/posts/${id}/`);
 
 // ── Appointments ──────────────────────────────────────
-export const getAppointments = () => api.get("/appointments/").then((r) => r.data);
-export const createAppointment = (appt) => api.post("/appointments/", appt).then((r) => r.data);
-export const updateAppointment = (id, appt) => api.put(`/appointments/${id}/`, appt).then((r) => r.data);
-export const cancelAppointment = (id) => api.patch(`/appointments/${id}/cancel/`).then((r) => r.data);
-export const confirmAppointment = (id) => api.patch(`/appointments/${id}/confirm/`).then((r) => r.data);
-export const markNotificationsSeen = () => api.post("/appointments/mark_seen/").then((r) => r.data);
+export const getAppointments = () => dedupedGet("/appointments/");
+export const createAppointment = (appt) => { invalidateInFlightGets('/appointments/'); return api.post("/appointments/", appt).then((r) => r.data); };
+export const updateAppointment = (id, appt) => { invalidateInFlightGets('/appointments/'); return api.put(`/appointments/${id}/`, appt).then((r) => r.data); };
+export const cancelAppointment = (id) => { invalidateInFlightGets('/appointments/'); return api.patch(`/appointments/${id}/cancel/`).then((r) => r.data); };
+export const confirmAppointment = (id) => { invalidateInFlightGets('/appointments/'); return api.patch(`/appointments/${id}/confirm/`).then((r) => r.data); };
+export const markNotificationsSeen = () => { invalidateInFlightGets('/appointments/'); return api.post("/appointments/mark_seen/").then((r) => r.data); };
 export const getClinicNotifications = () => api.get("/appointments/?seen_by_clinic=false").then((r) => r.data);
 export const markClinicNotificationsSeen = () => api.post("/appointments/mark_seen_clinic/").then((r) => r.data);
 export const markNoShow = (id) => api.patch(`/appointments/${id}/mark_no_show/`).then((r) => r.data);
 
 // ── Clinics ───────────────────────────────────────────
-export const getClinics = () => api.get("/clinics/").then((r) => r.data);
-export const joinClinic = (id) => api.post(`/clinics/${id}/join/`).then((r) => r.data);
+export const getClinics = () => dedupedGet("/clinics/");
+export const joinClinic = (id) => { invalidateInFlightGets('/clinics/'); return api.post(`/clinics/${id}/join/`).then((r) => r.data); };
 
 
 // ── Negocios y refugios VetPaw ──────────────────────
@@ -264,22 +299,22 @@ export const updateMyShelterProfile = (profileData) =>
     }).then((r) => r.data);
 
 // ── Visits ────────────────────────────────────────────
-export const getVisits = () => api.get("/visits/").then((r) => r.data);
-export const createVisit = (visit) => api.post("/visits/", visit).then((r) => r.data);
+export const getVisits = () => dedupedGet("/visits/");
+export const createVisit = (visit) => { invalidateInFlightGets('/visits/'); return api.post("/visits/", visit).then((r) => r.data); };
 
 // ── Vaccines ──────────────────────────────────────────
-export const getVaccines = () => api.get("/vaccines/").then((r) => r.data);
+export const getVaccines = () => dedupedGet("/vaccines/");
 
 // ── Tratamientos preventivos (desparasitaria, pulgas, pipeta) ──
 export const createTreatment = (data) => api.post("/treatments/", data).then((r) => r.data);
 export const deleteTreatment = (id) => api.delete(`/treatments/${id}/`);
 
 // ── Messages ──────────────────────────────────────────
-export const getConversations  = () => api.get('/messages/conversations/').then(r => r.data)
-export const getMessages       = () => api.get('/messages/').then(r => r.data)
-export const sendMessage       = (data) => api.post('/messages/', data).then(r => r.data)
-export const markMessagesRead  = (other_user_id) => api.post('/messages/mark_read/', { other_user_id }).then(r => r.data)
-export const getUnreadCount    = () => api.get('/messages/unread_count/').then(r => r.data)
+export const getConversations  = () => dedupedGet('/messages/conversations/')
+export const getMessages       = () => dedupedGet('/messages/')
+export const sendMessage       = (data) => { invalidateInFlightGets('/messages/'); return api.post('/messages/', data).then(r => r.data) }
+export const markMessagesRead  = (other_user_id) => { invalidateInFlightGets('/messages/'); return api.post('/messages/mark_read/', { other_user_id }).then(r => r.data) }
+export const getUnreadCount    = () => dedupedGet('/messages/unread_count/')
 
 // ── Password Reset ────────────────────────────────────
 export const requestPasswordReset = (email) =>
@@ -292,15 +327,21 @@ export const confirmPasswordReset = (uidb64, token, password, password2) =>
 
 // ── Cumpleaños VetPaw ────────────────────────────────
 export const getBirthdayCelebrations = (unread = false) =>
-    api.get(`/birthday-celebrations/${unread ? '?unread=true' : ''}`).then((r) => r.data);
+    dedupedGet(`/birthday-celebrations/${unread ? '?unread=true' : ''}`);
 export const getCurrentBirthdayCelebrations = () =>
-    api.get('/birthday-celebrations/current/').then((r) => r.data);
-export const openBirthdayGift = (id) =>
-    api.post(`/birthday-celebrations/${id}/open-gift/`).then((r) => r.data);
-export const markBirthdayCelebrationRead = (id) =>
-    api.post(`/birthday-celebrations/${id}/mark-read/`).then((r) => r.data);
-export const markAllBirthdayCelebrationsRead = () =>
-    api.post('/birthday-celebrations/mark-all-read/').then((r) => r.data);
+    dedupedGet('/birthday-celebrations/current/');
+export const openBirthdayGift = (id) => {
+    invalidateInFlightGets('/birthday-celebrations/');
+    return api.post(`/birthday-celebrations/${id}/open-gift/`).then((r) => r.data);
+};
+export const markBirthdayCelebrationRead = (id) => {
+    invalidateInFlightGets('/birthday-celebrations/');
+    return api.post(`/birthday-celebrations/${id}/mark-read/`).then((r) => r.data);
+};
+export const markAllBirthdayCelebrationsRead = () => {
+    invalidateInFlightGets('/birthday-celebrations/');
+    return api.post('/birthday-celebrations/mark-all-read/').then((r) => r.data);
+};
 export const markBirthdayCardDownloaded = (id) =>
     api.post(`/birthday-celebrations/${id}/card-downloaded/`).then((r) => r.data);
 
@@ -471,16 +512,20 @@ export const restoreHiddenCommunityPost = (id) =>
     api.post(`/community/hidden-posts/${id}/restore/`).then((r) => r.data);
 
 export const getCommunityNotifications = (params = {}) =>
-    api.get('/community/notifications/', { params }).then((r) => r.data);
+    dedupedGet('/community/notifications/', { params });
 
 export const getCommunityNotificationsUnreadCount = () =>
-    api.get('/community/notifications/unread_count/').then((r) => r.data);
+    dedupedGet('/community/notifications/unread_count/');
 
-export const markCommunityNotificationRead = (id) =>
-    api.post(`/community/notifications/${id}/mark_read/`).then((r) => r.data);
+export const markCommunityNotificationRead = (id) => {
+    invalidateInFlightGets('/community/notifications/');
+    return api.post(`/community/notifications/${id}/mark_read/`).then((r) => r.data);
+};
 
-export const markAllCommunityNotificationsRead = () =>
-    api.post('/community/notifications/mark_all_read/').then((r) => r.data);
+export const markAllCommunityNotificationsRead = () => {
+    invalidateInFlightGets('/community/notifications/');
+    return api.post('/community/notifications/mark_all_read/').then((r) => r.data);
+};
 
 
 // ── Notificaciones Web Push ──────────────────────────

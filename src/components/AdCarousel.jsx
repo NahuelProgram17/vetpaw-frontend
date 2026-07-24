@@ -62,7 +62,7 @@ export default function AdCarousel() {
 
     // Cada slide: clickeable (<a>) si tiene link, o estático (<div>) si no
     const Slide = ({ ad }) => {
-        const img = <img src={ad.image_url} alt={ad.name} style={{ width: '100%', display: 'block' }} />
+        const img = <img src={ad.image_url} alt={ad.name} decoding="async" style={{ width: '100%', display: 'block' }} />
         if (ad.link) {
             return (
                 <a href={ad.link} target="_blank" rel="noopener noreferrer"

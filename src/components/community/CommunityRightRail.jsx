@@ -20,7 +20,7 @@ export default function CommunityRightRail({ discover, user, onRefresh }) {
           <div className="right-title"><span>🐾 Mascotas para conocer</span><Link to="/explorar?seccion=pets">Ver más</Link></div>
           {(discover.suggested_pets || []).slice(0, 4).map((pet) => (
             <div className="suggestion-row" key={pet.id}>
-              {pet.photo ? <img className="suggestion-avatar" src={pet.photo} alt="" /> : <div className="suggestion-avatar">🐾</div>}
+              {pet.photo ? <img className="suggestion-avatar" src={pet.photo} alt="" loading="lazy" decoding="async" /> : <div className="suggestion-avatar">🐾</div>}
               <div className="suggestion-info"><Link className="suggestion-name" to={`/mascotas/${pet.id}`}>{pet.name}</Link><div className="suggestion-sub">{pet.species_display}{pet.locality ? ` · ${pet.locality}` : ''}</div></div>
               <button className={`mini-follow ${pet.following ? 'following' : ''}`} disabled={busy === pet.id} onClick={() => follow(pet)}>{pet.following ? 'Siguiendo' : 'Seguir'}</button>
             </div>
@@ -33,7 +33,7 @@ export default function CommunityRightRail({ discover, user, onRefresh }) {
             <div className="right-title"><span>🎂 Cumpleaños VetPaw</span></div>
             {discover.birthdays.slice(0, 4).map((item) => (
               <Link className="right-mini-card" to={`/mascotas/${item.pet_id}`} key={item.id}>
-                {item.photo ? <img src={item.photo} alt="" /> : <div className="suggestion-avatar">🎂</div>}
+                {item.photo ? <img src={item.photo} alt="" loading="lazy" decoding="async" /> : <div className="suggestion-avatar">🎂</div>}
                 <div><strong>{item.pet_name} cumple {item.age}</strong><span>Dejale una patita de cumpleaños.</span></div>
               </Link>
             ))}
@@ -44,7 +44,7 @@ export default function CommunityRightRail({ discover, user, onRefresh }) {
           <div className="right-title"><span>🚨 Cerca de la comunidad</span><Link to="/mascotas-perdidas">Ver avisos</Link></div>
           {(discover.lost_pets || []).slice(0, 3).map((item) => (
             <Link className="right-mini-card" to="/mascotas-perdidas" key={item.id}>
-              {item.photo ? <img src={item.photo} alt="" /> : <div className="suggestion-avatar">🔎</div>}
+              {item.photo ? <img src={item.photo} alt="" loading="lazy" decoding="async" /> : <div className="suggestion-avatar">🔎</div>}
               <div><strong>{item.report_type === 'lost' ? 'Se busca' : 'Encontrada'}: {item.pet_name}</strong><span>{item.locality || 'Sin localidad'}{item.province ? `, ${item.province}` : ''}</span></div>
             </Link>
           ))}
@@ -57,13 +57,13 @@ export default function CommunityRightRail({ discover, user, onRefresh }) {
             <div className="right-title"><span>🤝 Ecosistema VetPaw</span><Link to="/explorar">Explorar</Link></div>
             {(discover.businesses || []).slice(0, 2).map((item) => (
               <Link className="right-mini-card" to={`/negocios/${item.slug}`} key={`business-${item.id}`}>
-                {item.logo ? <img src={item.logo} alt="" /> : <div className="suggestion-avatar">🛍️</div>}
+                {item.logo ? <img src={item.logo} alt="" loading="lazy" decoding="async" /> : <div className="suggestion-avatar">🛍️</div>}
                 <div><strong>{item.name}</strong><span>{item.type_display} · {item.locality}</span></div>
               </Link>
             ))}
             {(discover.shelters || []).slice(0, 2).map((item) => (
               <Link className="right-mini-card" to={`/refugios/${item.slug}`} key={`shelter-${item.id}`}>
-                {item.logo ? <img src={item.logo} alt="" /> : <div className="suggestion-avatar">🏠</div>}
+                {item.logo ? <img src={item.logo} alt="" loading="lazy" decoding="async" /> : <div className="suggestion-avatar">🏠</div>}
                 <div><strong>{item.name}</strong><span>{item.capacity_status_display} · {item.locality}</span></div>
               </Link>
             ))}
@@ -74,7 +74,7 @@ export default function CommunityRightRail({ discover, user, onRefresh }) {
           <div className="right-title"><span>🏥 Veterinarias en VetPaw</span><Link to="/explorar?seccion=clinics">Todas</Link></div>
           {(discover.clinics || []).slice(0, 4).map((clinic) => (
             <Link className="right-mini-card" to={`/clinicas/${clinic.slug}`} key={clinic.id}>
-              {clinic.logo ? <img src={clinic.logo} alt="" /> : <div className="suggestion-avatar">{fallback('clinic')}</div>}
+              {clinic.logo ? <img src={clinic.logo} alt="" loading="lazy" decoding="async" /> : <div className="suggestion-avatar">{fallback('clinic')}</div>}
               <div><strong>{clinic.name} {clinic.is_24h ? '· 24 h' : ''}</strong><span>{clinic.locality}, {clinic.province}</span></div>
             </Link>
           ))}

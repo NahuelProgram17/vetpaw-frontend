@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { canAccessAdmin } from '../utils/permissions';
 import { getPets, getAppointments, getClinics, getVaccines, markNotificationsSeen } from "../services/api";
-import ownerBg from "../assets/vetpaw-owner-bg.png";
+import ownerBg from "../assets/vetpaw-owner-bg.webp";
 import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
 import dashboardAppointmentsIcon from "../assets/vetpaw-dashboard-icons/dashboard-appointments.png";
 import dashboardNextAppointmentIcon from "../assets/vetpaw-dashboard-icons/dashboard-next-appointment.png";
