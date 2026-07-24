@@ -54,6 +54,17 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
+        if (error.response?.status === 429) {
+            const waitSeconds = Number(responseData?.available_in || responseData?.wait || 0);
+            const waitText = waitSeconds > 0 ? ` Esperá ${Math.max(1, Math.ceil(waitSeconds / 60))} minuto(s) antes de volver a intentarlo.` : '';
+            error.response.data = {
+                ...responseData,
+                detail: `Hiciste demasiadas acciones en poco tiempo.${waitText} VetPaw bloqueó solo esta acción para proteger la Comunidad.`,
+                code: responseData?.code || 'rate_limited',
+            };
+            return Promise.reject(error);
+        }
+
         if (!isUnauthorized || original._retry || isRefreshRequest) {
             return Promise.reject(error);
         }
@@ -593,4 +604,14 @@ export const getAccountModerationHistory = (params = {}) =>
 
 export const moderateAccount = (userId, payload) =>
     api.post(`/users/admin/moderation/accounts/${userId}/`, payload).then((r) => r.data);
+
+// ── Protección contra abuso y spam ────────────────────
+export const getAbuseSignals = (params = {}) =>
+    api.get('/users/admin/abuse/signals/', { params }).then((r) => r.data);
+
+export const getAbuseAccounts = (params = {}) =>
+    api.get('/users/admin/abuse/accounts/', { params }).then((r) => r.data);
+
+export const reviewAbuseSignal = (signalId, payload) =>
+    api.post(`/users/admin/abuse/signals/${signalId}/`, payload).then((r) => r.data);
 

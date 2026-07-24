@@ -1,0 +1,171 @@
+.abuse-protection-panel {
+    color: #fff;
+    --abuse-card: #1a2535;
+    --abuse-border: rgba(255, 255, 255, 0.08);
+    --abuse-green: #66d071;
+    --abuse-orange: #ffad35;
+    --abuse-red: #ff697b;
+    --abuse-blue: #6bcaff;
+}
+
+.abuse-protection-panel * { box-sizing: border-box; }
+
+.abuse-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 20px;
+    padding: 26px 28px;
+    border: 1px solid rgba(255, 105, 123, 0.2);
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at 88% 18%, rgba(255, 105, 123, 0.17), transparent 34%),
+        linear-gradient(135deg, rgba(255, 152, 0, 0.09), rgba(76, 175, 80, 0.07)),
+        var(--abuse-card);
+}
+.abuse-kicker { display: inline-block; margin-bottom: 7px; color: #ff9faa; font-size: 11px; font-weight: 900; letter-spacing: 1.8px; text-transform: uppercase; }
+.abuse-hero h2 { margin: 0 0 8px; font-size: clamp(23px, 3vw, 32px); }
+.abuse-hero p { max-width: 760px; margin: 0; color: rgba(255, 255, 255, 0.58); line-height: 1.6; }
+.abuse-hero-icon { font-size: 58px; filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35)); }
+
+.abuse-summary { display: grid; grid-template-columns: repeat(5, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.abuse-summary-card { display: flex; align-items: center; gap: 12px; min-height: 92px; padding: 16px; border: 1px solid var(--abuse-border); border-radius: 16px; background: var(--abuse-card); }
+.abuse-summary-card > span { font-size: 26px; }
+.abuse-summary-card strong { display: block; font-size: 25px; line-height: 1; }
+.abuse-summary-card small { display: block; margin-top: 6px; color: rgba(255, 255, 255, 0.48); font-size: 11px; line-height: 1.25; }
+.abuse-summary-card.warning { border-color: rgba(255, 173, 53, 0.27); }
+.abuse-summary-card.danger { border-color: rgba(255, 105, 123, 0.32); }
+.abuse-summary-card.muted { opacity: 0.86; }
+
+.abuse-tabs { display: flex; gap: 8px; width: fit-content; margin-bottom: 18px; padding: 5px; border: 1px solid var(--abuse-border); border-radius: 13px; background: rgba(255, 255, 255, 0.025); }
+.abuse-tabs button { padding: 9px 15px; border: 0; border-radius: 9px; color: rgba(255, 255, 255, 0.52); background: transparent; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+.abuse-tabs button.active { color: #ffc1c8; background: rgba(255, 105, 123, 0.13); }
+
+.abuse-alert { margin-bottom: 16px; padding: 12px 15px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
+.abuse-alert.success { color: #b4f4b9; border: 1px solid rgba(76, 175, 80, 0.28); background: rgba(76, 175, 80, 0.1); }
+.abuse-alert.error { color: #ffb4bd; border: 1px solid rgba(255, 105, 123, 0.28); background: rgba(255, 105, 123, 0.1); }
+
+.abuse-account-filter-note { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; padding: 10px 13px; border: 1px solid rgba(107, 202, 255, 0.18); border-radius: 11px; color: #bfe8ff; background: rgba(107, 202, 255, 0.06); font-size: 12px; }
+.abuse-account-filter-note button { border: 0; color: #fff; background: transparent; font: inherit; font-size: 11px; font-weight: 900; text-decoration: underline; cursor: pointer; }
+
+.abuse-filters, .abuse-account-filters { display: grid; gap: 12px; margin-bottom: 18px; padding: 16px; border: 1px solid var(--abuse-border); border-radius: 16px; background: rgba(255, 255, 255, 0.018); }
+.abuse-filters { grid-template-columns: minmax(260px, 1.4fr) repeat(3, minmax(155px, 0.6fr)); }
+.abuse-account-filters { grid-template-columns: minmax(260px, 1.5fr) repeat(2, minmax(180px, 0.6fr)); }
+.abuse-filters label, .abuse-account-filters label, .abuse-modal label { display: grid; gap: 7px; }
+.abuse-filters label > span, .abuse-account-filters label > span, .abuse-modal label > span { color: rgba(255, 255, 255, 0.46); font-size: 10px; font-weight: 900; letter-spacing: 0.7px; text-transform: uppercase; }
+.abuse-filters input, .abuse-filters select, .abuse-account-filters input, .abuse-account-filters select, .abuse-modal input, .abuse-modal select, .abuse-modal textarea { width: 100%; padding: 11px 12px; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 10px; outline: none; color: #fff; background: #111c29; font: inherit; font-size: 13px; }
+.abuse-filters select option, .abuse-account-filters select option, .abuse-modal select option { color: #fff; background: #111c29; }
+.abuse-filters input:focus, .abuse-filters select:focus, .abuse-account-filters input:focus, .abuse-account-filters select:focus, .abuse-modal input:focus, .abuse-modal select:focus, .abuse-modal textarea:focus { border-color: rgba(255, 105, 123, 0.62); box-shadow: 0 0 0 3px rgba(255, 105, 123, 0.07); }
+.abuse-search > div { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.abuse-search button { padding: 0 16px; border: 0; border-radius: 10px; color: #fff; background: linear-gradient(135deg, #e7942a, #ff697b); font: inherit; font-size: 12px; font-weight: 900; cursor: pointer; }
+
+.abuse-signal-list, .abuse-account-list { display: grid; gap: 12px; }
+.abuse-signal-card, .abuse-account-card { padding: 18px; border: 1px solid var(--abuse-border); border-radius: 16px; background: var(--abuse-card); }
+.abuse-signal-card.severity-high { border-color: rgba(255, 105, 123, 0.28); box-shadow: inset 3px 0 0 rgba(255, 105, 123, 0.7); }
+.abuse-signal-card.severity-warning { box-shadow: inset 3px 0 0 rgba(255, 173, 53, 0.65); }
+.abuse-signal-card.severity-info { box-shadow: inset 3px 0 0 rgba(107, 202, 255, 0.55); }
+.abuse-signal-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.abuse-signal-title { display: flex; align-items: flex-start; gap: 13px; min-width: 0; }
+.abuse-signal-icon { display: grid; place-items: center; flex: 0 0 46px; width: 46px; height: 46px; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 13px; background: rgba(255, 255, 255, 0.035); font-size: 23px; }
+.abuse-signal-heading-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.abuse-signal-heading-row h3 { margin: 0; font-size: 17px; }
+.abuse-signal-title p { margin: 5px 0 0; color: rgba(255, 255, 255, 0.48); font-size: 12px; overflow-wrap: anywhere; }
+.abuse-occurrences { min-width: 88px; padding: 9px 11px; border-radius: 11px; background: rgba(255, 255, 255, 0.035); text-align: center; }
+.abuse-occurrences strong { display: block; font-size: 20px; }
+.abuse-occurrences span { color: rgba(255, 255, 255, 0.38); font-size: 9px; font-weight: 800; text-transform: uppercase; }
+.abuse-badge, .abuse-risk-badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; font-size: 9px; font-weight: 900; letter-spacing: 0.45px; text-transform: uppercase; }
+.abuse-badge.is-info { color: #a9ddff; background: rgba(107, 202, 255, 0.12); }
+.abuse-badge.is-warning, .abuse-badge.is-pending { color: #ffd28a; background: rgba(255, 173, 53, 0.12); }
+.abuse-badge.is-high { color: #ffabb5; background: rgba(255, 105, 123, 0.14); }
+.abuse-badge.is-reviewed { color: #b9dfff; background: rgba(107, 202, 255, 0.1); }
+.abuse-badge.is-dismissed { color: #aceeb2; background: rgba(76, 175, 80, 0.11); }
+.abuse-badge.is-actioned { color: #d8c3ff; background: rgba(168, 119, 255, 0.12); }
+.abuse-signal-card blockquote { margin: 14px 0 0; padding: 11px 13px; border-left: 3px solid rgba(255, 173, 53, 0.55); border-radius: 0 9px 9px 0; color: rgba(255, 255, 255, 0.72); background: rgba(0, 0, 0, 0.12); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.abuse-signal-grid { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)); gap: 9px; margin-top: 14px; }
+.abuse-signal-grid > div { padding: 10px; border-radius: 9px; background: rgba(255, 255, 255, 0.028); }
+.abuse-signal-grid span { display: block; margin-bottom: 4px; color: rgba(255, 255, 255, 0.33); font-size: 9px; font-weight: 800; text-transform: uppercase; }
+.abuse-signal-grid strong { color: rgba(255, 255, 255, 0.73); font-size: 11px; overflow-wrap: anywhere; }
+.abuse-review-note { display: grid; gap: 3px; margin-top: 13px; padding: 10px 12px; border: 1px solid rgba(107, 202, 255, 0.13); border-radius: 10px; background: rgba(107, 202, 255, 0.045); }
+.abuse-review-note strong { color: #bce7ff; font-size: 10px; text-transform: uppercase; }
+.abuse-review-note span { color: rgba(255, 255, 255, 0.65); font-size: 12px; line-height: 1.45; }
+.abuse-review-note small { color: rgba(255, 255, 255, 0.32); }
+.abuse-signal-actions, .abuse-account-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+.abuse-signal-actions button, .abuse-account-actions button { padding: 8px 11px; border-radius: 9px; font: inherit; font-size: 11px; font-weight: 900; cursor: pointer; }
+.abuse-signal-actions .review { color: #bce7ff; border: 1px solid rgba(107, 202, 255, 0.25); background: rgba(107, 202, 255, 0.07); }
+.abuse-signal-actions .dismiss { color: #aceeb2; border: 1px solid rgba(76, 175, 80, 0.25); background: rgba(76, 175, 80, 0.07); }
+.abuse-signal-actions .actioned { color: #d8c3ff; border: 1px solid rgba(168, 119, 255, 0.25); background: rgba(168, 119, 255, 0.07); }
+.abuse-signal-actions .suspend, .abuse-account-actions .suspend { color: #ffd28a; border: 1px solid rgba(255, 173, 53, 0.28); background: rgba(255, 173, 53, 0.08); }
+.abuse-signal-actions .ban, .abuse-account-actions .ban { color: #ffabb5; border: 1px solid rgba(255, 105, 123, 0.3); background: rgba(255, 105, 123, 0.08); }
+
+.abuse-account-card { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.abuse-account-main { display: flex; align-items: flex-start; gap: 14px; min-width: 0; }
+.abuse-account-avatar { display: grid; place-items: center; flex: 0 0 48px; width: 48px; height: 48px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; background: rgba(255, 255, 255, 0.04); font-size: 24px; }
+.abuse-account-heading { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.abuse-account-heading h3 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
+.abuse-account-main p { margin: 4px 0 8px; color: rgba(255, 255, 255, 0.48); font-size: 12px; overflow-wrap: anywhere; }
+.abuse-account-metrics { display: flex; flex-wrap: wrap; gap: 7px 13px; color: rgba(255, 255, 255, 0.39); font-size: 11px; }
+.abuse-account-metrics strong { color: rgba(255, 255, 255, 0.72); }
+.abuse-risk-badge.is-normal { color: #aceeb2; background: rgba(76, 175, 80, 0.11); }
+.abuse-risk-badge.is-watch { color: #ffd28a; background: rgba(255, 173, 53, 0.12); }
+.abuse-risk-badge.is-high, .abuse-risk-badge.is-banned { color: #ffabb5; background: rgba(255, 105, 123, 0.14); }
+.abuse-risk-badge.is-blocked { color: #d8c3ff; background: rgba(168, 119, 255, 0.12); }
+.abuse-active-sanction { display: grid; gap: 3px; margin-top: 11px; padding: 10px 12px; max-width: 650px; border-left: 3px solid var(--abuse-orange); border-radius: 0 9px 9px 0; background: rgba(255, 173, 53, 0.07); }
+.abuse-active-sanction strong { color: #ffd58c; font-size: 10px; text-transform: uppercase; }
+.abuse-active-sanction span { color: rgba(255, 255, 255, 0.7); font-size: 12px; }
+.abuse-active-sanction small { color: rgba(255, 255, 255, 0.38); }
+.abuse-account-actions { justify-content: flex-end; flex: 0 0 auto; margin-top: 0; }
+.abuse-account-actions .signals { color: #bce7ff; border: 1px solid rgba(107, 202, 255, 0.25); background: rgba(107, 202, 255, 0.07); }
+
+.abuse-empty { display: grid; place-items: center; min-height: 230px; padding: 30px; border: 1px solid var(--abuse-border); border-radius: 16px; background: var(--abuse-card); text-align: center; }
+.abuse-empty span { font-size: 42px; }
+.abuse-empty h3 { margin: 10px 0 5px; }
+.abuse-empty p { margin: 0; color: rgba(255, 255, 255, 0.42); font-size: 13px; }
+.abuse-pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
+.abuse-pagination span { color: rgba(255, 255, 255, 0.44); font-size: 12px; }
+.abuse-pagination button { padding: 8px 13px; border: 1px solid var(--abuse-border); border-radius: 9px; color: #fff; background: var(--abuse-card); font: inherit; font-size: 12px; cursor: pointer; }
+.abuse-pagination button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.abuse-modal-backdrop { position: fixed; inset: 0; z-index: 3100; display: grid; place-items: center; padding: 18px; background: rgba(2, 8, 15, 0.83); backdrop-filter: blur(7px); }
+.abuse-modal { position: relative; width: min(100%, 580px); max-height: calc(100vh - 36px); overflow-y: auto; padding: 27px; border: 1px solid rgba(255, 173, 53, 0.25); border-radius: 22px; background: #172231; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55); }
+.abuse-modal.danger { border-color: rgba(255, 105, 123, 0.35); }
+.abuse-modal-close { position: absolute; top: 12px; right: 14px; width: 34px; height: 34px; border: 0; border-radius: 50%; color: rgba(255, 255, 255, 0.58); background: rgba(255, 255, 255, 0.05); font-size: 24px; cursor: pointer; }
+.abuse-modal-icon { font-size: 38px; }
+.abuse-modal h3 { margin: 8px 0 6px; font-size: 22px; }
+.abuse-modal > p { margin: 0 0 18px; color: rgba(255, 255, 255, 0.5); font-size: 13px; line-height: 1.55; }
+.abuse-modal form { display: grid; gap: 14px; }
+.abuse-modal textarea { min-height: 86px; resize: vertical; }
+.abuse-modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 4px; }
+.abuse-modal-actions button { padding: 10px 15px; border-radius: 10px; font: inherit; font-size: 12px; font-weight: 900; cursor: pointer; }
+.abuse-modal-actions .cancel { color: rgba(255, 255, 255, 0.65); border: 1px solid rgba(255, 255, 255, 0.12); background: transparent; }
+.abuse-modal-actions .confirm { color: #fff; border: 0; background: linear-gradient(135deg, #e49a2a, #ff697b); }
+.abuse-modal-actions .confirm.ban { background: linear-gradient(135deg, #d7475c, #ff697b); }
+.abuse-modal-actions button:disabled { opacity: 0.55; cursor: wait; }
+
+@media (max-width: 1150px) {
+    .abuse-summary { grid-template-columns: repeat(3, 1fr); }
+    .abuse-filters { grid-template-columns: repeat(2, 1fr); }
+    .abuse-signal-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 760px) {
+    .abuse-hero { align-items: flex-start; padding: 20px; }
+    .abuse-hero-icon { font-size: 42px; }
+    .abuse-summary { grid-template-columns: repeat(2, 1fr); }
+    .abuse-filters, .abuse-account-filters { grid-template-columns: 1fr; }
+    .abuse-account-card { align-items: stretch; flex-direction: column; }
+    .abuse-account-actions { justify-content: flex-start; }
+}
+
+@media (max-width: 520px) {
+    .abuse-hero-icon { display: none; }
+    .abuse-summary { grid-template-columns: 1fr; }
+    .abuse-tabs { width: 100%; }
+    .abuse-tabs button { flex: 1; padding-inline: 8px; }
+    .abuse-signal-top, .abuse-account-main { flex-direction: column; }
+    .abuse-occurrences { width: 100%; }
+    .abuse-signal-grid { grid-template-columns: 1fr; }
+    .abuse-modal { padding: 24px 18px 20px; }
+    .abuse-modal-actions { flex-direction: column-reverse; }
+    .abuse-modal-actions button { width: 100%; }
+}
