@@ -15,6 +15,7 @@ import { downloadBirthdayCard, shareBirthdayCard } from '../utils/birthdayCard'
 import ownerBg from '../assets/vetpaw-owner-bg.png'
 import VetPawLoader from '../components/VetPawLoader'
 import PushNotificationSettings from '../components/PushNotificationSettings'
+import { getCommunityNotificationIcon, getCommunityNotificationTarget } from '../utils/communityNotifications'
 
 const FONT = "'Plus Jakarta Sans','Nunito',sans-serif"
 
@@ -39,19 +40,6 @@ const relativeTime = (value) => {
     const days = Math.floor(hours / 24)
     if (days < 7) return `hace ${days} d`
     return formatDate(value)
-}
-
-const socialIcon = (type) => {
-    if (type === 'reaction') return '🐾'
-    if (type === 'comment') return '💬'
-    if (type === 'follow') return '👥'
-    if (type === 'comment_reaction') return '🐾'
-    if (type === 'reply') return '↩️'
-    if (type === 'mention') return '📣'
-    if (type === 'adoption_application') return '🏡'
-    if (type === 'adoption_help_offer') return '🤝'
-    if (type === 'adoption_application_update') return '📋'
-    return '🔔'
 }
 
 export default function Notifications() {
@@ -112,7 +100,7 @@ export default function Notifications() {
                 setSocial((items) => items.map((item) => item.id === updated.id ? updated : item))
                 refreshNavbar()
             }
-            navigate(notification.target_url || '/comunidad')
+            navigate(getCommunityNotificationTarget(notification))
         } finally {
             setBusyId(null)
         }
@@ -222,8 +210,8 @@ export default function Notifications() {
                                             <div className="social-avatar-wrap">
                                                 {notification.actor?.avatar
                                                     ? <img src={notification.actor.avatar} alt="" />
-                                                    : <span>{socialIcon(notification.notification_type)}</span>}
-                                                <i>{socialIcon(notification.notification_type)}</i>
+                                                    : <span>{getCommunityNotificationIcon(notification.notification_type)}</span>}
+                                                <i>{getCommunityNotificationIcon(notification.notification_type)}</i>
                                             </div>
                                             <div className="social-copy">
                                                 <strong>{notification.message}</strong>

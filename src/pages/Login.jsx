@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import loginVetpawBg from "../assets/login/login-vetpaw-bg.png";
+import { formatSanctionDate, getHomeForRole, parseLoginFailure } from "../utils/authFlow";
 
 export default function Login() {
     const { login } = useAuth();
@@ -23,19 +24,6 @@ export default function Login() {
         }
     }, []);
 
-    const formatSanctionDate = (value) => {
-        if (!value) return "";
-        const parsed = new Date(value);
-        if (Number.isNaN(parsed.getTime())) return "";
-        return parsed.toLocaleString("es-AR", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        });
-    };
-
     const handleChange = (e) =>
         setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -46,28 +34,11 @@ export default function Login() {
         setLoading(true);
         try {
             const userData = await login(form.username, form.password);
-            const destinations = {
-                owner: "/dashboard",
-                clinic: "/clinic/dashboard",
-                business: "/business/dashboard",
-                shelter: "/shelter/dashboard",
-            };
-            navigate(destinations[userData?.role] || "/comunidad");
+            navigate(getHomeForRole(userData?.role));
         } catch (err) {
-            const data = err.response?.data;
-            if (data?.code === "account_suspended" || data?.code === "account_banned") {
-                setSanction({
-                    code: data.code,
-                    detail: data.detail,
-                    sanction: data.account_sanction || null,
-                });
-                setError("");
-            } else {
-                const msg = typeof data?.detail === "string"
-                    ? data.detail
-                    : "Credenciales incorrectas. Intentá de nuevo.";
-                setError(msg);
-            }
+            const failure = parseLoginFailure(err.response?.data);
+            setSanction(failure.sanction);
+            setError(failure.error);
         } finally {
             setLoading(false);
         }

@@ -1,4 +1,6 @@
 import axios from "axios";
+import { buildAccountSanction, isAccountSanctionCode } from "../utils/authFlow";
+import { normalizeRateLimitResponse } from "../utils/apiErrors";
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 const API_BASE_URL = `${API_ORIGIN}/api`;
@@ -33,17 +35,13 @@ api.interceptors.response.use(
         const isUnauthorized = error.response?.status === 401;
         const isRefreshRequest = String(original.url || "").includes("/users/token/refresh/");
         const sanctionCode = responseData?.code;
-        const isAccountSanction = sanctionCode === "account_suspended" || sanctionCode === "account_banned";
+        const isAccountSanction = isAccountSanctionCode(sanctionCode);
 
         // Una sanción activa bloquea tanto nuevos inicios de sesión como tokens ya emitidos.
         // Guardamos el motivo para que la pantalla de acceso pueda explicárselo claramente al usuario.
         if (isUnauthorized && isAccountSanction) {
             try {
-                sessionStorage.setItem("vetpaw_account_sanction", JSON.stringify({
-                    code: sanctionCode,
-                    detail: responseData.detail,
-                    sanction: responseData.account_sanction || null,
-                }));
+                sessionStorage.setItem("vetpaw_account_sanction", JSON.stringify(buildAccountSanction(responseData)));
             } catch {
                 // Si el navegador no permite sessionStorage, el error igual se conserva en la respuesta.
             }
@@ -55,13 +53,7 @@ api.interceptors.response.use(
         }
 
         if (error.response?.status === 429) {
-            const waitSeconds = Number(responseData?.available_in || responseData?.wait || 0);
-            const waitText = waitSeconds > 0 ? ` Esperá ${Math.max(1, Math.ceil(waitSeconds / 60))} minuto(s) antes de volver a intentarlo.` : '';
-            error.response.data = {
-                ...responseData,
-                detail: `Hiciste demasiadas acciones en poco tiempo.${waitText} VetPaw bloqueó solo esta acción para proteger la Comunidad.`,
-                code: responseData?.code || 'rate_limited',
-            };
+            error.response.data = normalizeRateLimitResponse(responseData);
             return Promise.reject(error);
         }
 

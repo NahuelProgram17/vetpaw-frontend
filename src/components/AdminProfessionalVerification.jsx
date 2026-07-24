@@ -6,30 +6,15 @@ import {
     updateProfessionalVerification,
 } from '../services/api'
 import './AdminProfessionalVerification.css'
-
-const ROLE_META = {
-    clinic: { label: 'Veterinaria', icon: '🏥' },
-    business: { label: 'Negocio', icon: '🛍️' },
-    shelter: { label: 'Refugio o rescatista', icon: '🏠' },
-}
-
-const STATUS_META = {
-    pending: { label: 'Pendiente', className: 'is-pending', icon: '⏳' },
-    in_review: { label: 'En revisión', className: 'is-review', icon: '🔎' },
-    corrections: { label: 'Requiere correcciones', className: 'is-corrections', icon: '✏️' },
-    verified: { label: 'Verificada', className: 'is-verified', icon: '✅' },
-    rejected: { label: 'Rechazada', className: 'is-rejected', icon: '✕' },
-    withdrawn: { label: 'Verificación retirada', className: 'is-withdrawn', icon: '↩️' },
-}
-
-const ACTION_OPTIONS = [
-    { value: 'review', label: 'Pasar a revisión', targetStatus: 'in_review' },
-    { value: 'request_corrections', label: 'Pedir correcciones', targetStatus: 'corrections' },
-    { value: 'verify', label: 'Verificar perfil', targetStatus: 'verified' },
-    { value: 'reject', label: 'Rechazar verificación', targetStatus: 'rejected' },
-    { value: 'withdraw', label: 'Retirar insignia', targetStatus: 'withdrawn' },
-    { value: 'pending', label: 'Volver a pendiente', targetStatus: 'pending' },
-]
+import {
+    PROFESSIONAL_ACTION_OPTIONS,
+    PROFESSIONAL_ROLE_META,
+    PROFESSIONAL_STATUS_META,
+    canVerifyProfessionalProfile,
+    getDefaultProfessionalAction,
+    getProfessionalProfileUrl,
+    requiresProfessionalPublicNote,
+} from '../utils/professionalVerification'
 
 const initialForm = {
     action: 'review',
@@ -60,21 +45,13 @@ const extractError = (error) => {
     return typeof first === 'string' ? first : 'No se pudo completar la acción.'
 }
 
-const profileUrl = (row) => {
-    if (!row?.profile_slug) return ''
-    if (row.role === 'clinic') return `/clinicas/${row.profile_slug}`
-    if (row.role === 'business') return `/negocios/${row.profile_slug}`
-    if (row.role === 'shelter') return `/refugios/${row.profile_slug}`
-    return ''
-}
-
 function StatusBadge({ status }) {
-    const meta = STATUS_META[status] || STATUS_META.pending
+    const meta = PROFESSIONAL_STATUS_META[status] || PROFESSIONAL_STATUS_META.pending
     return <span className={`professional-verification-badge ${meta.className}`}>{meta.icon} {meta.label}</span>
 }
 
 function SummaryCard({ status, value }) {
-    const meta = STATUS_META[status]
+    const meta = PROFESSIONAL_STATUS_META[status]
     if (!meta) return null
     return (
         <div className={`professional-verification-summary-card ${meta.className}`}>
@@ -163,10 +140,10 @@ export default function AdminProfessionalVerification() {
     const history = historyData.results || []
     const summary = profilesData.summary || {}
     const selectedAction = useMemo(
-        () => ACTION_OPTIONS.find((option) => option.value === form.action) || ACTION_OPTIONS[0],
+        () => PROFESSIONAL_ACTION_OPTIONS.find((option) => option.value === form.action) || PROFESSIONAL_ACTION_OPTIONS[0],
         [form.action],
     )
-    const requiresPublicNote = ['request_corrections', 'reject', 'withdraw'].includes(form.action)
+    const requiresPublicNote = requiresProfessionalPublicNote(form.action)
 
     const submitSearch = (event) => {
         event.preventDefault()
@@ -175,12 +152,7 @@ export default function AdminProfessionalVerification() {
 
     const openAction = (row, preferredAction = '') => {
         let action = preferredAction
-        if (!action) {
-            if (row.status === 'pending') action = 'review'
-            else if (row.status === 'in_review' || row.status === 'corrections') action = row.is_approved ? 'verify' : 'review'
-            else if (row.status === 'verified') action = 'withdraw'
-            else action = 'review'
-        }
+        if (!action) action = getDefaultProfessionalAction(row)
         setSelectedProfile(row)
         setForm({
             action,
@@ -194,7 +166,7 @@ export default function AdminProfessionalVerification() {
     const submitAction = async (event) => {
         event.preventDefault()
         if (!selectedProfile) return
-        if (form.action === 'verify' && !selectedProfile.is_approved) {
+        if (form.action === 'verify' && !canVerifyProfessionalProfile(selectedProfile)) {
             setError('Primero tenés que aprobar la cuenta profesional antes de verificarla.')
             return
         }
@@ -271,7 +243,7 @@ export default function AdminProfessionalVerification() {
                         </select>
                         <select value={filters.status} onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value, page: 1 }))}>
                             <option value="">Todos los estados</option>
-                            {Object.entries(STATUS_META).map(([value, meta]) => <option key={value} value={value}>{meta.label}</option>)}
+                            {Object.entries(PROFESSIONAL_STATUS_META).map(([value, meta]) => <option key={value} value={value}>{meta.label}</option>)}
                         </select>
                         <select value={filters.approved} onChange={(event) => setFilters((current) => ({ ...current, approved: event.target.value, page: 1 }))}>
                             <option value="">Aprobadas y pendientes</option>
@@ -288,8 +260,8 @@ export default function AdminProfessionalVerification() {
                     ) : (
                         <div className="professional-verification-list">
                             {profiles.map((row) => {
-                                const role = ROLE_META[row.role] || ROLE_META.business
-                                const url = profileUrl(row)
+                                const role = PROFESSIONAL_ROLE_META[row.role] || PROFESSIONAL_ROLE_META.business
+                                const url = getProfessionalProfileUrl(row)
                                 return (
                                     <article key={row.user_id} className="professional-verification-card">
                                         <div className="professional-verification-card-main">
@@ -340,7 +312,7 @@ export default function AdminProfessionalVerification() {
                         />
                         <select value={historyFilters.status} onChange={(event) => setHistoryFilters((current) => ({ ...current, status: event.target.value, page: 1 }))}>
                             <option value="">Todos los resultados</option>
-                            {Object.entries(STATUS_META).map(([value, meta]) => <option key={value} value={value}>{meta.label}</option>)}
+                            {Object.entries(PROFESSIONAL_STATUS_META).map(([value, meta]) => <option key={value} value={value}>{meta.label}</option>)}
                         </select>
                         {(historyFilters.user_id || historyFilters.status) && (
                             <button type="button" onClick={() => setHistoryFilters({ user_id: '', status: '', page: 1 })}>Limpiar filtros</button>
@@ -386,7 +358,7 @@ export default function AdminProfessionalVerification() {
                     <form className="professional-verification-modal" onSubmit={submitAction}>
                         <div className="professional-verification-modal-head">
                             <div>
-                                <span>{(ROLE_META[selectedProfile.role] || ROLE_META.business).icon} Gestionar verificación</span>
+                                <span>{(PROFESSIONAL_ROLE_META[selectedProfile.role] || PROFESSIONAL_ROLE_META.business).icon} Gestionar verificación</span>
                                 <h3>{selectedProfile.profile_name || selectedProfile.username}</h3>
                             </div>
                             <button type="button" disabled={saving} onClick={() => setSelectedProfile(null)}>✕</button>
@@ -395,7 +367,7 @@ export default function AdminProfessionalVerification() {
                         <label>
                             Acción
                             <select value={form.action} onChange={(event) => setForm((current) => ({ ...current, action: event.target.value }))}>
-                                {ACTION_OPTIONS.map((option) => (
+                                {PROFESSIONAL_ACTION_OPTIONS.map((option) => (
                                     <option key={option.value} value={option.value} disabled={option.value === 'verify' && !selectedProfile.is_approved}>
                                         {option.label}{option.value === 'verify' && !selectedProfile.is_approved ? ' — requiere aprobación' : ''}
                                     </option>
@@ -403,8 +375,8 @@ export default function AdminProfessionalVerification() {
                             </select>
                         </label>
 
-                        <div className={`professional-verification-target-preview ${(STATUS_META[selectedAction.targetStatus] || STATUS_META.pending).className}`}>
-                            El perfil quedará como: <strong>{(STATUS_META[selectedAction.targetStatus] || STATUS_META.pending).label}</strong>
+                        <div className={`professional-verification-target-preview ${(PROFESSIONAL_STATUS_META[selectedAction.targetStatus] || PROFESSIONAL_STATUS_META.pending).className}`}>
+                            El perfil quedará como: <strong>{(PROFESSIONAL_STATUS_META[selectedAction.targetStatus] || PROFESSIONAL_STATUS_META.pending).label}</strong>
                         </div>
 
                         <label>
