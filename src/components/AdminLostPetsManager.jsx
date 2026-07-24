@@ -92,7 +92,6 @@ export default function AdminLostPetsManager() {
 
     useEffect(() => {
         // Carga inicial del módulo admin de mascotas perdidas.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchPets()
     }, [])
 

@@ -79,11 +79,9 @@ export default function Community() {
   }, [])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchFeed(filter, 1, false)
   }, [filter, fetchFeed])
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDiscover()
   }, [user, fetchDiscover])
 

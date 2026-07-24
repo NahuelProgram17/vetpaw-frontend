@@ -59,7 +59,6 @@ const TREATMENT_TYPES = [
     { value: 'flea', label: 'Pastilla antipulgas', emoji: '💊' },
     { value: 'pipette', label: 'Pipeta', emoji: '💧' },
 ];
-const treatmentMeta = (t) => TREATMENT_TYPES.find((x) => x.value === t) || { label: t, emoji: '💊' };
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const fmtDate = (d) => {
     if (!d) return '';
@@ -175,40 +174,6 @@ function OwnerPawIcon() {
     return (
         <span className="owner-icon-badge owner-icon-badge--image" aria-hidden="true">
             <img src={dashboardPetsIcon} alt="" className="owner-title-icon-img" />
-        </span>
-    );
-}
-function OwnerCalendarIcon() {
-    return (
-        <span className="owner-icon-badge" aria-hidden="true">
-            <svg viewBox="0 0 64 64" fill="none">
-                <rect x="12" y="16" width="40" height="36" rx="8" fill="rgba(107,202,255,.13)" stroke="#6bcaff" strokeWidth="2"/>
-                <path d="M12 27h40" stroke="#4CAF50" strokeWidth="2"/>
-                <path d="M22 11v10M42 11v10" stroke="#FF9800" strokeWidth="4" strokeLinecap="round"/>
-                <rect x="20" y="34" width="8" height="8" rx="2" fill="#4CAF50"/><rect x="32" y="34" width="8" height="8" rx="2" fill="#FF9800"/>
-            </svg>
-        </span>
-    );
-}
-function OwnerVetIcon() {
-    return (
-        <span className="owner-icon-badge" aria-hidden="true">
-            <svg viewBox="0 0 64 64" fill="none">
-                <path d="M13 51V25l19-13 19 13v26" stroke="#6bcaff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M25 51V37h14v14" stroke="#4CAF50" strokeWidth="2.4" strokeLinecap="round"/>
-                <path d="M32 23v12M26 29h12" stroke="#FF9800" strokeWidth="4" strokeLinecap="round"/>
-            </svg>
-        </span>
-    );
-}
-function OwnerAlertPetIcon() {
-    return (
-        <span className="owner-icon-badge" aria-hidden="true">
-            <svg viewBox="0 0 64 64" fill="none">
-                <path d="M32 11 55 52H9L32 11Z" fill="rgba(255,152,0,.15)" stroke="#FF9800" strokeWidth="2.5"/>
-                <path d="M24 39c2.4-4 4.8-5.8 8-5.8S37.6 35 40 39l2.2 3.5c1.8 2.8-.2 6.5-3.6 6.5H25.4c-3.4 0-5.4-3.7-3.6-6.5L24 39Z" fill="#4CAF50"/>
-                <circle cx="23" cy="31" r="3.5" fill="#FFB74D"/><circle cx="30" cy="26" r="3.5" fill="#6bcaff"/><circle cx="38" cy="31" r="3.5" fill="#FF9800"/>
-            </svg>
         </span>
     );
 }

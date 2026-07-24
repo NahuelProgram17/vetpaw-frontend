@@ -5,7 +5,6 @@ import AdCarousel from '../components/AdCarousel'
 const G1 = '#4CAF50'
 const G2 = '#66BB6A'
 const O1 = '#FF9800'
-const O2 = '#FFB74D'
 const DARK = '#0f1923'
 const DARK2 = '#162032'
 const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif"

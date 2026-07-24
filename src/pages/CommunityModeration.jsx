@@ -31,7 +31,6 @@ export default function CommunityModeration() {
   useEffect(() => {
     if (authLoading) return
     if (!allowed) { navigate('/'); return }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     load()
   }, [authLoading, allowed, navigate, load])
 

@@ -53,4 +53,6 @@ export function AuthProvider({ children }) {
     )
 }
 
+// Hook compartido: se exporta junto al provider de forma intencional.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext)

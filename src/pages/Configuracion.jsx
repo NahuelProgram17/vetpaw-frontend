@@ -9,7 +9,6 @@ const CARD = "#16212f";
 const CARD2 = "#1b2a3d";
 const BORDER = "rgba(255,255,255,0.08)";
 const TEXT = "#fff";
-const MUTED = "rgba(255,255,255,0.5)";
 const MUTED2 = "rgba(255,255,255,0.65)";
 const MUTED3 = "rgba(255,255,255,0.4)";
 const G1 = "#4CAF50";
@@ -41,7 +40,7 @@ export default function Configuracion() {
         try {
             await api.post("/users/password-reset/", { email: user.email });
             setPwdMessage(`Te mandamos un mail a ${user.email} con el link para cambiar tu contraseña. Puede tardar unos minutos en llegar.`);
-        } catch (err) {
+        } catch {
             setPwdError("No pudimos enviar el mail. Intentá de nuevo en un rato.");
         } finally {
             setPwdSending(false);

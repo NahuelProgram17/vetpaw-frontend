@@ -347,13 +347,6 @@ export default function Navbar() {
     const sidebarLinks = !user ? guestLinks : (roleLinks[user.role] || ownerLinks)
 
     // ── Estilos compartidos ──
-    const linkStyle = {
-        fontFamily: FONT, fontSize: 15, fontWeight: 600,
-        color: 'rgba(255,255,255,0.65)', padding: '6px 10px',
-        textDecoration: 'none', borderRadius: 8,
-        transition: 'color .15s, background .15s', letterSpacing: 0.2,
-    }
-
     const browserLinkStyle = (path, accent = G1) => {
         const active = isActive(path)
         const softAccent = accent === O1 ? '#ffc36a' : '#8fda91'
@@ -389,14 +382,6 @@ export default function Navbar() {
             e.currentTarget.style.transform = 'translateY(0)'
         },
     })
-    const linkHover = (e) => {
-        e.currentTarget.style.color = G1
-        e.currentTarget.style.background = 'rgba(76,175,80,0.08)'
-    }
-    const linkLeave = (e) => {
-        e.currentTarget.style.color = 'rgba(255,255,255,0.65)'
-        e.currentTarget.style.background = 'transparent'
-    }
     const btnOutline = {
         fontFamily: FONT, fontSize: 15, fontWeight: 700,
         color: '#fff', padding: '7px 18px', borderRadius: 10,

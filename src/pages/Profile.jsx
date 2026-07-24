@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import { getPets, getAppointments } from "../services/api";
 import api from "../services/api";
 import VetPawLoader from '../components/VetPawLoader';
@@ -10,7 +9,6 @@ const FONT = "'Plus Jakarta Sans', 'Nunito', sans-serif";
 const G1 = "#4CAF50";
 const G2 = "#66BB6A";
 const O1 = "#FF9800";
-const O2 = "#FFB74D";
 const BLUE = "#6bcaff";
 const PURPLE = "#a78bfa";
 const CARD = "#16212f";
@@ -31,7 +29,6 @@ const VERIFICATION_META = {
 };
 
 export default function Profile() {
-    const { user } = useAuth();
     const [profile, setProfile] = useState(null);
     const [pets, setPets] = useState([]);
     const [appointments, setAppointments] = useState([]);
@@ -150,7 +147,7 @@ export default function Profile() {
 
     const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || profile?.username;
 
-    const field = (label, value, mono) => (
+    const field = (label, value) => (
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "11px 0", borderBottom: `1px solid ${BORDER}` }}>
             <span style={{ fontSize: 12.5, color: MUTED }}>{label}</span>
             <span style={{ fontSize: 13, fontWeight: 600, color: value ? "#fff" : MUTED, textAlign: "right", fontStyle: value ? "normal" : "italic" }}>{value || "Sin completar"}</span>

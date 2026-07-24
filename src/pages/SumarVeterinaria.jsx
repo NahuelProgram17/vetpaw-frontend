@@ -25,7 +25,7 @@ export default function SumarVeterinaria() {
         try {
             await api.post('/contact/veterinaria/', form)
             setEnviado(true)
-        } catch (e) {
+        } catch {
             setError('Hubo un error. Escribinos directamente a vetpawapp@gmail.com')
         } finally {
             setEnviando(false)

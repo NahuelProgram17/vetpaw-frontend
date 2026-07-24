@@ -386,7 +386,7 @@ export default function ClinicDashboard() {
         );
       }
       setSchedule(normalized);
-    } catch (error) {
+    } catch {
       setSchedule(EMPTY_SCHEDULE);
     } finally {
       setScheduleLoading(false);
@@ -1043,7 +1043,6 @@ function PacientesTab({
   openClinicalFile,
   openPetFile,
   downloadPetPDF,
-  openVisitModal,
   openVaccineModal,
 }) {
   const openClinicalUploadFromCard = () => {

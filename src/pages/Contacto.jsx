@@ -25,7 +25,7 @@ export default function Contacto() {
         try {
             await api.post('/contact/', form)
             setEnviado(true)
-        } catch (e) {
+        } catch {
             setError('Hubo un error al enviar el mensaje. Intentá de nuevo o escribinos directamente a vetpawapp@gmail.com')
         } finally {
             setEnviando(false)

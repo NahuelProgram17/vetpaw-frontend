@@ -7,7 +7,6 @@ import VetPawLoader from '../components/VetPawLoader';
 const GREEN = "#4CAF50";
 const ORANGE = "#FF9800";
 const BLUE = "#39a7ff";
-const RED = "#ff4d5f";
 const VIOLET = "#a855f7";
 
 const WEEK_DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -15,7 +14,6 @@ const HOURS = ["8h", "9h", "10h", "11h", "12h", "13h", "14h", "15h", "16h", "17h
 
 const normalizeList = (payload) => payload?.results ?? payload ?? [];
 const toDate = (value) => (value ? new Date(value) : null);
-const safeNumber = (value) => (Number.isFinite(value) ? value : 0);
 
 function StarsBackground() {
     return (

@@ -15,7 +15,6 @@ import dashboardActivityIcon from "../assets/vetpaw-dashboard-icons/dashboard-ac
 import VetPawLoader from '../components/VetPawLoader';
 
 // ───────────────────────── Tokens de diseño
-const BG = "#0a121d";
 const CARD = "#16212f";
 const CARD2 = "#1b2a3d";
 const BORDER = "rgba(255,255,255,0.08)";
@@ -105,44 +104,6 @@ const STATUS_LABEL = {
     completed: { label: "Realizado", color: V1, bg: "rgba(167,139,250,0.15)" },
     no_show: { label: "Ausente", color: YELLOW, bg: "rgba(255,217,61,0.15)" },
 };
-
-const StatPetIcon = () => (
-    <svg viewBox="0 0 64 64" width="30" height="30" fill="none" aria-hidden="true">
-        <path d="M18 37c4-6 8-9 14-9s10 3 14 9l4 7c3 5-.5 11-6.5 11h-23C14.5 55 11 49 14 44l4-7Z" fill="url(#statPetBody)" stroke="rgba(255,255,255,.55)" strokeWidth="2" />
-        <circle cx="18" cy="25" r="5.5" fill="#FF9800" />
-        <circle cx="29" cy="18" r="5.5" fill="#4CAF50" />
-        <circle cx="41" cy="24" r="5.5" fill="#FFB74D" />
-        <circle cx="49" cy="34" r="4.8" fill="#6bcaff" />
-        <defs><linearGradient id="statPetBody" x1="15" y1="27" x2="47" y2="55"><stop stopColor="#4CAF50"/><stop offset="1" stopColor="#FF9800"/></linearGradient></defs>
-    </svg>
-);
-
-const StatCalendarIcon = () => (
-    <svg viewBox="0 0 64 64" width="30" height="30" fill="none" aria-hidden="true">
-        <rect x="12" y="16" width="40" height="38" rx="9" fill="rgba(255,152,0,.16)" stroke="#FFB74D" strokeWidth="2.2" />
-        <path d="M12 28h40" stroke="#4CAF50" strokeWidth="2.2" />
-        <path d="M22 11v10M42 11v10" stroke="#FF9800" strokeWidth="4" strokeLinecap="round" />
-        <rect x="21" y="35" width="8" height="8" rx="2" fill="#6bcaff" />
-        <rect x="35" y="35" width="8" height="8" rx="2" fill="#FFB300" />
-    </svg>
-);
-
-const StatHourIcon = () => (
-    <svg viewBox="0 0 64 64" width="30" height="30" fill="none" aria-hidden="true">
-        <path d="M23 8h18M28 8v7h8V8" stroke="#a78bfa" strokeWidth="3" strokeLinecap="round" />
-        <circle cx="32" cy="36" r="19" fill="rgba(167,139,250,.16)" stroke="#a78bfa" strokeWidth="2.4" />
-        <path d="M32 24v13l9 6" stroke="#FFB74D" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-);
-
-const StatVaccineIcon = () => (
-    <svg viewBox="0 0 64 64" width="30" height="30" fill="none" aria-hidden="true">
-        <path d="M42 10l12 12M37 15l12 12" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
-        <rect x="17" y="28" width="27" height="12" rx="4" transform="rotate(-45 17 28)" fill="rgba(107,202,255,.18)" stroke="#6bcaff" strokeWidth="2" />
-        <path d="M22 48l-6 6M16 42l6 6M43 20l-8 8" stroke="#FF6B6B" strokeWidth="4" strokeLinecap="round" />
-        <path d="M26 37l7-7" stroke="#FFB300" strokeWidth="3" strokeLinecap="round" />
-    </svg>
-);
 
 export default function Dashboard() {
     const { user } = useAuth();
