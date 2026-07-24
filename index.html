@@ -1,13 +1,17 @@
 <!doctype html>
-<html lang="es">
+<html lang="es-AR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- ═══ Identidad básica ═══ -->
-    <title>VetPaw — Tu app veterinaria de confianza</title>
-    <meta name="description" content="Sacá turno, manejá la libreta sanitaria de tu mascota y conectate con veterinarias verificadas en Argentina." />
-    <link rel="canonical" href="https://vetpaw.com.ar/" />
+    <title>VetPaw — La red social de las mascotas</title>
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="description" content="Creá el perfil de tu mascota, compartí su historia, encontrá veterinarias y negocios, gestioná turnos y ayudá en adopciones o búsquedas." />
+    <link rel="canonical" href="https://www.vetpaw.com.ar/" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <link rel="preconnect" href="https://web-production-eaeb4.up.railway.app" crossorigin />
+    <link rel="dns-prefetch" href="https://web-production-eaeb4.up.railway.app" />
 
     <!-- ═══ Iconos y PWA ═══ -->
     <link rel="icon" type="image/png" href="/logo_vetpaw.png" />
@@ -24,11 +28,11 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="VetPaw" />
     <meta property="og:locale" content="es_AR" />
-    <meta property="og:url" content="https://vetpaw.com.ar/" />
-    <meta property="og:title" content="VetPaw — Tu app veterinaria de confianza" />
-    <meta property="og:description" content="Sacá turno, manejá la libreta sanitaria de tu mascota y conectate con veterinarias verificadas en Argentina." />
-    <meta property="og:image" content="https://vetpaw.com.ar/og-image.png" />
-    <meta property="og:image:secure_url" content="https://vetpaw.com.ar/og-image.png" />
+    <meta property="og:url" content="https://www.vetpaw.com.ar/" />
+    <meta property="og:title" content="VetPaw — La red social de las mascotas" />
+    <meta property="og:description" content="Creá el perfil de tu mascota, compartí su historia, encontrá veterinarias y negocios, gestioná turnos y ayudá en adopciones o búsquedas." />
+    <meta property="og:image" content="https://www.vetpaw.com.ar/og-image.png" />
+    <meta property="og:image:secure_url" content="https://www.vetpaw.com.ar/og-image.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -36,13 +40,27 @@
 
     <!-- ═══ Twitter / X Card ═══ -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="VetPaw — Tu app veterinaria de confianza" />
-    <meta name="twitter:description" content="Sacá turno, manejá la libreta sanitaria de tu mascota y conectate con veterinarias verificadas en Argentina." />
-    <meta name="twitter:image" content="https://vetpaw.com.ar/og-image.png" />
+    <meta name="twitter:title" content="VetPaw — La red social de las mascotas" />
+    <meta name="twitter:description" content="Creá el perfil de tu mascota, compartí su historia, encontrá veterinarias y negocios, gestioná turnos y ayudá en adopciones o búsquedas." />
+    <meta name="twitter:image" content="https://www.vetpaw.com.ar/og-image.png" />
     <meta name="twitter:image:alt" content="Logo de VetPaw, app veterinaria de confianza" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "VetPaw",
+        "url": "https://www.vetpaw.com.ar/",
+        "applicationCategory": "SocialNetworkingApplication",
+        "operatingSystem": "Web, Android, iOS, Windows",
+        "inLanguage": "es-AR",
+        "description": "Red social de mascotas con comunidad, adopciones, turnos e historial veterinario."
+      }
+    </script>
   </head>
   <body>
     <a target="_blank" href="https://www.comparasoftware.com.ar/vetpaw" rel="noopener">VetPaw</a> se encuentra verificado como <a href="https://www.comparasoftware.com.ar/veterinario" rel="noopener">Software para Veterinarias en Argentina</a>
+    <noscript>Necesitás habilitar JavaScript para utilizar VetPaw.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>

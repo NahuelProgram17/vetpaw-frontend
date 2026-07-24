@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPets, createPet, updatePet, deletePet, createTreatment, deleteTreatment } from '../services/api';
 import { prepareImageForUpload, replaceObjectUrl, revokeObjectUrl } from '../utils/imageUpload';
+import { runtimeConfig } from '../config/runtime';
 import ownerBg from "../assets/vetpaw-owner-bg.webp";
 import VetPawLoader from "../components/VetPawLoader";
 import dashboardPetsIcon from "../assets/vetpaw-dashboard-icons/dashboard-pets.png";
@@ -97,9 +98,7 @@ const SPECIES_EMOJI = {
 const petEmoji = (species) =>
     SPECIES_EMOJI[(species || '').toLowerCase()] || '🐾';
 
-const API_ORIGIN = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000')
-    .replace(/\/api\/?$/, '')
-    .replace(/\/$/, '');
+const API_ORIGIN = runtimeConfig.apiOrigin;
 
 const mediaUrl = (url) => {
     if (!url) return null;

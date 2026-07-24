@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { SERVICE_RECOVERED_EVENT, SERVICE_STATUS_EVENT } from '../utils/serviceErrors'
+import { runtimeConfig } from '../config/runtime'
 
-const API_ORIGIN = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')
-const HEALTH_URL = `${API_ORIGIN}/api/health/`
+const HEALTH_URL = runtimeConfig.healthUrl
 
 const initialState = () => (
   typeof navigator !== 'undefined' && navigator.onLine === false

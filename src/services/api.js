@@ -6,9 +6,9 @@ import {
     normalizeApiFailure,
     SERVICE_STATUS_EVENT,
 } from "../utils/serviceErrors";
+import { runtimeConfig } from "../config/runtime";
 
-const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
-const API_BASE_URL = `${API_ORIGIN}/api`;
+const API_BASE_URL = runtimeConfig.apiBaseUrl;
 
 const api = axios.create({
     baseURL: API_BASE_URL,

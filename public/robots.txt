@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin-panel
+Disallow: /comunidad/moderacion
+Disallow: /dashboard
+Disallow: /clinic/
+Disallow: /business/
+Disallow: /shelter/
+Disallow: /messages
+Disallow: /notifications
+Disallow: /profile
+Disallow: /configuracion
+
+Sitemap: https://www.vetpaw.com.ar/sitemap.xml

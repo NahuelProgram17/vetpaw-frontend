@@ -1,7 +1,18 @@
-const SHELL_CACHE = 'vetpaw-shell-v4'
-const STATIC_CACHE = 'vetpaw-static-v4'
+const SHELL_CACHE = 'vetpaw-shell-v5'
+const STATIC_CACHE = 'vetpaw-static-v5'
 const APP_SHELL_URL = '/'
-const CORE_ASSETS = ['/', '/manifest.json', '/logo_vetpaw.png', '/icon-192.png']
+const OFFLINE_URL = '/offline.html'
+const MAX_STATIC_ENTRIES = 160
+const CORE_ASSETS = ['/', OFFLINE_URL, '/manifest.json', '/logo_vetpaw.png', '/icon-192.png', '/favicon-32x32.png']
+
+
+const trimCache = async (cacheName, maxEntries) => {
+  const cache = await caches.open(cacheName)
+  const keys = await cache.keys()
+  const extra = keys.length - maxEntries
+  if (extra <= 0) return
+  await Promise.all(keys.slice(0, extra).map((key) => cache.delete(key)))
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -62,6 +73,7 @@ self.addEventListener('fetch', (event) => {
         .catch(async () => {
           return (await caches.match(request))
             || (await caches.match(APP_SHELL_URL))
+            || (await caches.match(OFFLINE_URL))
             || offlineDocument()
         })
     )
@@ -76,7 +88,10 @@ self.addEventListener('fetch', (event) => {
       const network = fetch(request)
         .then((response) => {
           if (response.ok) {
-            caches.open(STATIC_CACHE).then((cache) => cache.put(request, response.clone()))
+            caches.open(STATIC_CACHE).then(async (cache) => {
+              await cache.put(request, response.clone())
+              await trimCache(STATIC_CACHE, MAX_STATIC_ENTRIES)
+            })
           }
           return response
         })
